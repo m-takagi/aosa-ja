@@ -1,61 +1,71 @@
 \begin{aosachapter}{The Bourne-Again Shell}{s:bash}{Chet Ramey}
 %% Based on EN-Revision r229
 
-\begin{aosasect1}{Introduction}
+%% \begin{aosasect1}{Introduction}
+\begin{aosasect1}{導入}
 
-A Unix shell provides an interface that lets the user interact
-with the operating system by running commands.
-But a shell is also a fairly rich
-programming language: there are constructs for flow control,
-alternation, looping, conditionals, basic mathematical operations,
-named functions, string variables, and two-way communication between
-the shell and the commands it invokes.
+%% A Unix shell provides an interface that lets the user interact
+%% with the operating system by running commands.
+%% But a shell is also a fairly rich
+%% programming language: there are constructs for flow control,
+%% alternation, looping, conditionals, basic mathematical operations,
+%% named functions, string variables, and two-way communication between
+%% the shell and the commands it invokes.
+Unixのシェルは、ユーザーとOSとの間のコマンドによるインターフェイスを提供する。しかし、シェルはまた、リッチなプログラミング言語でもある。フロー制御やループそして条件分岐といった制御構造もあるし、基本的な数学演算や関数、文字列変数などもあり、シェルとコマンドの間の双方向の通信もある。
 
-Shells can be used interactively, from a terminal or terminal emulator
-such as xterm, and non-interactively, reading commands from a file.
-Most modern shells, including bash, provide command-line editing, in
-which the command line can be manipulated using emacs- or vi-like
-commands while it's being entered, and various forms of a saved
-history of commands.
+%% Shells can be used interactively, from a terminal or terminal emulator
+%% such as xterm, and non-interactively, reading commands from a file.
+%% Most modern shells, including bash, provide command-line editing, in
+%% which the command line can be manipulated using emacs- or vi-like
+%% commands while it's being entered, and various forms of a saved
+%% history of commands.
+シェルは、ターミナルあるいはターミナルエミュレータ(xtermなど)から対話的に使うこともできるし、コマンドをファイルから読み込むこともできる。bashを含むモダンなシェルにはコマンドラインの編集機能があり、コマンドの入力中にemacs風あるいはvi風の操作でコマンドラインをいじることができる。また、さまざまな形式でコマンド履歴を記録する。
 
-Bash processing is much like a shell pipeline: after being read from
-the terminal or a script, data is passed through a number of stages,
-transformed at each step, until the shell finally executes a command
-and collects its return status.
+%% Bash processing is much like a shell pipeline: after being read from
+%% the terminal or a script, data is passed through a number of stages,
+%% transformed at each step, until the shell finally executes a command
+%% and collects its return status.
+Bashの処理はシェルのパイプラインとそっくりだ。ターミナルあるいはスクリプトから読み込んだデータはいくつかのステージを通過し、各ステージで変換され、シェルが最終的にコマンドを実行してその返り値を受け取る。
 
-This chapter will explore bash's major components: input processing,
-parsing, the various word expansions and other command processing, and
-command execution, from the pipeline perspective.  These components
-act as a pipeline for data read from the keyboard or from a file,
-turning it into an executed command.
+%% This chapter will explore bash's major components: input processing,
+%% parsing, the various word expansions and other command processing, and
+%% command execution, from the pipeline perspective.  These components
+%% act as a pipeline for data read from the keyboard or from a file,
+%% turning it into an executed command.
+本章では、bashの主要なコンポーネントである入力処理やパース、さまざまなワードの展開、その他のコマンド処理、そしてコマンドの実行について、パイプラインの観点から探求する。これらのコンポーネントはキーボードやファイルから読み込んだデータのパイプラインとして働き、それを実行されるコマンドに変える。
 
-\aosafigure{../images/bash/bash-article-diagram.eps}{Bash Component Architecture}{fig.bash.fig1}
+%% \aosafigure{../images/bash/bash-article-diagram.eps}{Bash Component Architecture}{fig.bash.fig1}
+\aosafigure{../images/bash/bash-article-diagram.eps}{Bashのコンポーネントのアーキテクチャ}{fig.bash.fig1}
 
+%% \begin{aosasect2}{Bash}
 \begin{aosasect2}{Bash}
 
-Bash is the shell that appears in the GNU operating system, commonly
-implemented atop the Linux kernel, and several other common operating
-systems, most notably Mac OS X\@.  It offers functional improvements
-over historical versions of sh for both interactive and programming
-use.
+%% Bash is the shell that appears in the GNU operating system, commonly
+%% implemented atop the Linux kernel, and several other common operating
+%% systems, most notably Mac OS X\@.  It offers functional improvements
+%% over historical versions of sh for both interactive and programming
+%% use.
+BashはGNUオペレーティングシステムで使われているシェルであり、一般的にはLinuxカーネル上で実装されている。また、Mac OS X\@などその他の主要OS上でも動く。過去の歴史上のバージョンであるshに対して、対話的な操作においてもプログラミング機能においても改良が施されている。
 
-The name is an acronym for Bourne-Again SHell, a pun combining the
-name of Stephen Bourne (the author of the direct ancestor of the
-current Unix shell \code{/bin/sh}, which appeared in the Bell Labs
-Seventh Edition Research version of Unix) with the notion of rebirth
-through reimplementation.
-The original author of bash was Brian Fox, an employee of the Free
-Software Foundation.  I am the current developer and maintainer, a
-volunteer who works at Case Western Reserve University in Cleveland,
-Ohio.
+%% The name is an acronym for Bourne-Again SHell, a pun combining the
+%% name of Stephen Bourne (the author of the direct ancestor of the
+%% current Unix shell \code{/bin/sh}, which appeared in the Bell Labs
+%% Seventh Edition Research version of Unix) with the notion of rebirth
+%% through reimplementation.
+%% The original author of bash was Brian Fox, an employee of the Free
+%% Software Foundation.  I am the current developer and maintainer, a
+%% volunteer who works at Case Western Reserve University in Cleveland,
+%% Ohio.
+名前の由来はBourne-Again SHellの頭文字をとったもので、Stephen Bourne(現在のUnixシェルの先祖である\code{/bin/sh}の作者。このシェルはベル研のVersion 7 Unixで登場した)の名前と再実装によって生まれ変わったことをかけている。bashの最初の作者はBrian Foxで、彼はFree Software Foundationのメンバーだった。私は現在の開発者兼メンテナ—であり、オハイオ州クリーブランドにあるケースウエスタンリザーブ大学に勤務している。
 
-Like other GNU software, bash is quite portable.  It currently runs on
-nearly every version of Unix and a few other operating
-systems---independently-supported ports exist for hosted Windows
-environments such as Cygwin and MinGW, and ports to Unix-like systems
-such as QNX and Minix are part of the distribution.  It only requires
-a Posix environment to build and run, such as one provided by
-Microsoft's Services for Unix (SFU).
+%% Like other GNU software, bash is quite portable.  It currently runs on
+%% nearly every version of Unix and a few other operating
+%% systems---independently-supported ports exist for hosted Windows
+%% environments such as Cygwin and MinGW, and ports to Unix-like systems
+%% such as QNX and Minix are part of the distribution.  It only requires
+%% a Posix environment to build and run, such as one provided by
+%% Microsoft's Services for Unix (SFU).
+他のGNUソフトウェアと同様、bashも移植性がきわめて高い。Unixのほぼすべてのバージョンで動作するし、その他のOSでも動作する---独自にサポートしている移植版にはWindows上のCygwinやMinGWといった環境もあるし、QNXやMinixといったUnixライクなシステムへの移植版は配布物に含まれている。ビルドして実行するために必要なのはPosix環境だけである。つまり、MicrosoftのServices for Unix (SFU)などでもよい。
 
 \end{aosasect2}
 
