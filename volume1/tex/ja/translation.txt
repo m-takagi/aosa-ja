@@ -1,0 +1,34 @@
+Japanese Translation per file
+
+File                Transl. Assigned                           %        Proofreader
+---------------------------------------------------------------------------------------------
+aosa.tex            TAKAGI Masahiro <matakagi@gmail.com>      100
+asterisk.tex        Arai Kunimitsu                            100
+audacity.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
+bash.tex            TAKAGI Masahiro <matakagi@gmail.com>       20
+bdb.tex
+cmake.tex
+colophon.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
+eclipse.tex         Masugata Seiji                              ?
+frontmatter.tex     TAKAGI Masahiro <matakagi@gmail.com>      100
+graphite.tex
+hdfs.tex
+integration.tex
+intro.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
+jitsi.tex
+llvm.tex            Masugata Seiji                              ?
+makingsoftware.tex
+mercurial.tex
+nosql.tex
+packaging.tex
+riak.tex
+selenium.tex
+sendmail.tex
+snowflock.tex
+socialcalc.tex
+telepathy.tex
+thousandparsec.tex
+violet.tex
+vistrails.tex
+vtk.tex
+wesnoth.tex
