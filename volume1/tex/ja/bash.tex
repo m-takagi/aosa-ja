@@ -71,130 +71,149 @@ BashはGNUオペレーティングシステムで使われているシェルで�
 
 \end{aosasect1}
 
-\begin{aosasect1}{Syntactic Units and Primitives}
+%% \begin{aosasect1}{Syntactic Units and Primitives}
+\begin{aosasect1}{構文単位およびプリミティブ}
 
-\begin{aosasect2}{Primitives}
+%% \begin{aosasect2}{Primitives}
+\begin{aosasect2}{プリミティブ}
 
-To bash, there are basically three kinds of tokens: reserved
-words, words, and operators.  Reserved words are those that have
-meaning to the shell and its programming language; usually these words
-introduce flow control constructs, like \code{if} and \code{while}.
-Operators are composed of one or more metacharacters: characters that
-have special meaning to the shell on their own, such as \code{|} and
-\code{{\textgreater}}.  The rest of the shell's input consists of
-ordinary words, some of which have special meaning---assignment
-statements or numbers, for instance---depending on where they appear
-on the command line.
-
-\end{aosasect2}
-
-\begin{aosasect2}{Variables and Parameters}
-
-As in any programming language, shells provide variables: names to
-refer to stored data and operate on it.  The shell provides basic
-user-settable variables and some built-in variables referred to as
-parameters.  Shell parameters generally reflect some aspect of the
-shell's internal state, and are set automatically or as a side effect
-of another operation.
-
-Variable values are strings.  Some values are treated specially
-depending on context; these will be explained later.  Variables are
-assigned using statements of the form \code{name=value}.  The
-\code{value} is optional; omitting it assigns the empty string to
-\code{name}.  If the value is supplied, the shell expands the value
-and assigns it to \code{name}.  The shell can perform different
-operations based on whether or not a variable is set, but assigning a
-value is the only way to set a variable.  Variables that have not been
-assigned a value, even if they have been declared and given
-attributes, are referred to as \emph{unset}.
-
-A word beginning with a dollar sign introduces a variable or parameter
-reference.  The word, including the dollar sign, is replaced with the
-value of the named variable.  The shell provides a rich set of
-expansion operators, from simple value replacement to changing or
-removing portions of a variable's value that match a pattern.
-
-There are provisions for local and global variables.  By default, all
-variables are global.  Any simple command (the most familiar type of
-command---a command name and optional set of arguments and
-redirections) may be prefixed by a set of assignment statements to
-cause those variables to exist only for that command.  The shell
-implements stored procedures, or shell functions, which can have
-function-local variables.
-
-Variables can be minimally typed: in addition to simple string-valued
-variables, there are integers and arrays.  Integer-typed variables are
-treated as numbers: any string assigned to them is expanded as an
-arithmetic expression and the result is assigned as the variable's
-value.  Arrays may be indexed or associative; indexed arrays use
-numbers as subscripts, while associative arrays use arbitrary strings.
-Array elements are strings, which can be treated as integers if
-desired.  Array elements may not be other arrays.
-
-Bash uses hash tables to store and retrieve shell variables, and
-linked lists of these hash tables to implement variable scoping.
-There are different variable scopes for shell function calls and
-temporary scopes for variables set by assignment statements preceding
-a command.  When those assignment statements precede a command that is
-built into the shell, for instance, the shell has to keep track of the
-correct order in which to resolve variable references, and the linked
-scopes allow bash to do that.  There can be a surprising number of
-scopes to traverse depending on the execution nesting level.
+%% To bash, there are basically three kinds of tokens: reserved
+%% words, words, and operators.  Reserved words are those that have
+%% meaning to the shell and its programming language; usually these words
+%% introduce flow control constructs, like \code{if} and \code{while}.
+%% Operators are composed of one or more metacharacters: characters that
+%% have special meaning to the shell on their own, such as \code{|} and
+%% \code{{\textgreater}}.  The rest of the shell's input consists of
+%% ordinary words, some of which have special meaning---assignment
+%% statements or numbers, for instance---depending on where they appear
+%% on the command line.
+bashには、基本的に三種類のトークンがある。予約語(reserved word)、単語(word)、そして演算子(operator)だ。予約語とはシェルやそのプログラミング言語に対して何らかの意味を持つ単語のことで、フロー制御構文に使われることが多い。たとえば\code{if}や\code{while}がそれにあたる。演算子とはメタ文字を組み合わせたもののことで、メタ文字とはシェル自身に対して特別な意味を持つ文字を指す。\code{|}や\code{{\textgreater}}などだ。それ以外のシェルへの入力は普通の単語で、その中にはコマンドライン内での登場位置によって特殊な意味を持つもの---代入文や数値など---もある。
 
 \end{aosasect2}
 
-\begin{aosasect2}{The Shell Programming Language}
+%% \begin{aosasect2}{Variables and Parameters}
+\begin{aosasect2}{変数およびパラメータ}
 
-A \emph{simple} shell command, one with which most readers are most
-familiar, consists of a command name, such as \code{echo} or
-\code{cd}, and a list of zero or more arguments and redirections.
-Redirections allow the shell user to control the input to and output
-from invoked commands.  As noted above, users can define variables
-local to simple commands.
+%% As in any programming language, shells provide variables: names to
+%% refer to stored data and operate on it.  The shell provides basic
+%% user-settable variables and some built-in variables referred to as
+%% parameters.  Shell parameters generally reflect some aspect of the
+%% shell's internal state, and are set automatically or as a side effect
+%% of another operation.
+他のプログラミング言語と同様、シェルにも変数の機能があり、保存したデータを後で参照したり演算に使ったりすることができる。シェルが提供している変数には、ユーザーが設定可能な基本的な変数と、パラメータとして参照できる組み込みの変数がある。シェルのパラメータは一般的にシェルの内部状態を反映するもので、自動的に設定されたり別の操作の副作用として設定されたりする。
 
-Reserved words introduce more complex shell commands.  There are
-constructs common to any high-level programming language, such as
-\code{if-then-else}, \code{while}, a \code{for} loop that iterates
-over a list of values, and a C-like arithmetic \code{for} loop.
-These more complex commands allow the shell to execute a
-command or otherwise test a condition and perform different operations
-based on the result, or execute commands multiple times.
+%% Variable values are strings.  Some values are treated specially
+%% depending on context; these will be explained later.  Variables are
+%% assigned using statements of the form \code{name=value}.  The
+%% \code{value} is optional; omitting it assigns the empty string to
+%% \code{name}.  If the value is supplied, the shell expands the value
+%% and assigns it to \code{name}.  The shell can perform different
+%% operations based on whether or not a variable is set, but assigning a
+%% value is the only way to set a variable.  Variables that have not been
+%% assigned a value, even if they have been declared and given
+%% attributes, are referred to as \emph{unset}.
+変数の値は文字列である。値の中には状況によって特別な意味を持つものもあるが、それについては後で説明する。変数への代入は、\code{name=value}形式の文を使う。\code{value}は必須ではなく、省略した場合は空の文字列を\code{name}に代入する。valueを指定すると、シェルはその内容を展開して\code{name}に代入する。シェルは、変数が設定されているかどうかによって処理を変えることがある。しかし、変数に値を設定するには値を代入する以外の方法はない。値を代入されていない変数は、たとえ事前に宣言されていたとしても参照すると\emph{unset}となる。
 
-One of the gifts Unix brought the computing world is the pipeline: a
-linear list of commands, in which the output of one command in the
-list becomes the input of the next.  Any shell construct can be used
-in a pipeline, and it's not uncommon to see pipelines in which a
-command feeds data to a loop.
+%% A word beginning with a dollar sign introduces a variable or parameter
+%% reference.  The word, including the dollar sign, is replaced with the
+%% value of the named variable.  The shell provides a rich set of
+%% expansion operators, from simple value replacement to changing or
+%% removing portions of a variable's value that match a pattern.
+ドル記号で始まる単語は、変数あるいはパラメータへの参照を意味する。ドル記号を含めた単語が、その名前の変数の値に置きかえられる。シェルには豊富な展開演算子が用意されており、単純な値の置換だけではなくパターンにマッチする部分を変更したり削除したりすることもできる。
 
-Bash implements a facility that allows the standard input, standard
-output, and standard error streams for a command to be redirected to
-another file or process when the command is invoked.  Shell
-programmers can also use redirection to open and close files in the
-current shell environment.
+%% There are provisions for local and global variables.  By default, all
+%% variables are global.  Any simple command (the most familiar type of
+%% command---a command name and optional set of arguments and
+%% redirections) may be prefixed by a set of assignment statements to
+%% cause those variables to exist only for that command.  The shell
+%% implements stored procedures, or shell functions, which can have
+%% function-local variables.
+変数には、ローカルとグローバルの二種類がある。デフォルトでは、すべての変数はグローバルとなる。単純なコマンド(最も見なれた形式のコマンド---コマンド名の後にオプションで引数やリダイレクトが続く形式)の前には代入文がくることもあり、そのコマンドのためだけに変数が存在することになる。シェルはストアドプロシージャやシェル関数を実装しており、それぞれ関数ローカルな変数を持つことができる。
 
-Bash allows shell programs to be stored and used more than once.
-Shell functions and shell scripts are both ways to name a group of
-commands and execute the group, just like executing any other command.
-Shell functions are declared using a special syntax and stored and
-executed in the same shell's context; shell scripts are created by
-putting commands into a file and executing a new instance of the shell
-to interpret them.  Shell functions share most of the execution
-context with the shell that calls them, but shell scripts, since they
-are interpreted by a new shell invocation, share only what is passed
-between processes in the environment.
+%% Variables can be minimally typed: in addition to simple string-valued
+%% variables, there are integers and arrays.  Integer-typed variables are
+%% treated as numbers: any string assigned to them is expanded as an
+%% arithmetic expression and the result is assigned as the variable's
+%% value.  Arrays may be indexed or associative; indexed arrays use
+%% numbers as subscripts, while associative arrays use arbitrary strings.
+%% Array elements are strings, which can be treated as integers if
+%% desired.  Array elements may not be other arrays.
+変数には最低限の型をつけることができる。単純な文字列値の変数に加えて、静数値と配列が使える。整数型の変数は数値として扱われる。文字列を代入するとそれを計算式とみなして展開し、計算結果を変数の値として代入する。配列は、インデックス型と連想型のどちらかになる。インデックス型の配列は数値を添字として使い、連想配列は任意の文字列を添字として使う。配列の要素は文字列であり、臨むなら静数値として扱うこともできる。配列の要素に別の配列が入ることはない。
+
+%% Bash uses hash tables to store and retrieve shell variables, and
+%% linked lists of these hash tables to implement variable scoping.
+%% There are different variable scopes for shell function calls and
+%% temporary scopes for variables set by assignment statements preceding
+%% a command.  When those assignment statements precede a command that is
+%% built into the shell, for instance, the shell has to keep track of the
+%% correct order in which to resolve variable references, and the linked
+%% scopes allow bash to do that.  There can be a surprising number of
+%% scopes to traverse depending on the execution nesting level.
+Bashは、ハッシュテーブルを使ってシェル変数の格納や取得を行う。また、そのハッシュテーブルの連結リストで変数のスコープを実装する。シェル関数の呼び出し用にさまざまなスコープがあり、コマンドの前にある代入文で設定した変数用のテンポラリスコープもある。代入文の後にシェルの組み込みコマンドが続くときは、シェルは変数の参照の解決順序を覚えておく必要がある。また、連結したスコープがbashにそれを許可しなければならない。実行のネストレベルによっては、走査するスコープの数が驚くほど多くなることもありえる。
 
 \end{aosasect2}
 
-\begin{aosasect2}{A Further Note}
+%% \begin{aosasect2}{The Shell Programming Language}
+\begin{aosasect2}{シェルプログラミング言語}
 
-As you read further, keep in mind that the shell implements its
-features using only a few data structures: arrays, trees,
-singly-linked and doubly-linked lists, and hash tables.  Nearly all of
-the shell constructs are implemented using these primitives.
+%% A \emph{simple} shell command, one with which most readers are most
+%% familiar, consists of a command name, such as \code{echo} or
+%% \code{cd}, and a list of zero or more arguments and redirections.
+%% Redirections allow the shell user to control the input to and output
+%% from invoked commands.  As noted above, users can define variables
+%% local to simple commands.
+\emph{単純な}シェルコマンド、つまり読者の多くが最も見なれているであろうコマンドは、まず\code{echo}や\code{cd}のようなコマンド名があってその後にゼロ個以上の引数やリダイレクトが続く。リダイレクトを使うと、起動するコマンドへの入力やコマンドからの出力をシェルのユーザーが制御できるようになる。先ほど説明したように、単純なコマンド内のローカル変数を定義することができる。
 
-The basic data structure the shell uses to pass information from one
-stage to the next, and to operate on data units within each processing
-stage, is the \code{WORD\_DESC}:
+%% Reserved words introduce more complex shell commands.  There are
+%% constructs common to any high-level programming language, such as
+%% \code{if-then-else}, \code{while}, a \code{for} loop that iterates
+%% over a list of values, and a C-like arithmetic \code{for} loop.
+%% These more complex commands allow the shell to execute a
+%% command or otherwise test a condition and perform different operations
+%% based on the result, or execute commands multiple times.
+予約語を使えば、より複雑なシェルコマンドを実行できる。他の高級言語にもよくある制御構造である\code{if-then-else}や\code{while}も使えるし、\code{for}ループで値のリストを順に処理することもできる。また、C言語風にカウンタを用いた\code{for}ループも使える。これらの複雑なコマンドを使えば、ある条件を調べてその結果によって処理を切り替えるようなコマンドを実行することもできるし、あるコマンドを複数回実行することもできる。
+
+%% One of the gifts Unix brought the computing world is the pipeline: a
+%% linear list of commands, in which the output of one command in the
+%% list becomes the input of the next.  Any shell construct can be used
+%% in a pipeline, and it's not uncommon to see pipelines in which a
+%% command feeds data to a loop.
+Unixが計算機界にもたらした贈り物のひとつがパイプラインである。これを使えば、一連のコマンド群でひとつのコマンドの出力を次のコマンドへの入力とすることができる。シェルの制御構造はすべてパイプラインの中でも使え、あるコマンドがデータをループに送るようなパイプラインを見ることも珍しくない。
+
+%% Bash implements a facility that allows the standard input, standard
+%% output, and standard error streams for a command to be redirected to
+%% another file or process when the command is invoked.  Shell
+%% programmers can also use redirection to open and close files in the
+%% current shell environment.
+Bashには、あるコマンドの実行時に標準入力や標準出力そして標準エラー出力をリダイレクトして別のファイルやプロセスに送る機能がある。シェルプログラマーは、リダイレクトを使って現在のシェル環境でファイルを開いたり閉じたりすることができる。
+
+%% Bash allows shell programs to be stored and used more than once.
+%% Shell functions and shell scripts are both ways to name a group of
+%% commands and execute the group, just like executing any other command.
+%% Shell functions are declared using a special syntax and stored and
+%% executed in the same shell's context; shell scripts are created by
+%% putting commands into a file and executing a new instance of the shell
+%% to interpret them.  Shell functions share most of the execution
+%% context with the shell that calls them, but shell scripts, since they
+%% are interpreted by a new shell invocation, share only what is passed
+%% between processes in the environment.
+Bashでは、シェルのプログラムを保存して再利用することができる。シェル関数やシェルスクリプトは、どちらもコマンド群に名前をつけて実行できるようにしたものであり、他のコマンドと同じように実行できる。シェル関数の宣言は特別な構文で行い、同じシェルのコンテキストで使うことができる。シェルスクリプトはコマンドを書いたファイルとして作り、実行するときにはそれを解釈する新たなシェルのインスタンスを立ち上げる。シェル関数は大半の実行時コンテキストを呼び出し元のシェルと共有するが、シェルスクリプトは新たなシェルを立ち上げて動作するので、環境変数で渡された内容しか共有できない。
+
+\end{aosasect2}
+
+%% \begin{aosasect2}{A Further Note}
+\begin{aosasect2}{さらなる注意}
+
+%% As you read further, keep in mind that the shell implements its
+%% features using only a few data structures: arrays, trees,
+%% singly-linked and doubly-linked lists, and hash tables.  Nearly all of
+%% the shell constructs are implemented using these primitives.
+さらに読み進めていくうえで覚えておいてほしいのは、シェルがその機能を実装するために使っているデータ構造はほんのわずかであるということだ。配列、ツリー、片方向連結リスト、双方向連結リスト、そしてハッシュテーブル。これだけである。シェルのほぼすべての構造が、これらのプリミティブを用いて実装されている。
+
+%% The basic data structure the shell uses to pass information from one
+%% stage to the next, and to operate on data units within each processing
+%% stage, is the \code{WORD\_DESC}:
+あるステージから次のステージに情報を渡したり各処理ステージでデータを操作したりするときに使う基本的なデータ構造が\code{WORD\_DESC}だ。
 
 \begin{verbatim}
 typedef struct word_desc {
@@ -203,8 +222,9 @@ typedef struct word_desc {
 } WORD_DESC;
 \end{verbatim}
 
-\noindent Words are combined into, for example, argument lists, using simple
-linked lists:
+%% \noindent Words are combined into, for example, argument lists, using simple
+%% linked lists:
+\noindent 単語を組み合わせて引数リストなどを作るときには、単純な連結リストを使う。
 
 \begin{verbatim}
 typedef struct word_list {
@@ -213,9 +233,10 @@ typedef struct word_list {
 } WORD_LIST;
 \end{verbatim}
 
-\code{WORD\_LIST}s are pervasive throughout the shell.  A simple
-command is a word list, the result of expansion is a word list, and
-the built-in commands each take a word list of arguments.
+%% \code{WORD\_LIST}s are pervasive throughout the shell.  A simple
+%% command is a word list, the result of expansion is a word list, and
+%% the built-in commands each take a word list of arguments.
+\code{WORD\_LIST}はシェル全体に広がる。単純なコマンドは単語のリストだし、その展開結果も単語のリスト、そして組み込みのコマンドも引数の一覧を単語のリストで受け取る。
 
 \end{aosasect2}
 
