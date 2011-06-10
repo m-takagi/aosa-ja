@@ -6,7 +6,7 @@
 %% server application for making, receiving, and performing custom
 %% processing of phone calls.
 Asterisk\footnote{\url{http://www.asterisk.org/}}はGPLv2で配布されているオープンソースによる電話通信のプラットフォームである。
-つまり、電話を掛けたり、受けたり、カスタム処理を実行したりするサーバアプリケーションである。
+簡単に言うと、電話を掛けたり、受けたり、カスタム処理を実行したりするためのサーバアプリケーションである。
 
 %% The project was started by Mark Spencer in 1999. Mark had a company
 %% called Linux Support Services and he needed a phone system to help
@@ -14,7 +14,7 @@ Asterisk\footnote{\url{http://www.asterisk.org/}}はGPLv2で配布されてい�
 %% buying one, so he just made his own. As the popularity of Asterisk
 %% grew, Linux Support Services shifted focus to Asterisk and changed
 %% its name to Digium, Inc.
-このプロジェクトは 1999年にMark Spencerによって始められた。Markは自らが興した Linux Support Services社において、電話システムが必要だったのだが、購入するだけのお金が無かったため自作した。Asteriskの人気が上がると、Asteriskに資源を集中するため社名をDigium, Incに改めた。
+このプロジェクトは 1999年にMark Spencerによって始められた。Markは自らが興した Linux Support Services社において、電話システムが必要だったのだが、購入するだけの費用が無かったために自作した。Asteriskの人気が上がると、Asteriskに資源を集中するため社名をDigium, Incに改めた。
 
 %% The name Asterisk comes from the Unix wildcard character,
 %% \code{*}. The goal for the Asterisk project is to do everything
@@ -55,7 +55,7 @@ Asteriskシステムに電話が掛かってきたり、Asteriskから電話を�
 %% exists as an instance of the \code{ast\_channel} data structure.  This
 %% call scenario could be a caller interacting with voicemail, for
 %% example.
-Asteriskにおけるチャネルは、Asteriskシステムと電話端末の接続をあらわす(\aosafigref{fig.asterisk.simpleCall})。最も単純な例は、電話機がAsteriskシステムを呼び出す時である。この場合の接続は、一つのチャネルであらわされる。Asteriskのソースコードでは、チャネルは\code{ast\_channel} 構造体のインスタンスとして存在する。この呼び出しシナリオは、発信者がボイスメールを使うときの例である。
+Asteriskにおけるチャネルは、Asteriskシステムと電話端末の接続をあらわす(\aosafigref{fig.asterisk.simpleCall})。最も単純な例は、電話機がAsteriskシステムを呼び出す時である。この場合の接続は、一つのチャネルであらわされる。Asteriskのコードでは、チャネルは\code{ast\_channel} 構造体のインスタンスとして存在する。この呼び出しシナリオは、発信者がボイスメールを使うときの例である。
 
 %% \aosafigure[225pt]{../images/asterisk/singleChannel.eps}{A Single Call Leg, Represented by a Single Channel}{fig.asterisk.simpleCall}
 \aosafigure[225pt]{../images/asterisk/singleChannel.eps}{片方向通話, 単一チャネル}{fig.asterisk.simpleCall}
@@ -63,7 +63,7 @@ Asteriskにおけるチャネルは、Asteriskシステムと電話端末の接�
 \end{aosasect2}
 
 %% \begin{aosasect2}{Channel Bridging}
-\begin{aosasect2}{チャネルブリッジ}
+\begin{aosasect2}{チャネル・ブリッジ}
 
 %% Perhaps a more familiar call scenario would be a connection between
 %% two phones, where a person using phone A has called a person on phone
@@ -72,7 +72,7 @@ Asteriskにおけるチャネルは、Asteriskシステムと電話端末の接�
 %% (\aosafigref{fig.asterisk.twoChannels}).
 おそらく、より馴染のある通話シナリオは電話機同士の接続であろう。このシナリオでは、電話機Aを使っている人が電話機B\@を呼び出す。すなわち2台の電話端末がAsteriskシステムに接続しているため、二つのチャネルが存在する(\aosafigref{fig.asterisk.twoChannels})。
 
-\aosafigure[400pt]{../images/asterisk/twoChannels.eps}{Two Call Legs Represented by Two Channels}{fig.asterisk.twoChannels}
+\aosafigure[400pt]{../images/asterisk/twoChannels.eps}{２つのチャネルによって表される双方向通話}{fig.asterisk.twoChannels}
 
 %% When Asterisk channels are connected like this, it is referred to as a
 %% channel bridge. Channel bridging is the act of connecting channels
@@ -128,7 +128,7 @@ Asteriskにおけるチャネルは、Asteriskシステムと電話端末の接�
 %% \aosasecref{sec.asterisk.drivers}.
 %% \aosafigref{fig.asterisk.nativeBridge} illustrates an example of a
 %% native bridge.
-ジェネリック・ブリッジとネイティブ・ブリッジの選択は、ブリッジが必要になったときに、２つのチャネルの比較で決定する。二つのチャネルが同じネイティブ・ブリッジ技術をサポートする事がわかると、ネイティブ・ブリッジが使われる。その他の場合は、ジェネリック・ブリッジが使われる。２つのチャネルが同じネイティブ・ブリッジをサポートするかどうかの決定は、単純にC言語の関数ポインタの比較で行われる。これは、もっともエレガントな手法というわけではないが、この方法が我々のニーズを満たさなかったことは今のところない。ネイティブ・ブリッジ機能については、\aosasecref{sec.asterisk.drivers}で詳しく説明する。
+ジェネリック・ブリッジかネイティブ・ブリッジかの選択は、ブリッジが必要になったときに、２つのチャネルの比較で決定される。二つのチャネルが同じネイティブ・ブリッジ技術をサポートする事がわかると、ネイティブ・ブリッジが使われる。その他の場合は、ジェネリック・ブリッジが使われる。２つのチャネルが同じネイティブ・ブリッジをサポートするかどうかの決定は、単純にC言語の関数ポインタの比較で行われる。これは、もっともエレガントな手法というわけではないが、この方法が我々のニーズを満たさなかったことは今のところない。ネイティブ・ブリッジ機能については、\aosasecref{sec.asterisk.drivers}で詳しく説明する。
 \aosafigref{fig.asterisk.nativeBridge}は、ネイティブ・ブリッジの例を表現している。
 
 %% \aosafigure{../images/asterisk/nativeBridge.eps}{Example of a Native Bridge}{fig.asterisk.nativeBridge}
@@ -146,7 +146,7 @@ Asteriskにおけるチャネルは、Asteriskシステムと電話端末の接�
 %% would be passing through the system. Signalling frames are used to send
 %% messages about call signalling events, such as a digit being pressed, a
 %% call being put on hold, or a call being hung up.
-通話中のコミュニケーションは、Asteriskのソースコードではフレームで表現されている。これは、\code{ast\_frame}構造体のインスタンスである。フレームはメディア・フレームにもシグナリング・フレームにも使われる。音声メディア・フレームのストリームは基本的にシステムを通過する。シグナリング・フレームは、押された番号や保留中、呼切断などの呼制御イベントを送信するのに使われる。
+通話中のコミュニケーションは、Asteriskのコードではフレームで表現されている。これは、\code{ast\_frame}構造体のインスタンスである。フレームはメディア・フレームにもシグナリング・フレームにも使われる。音声メディア・フレームのストリームは基本的にシステムを通過する。シグナリング・フレームは、押された番号や保留中、呼切断などの呼制御イベントを送信するのに使われる。
 
 %% The list of available frame types is statically defined. Frames are
 %% marked with a numerically encoded type and subtype.  A full list can
@@ -196,7 +196,7 @@ Asteriskにおけるチャネルは、Asteriskシステムと電話端末の接�
 \end{aosasect1}
 
 %% \begin{aosasect1}{Asterisk Component Abstractions}
-\begin{aosasect1}{Asterisk コンポーネント抽象化}
+\begin{aosasect1}{Asterisk抽象コンポーネント}
 
 %% Asterisk is a highly modularized application. There is a core
 %% application that is built from the source in the \code{main/}
@@ -205,7 +205,7 @@ Asteriskにおけるチャネルは、Asteriskシステムと電話端末の接�
 %% also has code that knows how to connect all of the abstract interfaces
 %% together to make phone calls work. The concrete implementations of
 %% these interfaces are registered by loadable modules at runtime.
-Asteriskは高度にモジュール化が進んだアプリケーションである。ソースツリー中の\code{main/}ディレクトリ以下にコア・アプリケーションがある。しかし、これ自体は、便利というわけではない。コア・アプリケーションは、基本的にモジュール・レジストリとして振る舞う。通話をうまく動かすための抽象インターフェースとの接続用のコードも存在する。これらインタフェースの具体的な実装は実行時にローダブルモジュールによって登録される。
+Asteriskは高度にモジュール化が進んだアプリケーションである。ソースツリー中の\code{main/}ディレクトリ以下にコア・アプリケーションがある。しかし、これ自体は、大変有益というわけではない。コア・アプリケーションは、基本的にモジュール・レジストリとして振る舞う。通話をうまく動かすための抽象インターフェースとの接続用のコードも存在する。これらインタフェースの具体的な実装は実行時にローダブルモジュールによって登録される。
 
 %% By default, all modules found in a predefined Asterisk modules
 %% directory on the filesystem will be loaded when the main application
@@ -226,7 +226,7 @@ Asteriskは高度にモジュール化が進んだアプリケーションであ
 %% the Asterisk core. A module is allowed to register as many of these
 %% different interfaces as it would like. Generally, related
 %% functionality is grouped into a single module.
-モジュールはロードされるときにAsteriskコア・アプリケーションに抽象化コンポーネントの実装を登録する。モジュールがAsteriskコアに対して実装および登録できるインタフェースはたくさんある。モジュールは自身が登録したいインタフェースは種別が異なっていれば全て登録することができる。一般的に、関連する機能は一つのモジュールにまとめられる。
+モジュールはロードされるときにAsteriskコア・アプリケーションに抽象コンポーネントの実装を登録する。モジュールがAsteriskコアに対して実装および登録できるインタフェースはたくさんある。モジュールは自身が登録したいインタフェースは種別が異なっていれば全て登録することができる。一般的に、関連する機能は一つのモジュールにまとめられる。
 
 %% \begin{aosasect2}{Channel Drivers}
 \begin{aosasect2}{チャネル・ドライバ}
@@ -239,7 +239,7 @@ Asteriskは高度にモジュール化が進んだアプリケーションであ
 %% component is responsible for translating between the Asterisk channel
 %% abstraction and the details of the telephony technology that it
 %% implements.
-Asteriskチャネル・ドライバのインタフェースは、最も複雑かつ重要である。AsteriskチャネルAPIは、電話プロトコルの抽象化を提供する。抽象化により使用する電話プロトコルと独立してAsterisk機能が動けるようになる。このコンポーネントは、Asterisk抽象チャネルと実行される電話テクノロジの細部の間を翻訳する責務を持つ。
+Asteriskチャネル・ドライバのインタフェースは、最も複雑かつ重要である。AsteriskチャネルAPIは、電話プロトコルの抽象化を提供する。抽象化により使用する電話プロトコルと独立してAsterisk機能が動けるようになる。このコンポーネントは、Asterisk抽象チャネルと実行される電話テクノロジの細部の間を通訳する責務を持つ。
 
 %% The definition of the Asterisk channel driver interface is called the
 %% \code{ast\_channel\_tech} interface. It defines a set of methods that
@@ -262,7 +262,7 @@ Asteriskチャネル・ドライバ・インタフェースの定義は\code{ast
 %% two channels in Asterisk. \aosafigref{fig.asterisk.channelLayers}
 %% expands on this to show two bridged channels and how the channel
 %% technology implementations fit into the picture.
- \code{ast\_channel}が生成される時、生成元の\code{ast\_channel\_tech}への参照も作られる。技術に特化した方法で扱われるべき多くのオペレーションがある。これらのオペレーションが \code{ast\_channel}のなかで実行されるときオペレーションのハンドリングは、\code{ast\_channel\_tech}の適切なメソッドに委ねられる。 \aosafigref{fig.asterisk.twoChannels}は、Asteriskの2つのチャネルを示している。 \aosafigref{fig.asterisk.channelLayers}は、これを展開して、二つのブリッジされたチャネルとチャネル技術の実装がどのようにかみ合うのかを図示している。
+ \code{ast\_channel}が生成される時、生成元の\code{ast\_channel\_tech}への参照も作られる。テクノロジ固有の方法で扱われるべき多くのオペレーションがある。これらのオペレーションが \code{ast\_channel}のなかで実行されるときには、オペレーションのハンドリングは、\code{ast\_channel\_tech}の適切なメソッドに委ねられる。 \aosafigref{fig.asterisk.twoChannels}は、2つのAsteriskチャネルを示している。 \aosafigref{fig.asterisk.channelLayers}は、これを展開して、二つのブリッジされたチャネルとチャネル・テクノロジの実装がどのようにかみ合うのかを図示している。
 
 %% \aosafigure{../images/asterisk/channelLayers.eps}{Channel Technology and Abstract Channel Layers}{fig.asterisk.channelLayers}
 \aosafigure{../images/asterisk/channelLayers.eps}{チャネル・テクノロジと抽象チャネル・レイヤ}{fig.asterisk.channelLayers}
@@ -286,7 +286,7 @@ Asteriskチャネル・ドライバ・インタフェースの定義は\code{ast
 %% \item \code{answer}: This is called when Asterisk
 %% decides that it should answer the inbound call associated with this
 %% \code{ast\_channel}.
-\item \code{answer}: これはAsteriskが\code{ast\_channel}の着信に応答すると決めたときに呼ばれる。
+\item \code{answer}: Asteriskが本\code{ast\_channel}への着信に応答すると決めたときに呼ばれる。
 
 %% \item \code{hangup}: This is called when the system has
 %% determined that the call should be hung up. The channel driver will
@@ -324,7 +324,7 @@ Asteriskチャネル・ドライバ・インタフェースの定義は\code{ast
 %% take the data and packetize it as appropriate for the telephony
 %% protocol that it implements and pass it along to the
 %% endpoint.
-\item \code{write}: この関数は、デバイスに\code{ast\_frame}を送信するのに使われる。チャネル・ドライバは、データを取得して対応する電話プロトコルパケット化してエンドポイントに送信する。
+\item \code{write}: この関数は、デバイスに\code{ast\_frame}を送信するのに使われる。チャネル・ドライバは、データを取得して電話プロトコルに対応した形に、パケット化してエンドポイントに送信する。
 
 %% \item \code{bridge}: This is the native bridge callback
 %% for this channel type. As discussed before, native bridging is when
@@ -375,14 +375,14 @@ Asteriskは200近いアプリケーションを持つ。アプリケーション
 %% be customized using any programming language. Even when using these
 %% scripting interfaces with another programming language, dialplan
 %% applications are still invoked to interact with the channel.
-Asteriskダイヤルプランを使って、複数のアプリケーションを組み合せて、カスタムの通話処理が可能である。提供されたダイヤルプラン言語で実現できるカスタム化よりも複雑なものが必要なときには、都合の良いプログラミング言語を使ってカスタムの通話処理が可能なスクリプト・インタフェースもある。これらのスクリプト言語を使ってもダイヤルプラン・アプリケーションはチャネルとインタラクトするために起動される。
+Asteriskダイヤルプランを使って複数のアプリケーションを組み合せると、カスタムの通話処理が可能である。提供されたダイヤルプラン言語で実現できるカスタム化よりも複雑なものが必要なときには、都合の良いプログラミング言語を使ってカスタムの通話処理が可能なスクリプト・インタフェースもある。これらのスクリプトのためインタフェースを使って他のプログラム言語が使われる時でも、ダイヤルプラン・アプリケーションはチャネルと相互作用するために起動される。
 
 %% Before we get into an example, let's have a look at the syntax of an
 %% Asterisk dialplan that handles calls to the number \code{1234}. Note
 %% that the choice of \code{1234} here is arbitrary. It invokes three
 %% dialplan applications. First, it answers the call. Next, it plays back
 %% a sound file. Finally, it hangs up the call.
-エグザンプルに入る前に、番号 \code{1234}への通話を扱うAsteriskダイヤルプランの文法について説明する。 \code{1234}は無作為の選択である。これは、３つのダイヤルプラン・アプリケーションを起動する。最初に、呼応答し、次に、サウンド・ファイルを再生し、最後に呼切断を行う。
+次の例に入る前に、番号 \code{1234}への通話を扱うAsteriskダイヤルプランの文法について説明する。 \code{1234}は無作為の選択である。これは、３つのダイヤルプラン・アプリケーションを起動する。最初に、呼応答し、次に、サウンド・ファイルを再生し、最後に呼切断を行う。
 
 \begin{verbatim}
 ; Define the rules for what happens when someone dials 1234.
@@ -402,14 +402,14 @@ exten => 1234,1,Answer()
 %% \code{1234}.  The \code{n} is short for saying that this is the next
 %% step to take.  The last item on those lines specifies what action to
 %% take.
-\noindent \code{exten} キーワードはエクステンションを定義するのに使われる。\code{exten}行の右側において、\code{1234}は誰かが\code{1234}を呼び出したときのルールを定義している。次の\code{1}は、この番号にダイヤルされたときに最初に実行されるステップである事を示している。最後に、\code{Answer}はシステムが呼に応答することを指示する。次の \code{same}キーワードで始まる2行は、最後に指定したエクステンションと同じであることを示す。本例では、\code{1234}に対するエクステンションである事を示している。\code{n}は、次のステップであることを示す短縮表現である。各行の最後の項目には実行する動作を指定する。
+\noindent \code{exten} キーワードはエクステンションを定義するのに使われる。\code{exten}行の右側において、\code{1234}は誰かが\code{1234}を呼び出したときのルールを定義している。次の\code{1}は、この番号にダイヤルされたときに最初に実行されるステップである事を示している。最後に、\code{Answer}はシステムが呼に応答することを指示する。次の \code{same}キーワードで始まる2行は、直前に指定したエクステンションと同じであることを示す。本例では、\code{1234}に対するエクステンションである事を示している。\code{n}は、次のステップであることを示す短縮表現である。各行の最後の項目には実行する動作を指定する。
 
 %% Here is another example of using the Asterisk dialplan. In this case,
 %% an incoming call is answered. The caller is played a beep, and then up
 %% to 4 digits are read from the caller and stored into the \code{DIGITS}
 %% variable. Then, the digits are read back to the caller. Finally, the
 %% call is ended.
-次は、Asteriskダイヤルプランを使った別の例である。このケースでは、着呼に対して応答する。発信者にビープ音を鳴らし、発信者からの数字を4桁読み、\code{DIGITS}変数に格納される。さらに、格納された4桁の数字が、発信者に音声で通知される。最後に終話する。
+次は、Asteriskダイヤルプランを使った別の例である。このケースは次のような流れである。着呼に対して応答する。発信者にビープ音を鳴らし、発信者からの数字を4桁読み、\code{DIGITS}変数に格納される。さらに、格納された4桁の数字が、発信者に音声で通知される。最後に終話する。
 
 \begin{verbatim}
 exten => 5678,1,Answer()
@@ -429,12 +429,12 @@ int (*execute)(struct ast_channel *chan, const char *args);
 \noindent
 %% However, the application implementations use virtually all of the
 %% APIs found in \code{include/asterisk/}.
-しかしながら、アプリケーションの実装は、事実上、\code{include/asterisk/}にある全てのAPIsを使用する。
+しかしながら、アプリケーションの実装は、実際上、\code{include/asterisk/}にある全てのAPIsを使用する。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Dialplan Functions}
-\begin{aosasect2}{ダイヤルプラン ファンクション}
+\begin{aosasect2}{ダイヤルプラン・ファンクション}
 
 %% Most dialplan applications take a string of arguments.  While some
 %% values may be hard coded, variables are used in places where behavior
@@ -456,7 +456,7 @@ exten => 1234,1,Set(MY_VARIABLE=foo)
 %% functions may set or retrieve channel meta data, they do not do any
 %% signalling or media processing. That is left as the job of dialplan
 %% applications.
-ダイヤルプラン・ファンクションは、前の例と同じ構文を使って起動される。Astersiskモジュールは、ダイヤルプラン・ファンクションを登録することができる。ダイヤルプラン・ファンクションは、情報を引き出してダイヤルプランに反映させることができる。ダイヤルプラン・ファンクションは、ダイヤルプランからデータを受けて実行する事もできる。一般的なルールとして、ダイヤルプラン・ファンクションは、チャネル・メタデータをセットしたり引き出したりはできるが、呼制御やメディア・プロセッシングは行わない。これは、ダイヤルプラン・アプリケーションの仕事として残されている。
+ダイヤルプラン・ファンクションは、前の例と同じ構文を使って起動される。Astersiskモジュールは、ダイヤルプラン・ファンクションを登録することができる。ダイヤルプラン・ファンクションは、情報を引き出してダイヤルプランに反映させることができる。ダイヤルプラン・ファンクションは、ダイヤルプランからデータを受けて実行する事もできる。一般的なルールとして、ダイヤルプラン・ファンクションは、チャネル・メタデータをセットしたり引き出したりはできるが、呼制御やメディア処理は行わない。これは、ダイヤルプラン・アプリケーションの仕事として残されている。
 
 %% The following example demonstrates usage of a dialplan function.
 %% First, it prints out the CallerID of the current channel to the
@@ -499,7 +499,7 @@ exten => 555,1,Verbose(Time this call started: ${CDR(start)})
 %% offers tradeoffs in media quality, CPU consumption, and bandwidth
 %% requirements. Asterisk supports many different codecs and knows how to
 %% translate between them when necessary.
-VOIPの世界では、異なる符号媒体のネットワークをまたがって送信するために、様々な種類の符号化方式が使われる。メディアの品質、CPU消費量、帯域幅のトレードオフの中から選択される。Asteriskは多くの符号化方式をサポートし、必要ならば、これらの符号化方式を相互変換可能である。
+VOIPの世界では、異なる符号媒体のネットワークをまたがって送信するために、様々な種類の符号化方式が使われる。符号化方式は、メディアの品質、CPU消費量、帯域幅のトレードオフの中から選択される。Asteriskは多くの符号化方式をサポートし、必要ならば、これらの符号化方式を相互に変換可能である。
 
 %% When a call is set up, Asterisk will attempt to get two endpoints to
 %% use a common media codec so that transcoding is not required.
@@ -524,7 +524,7 @@ VOIPの世界では、異なる符号媒体のネットワークをまたがっ�
 %% in other cases, especially using IP protocols, there is a negotiation
 %% mechanism used where capabilities and preferences are expressed and a
 %% common codec is agreed upon.
-メディア・ストリームにどの符号化方式を使用するかの交渉は、Asteriskに通話を接続するテクノロジに依存する。従来の電話通信ネットワーク(いわゆるPSTN）上の通話ようなケースでは、交渉の余地は無いと思われる。しかし、特にIPプロトコルを使うようなケースでは、利用可能な符号化方式や優先度を示して、符号化方式を交渉する機構により、符号化方式の合意が取られる。
+メディア・ストリームにどの符号化方式を使用するかの交渉は、Asteriskに通話を接続するテクノロジに依存する。従来の電話通信ネットワーク(いわゆるPSTN）上の通話のようなケースでは、交渉の余地は無いと思われる。しかし、特にIPプロトコルを使うようなケースでは、利用可能な符号化方式や優先度を示して、符号化方式を交渉する機構により、符号化方式の合意が取られる。
 
 %% For example, in the case of SIP (the most commonly used VOIP
 %% protocol) this is a high level view of how codec negotiation is
@@ -564,13 +564,13 @@ Asteriskが充分に扱えない分野のひとつに、ビデオのようなよ
 %% be used to convert a chunk of media from the source to the destination
 %% format. It knows nothing about the concept of a phone call. It only
 %% knows how to convert media from one format to another.
-符号化方式変換モジュールは、一つ以上の\code{ast\_translator}インタフェースの実装を利用する。変換モジュールは、変換元と変換先の属性を持つ。また、変換元フォーマットから変換先フォーマットへのメディア・チャンクの変換に使われるコールバックも実装する。変換もジュールは、電話の概念については、関知せず、メディアの変換のみに関わる。
+符号化方式変換モジュールは、一つ以上の\code{ast\_translator}インタフェースの実装を利用する。変換モジュールは、変換元と変換先の属性を持つ。また、変換元フォーマットから変換先フォーマットへのメディア・チャンクの変換に使われるコールバックも実装する。変換モジュールは、電話の概念については、関知せず、メディアの変換のみに関わる。
 
 %% For more detailed information about the translator API, see
 %% \code{include/asterisk/translate.h} and
 %% \code{main/translate.c}. Implementations of the translator abstraction
 %% can be found in the \code{codecs} directory.
-符号化変換APIのより詳細情報は、\code{include/asterisk/translate.h}と\code{main/translate.c}にある。符号化変換の抽象化部の実装は、\code{codecs}ディレクトリにある。
+符号化方式変換APIのより詳細情報は、\code{include/asterisk/translate.h}と\code{main/translate.c}にある。符号化方式変換の抽象化部の実装は、\code{codecs}ディレクトリにある。
 
 \end{aosasect2}
 
@@ -586,7 +586,7 @@ Asteriskが充分に扱えない分野のひとつに、ビデオのようなよ
 %% threads in Asterisk can be classified as either a Network Monitor
 %% Thread, or a Channel Thread (sometimes also referred to as a PBX
 %% thread, because its primary purpose is to run the PBX for a channel).
-Asteriskは、マルチスレッドを多用しているアプリケーションである。Asteriskは、スレッドを管理するのにPOSIXスレッドAPIとロックなどの関連サービスを使っている。スレッドを扱うすべてのAsteriskのコードは、デバッグ目的で、一連のラッパーを通している。Asterisk内のほとんどのスレッドは、ネットワーク監視スレッドか、チャネルスレッド(PBXスレッドとも呼ばれる。主目的がチャネルに対するPBX機能の実行である事に起因する）に分類される。
+Asteriskは、マルチスレッドを多用するアプリケーションである。Asteriskは、スレッドを管理するのにPOSIXスレッドAPIとロックなどの関連サービスを使っている。スレッドを扱うすべてのAsteriskのコードは、デバッグ目的で、一連のラッパーを通している。Asterisk内のほとんどのスレッドは、ネットワーク監視スレッドか、チャネルスレッド(PBXスレッドとも呼ばれる。主目的がチャネルに対するPBX機能の実行である事に起因する）に分類される。
 
 %% \begin{aosasect2}{Network Monitor Threads}
 \begin{aosasect2}{ネットワーク監視スレッド}
@@ -634,7 +634,7 @@ Asteriskは、マルチスレッドを多用しているアプリケーション
 %% components, as well as the thread execution model. In this section,
 %% some common call scenarios are broken down to demonstrate how Asterisk
 %% components operate together to process phone calls.
-前の2節では、Asteriskコンポーネントに対する重要なインタフェースとスレッド実行モデルを紹介した。本節では、複数のAsteriskコンポーネントがどのように協調して通話処理するかを示すために、いくつかの一般的な通話シナリオを分解して示す。
+前の2節では、Asteriskコンポーネントに対する重要なインタフェースとスレッド実行モデルを紹介した。本節では、複数のAsteriskコンポーネントがどのように協調して通話処理するのかを示すために、いくつかの一般的な通話シナリオに分けて示す。
 
 %% \begin{aosasect2}{Checking Voicemail}
 \begin{aosasect2}{ボイスメールのチェック}
@@ -652,7 +652,7 @@ Asteriskは、マルチスレッドを多用しているアプリケーション
 %% available since the technology used to deliver the call does not
 %% support specifying the dialed number. An example of this would be an
 %% incoming call on an analog phone line.
-一例として、誰かが電話システムを呼び出して、ボイスメールをチェックする通話シナリオを示す。本シナリオでの最初の主要コンポーネントは、チャネル・ドライバである。チャネル・ドライバは、電話からの着信呼要求の処理に責任を持つ。これは、チャネル・ドライバの監視スレッドで行われる。呼をシステムに運ぶのに使われる電話テクノロジに依存して、通話をセットアップするのに要求される、いつかの交渉が行われる。呼のセットアップのもう一つのステップは、通話先の決定である。これは、通常、発信者がダイヤルした番号により決定される。しかし、あるケースでは、通話の伝送テクノロジがダイヤル番号の明示をサポートしないため、番号特定ができない事もある。アナログ電話の着信が一つの例である。
+一例として、誰かが電話システムを呼び出して、ボイスメールをチェックする通話シナリオを示す。本シナリオでの最初の主要コンポーネントは、チャネル・ドライバである。チャネル・ドライバは、電話からの着呼要求の処理に責任を持つ。これは、チャネル・ドライバの監視スレッドで行われる。呼をシステムに運ぶのに使われる電話テクノロジによっては、通話をセットアップするのに必要な交渉が行われる事もある。呼のセットアップのもう一つのステップは、通話先の決定である。これは、通常、発信者がダイヤルした番号により決定される。しかし、あるケースでは、通話の伝送テクノロジがダイヤル番号の明示をサポートしないため、番号特定ができない事もある。アナログ電話の着信が一つの例である。
 
 %% If the channel driver verifies that the Asterisk configuration has
 %% extensions defined in the dialplan (the call routing configuration)
@@ -696,7 +696,7 @@ exten => *123,1,Answer()
 %% interaction, it knows nothing about the technology that is being used
 %% to deliver the call into the Asterisk system. The Asterisk channel
 %% abstraction hides these details from the Voicemail implementation.
-次のステップでは、チャネル・スレッドは、\code{VoicemailMain}(\aosafigref{fig.asterisk.blockDiagramVoicemail})を実行する。このアプリケーションは、\code{app\_voicemail}モジュールによって、供給される。特筆するべき点は、ボイスメールのコードが通話に対応している間、Asteriskシステムへの呼び出しを伝送するテクノロジについては、何も知らないということである。Asterisk抽象チャネルは、ボイスメールの実行処理から、これらの詳細を隠蔽している。
+次のステップでは、チャネル・スレッドは、\code{VoicemailMain}(\aosafigref{fig.asterisk.blockDiagramVoicemail})を実行する。このアプリケーションは、\code{app\_voicemail}モジュールによって供給される。特筆するべき点は、ボイスメールのコードが通話に応対している間、ボイスメール自体は、Asteriskシステムへの呼び出しを伝送するテクノロジについては何も知らないということである。Asterisk抽象チャネルは、ボイスメールの実行処理から、これらの詳細を隠蔽している。
 
 %% There are many features involved in providing a caller access to their
 %% Voicemail. However, all of them are primarily implemented as reading
@@ -706,7 +706,7 @@ exten => *123,1,Answer()
 %% by the channel drivers. Once a key press has arrived in Asterisk, it
 %% is converted into a generic key press event and passed along to the
 %% Voicemail code.
-発信者が、自身のボイスメールにアクセスする処理には多くの機能が含まれる。しかし、基本的には、発信者からの数字キーの入力に応答して、サウンド・ファイルを読み込んだり、書き込んだりするような処理である。DTMF信号は、多くの異なる方式でAsteriskに運ばれる。繰り返しになるが、これらの詳細方式の部分は、チャネル・ドライバで行われる。キー入力がAseriskに届くと、共通のキー入力イベントに変換されてから、ボイスメールのコードに届く。
+発信者が、自身のボイスメールにアクセスする処理には多くの機能が含まれる。しかし、基本的には、発信者からの数字キーの入力に応答して、サウンド・ファイルを読み込んだり、書き込んだりするような処理である。DTMF信号は、多くの異なる方式でAsteriskに運ばれる。繰り返しになるが、これらの詳細方式の部分は、チャネル・ドライバで行われる。キー入力がAsteriskに届くと、共通のキー入力イベントに変換されてからボイスメールのコードに届く。
 
 %% One of the important interfaces in Asterisk that has been discussed is
 %% that of a codec translator. These codec implementations are very
@@ -716,7 +716,7 @@ exten => *123,1,Answer()
 %% communication between the Asterisk system and the caller. If it must
 %% transcode the audio, it will build a translation path of one or more
 %% codec translators to get from the source to the destination format.
-これまで述べてきたなかで、Asteriskの主要インターフェースの一つは、符号化変換である。これらの符号化の実装は、この呼び出しシナリオでは、大変重要である。ボイスメールコードが発信者に対してサウンド・ファイルを再生したいとき、サウンド・ファイルのオーディオ形式は、Asteriskと発信者の間で使われているフォーマットとことなるときもある。オーディオ形式を変換する必要がある時、一つ以上の変換器を使って、変換元から変換先の形式への符号化変換のパスを構築する。
+これまで述べてきた中で、Asteriskの主要インターフェースの一つは、符号化方式変換である。これらの符号化の実装は、この呼び出しシナリオでは大変重要である。ボイスメールのコードが発信者に対してサウンド・ファイルを再生したいとき、サウンド・ファイルのオーディオ形式は、Asteriskと発信者の間で使われているフォーマットと異なるときもある。オーディオ形式を変換する必要がある時、一つ以上の変換器を使って、変換元から変換先の形式への符号化変換のパスを構築する。
 
 %% \aosafigure{../images/asterisk/voicemail.eps}{A Call to \code{VoicemailMain}}{fig.asterisk.blockDiagramVoicemail}
 \aosafigure{../images/asterisk/voicemail.eps}{\code{VoicemailMain}への呼び出し}{fig.asterisk.blockDiagramVoicemail}
@@ -731,7 +731,7 @@ exten => *123,1,Answer()
 %% dialplan processing to be done, the channel driver will be given an
 %% opportunity to handle technology specific hangup processing and then
 %% the \code{ast\_channel} object will be destroyed.
-どこかの時点で、発信者は、ボイスメール・システムとやり取りして、呼切断を行う。チャネル・ドライバは、これを検出して、Asteriskチャネル呼制御の共通イベントへと変換する。この呼制御イベントを受信すると、ボイスメールのコードは残り作業は無いため終了する。制御は、チャネル・スレッドのメインループに戻って、ダイヤルプランの実行を続ける。この例では、これ以上のダイヤルプラン処理がないため、チャネル・ドライバは、テクノロジ固有の呼切断処理を与えられる。これにより、\code{ast\_channel}オブジェクトは破棄される。
+どこかの時点で発信者は、ボイスメール・システムとやり取りして呼切断を行う。チャネル・ドライバは、これを検出してAsteriskチャネル呼制御の共通イベントへと変換する。この呼制御イベントを受信すると、ボイスメールのコードは残り作業が無いため終了する。制御がチャネル・スレッドのメインループに戻って、ダイヤルプランの実行を続ける。この例では、これ以上のダイヤルプラン処理がないため、チャネル・ドライバはテクノロジ固有の呼切断処理を与えられる。これにより、\code{ast\_channel}オブジェクトは破棄される。
 
 \end{aosasect2}
 
@@ -764,7 +764,7 @@ exten => 1234,1,Dial(SIP/bob)
 %% \code{chan\_sip}.  Assuming the channel driver has been properly
 %% configured with an account called \code{bob}, it will know how to
 %% reach Bob's phone.
-\noindent \code{Dial}アプリケーションへの引数は、システムに、\code{SIP/bob}への発信を促す。この引数の\code{SIP}の部分は、SIPプロトコルが、通話に使われる事を示している。\code{bob}の部分は、SIPプロトコルを実装したチャネル・ドライバ\code{chan\_sip}によって、解釈される。チャネル・ドライバが、\code{bob}へのアカウントを正しく設定していると仮定すると、Bobの電話機への呼の伝送方法を知ることになる。
+\noindent \code{Dial}アプリケーションへの引数は、システムに、\code{SIP/bob}への発信を促す。この引数の\code{SIP}の部分は、通話に使われるプロトコルがSIPである事を示している。\code{bob}の部分は、SIPプロトコルを実装したチャネル・ドライバ\code{chan\_sip}によって、解釈される。チャネル・ドライバが、\code{bob}へのアカウントを正しく設定していると仮定すると、Bobの電話機への呼の伝送方法を知ることになる。
 
 %% The \code{Dial} application will ask the Asterisk core to allocate a
 %% new Asterisk channel using the \code{SIP/bob} identifier. The core
@@ -781,7 +781,7 @@ exten => 1234,1,Dial(SIP/bob)
 %% the system until the outbound call was answered.  Once both channels
 %% are answered, the bridging of the channels begins
 %% (\aosafigref{fig.asterisk.genericBridge}).
-\code{Dial}アプリケーションは、\code{SIP/bob}識別子を使って、Asteriskコアに対して新しいAsteriskチャネルを割り当てる。コアは、SIPチャネル・ドライバに対してテクノロジ固有の初期化処理を行うように指示する。チャネル・ドライバは、電話の呼び出しを行う処理を起動する。リクエストが進ときに、Asteriskコアに対してイベントの発生を知らせる。これは、さらに、\code{Dial}アプリケーションまで届けられる。これらのイベントは、呼応答、ビジー、輻輳、何らかの理由での拒絶など多くの応答種別が含まれる。理想的なケースでは、呼び出しは応答される。インバウンド・チャネルをを通じて呼が応答された事は伝わる。システムが、アウトバウンドコールへの応答が完了するまで、Asteriskは、この呼にたいしては、応答しない。両チャネルが、応答すると、チャネルのブリッジが始まる(\aosafigref{fig.asterisk.genericBridge})。
+\code{Dial}アプリケーションは、\code{SIP/bob}識別子を使ってAsteriskコアに対して新しいAsteriskチャネルを割り当てる。コアは、SIPチャネル・ドライバに対してテクノロジ固有の初期化処理を行うように指示する。チャネル・ドライバは、電話の呼び出しを行う処理を起動する。リクエストが進ときに、Asteriskコアに対してイベントの発生を知らせる。これは、さらに、\code{Dial}アプリケーションまで届けられる。これらのイベントは、呼応答、ビジー、輻輳、何らかの理由での拒絶など多くの応答種別が含まれる。理想的なケースでは、呼び出しは応答される。インバウンド・チャネルを通じて呼が応答された事は伝わる。システムが、アウトバウンドコールへの応答が完了するまで、Asteriskは、この呼に対しては応答しない。両チャネルが、応答するとチャネル・ブリッジが始まる(\aosafigref{fig.asterisk.genericBridge})。
 
 %% \aosafigure{../images/asterisk/bridgedCall.eps}{Block Diagram of a Bridged Call in a Generic Bridge}{fig.asterisk.genericBridge}
 \aosafigure{../images/asterisk/bridgedCall.eps}{ジェネリック・ブリッジのブリッジ・コールにおけるブロック図}{fig.asterisk.genericBridge}
@@ -802,7 +802,7 @@ exten => 1234,1,Dial(SIP/bob)
 %% channels involved. The channel technology specific hangup processing
 %% will be executed for both channels before the channel thread stops
 %% running.
-通話が終わると、切断処理は、前の例とほとんど同じように進められる。主な違いは、チャネルが二つあることである。チャネル・テクノロジ固有の切断処理は、チャネル・スレッドが実行を止める前に実行される。
+通話が終わると、切断処理は前の例とほとんど同じように進められる。主な違いは、チャネルが二つあることである。チャネル・テクノロジ固有の切断処理は、チャネル・スレッドが実行を止める前に実行される。
 
 \end{aosasect2}
 
@@ -821,7 +821,7 @@ exten => 1234,1,Dial(SIP/bob)
 %% these scalability concerns. In the next few years, we expect to see
 %% Asterisk, along with Asterisk SCF, continue to take over significant
 %% portions of the telephony market, including much larger installations.
-Asteriskのアーキテクチャは、誕生してから10年以上経っている。しかし、チャネルの基本的概念とAsteriskダイヤルプランを使った柔軟は、呼制御は、成長し続けている産業においても、複雑な電話通信システムの開発をサポートし続けている。Aseteriskのアーキテクチャで充分でない分野のひとつに、複数のサーバに渡るスケーリングがある。Asterisk開発コミュニティは、このスケーラビリティを改善するためのAsterisk SCF(Scalable Communications Framework)と呼んでいる兄弟プロジェクトを進めている。数年内には、AsteriskとAsterisk SCFが統合されて、より大規模システムへの採用が進み、電話市場における重要性を増すと考えている。
+Asteriskのアーキテクチャは、誕生してから10年を越える歳月が経っている。しかし、拡大を続ける産業においても、チャネルの基本概念とAsteriskダイヤルプランを使った呼制御の柔軟性は、複雑な電話通信システムの開発をサポートし続けている。Aseteriskのアーキテクチャで充分でない分野のひとつに、複数のサーバに渡るスケーリングがある。Asterisk開発コミュニティは、このスケーラビリティを改善するためのAsterisk SCF(Scalable Communications Framework)と呼んでいる兄弟プロジェクトを進めている。数年内には、AsteriskとAsterisk SCFが統合されて、より大規模システムへの採用が進み、電話市場における重要性を増すと考えている。
 
 \end{aosasect1}
 
