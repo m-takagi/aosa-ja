@@ -284,82 +284,88 @@ Readlineには、任意の長さのキーシーケンスをreadlineコマンド�
 %% \begin{aosasect3}{Readline Structure}
 \begin{aosasect3}{Readlineの構造}
 
-Readline is structured as a basic read/dispatch/execute/redisplay
-loop.  It reads characters from the keyboard using \code{read} or
-equivalent, or obtains input from a macro.  Each character is used as
-an index into a keymap, or dispatch table.  Though indexed by a single
-eight-bit character, the contents of each element of the keymap can be
-several things.  The characters can resolve to additional keymaps,
-which is how multiple-character key sequences are possible.  Resolving
-to a readline command, such as \code{beginning-of-line}, causes that
-command to be executed.
-A character bound to the \code{self-insert} command is stored into the
-editing buffer.
-It's also possible to bind a key sequence to
-a command while simultaneously binding subsequences to different
-commands (a relatively recently-added feature); there is a special
-index into a keymap to indicate that this is done.  Binding a key
-sequence to a macro provides a great deal of flexibility, from
-inserting arbitrary strings into a command line to creating
-keyboard shortcuts for complex editing sequences.  Readline stores
-each character bound to \code{self-insert} in the
-editing buffer, which when displayed may occupy one or more lines on
-the screen.
+%% Readline is structured as a basic read/dispatch/execute/redisplay
+%% loop.  It reads characters from the keyboard using \code{read} or
+%% equivalent, or obtains input from a macro.  Each character is used as
+%% an index into a keymap, or dispatch table.  Though indexed by a single
+%% eight-bit character, the contents of each element of the keymap can be
+%% several things.  The characters can resolve to additional keymaps,
+%% which is how multiple-character key sequences are possible.  Resolving
+%% to a readline command, such as \code{beginning-of-line}, causes that
+%% command to be executed.
+%% A character bound to the \code{self-insert} command is stored into the
+%% editing buffer.
+%% It's also possible to bind a key sequence to
+%% a command while simultaneously binding subsequences to different
+%% commands (a relatively recently-added feature); there is a special
+%% index into a keymap to indicate that this is done.  Binding a key
+%% sequence to a macro provides a great deal of flexibility, from
+%% inserting arbitrary strings into a command line to creating
+%% keyboard shortcuts for complex editing sequences.  Readline stores
+%% each character bound to \code{self-insert} in the
+%% editing buffer, which when displayed may occupy one or more lines on
+%% the screen.
+Readlineは、読み込み/送出/実行/再表示という基本的なループで構成されている。まず最初に、キーボードからの文字の読み込みを\code{read}などで行うか、あるいはマクロからの入力を取得する。個々の文字は、キーマップ(ディスパッチテーブル)のインデックスとして使われる。キーマップのインデックスは8ビットの1文字であるが、その要素はさまざまなものになり得る。たとえば、キーマップの要素の文字列を別のキーマップとして解決することもある。このようにして、複数文字のキーシーケンスを実装している。また、\code{beginning-of-line}のようなreadlineコマンドとして解決させることもあり、これは、そのコマンドを実行する。\code{self-insert}コマンドにバインドされた文字は、編集バッファに書き込まれる。あるキーシーケンスをひとつのコマンドにバインドすると同時に、そのシーケンスの一部を別のコマンドにバインドすることもできる(これは、比較的最近追加された機能である)。キーマップに特別なインデックスを追加して、これを実現している。キーシーケンスをマクロにバインドすることで、任意の文字列をコマンドラインに追加することから複雑な編集シーケンスのショートカットを作ることまで大きな柔軟性を実現した。Readlineは\code{self-insert}にバインドされた文字を編集バッファに格納する。表示するときには、これが画面の難行かを占めることがある。
 
-Readline manages only character buffers and strings using C
-\code{char}s, and builds multibyte characters out of them if
-necessary.  It does not use \code{wchar\_t} internally for both speed
-and storage reasons, and because the editing code existed before
-multibyte character support became widespread.  When in a locale that
-supports multibyte characters, readline automatically reads an entire
-multibyte character and inserts it into the editing buffer.  It's
-possible to bind multibyte characters to editing commands, but one has
-to bind such a character as a key sequence; this is possible, but
-difficult and usually not wanted.  The existing emacs and vi command
-sets do not use multibyte characters, for instance.
+%% Readline manages only character buffers and strings using C
+%% \code{char}s, and builds multibyte characters out of them if
+%% necessary.  It does not use \code{wchar\_t} internally for both speed
+%% and storage reasons, and because the editing code existed before
+%% multibyte character support became widespread.  When in a locale that
+%% supports multibyte characters, readline automatically reads an entire
+%% multibyte character and inserts it into the editing buffer.  It's
+%% possible to bind multibyte characters to editing commands, but one has
+%% to bind such a character as a key sequence; this is possible, but
+%% difficult and usually not wanted.  The existing emacs and vi command
+%% sets do not use multibyte characters, for instance.
+Readlineが管理する文字バッファや文字列はCの\code{char}だけによるものであり、必要に応じてそこからマルチバイト文字を組み立てる。内部的には\code{wchar\_t}は使っていない。速度や記憶容量を考慮したことも理由のひとつだが、編集のコードが書かれた頃にはまだマルチバイト文字のサポートがそれほど広まっていなかったという理由もある。マルチバイト文字をサポートするロケールでは、readlineが自動的にマルチバイト文字全体を読み込んで編集バッファに追加する。マルチバイト文字を編集コマンドとしてバインドすることも可能だが、バインドするときにはキーシーケンスとして指定しなければならない。可能ではあるが難しいことであり、通常はそんなことをしようとは思わないだろう。たとえばemacsやviのコマンドでもマルチバイト文字は使われていない。
 
-Once a key sequence finally resolves to an editing command,
-readline updates the terminal display to reflect the
-results.
-This happens regardless of whether the command
-results in characters being inserted into the buffer, the editing
-position being moved, or the line being partially or completely
-replaced.
-Some bindable editing commands, such as those that modify
-the history file, do not cause any change to the contents of the
-editing buffer.
+%% Once a key sequence finally resolves to an editing command,
+%% readline updates the terminal display to reflect the
+%% results.
+%% This happens regardless of whether the command
+%% results in characters being inserted into the buffer, the editing
+%% position being moved, or the line being partially or completely
+%% replaced.
+%% Some bindable editing commands, such as those that modify
+%% the history file, do not cause any change to the contents of the
+%% editing buffer.
+キーシーケンスが最終的に編集コマンドに解決されたら、readlineはターミナルの表示を更新して結果を反映させる。コマンドの結果が文字をバッファに文字を入れるものであったとしても編集位置を移動させるものであったとしても、あるいは行の一部あるいは全体を書き換えるものであったとしても、これは同様に発生する。バインド可能な編集コマンドの中には、履歴ファイルの編集などのように編集バッファには何も変更を加えないものもある。
 
-Updating the terminal display, while seemingly simple, is quite
-involved.  Readline has to keep track of three things: the current
-contents of the buffer of characters displayed on the screen, the
-updated contents of that display buffer, and the actual characters
-displayed.  In the presence of multibyte characters, the characters
-displayed do not exactly match the buffer, and the redisplay engine
-must take that into account.  When redisplaying, readline must compare
-the current display buffer's contents with the updated buffer, figure
-out the differences, and decide how to most efficiently modify the
-display to reflect the updated buffer.  This problem has been the
-subject of considerable research through the years (the
-\emph{string-to-string correction problem}).  Readline's approach is to
-identify the beginning and end of the portion of the buffer that
-differs, compute the cost of updating just that portion, including
-moving the cursor backward and forward (e.g., will it take more effort
-to issue terminal commands to delete characters and then insert new
-ones than to simply overwrite the current screen contents?), perform
-the lowest-cost update, then clean up by removing any characters
-remaining at the end of the line if necessary and position the cursor
-in the correct spot.
+%% Updating the terminal display, while seemingly simple, is quite
+%% involved.  Readline has to keep track of three things: the current
+%% contents of the buffer of characters displayed on the screen, the
+%% updated contents of that display buffer, and the actual characters
+%% displayed.  In the presence of multibyte characters, the characters
+%% displayed do not exactly match the buffer, and the redisplay engine
+%% must take that into account.  When redisplaying, readline must compare
+%% the current display buffer's contents with the updated buffer, figure
+%% out the differences, and decide how to most efficiently modify the
+%% display to reflect the updated buffer.  This problem has been the
+%% subject of considerable research through the years (the
+%% \emph{string-to-string correction problem}).  Readline's approach is to
+%% identify the beginning and end of the portion of the buffer that
+%% differs, compute the cost of updating just that portion, including
+%% moving the cursor backward and forward (e.g., will it take more effort
+%% to issue terminal commands to delete characters and then insert new
+%% ones than to simply overwrite the current screen contents?), perform
+%% the lowest-cost update, then clean up by removing any characters
+%% remaining at the end of the line if necessary and position the cursor
+%% in the correct spot.
+ターミナルの表示内容の更新は、一見シンプルなようだが実はかなり複雑だ。Readlineは三つの内容を気にかけねばならない。画面に表示されている文字バッファの現在の状態、表示バッファの更新後の内容、そして実際に表示されている文字だ。マルチバイト文字があるため、表示されている文字はバッファの内容と正確に一致するとは限らず、再表示エンジンはそのことを考慮しなければならない。再表示するときにreadlineは、現在の表示バッファの内容と更新されたバッファを比較して差分を算出し、更新後のバッファを表示に反映させるのに最適な方法を決めなければならない。この問題には長年悩まされてきた(the \emph{文字列から文字列への修正問題})。Readlineは次のようにしている。まずバッファの異なる部分の最初と最後の位置を見つけ、その部分だけを更新してカーソルを前後に移動させるコストを算出し(例: ターミナルのコマンドを発行して文字を消してから新しい文字を追加するのと、単に現在の画面表示を上書きしてしまうのとどちらが効率的か?)、もっともコストの低い方法で更新し、必要に応じて最終行の残りの文字を削除してカーソルを正しい位置に移動させる。
 
-The redisplay engine is without question the one piece of readline
-that has been modified most heavily.  Most of the changes have been to
-add functionality---most significantly, the ability to have
-non-displaying characters in the prompt (to change colors, for instance)
-and to cope with characters
-that take up more than a single byte.
+%% The redisplay engine is without question the one piece of readline
+%% that has been modified most heavily.  Most of the changes have been to
+%% add functionality---most significantly, the ability to have
+%% non-displaying characters in the prompt (to change colors, for instance)
+%% and to cope with characters
+%% that take up more than a single byte.
+再表示エンジンは、readlineの中で間違いなく最も頻繁に変更が入っている部分であろう。変更の大半は機能追加である---最も重大なのは、プロンプト内で非表示文字(色の変更など)を扱える機能やマルチバイト文字の対応だ。
 
-Readline returns the contents of the editing buffer to the calling
-application, which is then responsible for saving the
-possibly-modified results in the history list.
+%% Readline returns the contents of the editing buffer to the calling
+%% application, which is then responsible for saving the
+%% possibly-modified results in the history list.
+Readlineは編集バッファの中身を呼び出し元のアプリケーションに返す。そしてアプリケーションが、おそらく変更されているであろう結果を履歴リストに保存する。
 
 \end{aosasect3}
 
