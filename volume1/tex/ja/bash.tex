@@ -369,23 +369,26 @@ Readlineは編集バッファの中身を呼び出し元のアプリケーショ
 
 \end{aosasect3}
 
-\begin{aosasect3}{Applications Extending Readline}
+%% \begin{aosasect3}{Applications Extending Readline}
+\begin{aosasect3}{アプリケーション側からのReadlineの拡張}
 
-Just as readline offers users a variety of ways to customize and
-extend readline's default behavior, it provides a number of mechanisms
-for applications to extend its default feature set.  First, bindable
-readline functions accept a standard set of arguments and return a
-specified set of results, making it easy for applications to extend
-readline with application-specific functions.  Bash, for instance,
-adds more than thirty bindable commands, from bash-specific word
-completions to interfaces to shell built-in commands.
+%% Just as readline offers users a variety of ways to customize and
+%% extend readline's default behavior, it provides a number of mechanisms
+%% for applications to extend its default feature set.  First, bindable
+%% readline functions accept a standard set of arguments and return a
+%% specified set of results, making it easy for applications to extend
+%% readline with application-specific functions.  Bash, for instance,
+%% adds more than thirty bindable commands, from bash-specific word
+%% completions to interfaces to shell built-in commands.
+Readlineがユーザーに対してその振る舞いをカスタマイズするさまざまな手段を提供しているのと同様に、アプリケーションに対してもその機能群を拡張する仕組みをいくつか用意している。まず、バインド可能なreadlineの関数は標準の引数を受け取ることができ、指定した結果を返すことができる。これを使えば、アプリケーション側でreadlineを拡張してそのアプリケーションに合わせた関数を作りやすくなる。たとえばbashでは30以上のバインドコマンドを追加しており、bash固有の単語補完からシェルの組み込みコマンドへのインターフェイスまでさまざまなものを用意している。
 
-The second way readline allows applications to modify its behavior is
-through the pervasive use of pointers to hook functions with
-well-known names and calling interfaces.  Applications can replace
-some portions of readline's internals, interpose functionality in
-front of readline, and perform application-specific
-transformations.
+%% The second way readline allows applications to modify its behavior is
+%% through the pervasive use of pointers to hook functions with
+%% well-known names and calling interfaces.  Applications can replace
+%% some portions of readline's internals, interpose functionality in
+%% front of readline, and perform application-specific
+%% transformations.
+アプリケーションからreadlineの振る舞いを変更する二番目の方法は、フック関数へのポインタに既知の名前と呼び出しインターフェイスを使うことだ。アプリケーションがreadlineの内部動作の一部を置き換え、readlineの前に割り込み、アプリケーション固有の変換をさせることができる。
 
 \end{aosasect3}
 
