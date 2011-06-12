@@ -242,40 +242,47 @@ typedef struct word_list {
 
 \end{aosasect1}
 
-\begin{aosasect1}{Input Processing}
+%% \begin{aosasect1}{Input Processing}
+\begin{aosasect1}{入力の処理}
 
-The first stage of the bash processing pipeline is input processing:
-taking characters from the terminal or a file, breaking them into
-lines, and passing the lines to the shell parser to transform into
-commands.  As you would expect, the lines are
-sequences of characters terminated by newlines.
+%% The first stage of the bash processing pipeline is input processing:
+%% taking characters from the terminal or a file, breaking them into
+%% lines, and passing the lines to the shell parser to transform into
+%% commands.  As you would expect, the lines are
+%% sequences of characters terminated by newlines.
+bashのパイプライン処理における最初のステージは、入力の処理である。ターミナルあるいはファイルから文字を受け取り、それを行単位に分け、各行をパーサに渡してコマンドに変換する。想像がつくだろうが、行とは改行文字で終わる文字列のことだ。
 
-\begin{aosasect2}{Readline and Command Line Editing}
+%% \begin{aosasect2}{Readline and Command Line Editing}
+\begin{aosasect2}{Readlineおよびコマンドラインの編集}
 
-Bash reads input from the terminal when interactive, and from the
-script file specified as an argument otherwise.  When interactive,
-bash allows the user to edit command lines as they are typed in, using
-familiar key sequences and editing commands similar to the Unix emacs
-and vi editors.
+%% Bash reads input from the terminal when interactive, and from the
+%% script file specified as an argument otherwise.  When interactive,
+%% bash allows the user to edit command lines as they are typed in, using
+%% familiar key sequences and editing commands similar to the Unix emacs
+%% and vi editors.
+Bashは、対話モードのときにはターミナルから入力を読み込み、それ以外の場合は引数で指定したスクリプトファイルから入力を読み込む。対話モードのときは、ユーザーが入力したコマンドラインを編集することができる。編集時には、Unixのエディタemacsやviとよく似たキーシーケンスや編集コマンドが使える。
 
-Bash uses the readline library to implement command line editing.
-This provides a set of functions allowing users to edit command lines,
-functions to save command lines as they are entered, to recall
-previous commands, and to perform csh-like history expansion.  Bash is
-readline's primary client, and they are developed together, but there
-is no bash-specific code in readline.  Many other projects have
-adopted readline to provide a terminal-based line editing interface.
+%% Bash uses the readline library to implement command line editing.
+%% This provides a set of functions allowing users to edit command lines,
+%% functions to save command lines as they are entered, to recall
+%% previous commands, and to perform csh-like history expansion.  Bash is
+%% readline's primary client, and they are developed together, but there
+%% is no bash-specific code in readline.  Many other projects have
+%% adopted readline to provide a terminal-based line editing interface.
+Bashはreadlineライブラリを使ってコマンドラインの編集を実装している。このライブラリが提供する関数を使うと、コマンドラインの編集や入力内容の保存、過去のコマンドの呼び出し、そしてcsh風の履歴の展開ができるようになる。Readlineはもともとbash用に開発されたものであり、今でも一緒に開発が進められているが、readlineにはbash固有のコードは一切含まれていない。多くのプロジェクトが、readlineを使ってターミナルベースの行編集インターフェイスを提供している。
 
-Readline also allows users to bind key sequences of unlimited length
-to any of a large number of readline commands.  Readline has commands
-to move the cursor around the line, insert and remove text, retrieve
-previous lines, and complete partially-typed words.  On top of this,
-users may define macros, which are strings of characters that are
-inserted into the line in response to a key sequence, using the same
-syntax as key bindings.  Macros afford readline users a simple string
-substitution and shorthand facility.
+%% Readline also allows users to bind key sequences of unlimited length
+%% to any of a large number of readline commands.  Readline has commands
+%% to move the cursor around the line, insert and remove text, retrieve
+%% previous lines, and complete partially-typed words.  On top of this,
+%% users may define macros, which are strings of characters that are
+%% inserted into the line in response to a key sequence, using the same
+%% syntax as key bindings.  Macros afford readline users a simple string
+%% substitution and shorthand facility.
+Readlineには、任意の長さのキーシーケンスをreadlineコマンドにバインドする機能もある。Readlineには、カーソルの移動やテキストの挿入・削除、前の行の取得、そして途中まで入力した単語の補完などに対応するコマンドがある。これらのコマンドを使い、ユーザーはキーバインドと同じ構文でマクロを定義できる。マクロとは、キーシーケンスに対応して挿入される文字列のことである。マクロのおかげで、readlineのユーザーはちょっとした文字列置換や作業の短縮をできるようになる。
 
-\begin{aosasect3}{Readline Structure}
+%% \begin{aosasect3}{Readline Structure}
+\begin{aosasect3}{Readlineの構造}
 
 Readline is structured as a basic read/dispatch/execute/redisplay
 loop.  It reads characters from the keyboard using \code{read} or
