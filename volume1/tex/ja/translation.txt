@@ -15,7 +15,7 @@ graphite.tex
 hdfs.tex
 integration.tex
 intro.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
-jitsi.tex
+jitsi.tex           Arai Kunimitsu                              ?
 llvm.tex            Masugata Seiji                              ?
 makingsoftware.tex
 mercurial.tex
