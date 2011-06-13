@@ -394,25 +394,28 @@ Readlineがユーザーに対してその振る舞いをカスタマイズする
 
 \end{aosasect2}
 
-\begin{aosasect2}{Non-interactive Input Processing}
+%% \begin{aosasect2}{Non-interactive Input Processing}
+\begin{aosasect2}{非インタラクティブな入力の処理}
 
-When the shell is not using readline, it uses either \code{stdio} or its own
-buffered input routines to obtain input.  The bash buffered input
-package is preferable to \code{stdio} when the shell is not interactive
-because of the somewhat peculiar restrictions Posix imposes on input
-consumption: the shell must consume only the input necessary to parse
-a command and leave the rest for executed programs.  This is
-particularly important when the shell is reading a script from the
-standard input.  The shell is allowed to buffer input as much as it
-wants, as long as it is able to roll the file offset back to just
-after the last character the parser consumes.  As a practical matter,
-this means that the shell must read scripts a character at a time when
-reading from non-seekable devices such as pipes, but may buffer as
-many characters as it likes when reading from files.
+%% When the shell is not using readline, it uses either \code{stdio} or its own
+%% buffered input routines to obtain input.  The bash buffered input
+%% package is preferable to \code{stdio} when the shell is not interactive
+%% because of the somewhat peculiar restrictions Posix imposes on input
+%% consumption: the shell must consume only the input necessary to parse
+%% a command and leave the rest for executed programs.  This is
+%% particularly important when the shell is reading a script from the
+%% standard input.  The shell is allowed to buffer input as much as it
+%% wants, as long as it is able to roll the file offset back to just
+%% after the last character the parser consumes.  As a practical matter,
+%% this means that the shell must read scripts a character at a time when
+%% reading from non-seekable devices such as pipes, but may buffer as
+%% many characters as it likes when reading from files.
+シェルがreadlineを使っていない場合は、\code{stdio}あるいは自前のバッファ入力ルーチンを使って入力を取得する。シェルが対話モードでない場合は、\code{stdio}よりもbashのバッファ入力パッケージを使うことをお勧めする。なぜなら、Posixは入力の取り込みに奇妙な制約を課すからである。シェルが取り込むのはコマンドのパースに必要な部分だけで、残りはそのまま実行プログラムに渡さなければならない。これは、シェルがスクリプトを標準入力から読み込んでいるときに特に重要となる。シェルは、入力をバッファリングすることを許されている。ただし、ファイルのオフセットをパーサが処理済みの最後の文字の直後にまで戻せる場合に限る。現実的な意味合いで言うと、これはつまり次のような意味である。パイプなどのシーク不能なデバイスからスクリプトを読み込む場合は一文字ずつ読み込まなければならず、ファイルなどから読み込む場合は好きなだけバッファリングできるということだ。
 
-These idiosyncrasies aside, the output of the non-interactive input
-portion of shell processing is the same as readline: a buffer of
-characters terminated by a newline.
+%% These idiosyncrasies aside, the output of the non-interactive input
+%% portion of shell processing is the same as readline: a buffer of
+%% characters terminated by a newline.
+これらの特殊な点を別として、非インタラクティブな入力のシェルでの処理はreadlineと同様である。つまり、改行文字で区切られる文字列のバッファとして扱う。
 
 \end{aosasect2}
 
