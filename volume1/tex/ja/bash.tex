@@ -442,44 +442,50 @@ Readlineがユーザーに対してその振る舞いをカスタマイズする
 
 \end{aosasect1}
 
-\begin{aosasect1}{Parsing}
+%% \begin{aosasect1}{Parsing}
+\begin{aosasect1}{パース}
 
-The initial job of the parsing engine is lexical analysis: to separate
-the stream of characters into words and apply meaning to the result.
-The word is the basic unit on which the parser operates.  Words are
-sequences of characters separated by metacharacters, which include
-simple separators like spaces and tabs, or characters that are special
-to the shell language, like semicolons and ampersands.
+%% The initial job of the parsing engine is lexical analysis: to separate
+%% the stream of characters into words and apply meaning to the result.
+%% The word is the basic unit on which the parser operates.  Words are
+%% sequences of characters separated by metacharacters, which include
+%% simple separators like spaces and tabs, or characters that are special
+%% to the shell language, like semicolons and ampersands.
+パースエンジンが最初にする仕事は字句解析、つまり文字のストリームを単語に区切ってそれに意味を与えるということだ。単語は、パーサが何らかの操作をするときの基本単位となる。単語とはメタ文字で区切られた文字列のことである。メタ文字には、スペースやタブといったシンプルな区切り文字のほかにシェル言語で特殊な意味を持つ文字(セミコロンやアンパサンドなど)がある。
 
-One historical problem with the shell, as Tom Duff said in his paper
-about \code{rc}, the Plan 9 shell, is that nobody really knows what
-the Bourne shell grammar is.  The Posix shell committee deserves
-significant credit for finally publishing a definitive grammar for a
-Unix shell, albeit one that has plenty of context dependencies.  That
-grammar isn't without its problems---it disallows some constructs that
-historical Bourne shell parsers have accepted without error---but it's
-the best we have.
+%% One historical problem with the shell, as Tom Duff said in his paper
+%% about \code{rc}, the Plan 9 shell, is that nobody really knows what
+%% the Bourne shell grammar is.  The Posix shell committee deserves
+%% significant credit for finally publishing a definitive grammar for a
+%% Unix shell, albeit one that has plenty of context dependencies.  That
+%% grammar isn't without its problems---it disallows some constructs that
+%% historical Bourne shell parsers have accepted without error---but it's
+%% the best we have.
+シェルについての歴史的な問題は、Tom Duffが\code{rc}(Plan 9のシェル)に関するペーパーで述べたとおり、Bourne shellの文法を完全に理解している人が誰もいないということである。Posixシェル委員会はUnixシェルの完全な文法を公開するというすばらしい業績を残した。しかしこの文法には、コンテキストに依存する部分が大量にある。この文法に問題がないわけではない---過去のBourne shellがエラーなしで許容していた構文のいくつかは許可されていない---が、我々が知る限り最善のものだ。
 
-The bash parser is derived from an early version of the Posix grammar,
-and is, as far as I know, the only Bourne-style shell parser
-implemented using Yacc or Bison.  This has presented its own set of
-difficulties---the shell grammar isn't really well-suited to
-yacc-style parsing and requires some complicated lexical analysis and
-a lot of cooperation between the parser and the lexical analyzer.
+%% The bash parser is derived from an early version of the Posix grammar,
+%% and is, as far as I know, the only Bourne-style shell parser
+%% implemented using Yacc or Bison.  This has presented its own set of
+%% difficulties---the shell grammar isn't really well-suited to
+%% yacc-style parsing and requires some complicated lexical analysis and
+%% a lot of cooperation between the parser and the lexical analyzer.
+bashのパーサはPosixの文法の初期版に由来するもので、私の知る限りで唯一の、YaccあるいはBisonで実装されたBourneシェルパーサである。それ故の困難も存在する---シェルの文法はyacc形式のパースとはあまり相性がよくなくて、複雑な字句解析を必要とするしパーサと字句解析器との連携も多くなる。
 
-In any event, the lexical analyzer takes lines of input from readline
-or another source, breaks them into tokens at metacharacters,
-identifies the tokens based on context, and passes them on to the
-parser to be assembled into statements and commands.  There is a lot
-of context involved---for instance, the word \code{for} can be a
-reserved word, an identifier, part of an assignment statement, or
-other word, and the following is a perfectly valid command:
+%% In any event, the lexical analyzer takes lines of input from readline
+%% or another source, breaks them into tokens at metacharacters,
+%% identifies the tokens based on context, and passes them on to the
+%% parser to be assembled into statements and commands.  There is a lot
+%% of context involved---for instance, the word \code{for} can be a
+%% reserved word, an identifier, part of an assignment statement, or
+%% other word, and the following is a perfectly valid command:
+いずれにせよ、字句解析器は入力をreadlineあるいはその他のソースから受け取り、メタ文字でトークンに切り分け、コンテキストにあわせてトークンを識別し、それをパーサに渡して文やコマンドとして組み立てることになる。多くの部分はコンテキストに依存する---たとえば\code{for}という単語は、予約後かもしれないし識別子かもしれない。あるいは代入文や他の単語の一部かもしれない。次の例はコマンドとしてまったく問題のないものである。
 
 \begin{verbatim}
 for for in for; do for=for; done; echo $for
 \end{verbatim}
 
-\noindent that displays \code{for}.
+%% \noindent that displays \code{for}.
+\noindent これは\code{for}と表示する。
 
 At this point, a short digression about aliasing is in order.  Bash
 allows the first word of a simple command to be replaced with
