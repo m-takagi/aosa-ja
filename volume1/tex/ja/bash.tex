@@ -419,22 +419,24 @@ Readlineがユーザーに対してその振る舞いをカスタマイズする
 
 \end{aosasect2}
 
-\begin{aosasect2}{Multibyte Characters}
+%% \begin{aosasect2}{Multibyte Characters}
+\begin{aosasect2}{マルチバイト文字}
 
-Multibyte character processing was added to the shell a long time
-after its initial implementation, and it was done in a way designed to
-minimize its impact on the existing code.  When in a locale that
-supports multibyte characters, the shell stores its input in a buffer
-of bytes (C \code{char}s), but treats these bytes as potentially
-multibyte characters.  Readline understands how to display multibyte
-characters (the key is knowing how many screen positions a multibyte
-character occupies, and how many bytes to consume from a buffer when
-displaying a character on the screen), how to move forward and
-backward in the line a character at a time, as opposed to a byte at a
-time, and so on.  Other than that, multibyte characters don't have
-much effect on shell input processing.  Other parts of the shell,
-described later, need to be aware of multibyte characters and take
-them into account when processing their input.
+%% Multibyte character processing was added to the shell a long time
+%% after its initial implementation, and it was done in a way designed to
+%% minimize its impact on the existing code.  When in a locale that
+%% supports multibyte characters, the shell stores its input in a buffer
+%% of bytes (C \code{char}s), but treats these bytes as potentially
+%% multibyte characters.  Readline understands how to display multibyte
+%% characters (the key is knowing how many screen positions a multibyte
+%% character occupies, and how many bytes to consume from a buffer when
+%% displaying a character on the screen), how to move forward and
+%% backward in the line a character at a time, as opposed to a byte at a
+%% time, and so on.  Other than that, multibyte characters don't have
+%% much effect on shell input processing.  Other parts of the shell,
+%% described later, need to be aware of multibyte characters and take
+%% them into account when processing their input.
+マルチバイト文字の処理がシェルに追加されたのは、最初に実装が始まってからかなりの時間がたった後のことだった。この機能は、既存のコードに与える影響を最小限にするように設計された。マルチバイトをサポートしたロケールにいるときは、シェルへの入力はバイト(Cの\code{char})のバッファとして格納するが、その中身がマルチバイト文字である可能性も考慮するようになる。Readlineは、マルチバイト文字の表示方法を知っている(鍵となるのは、マルチバイト文字が画面上で一文字あたりどの程度の場所をとるかということと、画面に表示するときにバッファから何バイト取り出すべきかということだ)し、前後に移動するときにもバイト単位ではなく文字単位になることなども知っている。それ以外に、マルチバイト文字がシェルの入力処理に影響を及ぼすことはない。シェルのその他の部分については後ほど説明するが、マルチバイト文字を考慮にいれた処理が必要となる。
 
 \end{aosasect2}
 
