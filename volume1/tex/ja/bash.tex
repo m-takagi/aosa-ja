@@ -582,32 +582,38 @@ for for in for; do for=for; done; echo $for
 
 \end{aosasect1}
 
-\begin{aosasect1}{Word Expansions}
+%% \begin{aosasect1}{Word Expansions}
+\begin{aosasect1}{単語の展開}
 
-After parsing, but before execution, many of the words produced by the
-parsing stage are subjected to one or more word expansions, so that
-(for example) \code{\$OSTYPE} is replaced with the string
-\code{"linux-gnu"}.
+%% After parsing, but before execution, many of the words produced by the
+%% parsing stage are subjected to one or more word expansions, so that
+%% (for example) \code{\$OSTYPE} is replaced with the string
+%% \code{"linux-gnu"}.
+パースが終わったら、実行の前に、パース段階で生成された単語の多くを展開することになる。つまり、(たとえば)\code{\$OSTYPE}を文字列\code{"linux-gnu"}に置き換えたりするような処理だ。
 
-\begin{aosasect2}{Parameter and Variable Expansions}
+%% \begin{aosasect2}{Parameter and Variable Expansions}
+\begin{aosasect2}{パラメータおよび変数の展開}
 
-Variable expansions are the ones users find most familiar.  Shell
-variables are barely typed, and, with few exceptions, are treated as
-strings.  The expansions expand and transform these strings into new
-words and word lists.
+%% Variable expansions are the ones users find most familiar.  Shell
+%% variables are barely typed, and, with few exceptions, are treated as
+%% strings.  The expansions expand and transform these strings into new
+%% words and word lists.
+変数の展開は、ユーザーにとってもっともなじみ深いものだ。シェルの変数にはほとんど型付けがなく、わずかな例外を除いて文字列として扱われる。この展開では、パラメータおよび変数の文字列を新たな単語や単語リストに変換する。
 
-There are expansions that act on the variable's value itself.
-Programmers can use these to produce substrings of a variable's
-value, the value's length, remove portions that match a specified
-pattern from the beginning or end, replace portions of the value
-matching a specified pattern with a new string, or modify the case of
-alphabetic characters in a variable's value.
+%% There are expansions that act on the variable's value itself.
+%% Programmers can use these to produce substrings of a variable's
+%% value, the value's length, remove portions that match a specified
+%% pattern from the beginning or end, replace portions of the value
+%% matching a specified pattern with a new string, or modify the case of
+%% alphabetic characters in a variable's value.
+展開は、変数の値そのものに対して行われる。プログラマーは、これらを使って変数の値の部分文字列を生成したり値の長さを取得したり、指定したパターンにマッチする部分を先頭あるいは末尾から削除したり、値が指定したパターンにマッチする部分を新しい文字で置き換えたり、アルファベットの大文字小文字を変更したりする。
 
-In addition, there are expansions that depend on the state of a
-variable: different expansions or assignments happen based on whether
-or not the variable is set.  For instance,
-\code{\$\{parameter:-word\}} will expand to \code{parameter} if it's
-set, and \code{word} if it's not set or set to the empty string.
+%% In addition, there are expansions that depend on the state of a
+%% variable: different expansions or assignments happen based on whether
+%% or not the variable is set.  For instance,
+%% \code{\$\{parameter:-word\}} will expand to \code{parameter} if it's
+%% set, and \code{word} if it's not set or set to the empty string.
+さらに、変数の状態に依存する展開処理もある。変数に値が設定されているか否かによって、展開や代入の内容が異なってくる。たとえば\code{\$\{parameter:-word\}}は、もし設定されていれば\code{parameter}と展開されるが、設定されていなかったり空の文字列が設定されている場合は\code{word}と展開される。
 
 \end{aosasect2}
 
