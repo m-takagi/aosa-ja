@@ -487,90 +487,98 @@ for for in for; do for=for; done; echo $for
 %% \noindent that displays \code{for}.
 \noindent これは\code{for}と表示する。
 
-At this point, a short digression about aliasing is in order.  Bash
-allows the first word of a simple command to be replaced with
-arbitrary text using aliases.  Since they're completely lexical,
-aliases can even be used (or abused) to change the shell grammar: it's
-possible to write an alias that implements a compound command that
-bash doesn't provide.  The bash parser implements aliasing completely
-in the lexical phase, though the parser has to inform the analyzer
-when alias expansion is permitted.
+%% At this point, a short digression about aliasing is in order.  Bash
+%% allows the first word of a simple command to be replaced with
+%% arbitrary text using aliases.  Since they're completely lexical,
+%% aliases can even be used (or abused) to change the shell grammar: it's
+%% possible to write an alias that implements a compound command that
+%% bash doesn't provide.  The bash parser implements aliasing completely
+%% in the lexical phase, though the parser has to inform the analyzer
+%% when alias expansion is permitted.
+ここで、余談としてエイリアスについて説明しよう。Bashでは、シンプルなコマンドの先頭の単語をエイリアスで任意のテキストに置き換えられる。エイリアスは完全に単語なので、エイリアスを使えば(あるいは悪用すれば)シェルの文法を変えてしまうこともできる。たとえば、bashが提供していない複合コマンドをエイリアスで実装することもできる。bashのパーサはエイリアスを完全に解析フェーズで実装しているので、パーサは解析器に対してエイリアスの展開が許可されたことを通知しなければならない。
 
-Like many programming languages, the shell allows characters to be
-escaped to remove their special meaning, so that metacharacters such as
-\code{\&} can appear in commands.  There are three types of quoting,
-each of which is slightly different and permits slightly different
-interpretations of the quoted text: the backslash, which escapes the
-next character; single quotes, which prevent interpretation of all
-enclosed characters; and double quotes, which prevent some
-interpretation but allow certain word expansions (and treats
-backslashes differently).  The lexical analyzer interprets quoted
-characters and strings and prevents them from being recognized by the
-parser as reserved words or metacharacters.  There are also two
-special cases, \code{\$'...'} and \code{\$"..."}, that expand
-backslash-escaped characters in the same fashion as ANSI C strings and
-allow characters to be translated using standard internationalization
-functions, respectively.  The former is widely used; the latter,
-perhaps because there are few good examples or use cases, less so.
+%% Like many programming languages, the shell allows characters to be
+%% escaped to remove their special meaning, so that metacharacters such as
+%% \code{\&} can appear in commands.  There are three types of quoting,
+%% each of which is slightly different and permits slightly different
+%% interpretations of the quoted text: the backslash, which escapes the
+%% next character; single quotes, which prevent interpretation of all
+%% enclosed characters; and double quotes, which prevent some
+%% interpretation but allow certain word expansions (and treats
+%% backslashes differently).  The lexical analyzer interprets quoted
+%% characters and strings and prevents them from being recognized by the
+%% parser as reserved words or metacharacters.  There are also two
+%% special cases, \code{\$'...'} and \code{\$"..."}, that expand
+%% backslash-escaped characters in the same fashion as ANSI C strings and
+%% allow characters to be translated using standard internationalization
+%% functions, respectively.  The former is widely used; the latter,
+%% perhaps because there are few good examples or use cases, less so.
+他の多くのプログラミング言語と同様に、シェルでも文字をエスケープして特殊な意味を取り除くことができる。エスケープすれば、\code{\&}のようなメタ文字をコマンド内で使えるようになる。クォートには三種類の方法があり、クォートしたテキストの扱いがそれぞれ少しずつ異なる。バックスラッシュは、それに続く一文字をエスケープする。シングルクォートは、囲まれた文字をすべてそのまま扱う。ダブルクォートもほぼ同様だが、特定の単語の展開は行う(そしてバックスラッシュの扱いが異なる)。字句解析器は、クォートされた文字や文字列をパーサ側で予約語やメタ文字として扱われないようにする。それ以外に特殊な扱いをするのが\code{\$'...'}と\code{\$"..."}だ。前者はバックスラッシュでエスケープされた文字をANSI Cの文字列と同じように展開し、後者は標準の国際化関数を使って文字を翻訳する。前者は幅広く使われているが、後者はあまり使われていない。実際の使いどころがほとんどないからであろう。
 
-The rest of the interface between the parser and lexical analyzer is
-straightforward.  The parser encodes a certain amount of state and
-shares it with the analyzer to allow the sort of context-dependent
-analysis the grammar requires.  For example, the lexical analyzer
-categorizes words according to the token type: reserved word (in the
-appropriate context), word, assignment statement, and so on.  In order
-to do this, the parser has to tell it something about how far it has
-progressed parsing a command, whether it is processing a
-multiline string (sometimes called a ``here-document''),
-whether it's in a case statement or a conditional
-command, or whether it is processing an extended shell pattern or compound
-assignment statement.
+%% The rest of the interface between the parser and lexical analyzer is
+%% straightforward.  The parser encodes a certain amount of state and
+%% shares it with the analyzer to allow the sort of context-dependent
+%% analysis the grammar requires.  For example, the lexical analyzer
+%% categorizes words according to the token type: reserved word (in the
+%% appropriate context), word, assignment statement, and so on.  In order
+%% to do this, the parser has to tell it something about how far it has
+%% progressed parsing a command, whether it is processing a
+%% multiline string (sometimes called a ``here-document''),
+%% whether it's in a case statement or a conditional
+%% command, or whether it is processing an extended shell pattern or compound
+%% assignment statement.
+パーサと字句解析器の残りのインターフェイスはそれほど難しいものではない。パーサはある程度の量の状態を符号化して解析器と共有し、文法上必要となるコンテキスト依存の解析を行う。たとえば、字句解析器はトークンの型に応じて単語を分類している。(適切なコンテキストにおける)予約語、通常の単語、代入文などである。これを実現するために、パーサは字句解析器に次のようなことを伝えなければならない。コマンドのパースがどこまで進んだか、複数行の文字列(``ヒアドキュメント''と呼ばれることもある)を処理しているところかどうか、条件分岐の中にいるかどうか、シェルパターンを展開したものを処理しているのか複合代入文を処理しているのかなどである。
 
-Much of the work to recognize the end of the command substitution
-during the parsing stage is encapsulated into a single function
-(\code{parse\_comsub}), which knows an uncomfortable amount of shell
-syntax and duplicates rather more of the token-reading code than is
-optimal.  This function has to know about here documents, shell
-comments, metacharacters and word boundaries, quoting, and when
-reserved words are acceptable (so it knows when it's in a \code{case}
-statement); it took a while to get that right.
+%% Much of the work to recognize the end of the command substitution
+%% during the parsing stage is encapsulated into a single function
+%% (\code{parse\_comsub}), which knows an uncomfortable amount of shell
+%% syntax and duplicates rather more of the token-reading code than is
+%% optimal.  This function has to know about here documents, shell
+%% comments, metacharacters and word boundaries, quoting, and when
+%% reserved words are acceptable (so it knows when it's in a \code{case}
+%% statement); it took a while to get that right.
+パース段階でのコマンドの置換が終わったことを判断する作業のほとんどは、ひとつの関数(\code{parse\_comsub})にまとめられている。この関数は恐ろしいほどの量になるシェルの構文を知っており、トークン読み込みのコード以上に重複がある。最適化されているとはとても言えない。この関数はヒアドキュメントやシェルのコメントについて知っていなければならないし、それだけでなくメタ文字や単語の区切り、クォート処理、予約語が使えるかどうか(つまり、今\code{case}文の中にいるのかどうか)なども知っていなければならない。これらを正しく処理できるようになるまでには時間がかかった。
 
-When expanding a
-command substitution during word expansion, bash uses the parser to
-find the correct end of the construct.  This is similar to turning a
-string into a command for \code{eval}, but in this
-case the command isn't terminated by the end of the string.  In order
-to make this work, the parser must recognize a right parenthesis as a
-valid command terminator, which leads to special cases in a number of
-grammar productions and requires the lexical analyzer to flag a right
-parenthesis (in the appropriate context) as denoting EOF\@.  The parser
-also has to save and restore parser state before recursively invoking
-\code{yyparse}, since a command substitution can be parsed and
-executed as part of expanding a prompt string in the middle of reading
-a command.  Since the input functions implement read-ahead, this
-function must finally take care of rewinding the bash input pointer to
-the right spot, whether bash is reading input from a string, a file,
-or the terminal using readline.  This is important not only so that
-input is not lost, but so the command substitution expansion functions
-construct the correct string for execution.
+%% When expanding a
+%% command substitution during word expansion, bash uses the parser to
+%% find the correct end of the construct.  This is similar to turning a
+%% string into a command for \code{eval}, but in this
+%% case the command isn't terminated by the end of the string.  In order
+%% to make this work, the parser must recognize a right parenthesis as a
+%% valid command terminator, which leads to special cases in a number of
+%% grammar productions and requires the lexical analyzer to flag a right
+%% parenthesis (in the appropriate context) as denoting EOF\@.  The parser
+%% also has to save and restore parser state before recursively invoking
+%% \code{yyparse}, since a command substitution can be parsed and
+%% executed as part of expanding a prompt string in the middle of reading
+%% a command.  Since the input functions implement read-ahead, this
+%% function must finally take care of rewinding the bash input pointer to
+%% the right spot, whether bash is reading input from a string, a file,
+%% or the terminal using readline.  This is important not only so that
+%% input is not lost, but so the command substitution expansion functions
+%% construct the correct string for execution.
+単語の展開の際にコマンド置換を展開するときには、bashはパーサを使って言語構造の終了位置を見つける。文字列を\code{eval}用のコマンドに変換するのに似ているが、この場合は文字列の最後でコマンドが終わるわけではない。これを正しく動作させるには、パーサが右かっこをコマンドの終端を認識しなければならない。これは多くの文法導出に例外条件を追加することにつながり、字句解析器は(適切なコンテキストにおける)右かっこにEOFを表すフラグを立てなければならなくなる。パーサはまた、\code{yyparse}を再帰的に起動する前にパーサの状態を保存しておかなければならない。コマンドの置換は、コマンドを読み込む際のプロンプト文字列の展開の一部として発生することもあるからである。入力関数は先読みを実装しているので、この関数は最終的にbashの入力ポインタを正しい位置まで巻き戻さないといけない。入力を文字列やファイルから読み込んでいるときでもターミナルからreadlineで読み込んでいるときでも同じだ。これが重要なのは、単に入力を読み落とさないようにするためというだけではない。コマンド置換の展開関数が実行用の正しい文字列を組み立てられるようにするためでもある。
 
-Similar problems are posed by programmable word completion, which allows
-arbitrary commands to be executed while parsing another command,
-and solved by saving and restoring parser state around invocations.
+%% Similar problems are posed by programmable word completion, which allows
+%% arbitrary commands to be executed while parsing another command,
+%% and solved by saving and restoring parser state around invocations.
+同様の問題が、プログラマブルな単語補完でも発生する。これは、あるコマンドのパース中に別の任意のコマンドを実行できるようにするものだ。この問題を解決するために、起動の館にパーサの状態を保存して後で復元している。
 
-Quoting is also a source of incompatibility and debate.  Twenty years
-after the publication of the first Posix shell standard, members of
-the standards working group are still debating the proper behavior of
-obscure quoting.  As before, the Bourne shell is no help other than as
-a reference implementation to observe behavior.
+%% Quoting is also a source of incompatibility and debate.  Twenty years
+%% after the publication of the first Posix shell standard, members of
+%% the standards working group are still debating the proper behavior of
+%% obscure quoting.  As before, the Bourne shell is no help other than as
+%% a reference implementation to observe behavior.
+クォート処理もまた、非互換性や論争の元となるものだ。Posixシェルの標準規格が最初に発表されてから20年がたつが、標準化ワーキンググループのメンバーはいまだにクォート処理の適切な振る舞いについて議論を続けている。先に述べたように、Bourneシェルがその振る舞いの参考にしているのはリファレンス実装だけである。
 
-The parser returns a single C structure representing a command (which,
-in the case of compound commands like loops, may include other
-commands in turn) and passes it to the next stage of the shell's
-operation: word expansion.  The command structure is composed of
-command objects and lists of words.  Most of the word lists are
-subject to various transformations, depending on their context, as
-explained in the following sections.
+%% The parser returns a single C structure representing a command (which,
+%% in the case of compound commands like loops, may include other
+%% commands in turn) and passes it to the next stage of the shell's
+%% operation: word expansion.  The command structure is composed of
+%% command objects and lists of words.  Most of the word lists are
+%% subject to various transformations, depending on their context, as
+%% explained in the following sections.
+パーサが返すのはコマンドを表すCの構造体(ループのような合成コマンドの場合は、その中にさらに別のコマンドが含まれる場合もある)で、それがシェル操作の次のステージ、つまり単語の展開処理に渡される。コマンド構造体は、コマンドオブジェクトおよび単語のリストで構成されている。単語のリストの大半は、コンテキストによってさまざまに変換される。その詳細は次のセクションで説明する。
 
 \end{aosasect1}
 
