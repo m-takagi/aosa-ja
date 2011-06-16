@@ -617,55 +617,63 @@ for for in for; do for=for; done; echo $for
 
 \end{aosasect2}
 
-\begin{aosasect2}{And Many More}
+%% \begin{aosasect2}{And Many More}
+\begin{aosasect2}{その他いろいろ}
 
-Bash does many other kinds of expansion, each of which has its own
-quirky rules.  The first in processing order is brace expansion, which
-turns:
+%% Bash does many other kinds of expansion, each of which has its own
+%% quirky rules.  The first in processing order is brace expansion, which
+%% turns:
+Bashはそれ以外にもさまざまな展開を行い、それぞれについて独自の変な規則に従っている。最初に処理されるのはブレースの展開で、これは
 
 \begin{verbatim}
 pre{one,two,three}post
 \end{verbatim}
 
-\noindent into:
+%% \noindent into:
+\noindent のような文字列を次のように展開する。
 
 \begin{verbatim}
 preonepost pretwopost prethreepost
 \end{verbatim}
 
-There is also command substitution, which is a nice marriage of the
-shell's ability to run commands and manipulate variables.  The shell
-runs a command, collects the output, and uses that output as the value
-of the expansion.
+%% There is also command substitution, which is a nice marriage of the
+%% shell's ability to run commands and manipulate variables.  The shell
+%% runs a command, collects the output, and uses that output as the value
+%% of the expansion.
+コマンドの置換も行われる。これは、シェルの機能であるコマンドの実行と変数の操作をうまく組み合わせたものだ。シェルがコマンドを実行してその結果を収集し、その出力を使って値の展開をする。
 
-One of the problems with command substitution is that it runs the
-enclosed command immediately and waits for it to complete: there's
-no easy way for the shell to send input to it.  Bash uses a feature
-named process substitution, a sort of combination of command
-substitution and shell pipelines, to compensate for these
-shortcomings.  Like command substitution, bash runs a command, but
-lets it run in the background and doesn't wait for it to complete.
-The key is that bash opens a pipe to the command for reading or
-writing and exposes it as a filename, which becomes the result of the
-expansion.
+%% One of the problems with command substitution is that it runs the
+%% enclosed command immediately and waits for it to complete: there's
+%% no easy way for the shell to send input to it.  Bash uses a feature
+%% named process substitution, a sort of combination of command
+%% substitution and shell pipelines, to compensate for these
+%% shortcomings.  Like command substitution, bash runs a command, but
+%% lets it run in the background and doesn't wait for it to complete.
+%% The key is that bash opens a pipe to the command for reading or
+%% writing and exposes it as a filename, which becomes the result of the
+%% expansion.
+コマンド置換の問題のひとつは、コマンドを直接実行してその処理が完了するまで待ち続けるということだ。シェルからコマンドに対して入力を送る簡単な方法はない。Bashでは、プロセス置換という機能を使うことができる。これはコマンド置換とシェルのパイプラインを組み合わせたような機能で、コマンド置換のこれらの欠点を埋め合わせるために使える。コマンド置換と同様にbashがコマンドを実行するが、そのコマンドはバックグラウンドプロセスで動作し、処理が完了するまで待つことはない。この機能の鍵となるのは、bashがコマンドへのパイプを開いて読み書きをしたり、ファイルとして公開して展開の結果を記録したりするという点だ。
 
-Next is tilde expansion.  Originally intended to turn
-\code{{\textasciitilde}alan} into a
-reference to Alan's home directory, it has grown over the years into a
-way to refer to a large number of different directories.
+%% Next is tilde expansion.  Originally intended to turn
+%% \code{{\textasciitilde}alan} into a
+%% reference to Alan's home directory, it has grown over the years into a
+%% way to refer to a large number of different directories.
+次に行われるのはチルダの展開である。当初の意図は、たとえば\code{{\textasciitilde}alan}をAlanのホームディレクトリに変換するというものであった。しかし年月を経てこの機能は成長し、今ではさまざまなディレクトリを指すようになっている。
 
-Finally, there is arithmetic expansion.  \code{\$((expression))}
-causes \code{expression} to be evaluated according to the same rules
-as C language expressions.  The result of the expression becomes the
-result of the expansion.
+%% Finally, there is arithmetic expansion.  \code{\$((expression))}
+%% causes \code{expression} to be evaluated according to the same rules
+%% as C language expressions.  The result of the expression becomes the
+%% result of the expansion.
+最後に行われるのが算術式の展開である。\code{\$((expression))}とすると、\code{expression}の部分をC言語の式と同じルールで評価し、その評価結果を使って展開する。
 
-Variable expansion is where the difference between single and double
-quotes becomes most apparent.  Single quotes inhibit all
-expansions---the characters enclosed by the quotes pass through the
-expansions unscathed---whereas double quotes permit some expansions
-and inhibit others.  The word expansions and command, arithmetic, and
-process substitution take place---the double quotes only affect how
-the result is handled---but brace and tilde expansion do not.
+%% Variable expansion is where the difference between single and double
+%% quotes becomes most apparent.  Single quotes inhibit all
+%% expansions---the characters enclosed by the quotes pass through the
+%% expansions unscathed---whereas double quotes permit some expansions
+%% and inhibit others.  The word expansions and command, arithmetic, and
+%% process substitution take place---the double quotes only affect how
+%% the result is handled---but brace and tilde expansion do not.
+変数の展開は、シングルクォートとダブルクォートの違いが最も明確にあらわれる処理だ。シングルクォートは一切の展開を禁止する---囲まれた部分は何も変更されずにそのまま展開処理を通過する---が、ダブルクォートの場合はいくつかの展開は許可した上でそれ以外の展開を禁止する。単語の展開やコマンド、算術式、プロセスの置換は行われる---ダブルクォートは、その結果の扱い方にだけ影響を及ぼす---が、ブレースやチルダの展開は行われない。
 
 \end{aosasect2}
 
