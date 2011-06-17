@@ -5,7 +5,7 @@ File                Transl. Assigned                           %        Proofrea
 aosa.tex            TAKAGI Masahiro <matakagi@gmail.com>      100
 asterisk.tex        Arai Kunimitsu                            100
 audacity.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
-bash.tex            TAKAGI Masahiro <matakagi@gmail.com>       50
+bash.tex            TAKAGI Masahiro <matakagi@gmail.com>       60
 bdb.tex
 cmake.tex
 colophon.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
