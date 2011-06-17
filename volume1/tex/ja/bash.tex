@@ -677,14 +677,16 @@ preonepost pretwopost prethreepost
 
 \end{aosasect2}
 
-\begin{aosasect2}{Word Splitting}
+%% \begin{aosasect2}{Word Splitting}
+\begin{aosasect2}{単語の分割}
 
-The results of the word expansions are split using the characters in
-the value of the shell variable \code{IFS} as delimiters.  This is how
-the shell transforms a single word into more than one.  Each time one
-of the characters in \code{\$IFS}\footnote{In most cases, a sequence of one
-of the characters.} appears in the result, bash splits the word into
-two.  Single and double quotes both inhibit word splitting.
+%% The results of the word expansions are split using the characters in
+%% the value of the shell variable \code{IFS} as delimiters.  This is how
+%% the shell transforms a single word into more than one.  Each time one
+%% of the characters in \code{\$IFS}\footnote{In most cases, a sequence of one
+%% of the characters.} appears in the result, bash splits the word into
+%% two.  Single and double quotes both inhibit word splitting.
+単語を展開した結果は、シェル変数\code{IFS}内の文字を区切りとして分割される。これを用いて、シェルはひとつの単語を複数の単語に変換する。\code{\$IFS}内のいずれかの文字\footnote{たいていの場合は、いずれかの文字の列となる。}が結果の中に登場するたびに、bashはそこで単語をふたつに分割する。シングルクォートあるいはダブルクォートで囲まれている場合は、この分割は行われない。
 
 \end{aosasect2}
 
