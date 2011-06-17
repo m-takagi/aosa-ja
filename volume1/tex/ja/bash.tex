@@ -700,36 +700,40 @@ preonepost pretwopost prethreepost
 
 \end{aosasect2}
 
-\begin{aosasect2}{Implementation}
+%% \begin{aosasect2}{Implementation}
+\begin{aosasect2}{実装}
 
-If the basic architecture of the shell parallels a pipeline, the word
-expansions are a small pipeline unto themselves.  Each stage of word
-expansion takes a word and, after possibly transforming it, passes it
-to the next expansion stage.  After all the word expansions have been
-performed, the command is executed.
+%% If the basic architecture of the shell parallels a pipeline, the word
+%% expansions are a small pipeline unto themselves.  Each stage of word
+%% expansion takes a word and, after possibly transforming it, passes it
+%% to the next expansion stage.  After all the word expansions have been
+%% performed, the command is executed.
+シェルの基本構造がパイプラインにそったものなら、単語の展開は自分自身に向けた小さなパイプラインとなる。単語の展開における各ステージは、単語を受け取って何らかの変換を施し、それを次の展開ステージに渡す。すべての単語展開が終わったら、コマンドを実行する。
 
-The bash implementation of word expansions builds on the basic data
-structures already described.  The words output by the parser are
-expanded individually, resulting in one or more words for each input
-word.  The \code{WORD\_DESC} data structure has proved versatile
-enough to hold all the information required to encapsulate the
-expansion of a single word. The flags are used to encode information
-for use within the word expansion stage and to pass information from
-one stage to the next. For instance, the parser uses a flag to tell
-the expansion and command execution stages that a particular word is a
-shell assignment statement, and the word expansion code uses flags
-internally to inhibit word splitting or note the presence of a quoted
-null string (\code{"\$x"}, where \code{\$x} is unset or has a null
-value).  Using a single character string for each word being expanded,
-with some kind of character encoding to represent additional
-information, would have proved much more difficult.
+%% The bash implementation of word expansions builds on the basic data
+%% structures already described.  The words output by the parser are
+%% expanded individually, resulting in one or more words for each input
+%% word.  The \code{WORD\_DESC} data structure has proved versatile
+%% enough to hold all the information required to encapsulate the
+%% expansion of a single word. The flags are used to encode information
+%% for use within the word expansion stage and to pass information from
+%% one stage to the next. For instance, the parser uses a flag to tell
+%% the expansion and command execution stages that a particular word is a
+%% shell assignment statement, and the word expansion code uses flags
+%% internally to inhibit word splitting or note the presence of a quoted
+%% null string (\code{"\$x"}, where \code{\$x} is unset or has a null
+%% value).  Using a single character string for each word being expanded,
+%% with some kind of character encoding to represent additional
+%% information, would have proved much more difficult.
+bashの単語展開の実装は、既に説明済みの基本的なデータ構造をもとにしている。パーサが出力した単語群は個別に展開され、その結果の単語が入力となる。\code{WORD\_DESC}構造体には、単一の単語展開をカプセル化するために必要な情報をすべて保持できる。flagsを使って単語展開ステージに必要な情報を符号化し、情報を次のステージに引き継ぐ。たとえば、展開ステージとコマンド実行ステージでは、パーサがフラグを使って特定の単語がシェルの代入文であることを伝える。また、単語展開のコードでは、このフラグを内部的に使って、単語の分割を禁止したりクォートしたnull文字列(\code{"\$x"}。ただし\code{\$x}は未設定あるいはnull値が設定されている)の存在を示したりする。展開される各単語に対して文字列を用意し、何らかの文字符号化で追加情報を表すようになどしていたら、もっと難しくなっていたことだろう。
 
-As with the parser, the word expansion code handles characters whose
-representation requires more than a single byte.  For example, the
-variable length expansion (\code{\${\#variable}}) counts the length in
-characters, rather than bytes, and the code can correctly identify the
-end of expansions or characters special to expansions in the presence
-of multibyte characters.
+%% As with the parser, the word expansion code handles characters whose
+%% representation requires more than a single byte.  For example, the
+%% variable length expansion (\code{\${\#variable}}) counts the length in
+%% characters, rather than bytes, and the code can correctly identify the
+%% end of expansions or characters special to expansions in the presence
+%% of multibyte characters.
+パーサと同様、単語展開のコードもマルチバイト文字を正しく扱うことができる。たとえば、変数の長さの展開(\code{\${\#variable}})は、バイト数ではなく文字数を数える。展開のコードは、展開の終わりやマルチバイト文字列で特別な意味を持つ文字を正しく識別する。
 
 \end{aosasect2}
 
