@@ -739,27 +739,31 @@ bashの単語展開の実装は、既に説明済みの基本的なデータ構�
 
 \end{aosasect1}
 
-\begin{aosasect1}{Command Execution}
+%% \begin{aosasect1}{Command Execution}
+\begin{aosasect1}{コマンドの実行}
 
-The command execution stage of the internal bash pipeline is where the
-real action happens.  Most of the time, the set of expanded words is
-decomposed into a command name and set of arguments, and passed to the
-operating system as a file to be read and executed with the remaining
-words passed as the rest of the elements of \code{argv}.
+%% The command execution stage of the internal bash pipeline is where the
+%% real action happens.  Most of the time, the set of expanded words is
+%% decomposed into a command name and set of arguments, and passed to the
+%% operating system as a file to be read and executed with the remaining
+%% words passed as the rest of the elements of \code{argv}.
+bashの内部パイプラインにおけるコマンド実行ステージは、実際のアクションが発生する場所である。ほとんどの場合、展開された単語群はコマンド名と引数群に分けられる。OSに渡すときには、コマンド名の部分が読み込んで実行するファイルとなり、残りの単語は\code{argv}の残りの要素となる。
 
-The description thus far has deliberately concentrated on what Posix
-calls simple commands---those with a command name and a set of
-arguments.  This is the most common type of command, but bash provides
-much more.
+%% The description thus far has deliberately concentrated on what Posix
+%% calls simple commands---those with a command name and a set of
+%% arguments.  This is the most common type of command, but bash provides
+%% much more.
+ここまでの説明は意図的に、Posixが単純なコマンド---コマンド名と引数セットからなるコマンド---を呼ぶ場合に重点を置いている。この手のコマンドが最も一般的であるからそうしたのだが、bashにはそれ以外のコマンドもある。
 
-The input to the command execution stage is the command structure
-built by the parser and a set of possibly-expanded words.  This is
-where the real bash programming language comes into play.  The
-programming language uses the variables and expansions discussed
-previously, and implements the constructs one would expect in a
-high-level language: looping, conditionals, alternation, grouping,
-selection, conditional execution based on pattern matching, expression
-evaluation, and several higher-level constructs specific to the shell.
+%% The input to the command execution stage is the command structure
+%% built by the parser and a set of possibly-expanded words.  This is
+%% where the real bash programming language comes into play.  The
+%% programming language uses the variables and expansions discussed
+%% previously, and implements the constructs one would expect in a
+%% high-level language: looping, conditionals, alternation, grouping,
+%% selection, conditional execution based on pattern matching, expression
+%% evaluation, and several higher-level constructs specific to the shell.
+コマンド実行ステージへの入力は、パーサが組み立てたコマンド構造と、展開された単語群のセットとなる。ここからが、真のbashプログラミング言語の出番だ。このプログラミング言語は先ほど説明したような変数や展開を使うし、高級言語と聞いて一般に思い浮かべるような言語構造を実装している。ループや条件分岐、グルーピング、選択、パターンマッチングによる条件付きの実行、式の評価、そしてシェル特有のいくつかの言語構造などだ。
 
 \begin{aosasect2}{Redirection}
 
