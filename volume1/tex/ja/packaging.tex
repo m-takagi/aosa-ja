@@ -1,5 +1,5 @@
 \begin{aosachapter}{Python Packaging}{s:packaging}{Tarek Ziad\'{e}}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r375
 
 \begin{aosasect1}{Introduction}
 
@@ -1304,7 +1304,7 @@ applications were installed without trying to change the impacted
 PEPs.
 
 In other words, depending on the tool you used, the standard library
-\code{Distutils} or \code{Setuptools}, applications where installed
+\code{Distutils} or \code{Setuptools}, applications were installed
 differently. The problems were solved for one part of the community 
 that used these new tools, but added more problems for the rest of 
 the world.
@@ -1363,8 +1363,8 @@ implementation of \code{Distutils2} a wicked problem.
 
 For example, if a project that uses the new standards depends on 
 another project that don't use them yet, we can't stop the installation
-process by telling the end-user that the dependency is in an unkown 
-format !
+process by telling the end-user that the dependency is in an unknown 
+format!
 
 For example, the \code{INSTALL-DB} implementation contains compatibility code 
 to browse projects installed by the original \code{Distutils},
