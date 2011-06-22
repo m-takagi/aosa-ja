@@ -765,202 +765,225 @@ bashの内部パイプラインにおけるコマンド実行ステージは、�
 %% evaluation, and several higher-level constructs specific to the shell.
 コマンド実行ステージへの入力は、パーサが組み立てたコマンド構造と、展開された単語群のセットとなる。ここからが、真のbashプログラミング言語の出番だ。このプログラミング言語は先ほど説明したような変数や展開を使うし、高級言語と聞いて一般に思い浮かべるような言語構造を実装している。ループや条件分岐、グルーピング、選択、パターンマッチングによる条件付きの実行、式の評価、そしてシェル特有のいくつかの言語構造などだ。
 
-\begin{aosasect2}{Redirection}
+%% \begin{aosasect2}{Redirection}
+\begin{aosasect2}{リダイレクト}
 
-One reflection of the shell's role as an interface to the operating
-system is the ability to redirect input and output to and from the
-commands it invokes.  The redirection syntax is one of the things that
-reveals the sophistication of the shell's early users: until very
-recently, it required users to keep track of the file descriptors they
-were using, and explicitly specify by number any other than standard
-input, output, and error.
+%% One reflection of the shell's role as an interface to the operating
+%% system is the ability to redirect input and output to and from the
+%% commands it invokes.  The redirection syntax is one of the things that
+%% reveals the sophistication of the shell's early users: until very
+%% recently, it required users to keep track of the file descriptors they
+%% were using, and explicitly specify by number any other than standard
+%% input, output, and error.
+OSとのインターフェイスとしてのシェルの役割のひとつを反映しているのが、起動したコマンドの入出力に対するリダイレクト機能である。リダイレクトの構文は、初期のシェル利用者の洗練度を表すものだった。つい最近まで、リダイレクトを使う場合は自分が使っているファイルディスクリプタをきちんと把握しておく必要があったのだ。標準入出力と標準エラー出力だけでなく、それ以外のファイルディスクリプタも番号で明示しなければならなかった。
 
-A recent addition to the redirection syntax allows users to direct the
-shell to choose a suitable file descriptor and assign it to a
-specified variable, instead of having the user choose one.  This
-reduces the programmer's burden of keeping track of file descriptors,
-but adds extra processing: the shell has to duplicate file descriptors
-in the right place, and make sure they are assigned to the specified
-variable.  This is another example of how information is passed from
-the lexical analyzer to the parser through to command execution: the
-analyzer classifies the word as a redirection containing a variable
-assignment; the parser, in the appropriate grammar production, creates
-the redirection object with a flag indicating assignment is required;
-and the redirection code interprets the flag and ensures that the file
-descriptor number is assigned to the correct variable.
+%% A recent addition to the redirection syntax allows users to direct the
+%% shell to choose a suitable file descriptor and assign it to a
+%% specified variable, instead of having the user choose one.  This
+%% reduces the programmer's burden of keeping track of file descriptors,
+%% but adds extra processing: the shell has to duplicate file descriptors
+%% in the right place, and make sure they are assigned to the specified
+%% variable.  This is another example of how information is passed from
+%% the lexical analyzer to the parser through to command execution: the
+%% analyzer classifies the word as a redirection containing a variable
+%% assignment; the parser, in the appropriate grammar production, creates
+%% the redirection object with a flag indicating assignment is required;
+%% and the redirection code interprets the flag and ensures that the file
+%% descriptor number is assigned to the correct variable.
+最近追加されたリダイレクト構文によって、シェルに適切なファイルディスクリプタを選ばせてそれを指定した変数に代入できるようになり、ユーザーがファイルディスクリプタを指定する必要はなくなった。そのおかげでプログラマがファイルディスクリプタを意識する面倒は減らせたが、新たな処理が増えた。シェルがファイルディスクリプタを正しい場所に複製し、指定した変数にそれを代入しなければならなくなった。これは、字句解析器からパーサを通してコマンド実行まで情報を渡していく方法を示すもうひとつの例となる。解析器が変数代入を含むリダイレクトとして単語を識別し、パーサは構文の構築時にリダイレクトオブジェクトを作る。このオブジェクトには代入を要するという意味のフラグを立てる。そして、リダイレクトのコードがそのフラグを読み取り、ファイルディスクリプタの番号を正しい変数に代入する。
 
-The hardest part of implementing redirection is remembering how to
-undo redirections.  The shell deliberately blurs the distinction
-between commands executed from the filesystem that cause the creation
-of a new process and commands the shell executes itself (builtins),
-but, no matter how the command is implemented, the effects of
-redirections should not persist beyond the command's completion\footnote{The
-\code{exec} builtin is an exception to this rule.}. The shell therefore has
-to keep track of how to undo the effects of each redirection,
-otherwise redirecting the output of a shell builtin would change the
-shell's standard output.  Bash knows how to undo each type of
-redirection, either by closing a file descriptor that it allocated, or
-by saving file descriptor being duplicated to and restoring it later
-using \code{dup2}.  These use the same redirection objects as those
-created by the parser and are processed using the same functions.
+%% The hardest part of implementing redirection is remembering how to
+%% undo redirections.  The shell deliberately blurs the distinction
+%% between commands executed from the filesystem that cause the creation
+%% of a new process and commands the shell executes itself (builtins),
+%% but, no matter how the command is implemented, the effects of
+%% redirections should not persist beyond the command's completion\footnote{The
+%% \code{exec} builtin is an exception to this rule.}. The shell therefore has
+%% to keep track of how to undo the effects of each redirection,
+%% otherwise redirecting the output of a shell builtin would change the
+%% shell's standard output.  Bash knows how to undo each type of
+%% redirection, either by closing a file descriptor that it allocated, or
+%% by saving file descriptor being duplicated to and restoring it later
+%% using \code{dup2}.  These use the same redirection objects as those
+%% created by the parser and are processed using the same functions.
+リダイレクトの実装で最も難しい部分は、リダイレクトを取り消す方法を覚えておくことだ。シェルは、ファイルシステムから実行して新しいプロセスを立ち上げるコマンドとシェル自身が実行する(組み込みの)コマンドの区別を意図的に曖昧にしている。しかし、コマンドの実装がどうであろうと、リダイレクトの効果をそのコマンドが完了した後までひきずってはいけない\footnote{組み込みコマンド\code{exec}はこのルールの例外だ。}。したがって、シェルはリダイレクトの効力を取り消す方法を覚えておかなければならない。さもないと、シェルの組み込みコマンドの出力をリダイレクトしたときにシェルの標準出力が変わってしまう。Bashは、リダイレクトの形式ごとにその取り消し方法を知っている。割り当てられたファイルディスクリプタをクローズするか、あるいは複製されたファイルディスクリプタを保存してあとで\code{dup2}を使って復元するかのいずれかだ。これらはいずれもパーサが作った同じリダイレクトオブジェクトを使い、同じ関数で処理される。
 
-Since multiple redirections are implemented as simple lists of
-objects, the redirections used to undo are kept in a separate list.
-That list is processed when a command completes, but the shell has to
-take care when it does so, since redirections attached to a shell
-function or the ``\code{.}'' builtin must stay in effect until that
-function or builtin completes.  When it doesn't invoke a command, the
-\code{exec} builtin causes the undo list to simply be discarded,
-because redirections associated with \code{exec} persist in the shell
-environment.
+%% Since multiple redirections are implemented as simple lists of
+%% objects, the redirections used to undo are kept in a separate list.
+%% That list is processed when a command completes, but the shell has to
+%% take care when it does so, since redirections attached to a shell
+%% function or the ``\code{.}'' builtin must stay in effect until that
+%% function or builtin completes.  When it doesn't invoke a command, the
+%% \code{exec} builtin causes the undo list to simply be discarded,
+%% because redirections associated with \code{exec} persist in the shell
+%% environment.
+複数のリダイレクトを単純にオブジェクトのリストで実装しているので、取り消しに使うリダイレクトは別のリストとして保持する。このリストはコマンドが完了したときに処理されるが、シェルはそれがいつ処理されるのかを気にかけねばならない。シェルの関数や組み込みコマンド``\code{.}''に関連づけられたリダイレクトは関数や組み込みコマンドが完了するまで有効にしておかなければならないからである。コマンドを起動しないときは、組み込みコマンド\code{exec}は取り消し用のリストを破棄する。\code{exec}に関連づけられたリダイレクトはシェルの環境に残り続けるからだ。
 
-The other complication is one bash brought on itself.  Historical
-versions of the Bourne shell allowed the user to manipulate only file
-descriptors 0-9, reserving descriptors 10 and above for the shell's
-internal use.  Bash relaxed this restriction, allowing a user to
-manipulate any descriptor up to the process's open file limit.  This
-means that bash has to keep track of its own internal file
-descriptors, including those opened by external libraries and not
-directly by the shell, and be prepared to move them around on demand.
-This requires a lot of bookkeeping, some heuristics involving the
-close-on-exec flag, and yet another list of redirections to be
-maintained for the duration of a command and then either processed or
-discarded.
-
-\end{aosasect2}
-
-\begin{aosasect2}{Builtin Commands}
-
-Bash makes a number of commands part of the shell itself.  These
-commands are executed by the shell, without creating a new process.
-
-The most common reason to make a command a builtin is to maintain or
-modify the shell's internal state.  \code{cd} is a good example; one
-of the classic exercises for introduction to Unix classes is to
-explain why \code{cd} can't be implemented as an external command.
-
-Bash builtins use the same internal primitives as the rest of the
-shell.  Each builtin is implemented using a C language function that
-takes a list of words as arguments.  The words are those output by the
-word expansion stage; the builtins treat them as command names and
-arguments.  For the most part, the builtins use the same standard
-expansion rules as any other command, with a couple of exceptions: the
-bash builtins that accept assignment statements as arguments (e.g.,
-\code{declare} and \code{export}) use the same expansion rules for the
-assignment arguments as those the shell uses for variable assignments.
-This is one place where the \code{flags} member of the
-\code{WORD\_DESC} structure is used to pass information between one
-stage of the shell's internal pipeline and another.
+%% The other complication is one bash brought on itself.  Historical
+%% versions of the Bourne shell allowed the user to manipulate only file
+%% descriptors 0-9, reserving descriptors 10 and above for the shell's
+%% internal use.  Bash relaxed this restriction, allowing a user to
+%% manipulate any descriptor up to the process's open file limit.  This
+%% means that bash has to keep track of its own internal file
+%% descriptors, including those opened by external libraries and not
+%% directly by the shell, and be prepared to move them around on demand.
+%% This requires a lot of bookkeeping, some heuristics involving the
+%% close-on-exec flag, and yet another list of redirections to be
+%% maintained for the duration of a command and then either processed or
+%% discarded.
+他にもやっかいなことがあるが、それはbashのせいではない。過去のバージョンのBourneシェルでは、ユーザーが操作できるファイルディスクリプタが0から9までだけだった。10以上は、シェルが内部的に使うために予約されていたのだ。Bashではこの制限を緩め、プロセスのファイルオープンの上限に達するまで任意のディスクリプタを操作できるようにした。つまり、bashは自身が保持する内部のファイルディスクリプタ(直接シェルからではなく、外部のライブラリからオープンしたディスクリプタも含む)を覚えておいて必要に応じて移動できるようにしなければならないということになる。管理しなければならないことが増えるし、close-on-execフラグのような仕組みも必要になる。さらに新たなリダイレクトのリストを用意して、コマンドの実行期間や処理済みか破棄されたかなどを管理しなければならない。
 
 \end{aosasect2}
 
-\begin{aosasect2}{Simple Command Execution}
+%% \begin{aosasect2}{Builtin Commands}
+\begin{aosasect2}{組み込みコマンド}
 
-Simple commands are the ones most commonly encountered.  The search
-for and execution of commands read from the filesystem, and
-collection of their exit status, covers many of the shell's remaining
-features.
+%% Bash makes a number of commands part of the shell itself.  These
+%% commands are executed by the shell, without creating a new process.
+Bashには、多数のコマンドがシェル自身の一部として組み込まれている。これらのコマンドはシェルから実行されるもので、新たなプロセスは立ち上げない。
 
-Shell variable assignments (i.e., words of the form \code{var=value}) are a
-kind of simple command themselves.  Assignment statements can either
-precede a command name or stand alone on a command line.  If they
-precede a command, the variables are passed to the executed command in
-its environment (if they precede a built-in command or shell function,
-they persist, with a few exceptions, only as long as the builtin or
-function executes).  If they're not followed by a command name, the
-assignment statements modify the shell's state.
+%% The most common reason to make a command a builtin is to maintain or
+%% modify the shell's internal state.  \code{cd} is a good example; one
+%% of the classic exercises for introduction to Unix classes is to
+%% explain why \code{cd} can't be implemented as an external command.
+コマンドを組み込みで用意する主な理由は、シェルの内部状態を保ったり変更したりするためだ。\code{cd}がよい例である。Unixの授業で最初に行う典型的な課題は、なぜ\code{cd}が外部コマンドとして実装できないのかを説明させることだ。
 
-When presented a command name that is not the name of a shell function
-or builtin, bash searches the filesystem for an executable file with
-that name.  The value of the \code{PATH} variable is used as a
-colon-separated list of directories in which to search.  Command names
-containing slashes (or other directory separators) are not looked up,
-but are executed directly.
-
-When a command is found using a \code{PATH} search, bash saves the
-command name and the corresponding full pathname in a hash table,
-which it consults before conducting subsequent \code{PATH} searches.
-If the command is not found, bash executes a specially-named function,
-if it's defined, with the command name and arguments as arguments to
-the function.  Some Linux distributions use this facility to offer to
-install missing commands.
-
-If bash finds a file to execute, it forks and creates a new execution
-environment, and executes the program in this new environment.  The
-execution environment is an exact duplicate of the shell environment,
-with minor modifications to things like signal disposition and files
-opened and closed by redirections.
+%% Bash builtins use the same internal primitives as the rest of the
+%% shell.  Each builtin is implemented using a C language function that
+%% takes a list of words as arguments.  The words are those output by the
+%% word expansion stage; the builtins treat them as command names and
+%% arguments.  For the most part, the builtins use the same standard
+%% expansion rules as any other command, with a couple of exceptions: the
+%% bash builtins that accept assignment statements as arguments (e.g.,
+%% \code{declare} and \code{export}) use the same expansion rules for the
+%% assignment arguments as those the shell uses for variable assignments.
+%% This is one place where the \code{flags} member of the
+%% \code{WORD\_DESC} structure is used to pass information between one
+%% stage of the shell's internal pipeline and another.
+Bashの組み込みコマンドは、シェルのその他の部分と同じ内部プリミティブを使う。組み込みコマンドはC言語の関数を使って実装されており、この関数は単語のリストを引数として受け取る。単語リストは単語展開ステージの出力する結果であり、組み込みコマンド側ではそれをコマンド名とその引数として解釈する。組み込みコマンドが使う展開ルールはほとんどが他のコマンドと同じ標準的なものだが、いくつか例外がある。bashの組み込みコマンドの中で代入文を引数として受け取れるもの(\code{declare}や\code{export}など)は、代入の引数を展開するときにはシェルの変数代入のときと同じルールを使う。ここでも\code{WORD\_DESC}構造体の\code{flags}を使い、シェルの内部パイプライン上でステージからステージへと情報を渡す。
 
 \end{aosasect2}
 
-\begin{aosasect2}{Job Control}
+%% \begin{aosasect2}{Simple Command Execution}
+\begin{aosasect2}{単純なコマンドの実行}
 
-The shell can execute commands in the foreground, in which it waits
-for the command to finish and collects its exit status, or the
-background, where the shell immediately reads the next command.  Job
-control is the ability to move processes (commands being executed)
-between the foreground and background, and to suspend and resume their
-execution.  To implement this, bash introduces the concept of a job,
-which is essentially a command being executed by one or more
-processes. A pipeline, for instance, uses one process for each of its elements.
-The process group is a way to join separate processes
-together into a single job.  The terminal has a process group ID
-associated with it, so the foreground process group is the one whose
-process group ID is the same as the terminal's.
+%% Simple commands are the ones most commonly encountered.  The search
+%% for and execution of commands read from the filesystem, and
+%% collection of their exit status, covers many of the shell's remaining
+%% features.
+単純なコマンドは、最もよく見かける形式のコマンドである。ファイルシステムからのコマンドの読み込みやその実行、そして終了ステータスの取得について説明すれば、ここまで説明してこなかったシェルの機能の多くをカバーすることになる。
 
-The shell uses a few simple data structures in its job control
-implementation.  There is a structure to represent a child process,
-including its process ID, its state, and the status it returned when
-it terminated.  A pipeline is just a simple linked list of these
-process structures.  A job is quite similar: there is a list of
-processes, some job state (running, suspended, exited, etc.), and the
-job's process group ID\@.  The process list usually consists of a single
-process; only pipelines result in more than one process being
-associated with a job.  Each job has a unique process group ID, and
-the process in the job whose process ID is the same as the job's
-process group ID is called the process group leader.  The current set
-of jobs is kept in an array, conceptually very similar to how it's
-presented to the user.  The job's state and exit status are assembled
-by aggregating the state and exit statuses of the constituent
-processes.
+%% Shell variable assignments (i.e., words of the form \code{var=value}) are a
+%% kind of simple command themselves.  Assignment statements can either
+%% precede a command name or stand alone on a command line.  If they
+%% precede a command, the variables are passed to the executed command in
+%% its environment (if they precede a built-in command or shell function,
+%% they persist, with a few exceptions, only as long as the builtin or
+%% function executes).  If they're not followed by a command name, the
+%% assignment statements modify the shell's state.
+シェルの変数への代入(つまり、\code{var=value}形式の単語)は、それ自身が単純なコマンドの一種である。代入文はコマンド名の前に書くこともできるし、コマンドラインでそれ単体で使うこともできる。コマンドの前に書いた場合は、その変数が後に続くコマンドの実行環境内で渡される(組み込みコマンドやシェル関数の前に書いた場合は、いくつかの例外を除いて、その変数が有効なのは組み込みコマンドあるいは関数の実行中だけとなる)。もし代入文のあとにコマンド名を続けなければ、その代入文はシェルの状態を変更する。
 
-Like several other things in the shell, the complex part about
-implementing job control is bookkeeping.  The shell must take care to
-assign processes to the correct process groups, make sure that child
-process creation and process group assignment are synchronized, and
-that the terminal's process group is set appropriately, since the
-terminal's process group determines the foreground job (and, if it's
-not set back to the shell's process group, the shell itself won't be
-able to read terminal input).  Since it's so process-oriented, it's
-not straightforward to implement compound commands such as
-\code{while} and \code{for} loops so an entire loop can be stopped and
-started as a unit, and few shells have done so.
+%% When presented a command name that is not the name of a shell function
+%% or builtin, bash searches the filesystem for an executable file with
+%% that name.  The value of the \code{PATH} variable is used as a
+%% colon-separated list of directories in which to search.  Command names
+%% containing slashes (or other directory separators) are not looked up,
+%% but are executed directly.
+指定したコマンド名がシェルの関数や組み込みコマンドにないものであった場合、bashはファイルシステムから、その名前の実行可能なファイルを探す。環境変数\code{PATH}の値は、このときの検索先を表すディレクトリをコロン区切りでつなげたリストである。スラッシュ(あるいはそのあのディレクトリ区切り文字)を含むコマンド名は検索対象外となるが、直接実行することはできる。
+
+%% When a command is found using a \code{PATH} search, bash saves the
+%% command name and the corresponding full pathname in a hash table,
+%% which it consults before conducting subsequent \code{PATH} searches.
+%% If the command is not found, bash executes a specially-named function,
+%% if it's defined, with the command name and arguments as arguments to
+%% the function.  Some Linux distributions use this facility to offer to
+%% install missing commands.
+\code{PATH}の検索でコマンドが見つかれば、bashはそのコマンド名とフルパス名をハッシュテーブルに保存する。ハッシュテーブルの内容は、その後に\code{PATH}の検索が発生したときに検索の前に参照される。コマンドが見つからない場合、もし特別な名前の関数が定義されていればbashはその関数を実行する。コマンド名と引数を、この関数への引数として渡す。Linuxのディストリビューションの中には、この機能を使って存在しないコマンドをインストールさせようとするものもある。
+
+%% If bash finds a file to execute, it forks and creates a new execution
+%% environment, and executes the program in this new environment.  The
+%% execution environment is an exact duplicate of the shell environment,
+%% with minor modifications to things like signal disposition and files
+%% opened and closed by redirections.
+実行するファイルが見つかれば、bashはそれをフォークして新しい実行環境を作り、この新しい環境でプログラムを実行する。実行用の環境はシェルの環境を完全に複製したもので、シグナルの処理やリダイレクトでオープンしたりクローズしたりしたファイルなどのちょっとした修正が入っている。
 
 \end{aosasect2}
 
-\begin{aosasect2}{Compound Commands}
+%% \begin{aosasect2}{Job Control}
+\begin{aosasect2}{ジョブ制御}
 
-Compound commands consist of lists of one or more simple commands and
-are introduced by a keyword such as \code{if} or \code{while}.  This
-is where the programming power of the shell is most visible and
-effective.
+%% The shell can execute commands in the foreground, in which it waits
+%% for the command to finish and collects its exit status, or the
+%% background, where the shell immediately reads the next command.  Job
+%% control is the ability to move processes (commands being executed)
+%% between the foreground and background, and to suspend and resume their
+%% execution.  To implement this, bash introduces the concept of a job,
+%% which is essentially a command being executed by one or more
+%% processes. A pipeline, for instance, uses one process for each of its elements.
+%% The process group is a way to join separate processes
+%% together into a single job.  The terminal has a process group ID
+%% associated with it, so the foreground process group is the one whose
+%% process group ID is the same as the terminal's.
+シェルによるコマンドの実行には二通りの方法がある。まずはフォアグラウンドでの実行で、これはコマンドが終了するまで待ってその終了ステータスを受け取る。もうひとつはバックグラウンドでの実行で、シェルはすぐに次のコマンドを読み込むことができる。ジョブ制御とは、プロセス(実行されたコマンド)をフォアグラウンドとバックグラウンドの間で移動したり実行の一時停止や再開をしたりする機能のことである。この機能を実装するためにbashはジョブという概念を導入した。ジョブとは、基本的にはひとつあるいは複数のプロセスから実行されたコマンドのことである。たとえばパイプラインでは、構成する各要素に対してひとつずつプロセスを使う。プロセスグループを使い、個々のプロセスをひとつにまとめて単一のジョブとする。ターミナルは自身に関連付けられたプロセスグループのIDを持っている。つまり、フォアグラウンドプロセスグループとは、ターミナルと同じプロセスグループIDを持つプロセスグループのことである。
 
-The implementation is fairly unsurprising.  The parser constructs
-objects corresponding to the various compound commands, and interprets
-them by traversing the object.  Each compound command is implemented
-by a corresponding C function that is responsible for performing the
-appropriate expansions, executing commands as specified, and altering
-the execution flow based on the command's return status.  The function
-that implements the \code{for} command is illustrative.  It must first
-expand the list of words following the \code{in} reserved word.  The
-function must then iterate through the expanded words, assigning each
-word to the appropriate variable, then executing the list of commands
-in the \code{for} command's body.  The for command doesn't have to
-alter execution based on the return status of the command, but it does
-have to pay attention to the effects of the \code{break} and
-\code{continue} builtins.  Once all the words in the list have been
-used, the \code{for} command returns.  As this shows, for the most
-part, the implementation follows the description very closely.
+%% The shell uses a few simple data structures in its job control
+%% implementation.  There is a structure to represent a child process,
+%% including its process ID, its state, and the status it returned when
+%% it terminated.  A pipeline is just a simple linked list of these
+%% process structures.  A job is quite similar: there is a list of
+%% processes, some job state (running, suspended, exited, etc.), and the
+%% job's process group ID\@.  The process list usually consists of a single
+%% process; only pipelines result in more than one process being
+%% associated with a job.  Each job has a unique process group ID, and
+%% the process in the job whose process ID is the same as the job's
+%% process group ID is called the process group leader.  The current set
+%% of jobs is kept in an array, conceptually very similar to how it's
+%% presented to the user.  The job's state and exit status are assembled
+%% by aggregating the state and exit statuses of the constituent
+%% processes.
+シェルは、いくつかのシンプルなデータ構造を使ってジョブ制御を実装している。子プロセスを表す構造体には、そのプロセスIDや状態、終了時に返すステータスなどが含まれている。パイプラインは、単にこのプロセス構造体をシンプルな連結リストにしただけのものだ。ジョブもまったく同様で、プロセスのリストとジョブの状態(実行中、停止中、終了など)、そしてジョブのプロセスグループIDで管理されている。プロセスのリストは、通常は単一のプロセスだけで構成されている。パイプラインの場合だけ、複数のプロセスがジョブに関連付けられる。各ジョブはそれぞれ一意なプロセスグループIDを持っており、ジョブ内のプロセスの中でプロセスグループIDと同じプロセスIDを持つものがプロセスグループリーダーと呼ばれる。現在のジョブセットは配列に保持されていおり、この考え方ははユーザーに対する見せ方と非常に似ている。ジョブの状態や終了ステータスは、そのジョブを構成するプロセスの状態や終了ステータスを集約した結果となる。
+
+%% Like several other things in the shell, the complex part about
+%% implementing job control is bookkeeping.  The shell must take care to
+%% assign processes to the correct process groups, make sure that child
+%% process creation and process group assignment are synchronized, and
+%% that the terminal's process group is set appropriately, since the
+%% terminal's process group determines the foreground job (and, if it's
+%% not set back to the shell's process group, the shell itself won't be
+%% able to read terminal input).  Since it's so process-oriented, it's
+%% not straightforward to implement compound commands such as
+%% \code{while} and \code{for} loops so an entire loop can be stopped and
+%% started as a unit, and few shells have done so.
+シェルの他の部分と同様、ジョブ制御を実装するときに複雑になる部分は帳簿管理である。シェルはプロセスを正しいプロセスグループに割り当てねばならないし、子プロセスの作成とプロセスグループへの割り当てを同期させなければならない。またターミナルのプロセスグループも適切に設定しなければならない。ターミナルのプロセスグループがフォアグラウンドジョブを決める(そして、もしシェルのプロセスグループが設定されていなければ、シェル自身がターミナルからの入力を読み込めない)からである。これはとてもプロセス指向な考え方なので、\code{while}や\code{for}ループのような複合コマンドを実装してループ全体をひとまとめで開始・停止できるようにするのは難しい。実際、それを実現しているシェルはほとんどない。
+
+\end{aosasect2}
+
+%% \begin{aosasect2}{Compound Commands}
+\begin{aosasect2}{複合コマンド}
+
+%% Compound commands consist of lists of one or more simple commands and
+%% are introduced by a keyword such as \code{if} or \code{while}.  This
+%% is where the programming power of the shell is most visible and
+%% effective.
+複合コマンドは単純なコマンドのリストで構成されており、\code{if}や\code{while}といったキーワードから始まる。複合コマンドのおかげで、シェルのプログラミングの威力を発揮できるようになる。
+
+%% The implementation is fairly unsurprising.  The parser constructs
+%% objects corresponding to the various compound commands, and interprets
+%% them by traversing the object.  Each compound command is implemented
+%% by a corresponding C function that is responsible for performing the
+%% appropriate expansions, executing commands as specified, and altering
+%% the execution flow based on the command's return status.  The function
+%% that implements the \code{for} command is illustrative.  It must first
+%% expand the list of words following the \code{in} reserved word.  The
+%% function must then iterate through the expanded words, assigning each
+%% word to the appropriate variable, then executing the list of commands
+%% in the \code{for} command's body.  The for command doesn't have to
+%% alter execution based on the return status of the command, but it does
+%% have to pay attention to the effects of the \code{break} and
+%% \code{continue} builtins.  Once all the words in the list have been
+%% used, the \code{for} command returns.  As this shows, for the most
+%% part, the implementation follows the description very closely.
+その実装方法は、特に驚くようなものではない。パーサが複合コマンドに対応するオブジェクトを組み立て、コマンドを解釈するときにはそのオブジェクトを走査していくという方法だ。個々の複合コマンドはそれに対応するCの関数として実装されている。この関数が、適切な展開処理や指定したコマンドの実行、そしてコマンドの返り値に応じた実行フローの切り替えなどを行う。\code{for}コマンドを実装する関数を例にして説明しよう。この関数は、まず最初に、予約語\code{in}に続く単語のリストを展開しなければならない。それから、展開された単語を順にとりあげて適切な変数に代入し、\code{for}コマンドの本体にあるコマンドのリストを実行することになる。\code{for}コマンドはコマンドの終了ステータスによって実行を切り替える必要はない。しかし、組み込みコマンド\code{break}や\code{continue}の影響には注意する必要がある。リストにあるすべての単語の処理を終えると、\code{for}コマンドは処理を返す。これでわかるように、実装の大半はそのコマンドの説明と密接につながっている。
 
 \end{aosasect2}
 
