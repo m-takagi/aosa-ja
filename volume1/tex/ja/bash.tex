@@ -989,108 +989,125 @@ Bashの組み込みコマンドは、シェルのその他の部分と同じ内�
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons Learned}
+%% \begin{aosasect1}{Lessons Learned}
+\begin{aosasect1}{学んだこと}
 
-\begin{aosasect2}{What I Have Found Is Important}
+%% \begin{aosasect2}{What I Have Found Is Important}
+\begin{aosasect2}{大切だとわかったこと}
 
-I have spent over twenty years working on bash, and I'd like to think
-I have discovered a few things.
-The most important---one that I can't stress enough---is that it's
-vital to have detailed change logs.  It's good when you can go back to
-your change logs and remind yourself about why a particular change was
-made. It's even better when you can tie that change to a particular
-bug report, complete with a reproducible test case, or a suggestion.
+%% I have spent over twenty years working on bash, and I'd like to think
+%% I have discovered a few things.
+%% The most important---one that I can't stress enough---is that it's
+%% vital to have detailed change logs.  It's good when you can go back to
+%% your change logs and remind yourself about why a particular change was
+%% made. It's even better when you can tie that change to a particular
+%% bug report, complete with a reproducible test case, or a suggestion.
+私はこれまで20年以上bashにかかわってきて、いくつかのことに気付いた。最も重要なこと---いくら強調してもしすぎではないだろう---は、ChangeLogを詳しく書いておくべきだということだ。あとでChangeLogを読みなおせば、そのときなぜそんな変更をしたのかを思い出せる。さらに、その変更を特定のバグレポートやそれを再現させるテストケースと結び付けられればすばらしい。
 
-If it's appropriate, extensive regression testing is something I would
-recommend building into a project from the beginning.  Bash has
-thousands of test cases covering virtually all of its non-interactive
-features. I have considered building tests for interactive
-features---Posix has them in its conformance test suite---but did not
-want to have to distribute the framework I judged it would need.
+%% If it's appropriate, extensive regression testing is something I would
+%% recommend building into a project from the beginning.  Bash has
+%% thousands of test cases covering virtually all of its non-interactive
+%% features. I have considered building tests for interactive
+%% features---Posix has them in its conformance test suite---but did not
+%% want to have to distribute the framework I judged it would need.
+もし可能であれば、回帰テストをプロジェクトの立ち上げ時から組み込んでおくことをお勧めする。Bashには数千のテストケースがあり、非インタラクティブな機能のほぼすべてをカバーしている。インタラクティブな機能についてのテストを組み込むことも検討した---Posixには独自の適合性テストスイートが存在する---が、それに必要なフレームワークを配布することになるのは避けたかった。
 
-Standards are important.  Bash has benefited from being an
-implementation of a standard.  It's important to participate in the
-standardization of the software you're implementing.  In addition to
-discussions about features and their behavior, having a standard to
-refer to as the arbiter can work well.  Of course, it can also work poorly---it
-depends on the standard.
+%% Standards are important.  Bash has benefited from being an
+%% implementation of a standard.  It's important to participate in the
+%% standardization of the software you're implementing.  In addition to
+%% discussions about features and their behavior, having a standard to
+%% refer to as the arbiter can work well.  Of course, it can also work poorly---it
+%% depends on the standard.
+標準規格は重要だ。Bashは、標準に従った実装をすることで恩恵を受けている。また、自分が実装しているソフトウェアの標準化作業にかかわることも重要だ。さまざまな機能やその振る舞いについて議論できるだけでなく、規格化するときの参考にする標準を持っていればうまくいく。もちろん、それはうまく動かないかもしれない---規格の内容による。
 
-External standards are important, but it's good to have
-internal standards as well.  I was lucky enough to fall into the GNU
-Project's set of standards, which provide plenty of good, practical
-advice about design and implementation.
+%% External standards are important, but it's good to have
+%% internal standards as well.  I was lucky enough to fall into the GNU
+%% Project's set of standards, which provide plenty of good, practical
+%% advice about design and implementation.
+外部の標準も重要だが、内部的な標準を持つこともまた大切だ。私は幸運なことにGNU Projectの標準規格に組み込まれ、設計や実装に関する現実的で優れたアドバイスを得ることができた。
 
-Good documentation is another essential.  If you expect a program to
-be used by others, it's worth having comprehensive, clear
-documentation.  If software is successful, there will end up being
-lots of documentation for it, and it's important that the developer
-writes the authoritative version.
+%% Good documentation is another essential.  If you expect a program to
+%% be used by others, it's worth having comprehensive, clear
+%% documentation.  If software is successful, there will end up being
+%% lots of documentation for it, and it's important that the developer
+%% writes the authoritative version.
+よくできたドキュメントも不可欠だ。もし自作のプログラムを他の人に使わせるつもりなら、包括的で明確なドキュメントを作るだけの価値はある。そのソフトウェアが成功して広まると、いろいろなところで大量のドキュメントが作られることになる。そのときには、開発者自身が書いた正式なバージョンがあることが重要となる。
 
-There's a lot of good software out there.  Use what you can: for
-instance, gnulib has a lot of convenient library functions (once you
-can unravel them from the gnulib framework).  So do the BSDs and Mac
-OS X\@.  Picasso said "Great artists steal" for a reason.
+%% There's a lot of good software out there.  Use what you can: for
+%% instance, gnulib has a lot of convenient library functions (once you
+%% can unravel them from the gnulib framework).  So do the BSDs and Mac
+%% OS X\@.  Picasso said "Great artists steal" for a reason.
+世の中には、よいソフトウェアが豊富にある。使えるものならどんどん使っていこう。たとえばgnulibには、(gnulibフレームワークから取り出せれば)便利なライブラリ関数が大量に用意されている。BSDやMac OS Xでも同様だ。ピカソも言っていたように「偉大な芸術家は盗む」のだ。
 
-Engage the user community, but be prepared for occasional criticism,
-some that will be head-scratching.  An active user community can be a
-tremendous benefit, but one consequence is that people will become
-very passionate.  Don't take it personally.
+%% Engage the user community, but be prepared for occasional criticism,
+%% some that will be head-scratching.  An active user community can be a
+%% tremendous benefit, but one consequence is that people will become
+%% very passionate.  Don't take it personally.
+ユーザーコミュニティは大切にしよう。しかし、ときには批判的な声に悩まされることになるかもしれないことに注意。アクティブなユーザーコミュニティからは非常に多くのメリットを得られるが、その結果として人々が熱くなりすぎることもある。個人的に責められているとは思わないことだ。
 
 \end{aosasect2}
 
-\begin{aosasect2}{What I Would Have Done Differently}
+%% \begin{aosasect2}{What I Would Have Done Differently}
+\begin{aosasect2}{私がそれ以外にやったこと}
 
-Bash has millions of users.  I've been educated about the importance
-of backwards compatibility.  In some sense, backwards compatibility
-means never having to say you're sorry.  The world, however, isn't
-quite that simple.  I've had to make incompatible changes from time to
-time, nearly all of which generated some number of user complaints,
-though I always had what I considered to be a valid reason, whether
-that was to correct a bad decision, to fix a design misfeature, or to
-correct incompatibilities between parts of the shell.  I would have
-introduced something like formal bash compatibility levels
-earlier.
+%% Bash has millions of users.  I've been educated about the importance
+%% of backwards compatibility.  In some sense, backwards compatibility
+%% means never having to say you're sorry.  The world, however, isn't
+%% quite that simple.  I've had to make incompatible changes from time to
+%% time, nearly all of which generated some number of user complaints,
+%% though I always had what I considered to be a valid reason, whether
+%% that was to correct a bad decision, to fix a design misfeature, or to
+%% correct incompatibilities between parts of the shell.  I would have
+%% introduced something like formal bash compatibility levels
+%% earlier.
+Bashには何百万人ものユーザーがおり、後方互換性の重要性を思い知らされている。ある意味では、後方互換性を保てば決して「ごめんなさい」と言わずに済むともいえる。しかし、世の中はそんなに単純ではない。これまでに、互換性を崩す変更をせざるを得なくなることが何度かあった。そしてそのたびに一部のユーザーから苦情を受けた。しかしそれらの変更は、すべて妥当な理由のあるものだった。間違った決定を正すものだったり、設計時の機能漏れを修正するものだったり、シェルの各パーツ間での非互換性を直すものだったりといった変更だ。初期のうちに、公式なbash互換性レベル的な何かを出しておけばよかったのだろう。
 
-Bash's development has never been particularly open.  I have become
-comfortable with the idea of milestone releases (e.g., bash-4.2) and
-individually-released patches.  There are reasons for doing this: I
-accommodate vendors with longer release timelines than the free
-software and open source worlds, and I've had trouble in the past with
-beta software becoming more widespread than I'd like.  If I had to
-start over again, though, I would have considered more frequent
-releases, using some kind of public repository.
+%% Bash's development has never been particularly open.  I have become
+%% comfortable with the idea of milestone releases (e.g., bash-4.2) and
+%% individually-released patches.  There are reasons for doing this: I
+%% accommodate vendors with longer release timelines than the free
+%% software and open source worlds, and I've had trouble in the past with
+%% beta software becoming more widespread than I'd like.  If I had to
+%% start over again, though, I would have considered more frequent
+%% releases, using some kind of public repository.
+Bashの開発は、これまでオープンになったことがなかった。私は、マイルストーンリリース(bash-4.2など)および個別にリリースされるパッチという考え方に満足している。このようにする理由は次の通りだ。私は、フリーソフトウェアやオープンソースの世界よりは長めのリリース間隔を保つベンダーを相手にしている。そして過去に、ベータ版のソフトウェアが思いのほか広まりすぎてトラブルになることがあった。しかし、もし最初からやり直せるのなら、もう少しこまめにリリースしたり何らかの公開リポジトリを用意したりすることも検討するだろう。
 
-No such list would be complete without an implementation
-consideration.  One thing I've considered multiple times, but never
-done, is rewriting the bash parser using straight recursive-descent
-rather than using \code{bison}.  I once thought I'd have to do this in
-order to make command substitution conform to Posix, but I was able to
-resolve that issue without changes that extensive.  Were I starting
-bash from scratch, I probably would have written a parser by hand.  It
-certainly would have made some things easier.
+%% No such list would be complete without an implementation
+%% consideration.  One thing I've considered multiple times, but never
+%% done, is rewriting the bash parser using straight recursive-descent
+%% rather than using \code{bison}.  I once thought I'd have to do this in
+%% order to make command substitution conform to Posix, but I was able to
+%% resolve that issue without changes that extensive.  Were I starting
+%% bash from scratch, I probably would have written a parser by hand.  It
+%% certainly would have made some things easier.
+そんなことを挙げていったところで、実現性を考慮しなければ完成しない。今までに何度か検討したけれどもできなかったことがひとつある。それは、bashのパーサを再帰下降で書きなおし、\code{bison}を使わないようにすることだ。そうしないとコマンド置換をPosix準拠にできないのではないかと考えたのだが、最終的にはそんな大規模な変更をしなくても問題を解決できた。もしbashをスクラッチで書きなおすことになったら、おそらくパーサは自分で書くだろう。そのほうがいろいろ楽になるのは明らかだから。
 
 \end{aosasect2}
 
 \end{aosasect1}
 
-\begin{aosasect1}{Conclusions}
+%% \begin{aosasect1}{Conclusions}
+\begin{aosasect1}{結論}
 
-Bash is a good example of a large, complex piece of free software.  It
-has had the benefit of more than twenty years of development, and is
-mature and powerful.  It runs nearly everywhere, and is used by
-millions of people every day, many of whom don't realize it.
+%% Bash is a good example of a large, complex piece of free software.  It
+%% has had the benefit of more than twenty years of development, and is
+%% mature and powerful.  It runs nearly everywhere, and is used by
+%% millions of people every day, many of whom don't realize it.
+Bashは、大規模で複雑なフリーソフトウェアのよい例と言える。20年を超える開発期間を経て成熟し、かつ強力だ。あらゆる場所で動いており、何百万もの人々が毎日使っている。その多くはbashを使っているということを意識していないだろう。
 
-Bash has been influenced by many sources, dating back to the original
-7th Edition Unix shell, written by Stephen Bourne.  The most
-significant influence is the Posix standard, which dictates a
-significant portion of its behavior.  This combination of backwards
-compatibility and standards compliance has brought its own challenges.
+%% Bash has been influenced by many sources, dating back to the original
+%% 7th Edition Unix shell, written by Stephen Bourne.  The most
+%% significant influence is the Posix standard, which dictates a
+%% significant portion of its behavior.  This combination of backwards
+%% compatibility and standards compliance has brought its own challenges.
+Bashは多くのソースの影響を受けており、古くはVersion 7 Unixのシェル(Stephen Bourneが書いたもの)にまでさかのぼる。最も多くの影響を受けたのはPosix標準規格で、bashの仕様の大部分はPosixに由来するものだ。過去との互換性を保ちつつ標準に準拠するのは困難なことだった。
 
-Bash has profited by being part of the GNU Project, which has provided
-a movement and a framework in which bash exists.  Without GNU, there
-would be no bash.  Bash has also benefited from its active, vibrant
-user community.  Their feedback has helped to make bash what it is
-today---a testament to the benefits of free software.
+%% Bash has profited by being part of the GNU Project, which has provided
+%% a movement and a framework in which bash exists.  Without GNU, there
+%% would be no bash.  Bash has also benefited from its active, vibrant
+%% user community.  Their feedback has helped to make bash what it is
+%% today---a testament to the benefits of free software.
+GNU Projectの一員であることで、Bashは多くの恩恵を受けている。GNUがbashの存在価値を与えてくれたのだ。GNUがなければbashも存在しなかっただろう。また、bashにはアクティブで活気のあるコミュニティがついている。コミュニティのフィードバックがあったからこそ今日のbashがある---まさにフリーソフトウェアのメリットを体現しているというわけだ。
 
 \end{aosasect1}
 
