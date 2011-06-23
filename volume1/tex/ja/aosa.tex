@@ -60,6 +60,24 @@
 % format the table of contents
 \renewcommand{\cftchapfont}{\sffamily}     % set TOC entries to sserif
 \renewcommand{\cftchappagefont}{\sffamily} % set TOC page numbers to sserif
+\makeatletter
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    %% \setlength\@tempdima{1.5em}%
+    \setlength\@tempdima{4.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+\makeatother
 
 % make all verbatim (code blocks) text smaller, just because it was bugging me
 \let\oldverbatim\verbatim
@@ -114,11 +132,11 @@
 {\begin{itemize}\addtolength{\itemsep}{-0.6\baselineskip}}
 {\end{itemize}}
 
-\newcommand{\aosaboxref}[1]{Box~\ref{#1}}
-\newcommand{\aosachapref}[1]{Chapter~\ref{#1}}
-\newcommand{\aosafigref}[1]{Figure~\ref{#1}}
-\newcommand{\aosasecref}[1]{Section~\ref{#1}}
-\newcommand{\aosatblref}[1]{Table~\ref{#1}}
+\newcommand{\aosaboxref}[1]{コラム\ref{#1}}
+\newcommand{\aosachapref}[1]{第\ref{#1}章}
+\newcommand{\aosafigref}[1]{図\ref{#1}}
+\newcommand{\aosasecref}[1]{\ref{#1}節}
+\newcommand{\aosatblref}[1]{表\ref{#1}}
 
 \newcommand{\aosafigure}[4][375pt]{\begin{figure}[h!]\centering\includegraphics[width={#1}]{#2}\caption{#3}\label{#4}\end{figure}}
 \newcommand{\aosafigureTop}[4][375pt]{\begin{figure}[t]\centering\includegraphics[width={#1}]{#2}\caption{#3}\label{#4}\end{figure}}
@@ -131,7 +149,8 @@
 \titleformat{\chapter}
   [display] % shape/type of title
   {\sffamily} % formatting commands applied to both label and title
-  {\vspace{-2cm} \hfill \Large Chapter \hspace{-0.2cm} \Huge \thechapter} 
+  %% {\vspace{-2cm} \hfill \Large Chapter \hspace{-0.2cm} \Huge \thechapter} 
+  {\vspace{-2cm} \hfill \Large 第 \hspace{-0.2cm} \Huge \thechapter \Large 章} 
   {2cm} % separation between number and chapter title
   {\Huge} % code preceding title. Last cmd can take arg, which is title
   [  % everything inside [] comes after the title
