@@ -1,35 +1,39 @@
-\begin{aosachapter}{Continuous Integration}{s:integration}{C.\ Titus Brown and Rosangela Canino-Koning}
+%% \begin{aosachapter}{Continuous Integration}{s:integration}{C.\ Titus Brown and Rosangela Canino-Koning}
+\begin{aosachapter}{継続的インテグレーション}{s:integration}{C.\ Titus Brown and Rosangela Canino-Koning}
 %% Based on EN-Revision r229
 
-Continuous Integration (CI) systems are systems that build and test
-software automatically and regularly.  Though their primary benefit
-lies in avoiding long periods between build and test runs, CI systems
-can also simplify and automate the execution of many otherwise tedious
-tasks. These include cross-platform testing, the regular running of slow,
-data-intensive, or difficult-to-configure tests, verification of
-proper performance on legacy platforms, detection of infrequently
-failing tests, and the regular production of up-to-date release
-products. And, because build and test automation is necessary for
-implementing continuous integration, CI is often a first step towards
-a \emph{continuous deployment} framework wherein software updates can be
-deployed quickly to live systems after testing.
+%% Continuous Integration (CI) systems are systems that build and test
+%% software automatically and regularly.  Though their primary benefit
+%% lies in avoiding long periods between build and test runs, CI systems
+%% can also simplify and automate the execution of many otherwise tedious
+%% tasks. These include cross-platform testing, the regular running of slow,
+%% data-intensive, or difficult-to-configure tests, verification of
+%% proper performance on legacy platforms, detection of infrequently
+%% failing tests, and the regular production of up-to-date release
+%% products. And, because build and test automation is necessary for
+%% implementing continuous integration, CI is often a first step towards
+%% a \emph{continuous deployment} framework wherein software updates can be
+%% deployed quickly to live systems after testing.
+継続的インテグレーション(Continuous Integration: CI)システムとは、ソフトウェアのビルドやテストを自動的かつ定期的に行うシステムのことである。CIシステムを使う最大のメリットは、ビルドやテストの実行間隔が長くなるのを避けられるということだ。それ以外にも、その他の退屈な作業を単純化して自動化させることもできる。たとえば、クロスプラットフォームでのテスト実行、遅かったりデータを扱ったり設定の難しかったりするテストの定期実行、レガシーな環境での適切なパフォーマンスの確保、ごくまれに失敗するテストの検出、そしてリリースする製品の定期的な作成などといった作業がそれにあたる。また、ビルドやテストの自動化は継続的インテグレーションのために必須となるので、CIは\emph{継続的デプロイ}用フレームワークに向けた第一歩にもなる。これは、ソフトウェアを更新したら、テストをしてすぐに稼働中のシステムへ展開できるようにする仕組みである。
 
-Continuous integration is a timely subject, not least because of its
-prominence in the Agile software methodology.  There has been an
-explosion of open source CI tools in recent years, in and for a
-variety of languages, implementing a huge range of features in the
-context of a diverse set of architectural models.  The purpose of this
-chapter is to describe common sets of features implemented in
-continuous integration systems, discuss the architectural options
-available, and examine which features may or may not be easy to
-implement given the choice of architecture.
+%% Continuous integration is a timely subject, not least because of its
+%% prominence in the Agile software methodology.  There has been an
+%% explosion of open source CI tools in recent years, in and for a
+%% variety of languages, implementing a huge range of features in the
+%% context of a diverse set of architectural models.  The purpose of this
+%% chapter is to describe common sets of features implemented in
+%% continuous integration systems, discuss the architectural options
+%% available, and examine which features may or may not be easy to
+%% implement given the choice of architecture.
+昨今アジャイルソフトウェア方法論が広まってきたこともあり、継続的インテグレーションはタイムリーな話題である。オープンソースのCIツールもここ数年急増し、さまざまな言語向けにさまざまな言語で書かれている。そして、さまざまなアーキテクチャモデルに対応した幅広い機能が実装されている。本章では継続的インテグレーションシステムが実装する一般的な機能群について説明し、アーキテクチャに関する選択肢について議論する。そして、選んだアーキテクチャごとにどの機能が実装しやすくてどの機能が実装しづらいのかを検討する。
  
-Below, we will briefly describe a set of systems that exemplify the
-extremes of architectural choices available when designing a CI
-system. The first, Buildbot, is a master/slave system; the second,
-CDash is a reporting server model; the third Jenkins, uses a hybrid model; and the fourth, Pony-Build, 
-is a Python-based decentralized reporting server that we will use
-as a foil for further discussion.
+%% Below, we will briefly describe a set of systems that exemplify the
+%% extremes of architectural choices available when designing a CI
+%% system. The first, Buildbot, is a master/slave system; the second,
+%% CDash is a reporting server model; the third Jenkins, uses a hybrid model; and the fourth, Pony-Build, 
+%% is a Python-based decentralized reporting server that we will use
+%% as a foil for further discussion.
+これ以降では、CIシステムを設計する際に選択可能なアーキテクチャのよい例となるシステム群について簡単に説明する。最初に取り上げるBuildbotはマスター/スレーブ型のシステムだ。それに続くCDashはレポートサーバー型、Jenkinsはハイブリッド型、そして最後のPony-BuildはPythonベースの分散型レポートサーバーで、これを使ってさらに議論を深めていく。
 
 \begin{aosasect1}{The Landscape}
 
