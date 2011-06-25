@@ -35,58 +35,65 @@
 %% as a foil for further discussion.
 これ以降では、CIシステムを設計する際に選択可能なアーキテクチャのよい例となるシステム群について簡単に説明する。最初に取り上げるBuildbotはマスター/スレーブ型のシステムだ。それに続くCDashはレポートサーバー型、Jenkinsはハイブリッド型、そして最後のPony-BuildはPythonベースの分散型レポートサーバーで、これを使ってさらに議論を深めていく。
 
-\begin{aosasect1}{The Landscape}
+%% \begin{aosasect1}{The Landscape}
+\begin{aosasect1}{概観}
 
-The space of architectures for continuous integration systems seems to
-be dominated by two extremes: master/slave architectures, in which a
-central server directs and controls remote builds; and reporting
-architectures, in which a central server aggregates build reports
-contributed by clients. All of the continuous integration systems of
-which we are aware have chosen some combination of features from these
-two architectures.
+%% The space of architectures for continuous integration systems seems to
+%% be dominated by two extremes: master/slave architectures, in which a
+%% central server directs and controls remote builds; and reporting
+%% architectures, in which a central server aggregates build reports
+%% contributed by clients. All of the continuous integration systems of
+%% which we are aware have chosen some combination of features from these
+%% two architectures.
+継続的インテグレーションシステムのアーキテクチャの世界は二大勢力に支配されているようだ。一方はマスター/スレーブ型のアーキテクチャで、中央のサーバーがリモートのビルドを指揮して制御する。その対極にあるのがレポーティングアーキテクチャで、各クライアントからのレポートを中央のサーバーが集約する。我々の知る範囲では、すべての継続的インテグレーションシステムはこの二種類のアーキテクチャの機能を組み合わせて使っている。
 
-Our example of a centralized architecture, Buildbot, is composed of
-two parts: the central server, or \emph{buildmaster}, which schedules and
-coordinates builds between one or more connected clients; and the
-clients, or \emph{buildslaves}, which execute builds. The buildmaster
-provides a central location to which to connect, along with
-configuration information about which clients should execute which
-commands in what order. Buildslaves connect to the buildmaster and
-receive detailed instructions. Buildslave configuration consists of
-installing the software, identifying the master server, and providing
-connection credentials for the client to connect to the master. Builds
-are scheduled by the buildmaster, and output is streamed from the
-buildslaves to the buildmaster and kept on the master server for
-presentation via the Web and other reporting and notification systems.
+%% Our example of a centralized architecture, Buildbot, is composed of
+%% two parts: the central server, or \emph{buildmaster}, which schedules and
+%% coordinates builds between one or more connected clients; and the
+%% clients, or \emph{buildslaves}, which execute builds. The buildmaster
+%% provides a central location to which to connect, along with
+%% configuration information about which clients should execute which
+%% commands in what order. Buildslaves connect to the buildmaster and
+%% receive detailed instructions. Buildslave configuration consists of
+%% installing the software, identifying the master server, and providing
+%% connection credentials for the client to connect to the master. Builds
+%% are scheduled by the buildmaster, and output is streamed from the
+%% buildslaves to the buildmaster and kept on the master server for
+%% presentation via the Web and other reporting and notification systems.
+中央集権型のアーキテクチャの例として取り上げるBuildbotは、ふたつのパーツで構成されている。中央サーバーである\emph{buildmaster}がそこに接続しているクライアントのビルドスケジュールを管理し、クライアント側の\emph{buildslaves}が実際のビルドを行う。buildmasterはクライアントからの接続先となり、各クライアントがどのコマンドをどの順で実行するのかという設定情報を提供する。buildslaveはbuildmasterに接続詞、詳細な指示を受け取る。buildslaveの設定に含まれるのは、ソフトウェアをインストールすることやマスターサーバーの識別、そしてマスターサーバーに接続するための認証情報などである。ビルド予定をたてるのはbuildmasterで、その出力はbuildslaveからbuildmasterに流される。結果はマスターサーバー上に保持され、ウェブ経由で見たり別のレポートシステムや通知システムで見たりすることができる。
 
-On the opposite side of the architecture spectrum lies CDash, which is
-used for the Visualization Toolkit (VTK)/Insight Toolkit (ITK)
-projects by Kitware, Inc. CDash is essentially a reporting server,
-designed to store and present information received from client
-computers running CMake and CTest. With CDash, the clients initiate
-the build and test suite, record build and test results, and then
-connect to the CDash server to deposit the information for central
-reporting.
+%% On the opposite side of the architecture spectrum lies CDash, which is
+%% used for the Visualization Toolkit (VTK)/Insight Toolkit (ITK)
+%% projects by Kitware, Inc. CDash is essentially a reporting server,
+%% designed to store and present information received from client
+%% computers running CMake and CTest. With CDash, the clients initiate
+%% the build and test suite, record build and test results, and then
+%% connect to the CDash server to deposit the information for central
+%% reporting.
+アーキテクチャ的にその対極にあるのがCDashで、これはKitware, Inc.のVisualization Toolkit (VTK)/Insight Toolkit (ITK)プロジェクトで使われている。CDashは本質的にレポーティングサーバーで、CMakeおよびCTestを実行するクライアントコンピューターから受け取った情報を蓄積して表示するように作られている。CDashでは、クライアント側がビルドとテストスイートを起動し、ビルドとテストの結果を記録し、それからCDashサーバーに接続して情報をレポーティングサーバーに預ける。
 
-Finally, a third system, Jenkins (known as Hudson before a name
-change in 2011), provides both modes of operation. With Jenkins,
-builds can either be executed independently with the results sent to
-the master server; or nodes can be slaved to the Jenkins master
-server, which then schedules and directs the execution of builds.
+%% Finally, a third system, Jenkins (known as Hudson before a name
+%% change in 2011), provides both modes of operation. With Jenkins,
+%% builds can either be executed independently with the results sent to
+%% the master server; or nodes can be slaved to the Jenkins master
+%% server, which then schedules and directs the execution of builds.
+最後に、三番目の例として取り上げるJenkins (かつてはHudsonと呼ばれていたが2011年に名前が変わった)は、その両方の操作モードを提供している。Jenkinsの場合、ビルドを個別に実行して結果をマスターサーバーに送ることもできるし、ノードをすべてJenkinsマスターサーバーの支配下においてビルドの予定やその実行をマスターサーバーから指示することもできる。
 
-Both the centralized and decentralized models have some features in
-common, and, as Jenkins shows, both models can co-exist in a single
-implementation. However, Buildbot and CDash exist in stark contrast to
-each other: apart from the commonalities of building software and
-reporting on the builds, essentially every other aspect of the
-architecture is different. Why?
+%% Both the centralized and decentralized models have some features in
+%% common, and, as Jenkins shows, both models can co-exist in a single
+%% implementation. However, Buildbot and CDash exist in stark contrast to
+%% each other: apart from the commonalities of building software and
+%% reporting on the builds, essentially every other aspect of the
+%% architecture is different. Why?
+中央集権型モデルと分散型モデルの両方に共通する機能もあり、Jenkinsを見てもわかるとおり、両方のモデルをひとつの実装に共存させることもできる。しかしBuildbotとCDashはお互い全く正反対の存在である。ソフトウェアをビルドしてその結果を報告するという点は共通しているが、それ以外の面では全く異なるアーキテクチャを採用している。なぜだろう?
 
-Further, to what extent does the choice of architecture seem to make
-certain features easier or harder to implement? Do some features
-emerge naturally from a centralized model? And how extensible are the
-existing implementations---can they easily be modified to provide new
-reporting mechanisms, or scale to many packages, or execute builds and
-tests in a cloud environment?
+%% Further, to what extent does the choice of architecture seem to make
+%% certain features easier or harder to implement? Do some features
+%% emerge naturally from a centralized model? And how extensible are the
+%% existing implementations---can they easily be modified to provide new
+%% reporting mechanisms, or scale to many packages, or execute builds and
+%% tests in a cloud environment?
+アーキテクチャの選択によって、特定の機能の実装しやすさ(しにくさ)はどの程度の影響を受けるのだろう? 中央集権型を採用することで必然的に出てくる機能などがあるのだろうか? 既存の実装の拡張しやすさについてはどうだろう---レポーティングの仕組みに手軽に手を入れたり、多数のパッケージを扱うために規模を拡大したり、あるいはビルドやテストをクラウド環境で実行したりといったことはできるのだろうか?
 
 \begin{aosasect2}{What Does Continuous Integration Software Do?}
 

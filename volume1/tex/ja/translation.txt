@@ -13,7 +13,7 @@ eclipse.tex         Masugata Seiji                              ?
 frontmatter.tex     TAKAGI Masahiro <matakagi@gmail.com>      100
 graphite.tex
 hdfs.tex
-integration.tex     TAKAGI Masahiro <matakagi@gmail.com>        0
+integration.tex     TAKAGI Masahiro <matakagi@gmail.com>        5
 intro.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
 jitsi.tex           Arai Kunimitsu                            100
 llvm.tex            Masugata Seiji                              ?
