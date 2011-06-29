@@ -95,17 +95,19 @@
 %% tests in a cloud environment?
 アーキテクチャの選択によって、特定の機能の実装しやすさ(しにくさ)はどの程度の影響を受けるのだろう? 中央集権型を採用することで必然的に出てくる機能などがあるのだろうか? 既存の実装の拡張しやすさについてはどうだろう---レポーティングの仕組みに手軽に手を入れたり、多数のパッケージを扱うために規模を拡大したり、あるいはビルドやテストをクラウド環境で実行したりといったことはできるのだろうか?
 
-\begin{aosasect2}{What Does Continuous Integration Software Do?}
+%% \begin{aosasect2}{What Does Continuous Integration Software Do?}
+\begin{aosasect2}{継続的インテグレーションソフトウェアの役割は?}
 
-The core functionality of a continuous integration system is simple:
-build software, run tests, and report the results. The build, test,
-and reporting can be performed by a script running from a scheduled
-task or cron job: such a script would just check out a new copy of the
-source code from the VCS, do a build, and then run the tests. Output
-would be logged to a file, and either stored in a canonical location
-or sent out via e-mail in case of a build failure. This is simple to
-implement: in UNIX, for example, this entire process can be
-implemented for most Python packages in a seven line script:
+%% The core functionality of a continuous integration system is simple:
+%% build software, run tests, and report the results. The build, test,
+%% and reporting can be performed by a script running from a scheduled
+%% task or cron job: such a script would just check out a new copy of the
+%% source code from the VCS, do a build, and then run the tests. Output
+%% would be logged to a file, and either stored in a canonical location
+%% or sent out via e-mail in case of a build failure. This is simple to
+%% implement: in UNIX, for example, this entire process can be
+%% implemented for most Python packages in a seven line script:
+継続的インテグレーションシステムの中核となる機能は単純だ。ソフトウェアをビルドしてテストを実行し、その結果を報告するだけである。ビルドやテストそして結果報告はスクリプトで行える。これは、スケジュールを組み込んだタスクやcronジョブとして実行する。スクリプトの仕事は、ソースコードの新たなコピーをVCSから取得してビルドし、そしてテストを実行することだ。出力はログファイルに書き込むことになるだろう。ファイルを所定の場所に保存し、ビルドが失敗したときにはメールを送信することになる。この機能を実装するのは簡単だ。UNIXなら、大半のPythonパッケージについてたった7行のスクリプトでこの機能を実現できる。
 
 \begin{verbatim}
 cd /tmp && \
@@ -117,88 +119,100 @@ echo build failed | sendmail notification@project.domain
 cd /tmp && rm -fr project_directory
 \end{verbatim}
 
-In \aosafigref{fig.integration.internal}, the unshaded rectangles
-represent discrete subsystems and functionality within the system.
-Arrows show information flow between the various components.  The
-cloud represents potential remote execution of build processes.  The
-shaded rectangles represent potential coupling between the subsystems;
-for example, build monitoring may include monitoring of the build
-process itself and aspects of system health (CPU load, I/O load,
-memory usage, etc.)
+%% In \aosafigref{fig.integration.internal}, the unshaded rectangles
+%% represent discrete subsystems and functionality within the system.
+%% Arrows show information flow between the various components.  The
+%% cloud represents potential remote execution of build processes.  The
+%% shaded rectangles represent potential coupling between the subsystems;
+%% for example, build monitoring may include monitoring of the build
+%% process itself and aspects of system health (CPU load, I/O load,
+%% memory usage, etc.)
+\aosafigref{fig.integration.internal}において影付きでない長方形は、システム内にある個別のサブシステムや機能をを表す。矢印は、コンポーネント間の情報の流れを意味する。雲で囲まれている部分は、おそらくリモートで実行されるであろうビルドプロセスを表す。影付きの長方形は、サブシステム間のつながりを表す。たとえば、ビルドの監視にはビルドプロセス自体の監視とシステムの健康状態(CPUの負荷、入出力の負荷、メモリの使用量など)の監視が含まれる。
 
-\aosafigureTop{../images/integration/ci-internal.eps}{Internals of a Continuous Integration System}{fig.integration.internal}
+%% \aosafigureTop{../images/integration/ci-internal.eps}{Internals of a Continuous Integration System}{fig.integration.internal}
+\aosafigureTop{../images/integration/ci-internal.eps}{継続的インテグレーションシステムの内部構造}{fig.integration.internal}
 
-But this simplicity is deceptive. Real-world CI systems usually
-do much more. In addition to initiating or receiving the results of
-remote build processes, continuous integration software may support
-any of the following additional features:
+%% But this simplicity is deceptive. Real-world CI systems usually
+%% do much more. In addition to initiating or receiving the results of
+%% remote build processes, continuous integration software may support
+%% any of the following additional features:
+しかし、単純そうに見えるのは見かけだけである。実際のCIシステムは、通常はこれ以上のことを行っている。リモートのビルドプロセスを立ち上げてその結果を受け取ったりするだけでなく、継続的インテグレーションソフトウェアはこのような追加機能に対応していることもある。
 
 \begin{aosadescription}
 
-  \item{Checkout and update:} For large projects, checking out a
-  new copy of the source code can be costly in terms of bandwidth
-  and time. Usually, CI systems update an existing working copy in
-  place, which communicates only the differences from the previous
-  update. In exchange for this savings, the system must keep track
-  of the working copy and know how to update it, which usually means
-  at least minimal integration with a VCS.
+  %% \item{Checkout and update:} For large projects, checking out a
+  %% new copy of the source code can be costly in terms of bandwidth
+  %% and time. Usually, CI systems update an existing working copy in
+  %% place, which communicates only the differences from the previous
+  %% update. In exchange for this savings, the system must keep track
+  %% of the working copy and know how to update it, which usually means
+  %% at least minimal integration with a VCS.
+  \item{チェックアウトと更新:} 大規模なプロジェクトでは、ソースコードすべてを新たにチェックアウトするのは帯域的にも時間的にもコストがかかることになる。通常、CIシステムは既存の作業コピーをその場で更新することになる。更新の際にやりとりするのは、前回の更新以降の差分だけである。通信量は節約できるが、その代わりにシステム側で作業コピーの状況をわかっていなければならない、更新方法も知る必要がある。つまり、通常は少なくともVCSとは最小限の統合をすることになる。
 
-  \item{Abstract build recipes:} A configure/build/test recipe
-  must be written for the software in question. The underlying
-  commands will often be different for different operating systems,
-  e.g. Mac OS X vs. Windows vs. UNIX, which means either specialized
-  recipes need to be written (introducing potential bugs or
-  disconnection from the actual build environment) or some suitable
-  level of abstraction for recipes must be provided by the CI
-  configuration system.
+  %% \item{Abstract build recipes:} A configure/build/test recipe
+  %% must be written for the software in question. The underlying
+  %% commands will often be different for different operating systems,
+  %% e.g. Mac OS X vs. Windows vs. UNIX, which means either specialized
+  %% recipes need to be written (introducing potential bugs or
+  %% disconnection from the actual build environment) or some suitable
+  %% level of abstraction for recipes must be provided by the CI
+  %% configuration system.
+  \item{ビルドレシピの抽象化:} 設定やビルドそしてテストのレシピは、対象となるソフトウェア用に書かなければならない。もとになるコマンドは(Mac OS XとWindowsとUNIXなど)OSによって異なることが多い。ということは、それぞれのOSに特化したレシピを書く(これはバグのもとになるし、実際のビルド環境とはかけ離れてしまう可能性もある)か、さもなければ何らかの抽象化をしてレシピをCI構成システムから提供できるようにしなければならない。
 
-  \item{Storing checkout/build/test status:} It may be desirable
-  for details of the checkout (files updated, code version), build
-  (warnings or errors) and test (code coverage, performance, memory
-  usage) to be stored and used for later analysis. These results can
-  be used to answer questions across the build architectures (did
-  the latest check-in significantly affect performance on any
-  particular architecture?) or over history (has code coverage
-  changed dramatically in the last month?) As with the build recipe,
-  the mechanisms and data types for this kind of introspection are
-  usually specific to the platform or build system.
+  %% \item{Storing checkout/build/test status:} It may be desirable
+  %% for details of the checkout (files updated, code version), build
+  %% (warnings or errors) and test (code coverage, performance, memory
+  %% usage) to be stored and used for later analysis. These results can
+  %% be used to answer questions across the build architectures (did
+  %% the latest check-in significantly affect performance on any
+  %% particular architecture?) or over history (has code coverage
+  %% changed dramatically in the last month?) As with the build recipe,
+  %% the mechanisms and data types for this kind of introspection are
+  %% usually specific to the platform or build system.
+  \item{チェックアウト/ビルド/テスト の状態の保存:} チェックアウトの詳細(更新されたファイル、コードのバージョンなど)やビルドの情報(警告やエラー)、そしてテストの結果(コードカバレッジ、パフォーマンス、メモリの使用量)などを保存し、あとで解析に使えるようにしたいという要望もあるだろう。これらの結果を使えば、ビルドアーキテクチャをまたがる質問(最新のチェックインのせいで特定のアーキテクチャのパフォーマンスに問題が出ていないか?)や歴史を超えた質問(コードカバレッジは先月に比べて劇的に上昇したか?)にも答えられるようになる。ビルドレシピと同様、この種の調査の仕組みやデータ形式は、プラットフォームやビルドシステムに依存するものとなる。
 
-  \item{Release packages:} Builds may produce binary packages or
-  other products that need to be made externally available. For
-  example, developers who don't have direct access to the build
-  machine may want to test the latest build in a specific
-  architecture; to support this, the CI system needs to be able to
-  transfer build products to a central repository.
+  %% \item{Release packages:} Builds may produce binary packages or
+  %% other products that need to be made externally available. For
+  %% example, developers who don't have direct access to the build
+  %% machine may want to test the latest build in a specific
+  %% architecture; to support this, the CI system needs to be able to
+  %% transfer build products to a central repository.
+  \item{パッケージのリリース:} ビルドを実行するとバイナリパッケージあるいはその他外部に公開する必要のある何かができあがるかもしれない。たとえば、ビルドマシンに直接アクセスできない開発者が、最新のビルドを特定のアーキテクチャでテストしたくなることもあるだろう。これをサポートするためには、CIシステムがビルドの成果物を中央リポジトリに転送できるようにしておく必要がある。
   
-  \item{Multiple architecture builds:} Since one goal
-  of continuous integration is to build on multiple architectures to
-  test cross-platform functionality, the CI software may need to
-  track the architecture for each build machine and link
-  builds and build outcomes to each client.
+  %% \item{Multiple architecture builds:} Since one goal
+  %% of continuous integration is to build on multiple architectures to
+  %% test cross-platform functionality, the CI software may need to
+  %% track the architecture for each build machine and link
+  %% builds and build outcomes to each client.
+  \item{複数のアーキテクチャでのビルド:} 継続的インテグレーションの目的のひとつは複数のアーキテクチャでビルドしてクロスプラットフォームな機能をテストすることなので、CIソフトウェアは各ビルドマシンのアーキテクチャを追跡してビルドやビルド結果を各クライアントにリンクしなければならない。
 
-  \item{Resource management:} If a build step is resource
-  intensive on a single machine, the CI system may want to run
-  conditionally. For example, builds may wait for the absence of
-  other builds or users, or delay until a particular CPU or memory
-  load is reached.
+  %% \item{Resource management:} If a build step is resource
+  %% intensive on a single machine, the CI system may want to run
+  %% conditionally. For example, builds may wait for the absence of
+  %% other builds or users, or delay until a particular CPU or memory
+  %% load is reached.
+  \item{リソース管理:} ビルドの手順が特定のマシンのリソースの状況に依存する場合、CIシステムはビルドを条件付きで実行させたくなることもある。たとえば、他のビルドやユーザーがいない間はビルドを待ったり、CPUやメモリの使用率が一定に達したらビルドを遅らせたりということがあり得る。
 
-  \item{External resource coordination:} Integration tests may
-  depend on non-local resources such as a staging database or a
-  remote web service. The CI system may therefore need to coordinate
-  builds between multiple machines to organize access to these
-  resources.
+  %% \item{External resource coordination:} Integration tests may
+  %% depend on non-local resources such as a staging database or a
+  %% remote web service. The CI system may therefore need to coordinate
+  %% builds between multiple machines to organize access to these
+  %% resources.
+  \item{外部リソースとの協調:} インテグレーションテストはローカルにないリソースに依存することがある。ステージング環境のデータベースやリモートウェブサービスなどだ。したがって、CIシステムは複数のマシン間で協調し、これらのリソースへのアクセスを整理する必要がある。
 
-  \item{Progress reports:} For long build processes, regular
-  reporting from the build may also be important. If a user is
-  primarily interested in the results of the first 30 minutes of a 5
-  hour build and test, then it would be a waste of time to make them
-  wait until the end of a run to see any results.
+  %% \item{Progress reports:} For long build processes, regular
+  %% reporting from the build may also be important. If a user is
+  %% primarily interested in the results of the first 30 minutes of a 5
+  %% hour build and test, then it would be a waste of time to make them
+  %% wait until the end of a run to see any results.
+  \item{進捗レポート:} 時間がかかるビルド手順については、ビルド状況の定期的な報告も大切である。5時間におよぶビルドやテストの中で主に知りたいのは最初の30分の結果だったとしよう。最後まで実行しないと何も結果を見られないのは時間の無駄になる。
 
 \end{aosadescription}
 
-A high-level view of all of these potential components of a CI system
-is shown in \aosafigref{fig.integration.internal}. CI software usually
-implements some subset of these components.
+%% A high-level view of all of these potential components of a CI system
+%% is shown in \aosafigref{fig.integration.internal}. CI software usually
+%% implements some subset of these components.
+CIシステムで必要となりそうな全コンポーネントの概要は\aosafigref{fig.integration.internal}に示したとおりだ。CIソフトウェアは通常、これらのコンポーネントの一部を実装している。
 
 \end{aosasect2}
 
