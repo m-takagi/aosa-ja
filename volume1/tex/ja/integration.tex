@@ -216,46 +216,52 @@ CIシステムで必要となりそうな全コンポーネントの概要は\ao
 
 \end{aosasect2}
 
-\begin{aosasect2}{External Interactions}
+%% \begin{aosasect2}{External Interactions}
+\begin{aosasect2}{外部とのインタラクション}
 
-Continuous integration systems also need to interact with other
-systems. There are several types of potential interactions:
+%% Continuous integration systems also need to interact with other
+%% systems. There are several types of potential interactions:
+継続的インテグレーションシステムでは、他のシステムとのやりとりも必要となる。考えうるやりとりには、次のような型がある。
 
 \begin{aosadescription}
 
-  \item{Build notification}: The outcomes of builds generally
-  need to be communicated to interested clients, either via pull
-  (Web, RSS, RPC, etc.) or push notification (e-mail, Twitter,
-  PubSubHubbub, etc.) This can include notification of all builds,
-  or only failed builds, or builds that haven't been executed within
-  a certain period.
+  %% \item{Build notification}: The outcomes of builds generally
+  %% need to be communicated to interested clients, either via pull
+  %% (Web, RSS, RPC, etc.) or push notification (e-mail, Twitter,
+  %% PubSubHubbub, etc.) This can include notification of all builds,
+  %% or only failed builds, or builds that haven't been executed within
+  %% a certain period.
+  \item{ビルド通知}: ビルドの結果は、一般的にクライアントとのやりとりを要するだろう。プル形式での取得(ウェブ、RSS、RPCなど)あるいはプッシュによる通知(メール、Twitter、PubSubHubbubなど)のいずれかとなる。すべてのビルド結果を通知することもあれば失敗したビルドだけを通知することもある。あるいは、所定の時間内に実行できなかったビルドだけを通知することもある。
 
-  \item{Build information}: Build details and products may need
-  to be retrieved, usually via RPC or a bulk download system. For
-  example, it may be desirable to have an external analysis system
-  do an in-depth or more targeted analysis, or report on code
-  coverage or performance results. In addition, an external test
-  result repository may be employed to keep track of failing and
-  successful tests separately from the CI system.
+  %% \item{Build information}: Build details and products may need
+  %% to be retrieved, usually via RPC or a bulk download system. For
+  %% example, it may be desirable to have an external analysis system
+  %% do an in-depth or more targeted analysis, or report on code
+  %% coverage or performance results. In addition, an external test
+  %% result repository may be employed to keep track of failing and
+  %% successful tests separately from the CI system.
+  \item{ビルド情報}: ビルドの詳細やその成果物を取得しなければならないこともあるだろう。通常は、RPCを使うか一括ダウンロードの仕組みを用意する。たとえば、別の解析システムを使ってより詳細な(あるいはより的を絞った)解析を行ったり、コードカバレッジやパフォーマンスの情報を表示させることがある。さらに、テスト結果のリポジトリを別に用意して、CIシステムでの失敗したテストと成功したテストの記録を保存しておくこともあるかもしれない。
 
-  \item{Build requests}: External build requests from users or a
-  code repository may need to be handled. Most VCSs have post-commit
-  hooks that can execute an RPC call to initiate a build, for
-  example. Or, users may request builds manually through a Web
-  interface or other user-initiated RPC.
+  %% \item{Build requests}: External build requests from users or a
+  %% code repository may need to be handled. Most VCSs have post-commit
+  %% hooks that can execute an RPC call to initiate a build, for
+  %% example. Or, users may request builds manually through a Web
+  %% interface or other user-initiated RPC.
+  \item{ビルド要求}: ユーザーあるいはコードリポジトリからのビルド要求を受け、それに対応する必要があるかもしれない。大半のVCSにはコミット後に何らかの処理をフックする仕組みがあり、たとえばビルド処理を起動するようなRPCコールを実行することができる。あるいは、ユーザーがウェブインターフェイスあるいはRPCを使って手動でビルド要求を出すかもしれない。
 
-  \item{Remote control of the CI system}: More generally, the
-  entire runtime may be modifiable through a more-or-less
-  well-defined RPC interface. Either ad hoc extensions or a
-  more formally specified interface may need to be able to drive
-  builds on specific platforms, specify alternate source branches in order to
-  build with various patches, and execute additional builds
-  conditionally. This is useful in support of more general workflow
-  systems, e.g. to permit commits only after they have passed the
-  full set of CI tests, or to test patches across a wide variety of
-  systems before final integration. Because of the variety of bug
-  tracker, patch systems, and other external systems in use, it may
-  not make sense to include this logic within the CI system itself.
+  %% \item{Remote control of the CI system}: More generally, the
+  %% entire runtime may be modifiable through a more-or-less
+  %% well-defined RPC interface. Either ad hoc extensions or a
+  %% more formally specified interface may need to be able to drive
+  %% builds on specific platforms, specify alternate source branches in order to
+  %% build with various patches, and execute additional builds
+  %% conditionally. This is useful in support of more general workflow
+  %% systems, e.g. to permit commits only after they have passed the
+  %% full set of CI tests, or to test patches across a wide variety of
+  %% systems before final integration. Because of the variety of bug
+  %% tracker, patch systems, and other external systems in use, it may
+  %% not make sense to include this logic within the CI system itself.
+  \item{CIシステムのリモート制御}: より一般化して、実行環境全体の変更をある程度うまく作られたRPCインターフェイスで行いたいものだ。アドホックな拡張あるいは正式に決められたインターフェイスを使って、特定のプラットフォーム上でのビルドの実行や別のブランチにさまざまなパッチを適用したビルドの実行、あるいは条件付きでのビルドの実行などを実行できる必要がある。この機能があれば、より一般的なワークフローにも対応できるので便利だ。たとえばCIテストに完全にパスした変更だけをコミットできるようにしたり、パッチをさまざまなシステムでテストしてから最終的に取り込むようにしたりといったことができる。バグ追跡システムやパッチシステムその他外部のシステムにはさまざまなものがあるので、このロジックをCIシステム自体に組み込んでしまうのは意味がない。
 
 \end{aosadescription}
 
