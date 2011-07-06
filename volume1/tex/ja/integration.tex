@@ -269,79 +269,90 @@ CIシステムで必要となりそうな全コンポーネントの概要は\ao
 
 \end{aosasect1}
 
-\begin{aosasect1}{Architectures}
+%% \begin{aosasect1}{Architectures}
+\begin{aosasect1}{アーキテクチャ}
 
-Buildbot and CDash have chosen opposite architectures, and implement
-overlapping but distinct sets of features. Below we examine these
-feature sets and discuss how features are easier or harder to
-implement given the choice of architecture.
+%% Buildbot and CDash have chosen opposite architectures, and implement
+%% overlapping but distinct sets of features. Below we examine these
+%% feature sets and discuss how features are easier or harder to
+%% implement given the choice of architecture.
+BuildbotとCDashはまったく正反対のアーキテクチャを選択しており、一部重複する部分もあるが別々の機能群を実装している。個々の機能セットについて以下で吟味し、ある機能の実装しやすさ(しにくさ)がアーキテクチャの選択でどのように変わるのかを確かめる。
 
-\begin{aosasect2}{Implementation Model: Buildbot}
+%% \begin{aosasect2}{Implementation Model: Buildbot}
+\begin{aosasect2}{実装モデル: Buildbot}
 
-\aosafigure{../images/integration/buildbot.eps}{Buildbot Architecture}{fig.integration.buildbot}
+%% \aosafigure{../images/integration/buildbot.eps}{Buildbot Architecture}{fig.integration.buildbot}
+\aosafigure{../images/integration/buildbot.eps}{Buildbotのアーキテクチャ}{fig.integration.buildbot}
 
-Buildbot uses a master/slave architecture, with a single central
-server and multiple build slaves. Remote execution is entirely
-scripted by the master server in real time: the master configuration
-specifies the command to be executed on each remote system, and runs
-them when each previous command is finished. Scheduling and build
-requests are not only coordinated through the master but directed
-entirely \emph{by} the master. No built-in recipe abstraction exists,
-except for basic version control system integration (``our code is in
-this repository'') and a distinction between commands that operate on
-the build directory vs. within the build directory. OS-specific
-commands are typically specified directly in the configuration.
+%% Buildbot uses a master/slave architecture, with a single central
+%% server and multiple build slaves. Remote execution is entirely
+%% scripted by the master server in real time: the master configuration
+%% specifies the command to be executed on each remote system, and runs
+%% them when each previous command is finished. Scheduling and build
+%% requests are not only coordinated through the master but directed
+%% entirely \emph{by} the master. No built-in recipe abstraction exists,
+%% except for basic version control system integration (``our code is in
+%% this repository'') and a distinction between commands that operate on
+%% the build directory vs. within the build directory. OS-specific
+%% commands are typically specified directly in the configuration.
+Buildbotはマスター/スレーブ型のアーキテクチャで、一台の中央サーバーと複数台のビルド用スレーブで構成されている。リモートの実行は、完全にマスターサーバー側からの指示でリアルタイムに行われる。各クライアント上で実行するコマンドをマスター側で設定し、直前のコマンドが終了するとそれを実行する。スケジューリングやビルド要求をサーバー側でとりまとめるだけではなく、実際の指示もマスターが行う。レシピの抽象化機能は組み込まれていない。ただし、基本的なバージョン管理システムとの統合(``我々のコードはこのリポジトリにある'')、そしてビルドディレクトリ上で実行されるコマンドとビルドディレクトリ内で実行されるコマンドの区別は例外である。OS固有のコマンドは、通常は設定で直接指定する。
 
-Buildbot maintains a constant connection with each buildslave, and
-manages and coordinates job execution between them.  Managing remote
-machines through a persistent connection adds significant practical
-complexity to the implementation, and has been a long-standing source
-of bugs.  Keeping robust long-term network connections running is not
-simple, and testing applications which interact with the local GUI is
-challenging through a network connection. OS alert windows are
-particularly difficult to deal with.  However, this constant
-connection makes resource coordination and scheduling straightforward,
-because slaves are entirely at the disposal of the master for
-execution of jobs.
+%% Buildbot maintains a constant connection with each buildslave, and
+%% manages and coordinates job execution between them.  Managing remote
+%% machines through a persistent connection adds significant practical
+%% complexity to the implementation, and has been a long-standing source
+%% of bugs.  Keeping robust long-term network connections running is not
+%% simple, and testing applications which interact with the local GUI is
+%% challenging through a network connection. OS alert windows are
+%% particularly difficult to deal with.  However, this constant
+%% connection makes resource coordination and scheduling straightforward,
+%% because slaves are entirely at the disposal of the master for
+%% execution of jobs.
+Buildbotは各スレーブとの接続を持続させ、ジョブの管理やスレーブ間での調整を行う。持続的接続を使ったリモートマシンの管理の実装は複雑なものとなり、長年バグの元となり続けている。堅牢なネットワーク接続を長期間保つのは単純なことではなく、ローカルのGUIと対話するアプリケーションのテストをネットワークごしに行うのは大変だ。OSのアラートウィンドウは特に扱いにくいものである。しかし、このように接続を持続させるおかげで、リソースの協調やスケジューリングを直感的に行うことができる。ジョブを実行させるときには、マスターがスレーブを完全に操れるからだ。
 
-The kind of tight control designed into the Buildbot model makes
-centralized build coordination between resources very easy. Buildbot
-implements both master and slave locks on the buildmaster, so that
-builds can coordinate system-global and machine-local resources. This
-makes Buildbot particularly suitable for large installations that run
-system integration tests, e.g. tests that interact with databases or
-other expensive resources.
+%% The kind of tight control designed into the Buildbot model makes
+%% centralized build coordination between resources very easy. Buildbot
+%% implements both master and slave locks on the buildmaster, so that
+%% builds can coordinate system-global and machine-local resources. This
+%% makes Buildbot particularly suitable for large installations that run
+%% system integration tests, e.g. tests that interact with databases or
+%% other expensive resources.
+Buildbotのモデルの設計に組み込まれたような密な制御は、中央管理型でビルドを管理してリソース間で協調させることが容易にできる。Buildbotはbuildmaster上でのマスターのロックとスレーブのロックの両方を実装している。これらを使って、システムグローバルなリソースとマシンローカルなリソースを協調させたビルドが可能となる。この点で、Buildbotが特に適しているのは大規模なシステムのインテグレーションテスト(データベースやその他高価なリソースと組み合わせたテスト)であると言える。
 
-The centralized configuration causes problems for a distributed use
-model, however. Each new buildslave must be explicitly allowed for in
-the master configuration, which makes it impossible for new
-buildslaves to dynamically attach to the central server and offer
-build services or build results. Moreover, because each build slave is
-entirely driven by the build master, build clients are vulnerable to
-malicious or accidental misconfigurations: the master literally
-controls the client entirely, within the client OS security
-restrictions.
+%% The centralized configuration causes problems for a distributed use
+%% model, however. Each new buildslave must be explicitly allowed for in
+%% the master configuration, which makes it impossible for new
+%% buildslaves to dynamically attach to the central server and offer
+%% build services or build results. Moreover, because each build slave is
+%% entirely driven by the build master, build clients are vulnerable to
+%% malicious or accidental misconfigurations: the master literally
+%% controls the client entirely, within the client OS security
+%% restrictions.
+しかし、中央集権型の設定は、分散型の利用モデルでは問題の原因となる。新しいbuildslaveを追加するには、マスターの設定で明示的に許可しなければならない。つまり、新しいbuildslaveを動的に中央サーバーにアタッチしてビルドサービスやビルド結果を送るようにするのは不可能だということだ。さらに、個々のスレーブは完全にマスター側からの指示で動いているので、悪意のある設定をされたり設定を間違えてしまったりするといった事故に対して脆弱になる。クライアントOSのセキュリティ制約の範囲内で、マスターはクライアントを文字通り完全に支配する。
 
-One limiting feature of Buildbot is that there is no simple way to
-return build products to the central server. For example, code
-coverage statistics and binary builds are kept on the remote
-buildslave, and there is no API to transmit them to the central
-buildmaster for aggregation and distribution. It is not clear why this
-feature is absent. It may be a consequence of the limited set of
-command abstractions distributed with Buildbot, which are focused on
-executing remote commands on the build slaves. Or, it may be due to
-the decision to use the connection between the buildmaster and
-buildslave as a control system, rather than as an RPC mechanism.
+%% One limiting feature of Buildbot is that there is no simple way to
+%% return build products to the central server. For example, code
+%% coverage statistics and binary builds are kept on the remote
+%% buildslave, and there is no API to transmit them to the central
+%% buildmaster for aggregation and distribution. It is not clear why this
+%% feature is absent. It may be a consequence of the limited set of
+%% command abstractions distributed with Buildbot, which are focused on
+%% executing remote commands on the build slaves. Or, it may be due to
+%% the decision to use the connection between the buildmaster and
+%% buildslave as a control system, rather than as an RPC mechanism.
+Buildbotの機能面での制限のひとつは、ビルドの成果物を中央サーバーに返すシンプルな方法がないことだ。たとえば、コードカバレッジの統計情報やビルド後のバイナリはリモートのbuildslave上に残ったままとなる。中央のbuildmaster側に、それを集約したり配布したりするAPIは用意されていない。この機能が存在しない理由は定かではない。Buildbotとともに配布されているコマンド群の抽象化の制約のためかもしれない。もとのコマンド群が、スレーブ上でのリモートコマンドの実行に焦点を合わせたものだからだ。あるいは、buildmasterとbuildslaveとの間の接続はあくまでも制御システムとして使い、RPCの仕組みとしては使わないように決めた結果かもしれない。
 
-Another consequence of the master/slave model and this limited
-communications channel is that buildslaves do not report system
-utilization and the master cannot be configured to be aware of high
-slave load.
+%% Another consequence of the master/slave model and this limited
+%% communications channel is that buildslaves do not report system
+%% utilization and the master cannot be configured to be aware of high
+%% slave load.
+マスター/スレーブモデルを採用し、かつこのように制限のある通信チャンネルを用意した結果、buildslave側からはシステムの利用状況を報告できなくなっており、マスター側ではスレーブの負荷対策を組み込むことができない。
 
-External CPU notification of build results is handled entirely by the
-buildmaster, and new notification services need to be implemented
-within the buildmaster itself. Likewise, new build requests must be
-communicated directly to the buildmaster.
+%% External CPU notification of build results is handled entirely by the
+%% buildmaster, and new notification services need to be implemented
+%% within the buildmaster itself. Likewise, new build requests must be
+%% communicated directly to the buildmaster.
+ビルド結果の外部CPU通知は完全にbuildmasterが処理する。新たな通知サービスを追加するにはbuildmaster自身の中で実装しなければならない。同様に、新たなビルド要求は直接buildmasterにしなければならない。
 
 \end{aosasect2}
 
