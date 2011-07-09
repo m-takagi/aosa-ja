@@ -5,3 +5,6 @@
 *.dvi
 *.bbl
 *.blg
+*.sty
+*.cls
+*.pdf
