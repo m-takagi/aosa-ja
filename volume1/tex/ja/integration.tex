@@ -356,56 +356,63 @@ Buildbotの機能面での制限のひとつは、ビルドの成果物を中央
 
 \end{aosasect2}
 
-\begin{aosasect2}{Implementation Model: CDash}
+%% \begin{aosasect2}{Implementation Model: CDash}
+\begin{aosasect2}{実装モデル: CDash}
 
-\aosafigure[300pt]{../images/integration/cdash.eps}{CDash Architecture}{fig.integration.cdash}
+%% \aosafigure[300pt]{../images/integration/cdash.eps}{CDash Architecture}{fig.integration.cdash}
+\aosafigure[300pt]{../images/integration/cdash.eps}{CDashのアーキテクチャ}{fig.integration.cdash}
 
-In contrast to Buildbot, CDash implements a reporting server model. In
-this model, the CDash server acts as a central repository for
-information on remotely executed builds, with associated reporting on
-build and test failures, code coverage analysis, and memory
-usage. Builds run on remote clients on their own schedule, and submit
-build reports in an XML format. Builds can be submitted both by
-``official'' build clients and by non-core developers or users running
-the published build process on their own machines.
+%% In contrast to Buildbot, CDash implements a reporting server model. In
+%% this model, the CDash server acts as a central repository for
+%% information on remotely executed builds, with associated reporting on
+%% build and test failures, code coverage analysis, and memory
+%% usage. Builds run on remote clients on their own schedule, and submit
+%% build reports in an XML format. Builds can be submitted both by
+%% ``official'' build clients and by non-core developers or users running
+%% the published build process on their own machines.
+Buildbotとは対照的に、CDashはレポーティングサーバーモデルを実装している。このモデルにおいて、CDashサーバーは中央リポジトリとしてふるまう。リモートで実行したビルドの情報やビルド・テストの失敗報告、コードカバレッジ解析、そしてメモリ使用状況などがここに集まる。ビルドのスケジュールをたてたり実行したりするのはリモートクライアント側で、ビルドレポートはXML形式で送信する。ビルド結果の送信は``公式の''ビルドクライアントで行うこともできるし、コアデベロッパー以外の開発者やユーザーが公開したビルドプロセスを自分のマシンで実行することもできる。
 
-This simple model is made possible because of the tight conceptual
-integration between CDash and other elements of the Kitware build
-infrastructure: CMake, a build configuration system, CTest, a test
-runner, and CPack, a packaging system. This software provides a
-mechanism by which build, test, and packaging recipes can be
-implemented at a fairly high level of abstraction in an OS-agnostic
-manner.
+%% This simple model is made possible because of the tight conceptual
+%% integration between CDash and other elements of the Kitware build
+%% infrastructure: CMake, a build configuration system, CTest, a test
+%% runner, and CPack, a packaging system. This software provides a
+%% mechanism by which build, test, and packaging recipes can be
+%% implemented at a fairly high level of abstraction in an OS-agnostic
+%% manner.
+このシンプルなモデルが可能が実現できた理由は、CDashとその他のKitwareビルド基盤の要素(ビルド設定システムであるCMake、テストランナーであるCTest、そしてパッケージングシステムであるCPack)が概念的に密結合していたことである。このソフトウェアが提供する仕組みを使うと、ビルドやテストそしてパッケージングのレシピを高度に抽象化して実装できる。その際にOSを意識する必要はない。
 
-CDash's client-driven process simplifies many aspects of the
-client-side CI process. The decision to run a build is made by build
-clients, so client-side conditions (time of day, high load, etc.) can
-be taken into account by the client before starting a build. Clients
-can appear and disappear as they wish, easily enabling volunteer
-builds and builds ``in the cloud''. Build products can be sent to the
-central server via a straightforward upload mechanism.
+%% CDash's client-driven process simplifies many aspects of the
+%% client-side CI process. The decision to run a build is made by build
+%% clients, so client-side conditions (time of day, high load, etc.) can
+%% be taken into account by the client before starting a build. Clients
+%% can appear and disappear as they wish, easily enabling volunteer
+%% builds and builds ``in the cloud''. Build products can be sent to the
+%% central server via a straightforward upload mechanism.
+CDashのクライアント主導のプロセスは、クライアント側のCIプロセスを多くの面で単純化する。ビルドを実行するかどうかを決めるのはクライアント側なので、クライアント側の状況(時刻や負荷など)を考慮にいれてビルドを始めることができる。望みに応じてクライアントを増やしたり減らしたりするしてビルドを手伝ったり、ビルドを``クラウドで''行うこともできる。ビルドの成果物を中央サーバーに送るのも、単純なアップロードで済む話だ。
 
-However, in exchange for this reporting model, CDash lacks many
-convenient features of Buildbot. There is no centralized coordination
-of resources, nor can this be implemented simply in a distributed
-environment with untrusted or unreliable clients. Progress reports are
-also not implemented: to do so, the server would have to allow
-incremental updating of build status. And, of course, there is no way
-to both globally request a build, and guarantee that anonymous clients
-\emph{perform} the build in response to a check-in---clients must be
-considered unreliable.
+%% However, in exchange for this reporting model, CDash lacks many
+%% convenient features of Buildbot. There is no centralized coordination
+%% of resources, nor can this be implemented simply in a distributed
+%% environment with untrusted or unreliable clients. Progress reports are
+%% also not implemented: to do so, the server would have to allow
+%% incremental updating of build status. And, of course, there is no way
+%% to both globally request a build, and guarantee that anonymous clients
+%% \emph{perform} the build in response to a check-in---clients must be
+%% considered unreliable.
+しかし、このレポーティングモデルを採用した代償として、CDashにはBuildbotが持つ多くの便利な機能が欠けている。中央管理型のリソース制御機能はないし、事前に登録済みでないクライアントを分散環境に投入することもできない。進捗レポート機能も実装されていない。実装するにはビルド状況のインクリメンタルな更新をサーバーが許可しないといけない。そしてもちろん、全体にビルド要求を出したり、チェックインに反応して匿名クライアントにビルドさせることもできない---クライアントはすべて信頼できないものとみなさなければならない。
 
-Recently, CDash added functionality to enable an ``@Home'' cloud build
-system, in which clients offer build services to a CDash server.
-Clients poll the server for build requests, execute them upon request,
-and return the results to the server.  In the current implementation
-(October 2010), builds must be manually requested on the server side,
-and clients must be connected for the server to offer their services.
-However, it is straightforward to extend this to a more generic
-scheduled-build model in which builds are requested automatically by
-the server whenever a relevant client is available.  The ``@Home''
-system is very similar in concept to the Pony-Build system described
-later.
+%% Recently, CDash added functionality to enable an ``@Home'' cloud build
+%% system, in which clients offer build services to a CDash server.
+%% Clients poll the server for build requests, execute them upon request,
+%% and return the results to the server.  In the current implementation
+%% (October 2010), builds must be manually requested on the server side,
+%% and clients must be connected for the server to offer their services.
+%% However, it is straightforward to extend this to a more generic
+%% scheduled-build model in which builds are requested automatically by
+%% the server whenever a relevant client is available.  The ``@Home''
+%% system is very similar in concept to the Pony-Build system described
+%% later.
+最近、CDashに新機能が追加されてクラウドビルドシステム``@Home''が使えるようになった。これは、クライアントがCDashサーバーに対してビルドサービスを提供する仕組みだ。クライアントがサーバーをポーリングしてビルドリクエストを受けとり、そのリクエストを処理して、結果をサーバーに返す。2010年10月時点の実装では、ビルドのリクエストはサーバー側で手動で行う必要がある。そして、クライアントはサーバーに接続しないとサービスを提供できない。しかし、これを素直に拡張すればより汎用的なビルドモデルが作れる。つまり、サーバー側から自動的にビルドリクエストを送ったら、対応可能なクライアントが処理してくれるというモデルだ。``@Home''システムは、後で説明するPony-Buildシステムと非常に似た概念である。
 
 \end{aosasect2}
 
