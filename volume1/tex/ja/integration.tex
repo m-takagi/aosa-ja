@@ -457,125 +457,143 @@ Jenkinsにはしっかりとしたプラグイン機構が組み込まれてお�
 
 \end{aosasect2}
 
-\begin{aosasect2}{Implementation Model: Pony-Build}
+%% \begin{aosasect2}{Implementation Model: Pony-Build}
+\begin{aosasect2}{実装モデル: Pony-Build}
 
-\aosafigure{../images/integration/webhooks.eps}{Pony-Build Architecture}{fig.integration.pb}
+%% \aosafigure{../images/integration/webhooks.eps}{Pony-Build Architecture}{fig.integration.pb}
+\aosafigure{../images/integration/webhooks.eps}{Pony-Buildのアーキテクチャ}{fig.integration.pb}
 
-Pony-Build is a proof-of-concept decentralized CI system written in
-Python. It is composed of three core components, which are illustrated
-in \aosafigref{fig.integration.pb}. The results server acts as a
-centralized database containing build results received from individual
-clients. The clients independently contain all configuration
-information and build context, coupled with a lightweight client-side
-library to help with VCS repository access, build process management,
-and the communication of results to the server. The reporting server
-is optional, and contains a simple Web interface, both for reporting
-on the results of builds and potentially for requesting new builds. In
-our implementation, the reporting server and results server run in a
-single multithreaded process but are loosely coupled at the API level
-and could easily be altered to run independently.
+%% Pony-Build is a proof-of-concept decentralized CI system written in
+%% Python. It is composed of three core components, which are illustrated
+%% in \aosafigref{fig.integration.pb}. The results server acts as a
+%% centralized database containing build results received from individual
+%% clients. The clients independently contain all configuration
+%% information and build context, coupled with a lightweight client-side
+%% library to help with VCS repository access, build process management,
+%% and the communication of results to the server. The reporting server
+%% is optional, and contains a simple Web interface, both for reporting
+%% on the results of builds and potentially for requesting new builds. In
+%% our implementation, the reporting server and results server run in a
+%% single multithreaded process but are loosely coupled at the API level
+%% and could easily be altered to run independently.
+Pony-Buildは、分散型のCIシステムの概念実証モデルとしてPythonで作られた。\aosafigref{fig.integration.pb}に示す三つのコアコンポーネントで構成されている。結果サーバーが中央データベースとして働き、個々のクライアントから受け取ったビルド結果を保持する。クライアントはそれぞれ独立してすべての設定情報やビルドコンテキストを保持しており、軽量なクライアントライブラリでVCSのリポジトリにアクセスしたりビルドプロセスを管理したり、結果をサーバーに通信したりといったことができる。レポートサーバーは必須ではない。ここにはシンプルなウェブインターフェイスが組み込まれており、ビルド結果の報告や新しいビルドの要求を行う。我々の実装では、レポートサーバーと結果サーバーは単一のマルチスレッドプロセスで動作する。しかしAPIレベルでの結合は緩く、個別に動くようにも容易に変更できる。
 
-This basic model is decorated with a variety of webhooks and RPC
-mechanisms to facilitate build and change notification and build
-introspection. For example, rather than tying VCS change notification
-from the code repository directly into the build system, remote build
-requests are directed to the reporting system, which communicates them
-to the results server. Likewise, rather than building push
-notification of new builds out to e-mail, instant messaging, and other
-services directly into the reporting server, notification is
-controlled using the PubSubHubbub (PuSH) active notification
-protocol. This allows a wide variety of consuming applications to
-receive notification of ``interesting'' events (currently limited to
-new builds and failed builds) via a PuSH webhook.
+%% This basic model is decorated with a variety of webhooks and RPC
+%% mechanisms to facilitate build and change notification and build
+%% introspection. For example, rather than tying VCS change notification
+%% from the code repository directly into the build system, remote build
+%% requests are directed to the reporting system, which communicates them
+%% to the results server. Likewise, rather than building push
+%% notification of new builds out to e-mail, instant messaging, and other
+%% services directly into the reporting server, notification is
+%% controlled using the PubSubHubbub (PuSH) active notification
+%% protocol. This allows a wide variety of consuming applications to
+%% receive notification of ``interesting'' events (currently limited to
+%% new builds and failed builds) via a PuSH webhook.
+基本モデルに加えてさまざまなWebHookやRPC機構が用意されており、ビルドや変更通知そしてビルドに関する調査を支援する。たとえば、VCSのコードリポジトリの変更通知をビルドシステムと直接結び付けるのではなく、リモートからのビルドリクエストを直接レポートシステムに回し、レポートシステムがそれを結果サーバーに伝えるようにする。同様に、メールやインスタントメッセージングなどを使って新しいビルドを直接レポートサーバーにプッシュ通知するのではなく、通知の制御にはPubSubHubbub (PuSH)を使っている。これにより、さまざまなアプリケーションが``興味のある''イベント(今のところは新しいビルドと失敗したビルドに限られる)の通知をPuSH WebHookで受け取れるようになっている。
 
-The advantages of this very decoupled model are substantial:
-
-\begin{aosadescription}
-
-  \item{Ease of communication:} The basic architectural
-  components and webhook protocols are extremely easy to implement,
-  requiring only a basic knowledge of Web programming.
-
-  \item{Easy modification:} The implementation of new
-  notification methods, or a new reporting server interface, is
-  extremely simple.
-
-  \item{Multiple language support:} Since the various components
-  call each other via webhooks, which are supported by most
-  programming languages, different components can be implemented in
-  different languages.
-
-  \item{Testability:} Each component can be completely isolated
-  and mocked, so the system is very testable.
-
-  \item{Ease of configuration:} The client-side requirements are
-  minimal, with only a single library file required beyond Python
-  itself.
-
-  \item{Minimal server load:} Since the central server has
-  virtually no control responsibilities over the clients, isolated
-  clients can run in parallel without contacting the server and
-  placing any corresponding load it, other than at reporting time.
-
-  \item{VCS integration:} Build configuration is entirely client
-  side, allowing it to be included within the VCS.
-
-  \item{Ease of results access:} Applications that wish to
-  consume build results can be written in any language capable of an
-  XML-RPC request. Users of the build system can be granted access
-  to the results and reporting servers at the network level, or via
-  a customized interface at the reporting server. The build clients
-  only need access to post results to the results server.
-
-\end{aosadescription}
-
-Unfortunately, there are also many serious \emph{disadvantages}, as
-with the CDash model:
+%% The advantages of this very decoupled model are substantial:
+このような疎結合のモデルを採用する利点は多い。
 
 \begin{aosadescription}
 
-  \item{Difficulty requesting builds:} This difficulty is
-  introduced by having the build clients be entirely independent of
-  the results server. Clients may poll the results server, to see if
-  a build request is operative, but this introduces high load and
-  significant latency. Alternatively, command and control
-  connections need to be established to allow the server to notify
-  clients of build requests directly. This introduces more
-  complexity into the system and eliminates the advantages of
-  decoupled build clients.
+  %% \item{Ease of communication:} The basic architectural
+  %% components and webhook protocols are extremely easy to implement,
+  %% requiring only a basic knowledge of Web programming.
+  \item{通信の容易性:} 基本となるアーキテクチャ上のコンポーネントやWebHookのプロトコルは極めて容易に実装でき、基本的なウェブプログラミングの知識さえあればよい。
 
-  \item{Poor support for resource locking:} It is easy to
-  provide an RPC mechanism for holding and releasing resource locks,
-  but much more difficult to enforce client policies. While CI
-  systems like CDash assume good faith on the client side, clients
-  may fail unintentionally and badly, e.g. without releasing
-  locks. Implementing a robust distributed locking system is hard
-  and adds significant undesired complexity. For example, in order
-  to provide master resource locks with unreliable clients, the
-  master lock controller must have a policy in place for clients
-  that take a lock and never release it, either because they crash
-  or because of a deadlock situation.
+  %% \item{Easy modification:} The implementation of new
+  %% notification methods, or a new reporting server interface, is
+  %% extremely simple.
+  \item{変更の容易性:} 新しい通知方式や新しいレポートサーバー用インターフェイスを実装するのは極めて容易である。
 
-  \item{Poor support for real-time monitoring:} Real-time
-  monitoring of the build, and control of the build process
-  itself, is challenging to implement in a system without a constant
-  connection. One significant advantage of Buildbot over the
-  client-driven model is that intermediate inspection of long builds
-  is easy, because the results of the build are communicated to the
-  master interface incrementally. Moreover, because Buildbot retains
-  a control connection, if a long build goes bad in the middle
-  due to misconfiguration or a bad check-in, it can be interrupted
-  and aborted. Adding such a feature into Pony-Build, in which the
-  results server has no guaranteed ability to contact the clients,
-  would require either constant polling by the clients, or the
-  addition of a standing connection to the clients.
+  %% \item{Multiple language support:} Since the various components
+  %% call each other via webhooks, which are supported by most
+  %% programming languages, different components can be implemented in
+  %% different languages.
+  \item{多言語のサポート:} さまざまなコンポーネントがお互いWebHookで呼び合っている。大半のプログラミング言語はWebHookをサポートしているので、コンポーネントごとに別々の言語で実装することができる。
+
+  %% \item{Testability:} Each component can be completely isolated
+  %% and mocked, so the system is very testable.
+  \item{テストのしやすさ:} 各コンポーネントは完全に分離していてモックがあるので、システムのテストを簡単に実行できる。
+
+  %% \item{Ease of configuration:} The client-side requirements are
+  %% minimal, with only a single library file required beyond Python
+  %% itself.
+  \item{設定の容易性:} クライアント側の要件は最小限で、Pythonそのもの以外に必要となるライブラリはひとつだけである。
+
+  %% \item{Minimal server load:} Since the central server has
+  %% virtually no control responsibilities over the clients, isolated
+  %% clients can run in parallel without contacting the server and
+  %% placing any corresponding load it, other than at reporting Time.
+  \item{サーバーの負荷の最小化:} 中央サーバーにはクライアントを制御する責任が事実上ないと言えるので、隔離されたクライアントをサーバーと連携せずに並列に実行させることができる。報告時を除いて、サーバーに負荷をかけることはない。
+
+  %% \item{VCS integration:} Build configuration is entirely client
+  %% side, allowing it to be included within the VCS.
+  \item{VCSとの統合:} ビルドの設定は完全にクライアント側で行われるので、VCSに含めることもできる。
+
+  %% \item{Ease of results access:} Applications that wish to
+  %% consume build results can be written in any language capable of an
+  %% XML-RPC request. Users of the build system can be granted access
+  %% to the results and reporting servers at the network level, or via
+  %% a customized interface at the reporting server. The build clients
+  %% only need access to post results to the results server.
+  \item{結果へのアクセスの容易性:} ビルド結果を取得したいアプリケーションを書くためのプログラミング言語は、XML-RPCリクエストを扱えるものなら何でもよい。ビルドシステムのユーザーには結果サーバーやレポートサーバーへのネットワークレベルでのアクセス権限を与えることもできるし、レポートサーバーの独自インターフェイスを使ってもよい。ビルドクライアントに必要なアクセス権限は、結果サーバーへの結果の送信権だけである。
 
 \end{aosadescription}
 
-Two other aspects of CIs that were raised by Pony-Build were how best
-to implement \emph{recipes}, and how to manage \emph{trust}. These are
-intertwined issues, because recipes execute arbitrary code on build
-clients.
+%% Unfortunately, there are also many serious \emph{disadvantages}, as
+%% with the CDash model:
+残念ながら、深刻な\emph{弱点}も多い。これはCDashのモデルと同様である。
+
+\begin{aosadescription}
+
+  %% \item{Difficulty requesting builds:} This difficulty is
+  %% introduced by having the build clients be entirely independent of
+  %% the results server. Clients may poll the results server, to see if
+  %% a build request is operative, but this introduces high load and
+  %% significant latency. Alternatively, command and control
+  %% connections need to be established to allow the server to notify
+  %% clients of build requests directly. This introduces more
+  %% complexity into the system and eliminates the advantages of
+  %% decoupled build clients.
+  \item{ビルド要求を送るのが難しい:} この弱点の原因は、ビルドクライアントが結果サーバーから完全に独立しているということだ。クライアント側からサーバー側にビルド要求があるかどうかを確認することはできるかもしれない。しかしこれは負荷が高く、待ち時間も長くなる。それ以外の手段をとるなら、指揮・制御のための接続を確立してサーバー側からクライアント側にビルドリクエストを直接通知しなければならない。システムはさらに複雑になり、分散型ビルドクライアントの利点を損ねてしまう。
+
+  %% \item{Poor support for resource locking:} It is easy to
+  %% provide an RPC mechanism for holding and releasing resource locks,
+  %% but much more difficult to enforce client policies. While CI
+  %% systems like CDash assume good faith on the client side, clients
+  %% may fail unintentionally and badly, e.g. without releasing
+  %% locks. Implementing a robust distributed locking system is hard
+  %% and adds significant undesired complexity. For example, in order
+  %% to provide master resource locks with unreliable clients, the
+  %% master lock controller must have a policy in place for clients
+  %% that take a lock and never release it, either because they crash
+  %% or because of a deadlock Situation.
+  \item{リソースロックのサポートが貧弱:} リソースロックを管理するためにRPCの仕組みを提供するのは簡単だが、クライアントポリシーを強制するのはずっと難しい。CDashのようなCIシステムはクライアント側を信頼することを前提としているが、クライアント側はそのつもりがなくても失敗してしまうかもしれない(ロックの解放を忘れるなど)。堅牢な分散型ロックシステムを実装するのは困難であり、余計な複雑さを持ち込んでしまう。たとえば、マスターリソースのロックを信頼できないクライアントに提供するには、ロックをつかんで離さないクライアントに対するポリシーをマスターロックコントローラー側で決めておく必要がある。これは、クライアントがクラッシュしたり、デッドロックが発生したりした場合の対策となる。
+
+  %% \item{Poor support for real-time monitoring:} Real-time
+  %% monitoring of the build, and control of the build process
+  %% itself, is challenging to implement in a system without a constant
+  %% connection. One significant advantage of Buildbot over the
+  %% client-driven model is that intermediate inspection of long builds
+  %% is easy, because the results of the build are communicated to the
+  %% master interface incrementally. Moreover, because Buildbot retains
+  %% a control connection, if a long build goes bad in the middle
+  %% due to misconfiguration or a bad check-in, it can be interrupted
+  %% and aborted. Adding such a feature into Pony-Build, in which the
+  %% results server has no guaranteed ability to contact the clients,
+  %% would require either constant polling by the clients, or the
+  %% addition of a standing connection to the clients.
+  \item{リアルタイムの監視処理が貧弱:} リアルタイムでビルドを監視したりビルドプロセス自体を制御したりする仕組みを実装するのは、常に接続が持続しているシステムでないと困難である。Buildbotがクライアント主導のモデルに比べてはるかに優れている点のひとつは、時間のかかるビルドの途中経過を調べやすいというところだ。これは、ビルドの結果がマスター側のインターフェイスにインクリメンタルに送られてくるからである。さらに、Buildbotは制御用の接続を保持しているので、もし時間のかかるビルドが途中で(設定ミスや間違ったチェックインなどで)失敗した場合は、そこでビルドを中止できる。そのような機能をPony-Build(結果サーバーからクライアント側への連絡ができない)に追加するには、クライアント側から定期的にポーリングさせるかクライアント側への接続を確立するかのどちらかの仕組みが必要となる。
+
+\end{aosadescription}
+
+%% Two other aspects of CIs that were raised by Pony-Build were how best
+%% to implement \emph{recipes}, and how to manage \emph{trust}. These are
+%% intertwined issues, because recipes execute arbitrary code on build
+%% clients.
+Pony-Buildが提起するCIのその他ふたつの側面は、\emph{レシピ}をいかに実装するかということ、そして\emph{信頼}をどのように管理するのかということだ。これらはともに関連する問題である。というのも、レシピはビルドクライアント上の任意のコードを実行するからである。
 
 \end{aosasect2}
 
