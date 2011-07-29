@@ -597,204 +597,229 @@ Pony-Buildが提起するCIのその他ふたつの側面は、\emph{レシピ}�
 
 \end{aosasect2}
 
-\begin{aosasect2}{Build Recipes}
+%% \begin{aosasect2}{Build Recipes}
+\begin{aosasect2}{ビルドレシピ}
 
-Build recipes add a useful level of abstraction, especially for
-software built in a cross-platform language or using a multi-platform
-build system. For example, CDash relies on a strict kind of
-recipe; most, or perhaps all, software that uses CDash is built
-with CMake, CTest, and CPack, and these tools are built to handle
-multi-platform issues. This is the ideal situation from the viewpoint
-of a continuous integration system, because the CI system can simply
-delegate all issues to the build tool chain.
+%% Build recipes add a useful level of abstraction, especially for
+%% software built in a cross-platform language or using a multi-platform
+%% build system. For example, CDash relies on a strict kind of
+%% recipe; most, or perhaps all, software that uses CDash is built
+%% with CMake, CTest, and CPack, and these tools are built to handle
+%% multi-platform issues. This is the ideal situation from the viewpoint
+%% of a continuous integration system, because the CI system can simply
+%% delegate all issues to the build tool chain.
+ビルドレシピは、使いやすいレベルの抽象化をしてくれるものだ。特に、クロスプラットフォームな言語で作られていたりマルチプラットフォームなビルドシステムを使っていたりする場合に役立つ。たとえばCDashは、非常に厳しいレシピに依存している。CDashを使うソフトウェアのほとんどすべてはCMakeやCTestそしてCPackでビルドされており、これらのツールはマルチプラットフォームな課題に対応するよう作られている。これは、継続的インテグレーションシステムの視点で考えると理想的な状況だ。というのも、CIシステムとしてはすべての課題をビルドツール群に丸投げするだけでよくなるからである。
 
-However, this is not true for all languages and build environments. In
-the Python ecosystem, there has been increasing standardization around
-distutils and distutils2 for building and packaging software, but as
-yet no standard has emerged for discovering and running tests, and
-collating the results. Moreover, many of the more complex Python
-packages add specialized build logic into their system, through a
-distutils extension mechanism that allows the execution of arbitrary
-code. This is typical of most build tool chains: while there may be a
-fairly standard set of commands to be run, there are always exceptions
-and extensions.
+%% However, this is not true for all languages and build environments. In
+%% the Python ecosystem, there has been increasing standardization around
+%% distutils and distutils2 for building and packaging software, but as
+%% yet no standard has emerged for discovering and running tests, and
+%% collating the results. Moreover, many of the more complex Python
+%% packages add specialized build logic into their system, through a
+%% distutils extension mechanism that allows the execution of arbitrary
+%% code. This is typical of most build tool chains: while there may be a
+%% fairly standard set of commands to be run, there are always exceptions
+%% and extensions.
+しかし、これは必ずしもすべての言語やビルド環境で成り立つわけではない。Pythonの世界ではdistutilsやdistutils2を使ってソフトウェアのビルドやパッケージングを行うことが標準になりつつある。しかし、テストを探して実行したりその結果を収集したりする仕組みにはまだ標準が確立されていない。さらに、より複雑なPythonパッケージの多くは自前のビルドロジックをシステムに組み込んでおり、distutilsの拡張機構(任意のコードを実行できる)を通してそれを使っている。たいていのビルドツールで、同じような状況が見られる。標準的なコマンドが用意されていても、常に例外や拡張があるものだ。
 
-Recipes for building, testing, and packaging are therefore
-problematic, because they must solve two problems: first, they should
-be specified in a platform independent way, so that a single recipe
-can be used to build software on multiple systems; and second, they
-must be customizable to the software being built.
-
-\end{aosasect2}
-
-\begin{aosasect2}{Trust}
-
-This raises a third problem.  Widespread use of recipes by a CI system
-introduces a second party that must be trusted by the system: not only
-must the software itself be trustworthy (because the CI clients are
-executing arbitrary code), but the recipes must also be trustworthy
-(because they, too, must be able to execute arbitrary code).
-
-These trust issues are easy to handle in a tightly controlled
-environment, e.g. a company where the build clients and CI system are
-part of an internal process. In other development environments,
-however, interested third parties may want to offer build services,
-for example to open source projects. The ideal solution would be to
-support the inclusion of standard build recipes in software on a
-community level, a direction that the Python community is taking with
-distutils2. An alternative solution would be to allow for the use of
-digitally signed recipes, so that trusted individuals could write and
-distribute signed recipes, and CI clients could check to see if they
-should trust the recipes.
+%% Recipes for building, testing, and packaging are therefore
+%% problematic, because they must solve two problems: first, they should
+%% be specified in a platform independent way, so that a single recipe
+%% can be used to build software on multiple systems; and second, they
+%% must be customizable to the software being built.
+ビルドやテストそしてパッケージングのレシピは、このようにいろいろ問題がある。なぜなら次のふたつの問題を解決しなければならないからだ。まず、プラットフォーム非依存な形式で指定しないといけない。単一のレシピを複数のシステム上のソフトウェアのビルドに使えるようにするためだ。そして、ビルドされるソフトウェアにあわせてカスタマイズ可能でなければならない。
 
 \end{aosasect2}
 
-\begin{aosasect2}{Choosing a Model}
+%% \begin{aosasect2}{Trust}
+\begin{aosasect2}{信頼}
 
-In our experience, a loosely coupled RPC or webhook callback-based
-model for continuous integration is extremely easy to implement, as
-long as one ignores any requirements for tight coordination that would
-involve complex coupling. Basic execution of remote checkouts and
-builds has similar design constraints whether the build is being
-driven locally or remotely; collection of information about the build
-(success/failure, etc.) is primarily driven by client-side
-requirements; and tracking information by architecture and result
-involves the same basic requirements.  Thus a basic CI system can be
-implemented quite easily using the reporting model.
+%% This raises a third problem.  Widespread use of recipes by a CI system
+%% introduces a second party that must be trusted by the system: not only
+%% must the software itself be trustworthy (because the CI clients are
+%% executing arbitrary code), but the recipes must also be trustworthy
+%% (because they, too, must be able to execute arbitrary code).
+さらに、第三の問題がある。CIシステムのレシピを幅広く使い始めると、信頼しなければならない外部のシステムが増えてしまう。ソフトウェア自身が信頼できる(CIクライアントは任意のコードを実行できるので)だけでは不十分で、さらにレシピも信頼できなければならない(レシピもまた任意のコードを実行できるので)。
 
-We found the loosely coupled model to be very flexible and expandable,
-as well. Adding new results reporting, notification mechanisms, and
-build recipes is easy because the components are clearly separated and
-quite independent. Separated components have clearly delegated tasks
-to perform, and are also easy to test and easy to modify.
+%% These trust issues are easy to handle in a tightly controlled
+%% environment, e.g. a company where the build clients and CI system are
+%% part of an internal process. In other development environments,
+%% however, interested third parties may want to offer build services,
+%% for example to open source projects. The ideal solution would be to
+%% support the inclusion of standard build recipes in software on a
+%% community level, a direction that the Python community is taking with
+%% distutils2. An alternative solution would be to allow for the use of
+%% digitally signed recipes, so that trusted individuals could write and
+%% distribute signed recipes, and CI clients could check to see if they
+%% should trust the recipes.
+こういった信頼に関する問題は、しっかりと制御された環境なら扱いやすい。たとえば、ビルドクライアントやCIシステムを内部プロセスの一環として扱うような企業がそれにあたる。しかし、その他の環境では、サードパーティがビルドサービスを提供することもある。たとえばオープンソースプロジェクト向けなどだ。理想的な解決策は、標準のビルドレシピをコミュニティレベルでソフトウェアに含められるようにすることだ。Pythonコミュニティは、これをdistutils2を使って行っている。もうひとつの解決策は、たとえばデジタル署名したレシピを使うことだ。そうすれば、信頼できる個人が書いたレシピを署名付きで配布でき、CIクライアントはそのレシピが信頼に値するかどうかを調べることができる。
 
-The only challenging aspect of remote builds in a CDash-like
-loosely-coupled model is build coordination: starting and stopping
-builds, reporting on ongoing builds, and coordinating resource locks
-between different clients is technically demanding compared to the
-rest of the implementation.
+\end{aosasect2}
 
-It is easy to reach the conclusion that the loosely coupled model is
-``better'' all around, but obviously this is only true if build
-coordination is not needed.  This decision should be made based on the
-needs of projects using the CI system.
+%% \begin{aosasect2}{Choosing a Model}
+\begin{aosasect2}{どのモデルを選ぶか}
+
+%% In our experience, a loosely coupled RPC or webhook callback-based
+%% model for continuous integration is extremely easy to implement, as
+%% long as one ignores any requirements for tight coordination that would
+%% involve complex coupling. Basic execution of remote checkouts and
+%% builds has similar design constraints whether the build is being
+%% driven locally or remotely; collection of information about the build
+%% (success/failure, etc.) is primarily driven by client-side
+%% requirements; and tracking information by architecture and result
+%% involves the same basic requirements.  Thus a basic CI system can be
+%% implemented quite easily using the reporting model.
+経験上、疎結合なRPCやWebhookコールバックベースのモデルによる継続的インテグレーションは非常に実装しやすいものだ。複雑な結合にからむ密接な連携に関する要件を一切無視しさえすれば。基本的なリモートチェックアウトやビルドの実行には、ビルドをローカルで行うかリモートで行うかにかかわらず共通した設計上の制約がある。ビルドに関する情報(成功/失敗など)の収集は、基本的にはクライアント側からの要求に基づいて行う。アーキテクチャによる情報の追跡も結果による情報の追跡も、同じ基本要件を必要とする。したがって、基本的なCIシステムはレポーティングモデルを使えば極めて容易に実装できる。
+
+%% We found the loosely coupled model to be very flexible and expandable,
+%% as well. Adding new results reporting, notification mechanisms, and
+%% build recipes is easy because the components are clearly separated and
+%% quite independent. Separated components have clearly delegated tasks
+%% to perform, and are also easy to test and easy to modify.
+疎結合のモデルも、非常に柔軟で拡張性のあるものであることがわかった。新たな結果報告の仕組みや通知の仕組み、あるいはビルドレシピを追加したりするのが容易になる。各コンポーネントが明確に分かれており、きちんと独立しているからである。分割されたコンポーネントはそれぞれやるべき作業が明確になっており、テストもしやすければ変更もしやすくなる。
+
+%% The only challenging aspect of remote builds in a CDash-like
+%% loosely-coupled model is build coordination: starting and stopping
+%% builds, reporting on ongoing builds, and coordinating resource locks
+%% between different clients is technically demanding compared to the
+%% rest of the implementation.
+CDashのような疎結合のモデルでリモートビルドをするときの唯一の困難は、ビルドの協調である。ビルドの開始や停止、進行中のビルドの状況報告、そして各クライアント間でのリソースロックの調整などが技術的に要求される。これらは、それ以外のモデルの実装ではあまり問われないものだ。
+
+%% It is easy to reach the conclusion that the loosely coupled model is
+%% ``better'' all around, but obviously this is only true if build
+%% coordination is not needed.  This decision should be made based on the
+%% needs of projects using the CI system.
+これらを踏まえて得られる結論は、疎結合のモデルのほうが全般的に``より優れている''ということだ。しかしそう言えるのは、ビルドの協調が不要な場合のみである。ビルドの協調が必要かどうかは、CIシステムを利用するプロジェクトによって決まる。
 
 \end{aosasect2}
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Future}
+%% \begin{aosasect1}{The Future}
+\begin{aosasect1}{将来}
 
-While thinking about Pony-Build, we came up with a few features that
-we would like to see in future continuous integration systems.
+%% While thinking about Pony-Build, we came up with a few features that
+%% we would like to see in future continuous integration systems.
+Pony-Buildについて検討しているときに、将来の継続的インテグレーションシステムにあったらいいなという機能をいくつか思いついた。
 
 \begin{aosadescription}
 
-  \item{A language-agnostic set of build recipes:} Currently,
-  each continuous integration system reinvents the wheel by
-  providing its own build configuration language, which is
-  manifestly ridiculous; there are fewer than a dozen commonly used
-  build systems, and probably only a few dozen test
-  runners. Nonetheless, each CI system has a new and different way
-  of specifying the build and test commands to be run. In fact, this
-  seems to be one of the reasons why so many basically identical CI
-  systems exist: each language and community implements their own
-  configuration system, tailored to their own build and test
-  systems, and then layers on the same set of features above that
-  system. Therefore, building a domain-specific language (DSL)
-  capable of representing the options used by the few dozen commonly
-  used build and test tool chains would go a long way toward
-  simplifying the CI landscape.
+  %% \item{A language-agnostic set of build recipes:} Currently,
+  %% each continuous integration system reinvents the wheel by
+  %% providing its own build configuration language, which is
+  %% manifestly ridiculous; there are fewer than a dozen commonly used
+  %% build systems, and probably only a few dozen test
+  %% runners. Nonetheless, each CI system has a new and different way
+  %% of specifying the build and test commands to be run. In fact, this
+  %% seems to be one of the reasons why so many basically identical CI
+  %% systems exist: each language and community implements their own
+  %% configuration system, tailored to their own build and test
+  %% systems, and then layers on the same set of features above that
+  %% system. Therefore, building a domain-specific language (DSL)
+  %% capable of representing the options used by the few dozen commonly
+  %% used build and test tool chains would go a long way toward
+  %% simplifying the CI landscape.
+  \item{言語不可知なビルドレシピ群:} 現状の継続的インテグレーションシステムはどれも、車輪の再発明をして独自のビルド設定言語を用意している。これは明らかにばかげた話だ。一般的に使われているビルドシステムは十種類にも満たないだろうし、テストランナーだっておそらく数十種類程度だろう。にもかかわらず、どのCIシステムも新しい独自の方法でビルドを指定したり実行するテストコマンドを指定したりする。実際のところ、よく似たCIシステムが氾濫している理由の一つがこれではないだろうか。それぞれのプログラミング言語やコミュニティが構成管理の仕組みを実装し、自分たちの使いなれたビルドシステムやテストシステムに合わせて調整し、同じような機能を持ったシステム上にそのレイヤーをかぶせているのだ。何かドメイン特化言語(DSL)を作り、高々数十種類しかないビルドツールやテストツールで使われるオプションを表せるようにしておけば、長い目で見たときにCIの世界を簡素化できるのではないだろうか。
 
-  \item{Common formats for build and test reporting:} There is
-  little agreement on exactly what information, in what format, a
-  build and test system needs to provide. If a common format or
-  standard could be developed it would make it much easier for
-  continuous integration systems to offer both detailed and summary
-  views across builds. The Test Anywhere Protocol, TAP (from the
-  Perl community) and the JUnit XML test output format (from the
-  Java community) are two interesting options that are capable of
-  encoding information about number of tests run, successes and
-  failures, and per-file code coverage details.
+  %% \item{Common formats for build and test reporting:} There is
+  %% little agreement on exactly what information, in what format, a
+  %% build and test system needs to provide. If a common format or
+  %% standard could be developed it would make it much easier for
+  %% continuous integration systems to offer both detailed and summary
+  %% views across builds. The Test Anywhere Protocol, TAP (from the
+  %% Perl community) and the JUnit XML test output format (from the
+  %% Java community) are two interesting options that are capable of
+  %% encoding information about number of tests run, successes and
+  %% failures, and per-file code coverage details.
+  \item{ビルドやテストの報告用の共通フォーマット:} ビルドシステムやテストシステムが、どんな情報をどんなフォーマットで提供すればいいのかに関する決まりが一切ない。もし何らかの共通フォーマットや標準規格ができれば、継続的インテグレーションシステムがビルドの詳細や概要をより簡単に提供できるようになるだろう。今のところそれに近い位置にあるのが、Perlコミュニティで使われているTAP(The Test Anywhere Protocol)やJavaコミュニティで使われているJUnitのXML出力形式である。これらは、実行したテストの数や成功と失敗の数、そしてファイル単位でのコードカバレッジの詳細といった情報を表すことができる。
 
-  \item{Increased granularity and introspection in reporting:}
-  Alternatively, it would be convenient if different build platforms
-  provided a well-documented set of hooks into their configuration,
-  compilation, and test systems. This would provide an API (rather
-  than a common format) that CI systems could use to extract more
-  detailed information about builds.
+  %% \item{Increased granularity and introspection in reporting:}
+  %% Alternatively, it would be convenient if different build platforms
+  %% provided a well-documented set of hooks into their configuration,
+  %% compilation, and test systems. This would provide an API (rather
+  %% than a common format) that CI systems could use to extract more
+  %% detailed information about builds.
+  \item{レポーティングにおける粒度や内部調査機能の向上:} あるいは、さまざまなビルドプラットフォームがよくできたフックシステムを提供し、その構成やコンパイルそしてテストのシステムをフックできるようになっていると便利だろう。このフックシステムが(共通のフォーマット以上の)APIを提供してくれれば、CIシステムはそれを使ってより詳細なビルド情報を取り出せる。
 
 \end{aosadescription}
 
-\begin{aosasect2}{Concluding Thoughts}
+%% \begin{aosasect2}{Concluding Thoughts}
+\begin{aosasect2}{まとめ}
 
-The continuous integration systems described above implemented
-features that fit their architecture, while the hybrid Jenkins system
-started with a master/slave model but added features from the more
-loosely coupled reporting architecture.
+%% The continuous integration systems described above implemented
+%% features that fit their architecture, while the hybrid Jenkins system
+%% started with a master/slave model but added features from the more
+%% loosely coupled reporting architecture.
+これまでに解説してきた継続的インテグレーションシステムは、それぞれのアーキテクチャにうまくあてはまる機能を実装してきた。一方、ハイブリッドであるJenkinsは、最初はマスター/スレーブモデルだったが、より疎結合なレポーティングアーキテクチャの機能をそこに追加した。
 
-It is tempting to conclude that architecture dictates function. This
-is nonsense, of course. Rather, the choice of architecture seems to
-canalize or direct development towards a particular set of
-features. For Pony-Build, we were surprised at the extent to which our
-initial choice of a CDash-style reporting architecture drove later
-design and implementation decisions. Some implementation choices, such
-as the avoidance of a centralized configuration and scheduling system
-in Pony-Build were driven by our use cases: we needed to allow dynamic
-attachment of remote build clients, which is difficult to support with
-Buildbot. Other features we didn't implement, such as progress reports
-and centralized resource locking in Pony-Build, were desirable but
-simply too complicated to add without a compelling requirement.
+%% It is tempting to conclude that architecture dictates function. This
+%% is nonsense, of course. Rather, the choice of architecture seems to
+%% canalize or direct development towards a particular set of
+%% features. For Pony-Build, we were surprised at the extent to which our
+%% initial choice of a CDash-style reporting architecture drove later
+%% design and implementation decisions. Some implementation choices, such
+%% as the avoidance of a centralized configuration and scheduling system
+%% in Pony-Build were driven by our use cases: we needed to allow dynamic
+%% attachment of remote build clients, which is difficult to support with
+%% Buildbot. Other features we didn't implement, such as progress reports
+%% and centralized resource locking in Pony-Build, were desirable but
+%% simply too complicated to add without a compelling requirement.
+選んだアーキテクチャによってその機能が決まる、という結論にしたいところだが、もちろんそれはナンセンスだ。それよりは、選んだアーキテクチャがその後の開発の方向性に影響を与え、特定の機能群を実装する流れになるのではないだろうか。Pony-Buildを作っていた我々も驚いた。最初に選んだCDash形式のレポーティングアーキテクチャが、後の設計や実装の決断に大きく影響したのだ。実装上の選択の中には、Pony-Buildで中央管理型の構成やスケジューリングシステムを回避した例のように実際の使用例に基づいたものもある。我々が必要としていたのはリモートビルドクライアントを動的に追加できることで、これはBuildbotではサポートしづらいものだった。それ以外にPony-Buildで実装しなかった機能には、進捗レポートや中央管理型のリソースロックなどがある。これらも実装したかったが、どうしてもという希望もなしに追加するには少し複雑すぎた。
 
-Similar logic may apply to Buildbot, CDash, and Jenkins. In each case
-there are useful features that are absent, perhaps due to
-architectural incompatibility. However, from discussions with members
-of the Buildbot and CDash communities, and from reading the Jenkins
-website, it seems likely that the desired features were chosen first,
-and the system was then developed using an architecture that permitted
-those features to be easily implemented. For example, CDash serves a
-community with a relatively small set of core developers, who develop
-software using a centralized model. Their primary consideration is to
-keep the software working on a core set of machines, and secondarily
-to receive bug reports from tech-savvy users. Meanwhile, Buildbot is
-increasingly used in complex build environments with many clients that
-require coordination to access shared resources. Buildbot's more
-flexible configuration file format with its many options for
-scheduling, change notification, and resource locks fits that need
-better than the other options. Finally, Jenkins seems aimed at ease of
-use and simple continuous integration, with a full GUI for configuring
-it and configuration options for running on the local server.
+%% Similar logic may apply to Buildbot, CDash, and Jenkins. In each case
+%% there are useful features that are absent, perhaps due to
+%% architectural incompatibility. However, from discussions with members
+%% of the Buildbot and CDash communities, and from reading the Jenkins
+%% website, it seems likely that the desired features were chosen first,
+%% and the system was then developed using an architecture that permitted
+%% those features to be easily implemented. For example, CDash serves a
+%% community with a relatively small set of core developers, who develop
+%% software using a centralized model. Their primary consideration is to
+%% keep the software working on a core set of machines, and secondarily
+%% to receive bug reports from tech-savvy users. Meanwhile, Buildbot is
+%% increasingly used in complex build environments with many clients that
+%% require coordination to access shared resources. Buildbot's more
+%% flexible configuration file format with its many options for
+%% scheduling, change notification, and resource locks fits that need
+%% better than the other options. Finally, Jenkins seems aimed at ease of
+%% use and simple continuous integration, with a full GUI for configuring
+%% it and configuration options for running on the local server.
+同じような理屈が、おそらくBuildbotやCDashそしてJenkinsにもあてはまるだろう。どのツールにも、有用なのに実装されていないという機能がある。おそらくそれはアーキテクチャ上の非互換性が原因だと思われる。しかし、BuildbotやCDashのコミュニティのメンバーとの議論やJenkinsのウェブサイトの記述によると、これらはまず欲しい機能を選ぶところから始めて、それからその機能を実装しやすいアーキテクチャでの開発を進めたらしい。たとえば、CDashのコミュニティには比較的小規模なコア開発者チームがおり、中央管理型のモデルでソフトウェアを開発している。最優先で考えるのはソフトウェアをコアマシン群で動作させ続けることで、その次は技術力のあるユーザーからのバグ報告を受け付けることだ。一方Buildbotが勢力を伸ばしているのは、複雑なビルド環境に多数のクライアントが絡み、共有リソースへのアクセスの調整を要するようなところである。Buildbotには柔軟な設定ファイルフォーマットがあり、スケジューリングや変更通知そしてリソースロックなどのさまざまなオプションを設定できる。そのあたりが好まれているのだろう。Jenkinsが目指しているのは、使いやすさとシンプルな継続的インテグレーションだろう。設定用のGUIとローカルサーバーで動かすためのオプションもその一環だ。
 
-The sociology of open source development is another confounding factor
-in correlating architecture with features: suppose developers choose
-open source projects based on how well the project architecture and
-features fit their use case?  If so, then their contributions will
-generally reflect an extension of a use case that already fits the
-project well. Thus projects may get locked into a certain feature set,
-since contributors are self-selected and may avoid projects with
-architectures that don't fit their own desired features. This was
-certainly true for us in choosing to implement a new system,
-Pony-Build, rather than contributing to Buildbot: the Buildbot
-architecture was simply not appropriate for building hundreds or
-thousands of packages.
+%% The sociology of open source development is another confounding factor
+%% in correlating architecture with features: suppose developers choose
+%% open source projects based on how well the project architecture and
+%% features fit their use case?  If so, then their contributions will
+%% generally reflect an extension of a use case that already fits the
+%% project well. Thus projects may get locked into a certain feature set,
+%% since contributors are self-selected and may avoid projects with
+%% architectures that don't fit their own desired features. This was
+%% certainly true for us in choosing to implement a new system,
+%% Pony-Build, rather than contributing to Buildbot: the Buildbot
+%% architecture was simply not appropriate for building hundreds or
+%% thousands of packages.
+オープンソース開発の社会学も、アーキテクチャと機能の相関関係における交絡因子となる。考えてみよう。もし、開発者たちがオープンソースプロジェクトを選ぶときの基準が、そのプロジェクトのアーキテクチャや機能が自分の用途に一致しているかどうかだとしたら?もしそうならば、彼らの貢献が反映されて、そのプロジェクトは今の機能をより伸ばすようになっていくだろう。その結果、プロジェクトは特定の機能セットにロックインされてしまうことになる。もともとその機能を好んで自ら選んだ人たちが開発を手伝うので、彼らが望む機能にうまくマッチしないアーキテクチャを避けるだろう。我々がBuildbotの開発に参加せず新たにPony-Buildを実装する道を選んだのも、まさにこの理由によるものだ。Buildbotのアーキテクチャは、何百何千ものパッケージをビルドするのには適さなかったのだ。
 
-Existing continuous integration systems are generally built around one
-of two disparate architectures, and generally implement only a subset
-of desirable features.  As CI systems mature and their user
-populations grow, we would expect them to grow additional features;
-however, implementation of these features may be constrained by the
-base choice of architecture.  It will be interesting to see how the
-field evolves.
+%% Existing continuous integration systems are generally built around one
+%% of two disparate architectures, and generally implement only a subset
+%% of desirable features.  As CI systems mature and their user
+%% populations grow, we would expect them to grow additional features;
+%% however, implementation of these features may be constrained by the
+%% base choice of architecture.  It will be interesting to see how the
+%% field evolves.
+既存の継続的インテグレーションシステムは一般に、本質的に異なる二つのアーキテクチャのいずれかで構築されており、要求される機能のサブセットしか実装していない。CIシステムが成熟してユーザー数が増えていくにつれて、さらに機能が追加されていくだろうと期待している。しかし機能を実装するには、選択したアーキテクチャによる制約があるかもしれない。今後どのように発展していくかが楽しみだ。
 
 \end{aosasect2}
 
-\begin{aosasect2}{Acknowledgments}
+%% \begin{aosasect2}{Acknowledgments}
+\begin{aosasect2}{謝辞}
 
-We thank Greg Wilson, Brett Cannon, Eric Holscher, Jesse Noller, and
-Victoria Laidler for interesting discussions on CI systems in general,
-and Pony-Build in particular.  Several students contributed to
-Pony-Build development, including Jack Carlson, Fatima Cherkaoui, Max
-Laite, and Khushboo Shakya.
+%% We thank Greg Wilson, Brett Cannon, Eric Holscher, Jesse Noller, and
+%% Victoria Laidler for interesting discussions on CI systems in general,
+%% and Pony-Build in particular.  Several students contributed to
+%% Pony-Build development, including Jack Carlson, Fatima Cherkaoui, Max
+%% Laite, and Khushboo Shakya.
+グレッグ・ウィルソンやブレット・キャノン、エリック・ホルシャー、ジェシー・ノラー、ヴィクトリア・レイドラーらとはCIシステム全般(特にPony-Build)について興味深い議論をさせていただいた。Pony-Buildの開発には、ジャック・カールソンやファティマ・シェルカウイ、マックス・ライト、クシュブ・シャキャらの学生たちが協力してくれた。
 
 \end{aosasect2}
 
