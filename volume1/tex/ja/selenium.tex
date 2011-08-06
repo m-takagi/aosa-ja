@@ -1,34 +1,37 @@
 \begin{aosachapter}{Selenium WebDriver}{s:selenium}{Simon Stewart}
 %% Based on EN-Revision r229
 
-Selenium is a browser automation tool, commonly used for writing
-end-to-end tests of web applications. A browser automation tool
-does exactly what you would expect: automate the control of a
-browser so that repetitive tasks can be automated. It sounds like
-a simple problem to solve, but as we will see, a lot has to happen
-behind the scenes to make it work.
+%% Selenium is a browser automation tool, commonly used for writing
+%% end-to-end tests of web applications. A browser automation tool
+%% does exactly what you would expect: automate the control of a
+%% browser so that repetitive tasks can be automated. It sounds like
+%% a simple problem to solve, but as we will see, a lot has to happen
+%% behind the scenes to make it work.
+Seleniumはブラウザの自動化ツールで、ウェブアプリケーションのエンドツーエンドテストを書くときによく使われる。ブラウザの自動化ツールが行うのは、その名前から想像できるとおりのことだ。ブラウザを制御して、繰り返し行われるタスクを自動化できる。解決しようとしている問題は単純なものだが、本章で説明するとおり、その裏側ではさまざまなことが起こっている。
 
-Before describing the architecture of Selenium it helps to understand
-how the various related pieces of the
-project fit together. At a very high level, Selenium is a suite of
-three tools. The first of these tools, Selenium
-IDE, is an extension for Firefox that allows users to record and
-playback tests. The record/playback paradigm can be limiting and isn't
-suitable for many users, so the second tool in the suite, Selenium
-WebDriver, provides APIs in a variety of languages to allow for more
-control and the application of standard software development
-practices. The final tool, Selenium Grid, makes it possible to use the
-Selenium APIs to control browser instances distributed over a grid of
-machines, allowing more tests to run in parallel. Within the project,
-they are referred to as ``IDE'', ``WebDriver'' and ``Grid''. This
-chapter explores the architecture of Selenium WebDriver.
+%% Before describing the architecture of Selenium it helps to understand
+%% how the various related pieces of the
+%% project fit together. At a very high level, Selenium is a suite of
+%% three tools. The first of these tools, Selenium
+%% IDE, is an extension for Firefox that allows users to record and
+%% playback tests. The record/playback paradigm can be limiting and isn't
+%% suitable for many users, so the second tool in the suite, Selenium
+%% WebDriver, provides APIs in a variety of languages to allow for more
+%% control and the application of standard software development
+%% practices. The final tool, Selenium Grid, makes it possible to use the
+%% Selenium APIs to control browser instances distributed over a grid of
+%% machines, allowing more tests to run in parallel. Within the project,
+%% they are referred to as ``IDE'', ``WebDriver'' and ``Grid''. This
+%% chapter explores the architecture of Selenium WebDriver.
+Seleniumのアーキテクチャについて語る前に、プロジェクト内のさまざまなパーツがどのように関連するのかを説明しておこう。上位レベルから見ると、Seleniumは三つのツールを組み合わせたものである。そのうちの一つであるSelenium IDEはFirefoxの拡張で、これを使うとテストの記録や再生ができる。この「記録/再生」のパラダイムは限定的なものであり、多くのユーザーにとっては物足りないものだ。そこで登場するのが第二のツールであるSelenium WebDriverだ。さまざまな言語向けのAPIを提供しており、より細やかな制御を行うことができるし、標準のソフトウェア開発の流れに組み込むこともできる。最後のツールはSelenium Gridだ。これを使うと、Selenium APIで分散環境にあるブラウザのインスタンスを制御でき、テストを並列に実行できるようになる。Seleniumプロジェクト内では、これらのツールはそれぞれ``IDE''、``WebDriver''そして``Grid''と呼ばれている。本章で扱うのはSelenium WebDriverのアーキテクチャである。
 
-This chapter was written during the betas of Selenium 2.0 in late
-2010. If you're reading the book after then, then things will have
-moved forward, and you'll be able to see how the architectural choices
-described here have unfolded. If you're reading before that date:
-Congratulations! You have a time machine. Can I have some winning
-lottery numbers?
+%% This chapter was written during the betas of Selenium 2.0 in late
+%% 2010. If you're reading the book after then, then things will have
+%% moved forward, and you'll be able to see how the architectural choices
+%% described here have unfolded. If you're reading before that date:
+%% Congratulations! You have a time machine. Can I have some winning
+%% lottery numbers?
+本章の内容はSelenium 2.0のベータ版に基づいており、2010年の後半に執筆された。もしそれより後にこれを読んでいるのなら、世間はさらに進んでいることだろう。ここで取り上げたアーキテクチャに関する選択が実際にどのような形で実装されたのかを見られるかもしれない。もし2010年後半よりも前にこれを読んでいるのなら…おめでとう!あなたはついにタイムマシンを手に入れたんだね!頼むから、宝くじの当選番号を教えてくれないかな?
 
 \begin{aosasect1}{History}
 
