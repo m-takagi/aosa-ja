@@ -33,114 +33,124 @@ Seleniumのアーキテクチャについて語る前に、プロジェクト内
 %% lottery numbers?
 本章の内容はSelenium 2.0のベータ版に基づいており、2010年の後半に執筆された。もしそれより後にこれを読んでいるのなら、世間はさらに進んでいることだろう。ここで取り上げたアーキテクチャに関する選択が実際にどのような形で実装されたのかを見られるかもしれない。もし2010年後半よりも前にこれを読んでいるのなら…おめでとう!あなたはついにタイムマシンを手に入れたんだね!頼むから、宝くじの当選番号を教えてくれないかな?
 
-\begin{aosasect1}{History}
+%% \begin{aosasect1}{History}
+\begin{aosasect1}{歴史}
 
-Jason Huggins started the Selenium project in 2004 while working at
-ThoughtWorks on their in-house Time and Expenses (T\&E) system, which
-made extensive use of Javascript. Although Internet Explorer was the
-dominant browser at the time, ThoughtWorks used a number of
-alternative browsers (in particular Mozilla variants) and would file
-bug reports when the T\&E app wouldn't work on their browser of
-choice. Open Source testing tools at the time were either focused on a
-single browser (typically IE) or were simulations of a browser (like
-HttpUnit).  The cost of a license for a commercial tool would have
-exhausted the limited budget for a small in-house project, so they
-weren't even considered as viable testing choices.
+%% Jason Huggins started the Selenium project in 2004 while working at
+%% ThoughtWorks on their in-house Time and Expenses (T\&E) system, which
+%% made extensive use of Javascript. Although Internet Explorer was the
+%% dominant browser at the time, ThoughtWorks used a number of
+%% alternative browsers (in particular Mozilla variants) and would file
+%% bug reports when the T\&E app wouldn't work on their browser of
+%% choice. Open Source testing tools at the time were either focused on a
+%% single browser (typically IE) or were simulations of a browser (like
+%% HttpUnit).  The cost of a license for a commercial tool would have
+%% exhausted the limited budget for a small in-house project, so they
+%% weren't even considered as viable testing choices.
+ジェイソン・ハギンズがSeleniumプロジェクトを立ち上げたのは2004年のこと。そのとき彼はThoughtWorksで社内用の勤怠管理(T\&E: Time and Expenses)システムを開発していた。それは、Javascriptを使いまくるシステムだった。Internet Explorerがシェアを支配していた時代だったが、ThoughtWorksではそれ以外のブラウザも使われており(特にMozilla系が多かった)、T\&Eアプリがそういったブラウザで動かないというバグ報告も受けていた。当時のオープンソースのテストツールといえば、特定のブラウザ(たいていIE)に絞ったものかブラウザをシミュレートするもの(HttpUnitなど)しかなかった。商用のツールのライセンスを購入するというのは、限られた予算の社内システムでは無理な話だった。そのため、そもそも選択肢にすら入っていなかった。
 
-Where automation is difficult, it's common to rely on manual
-testing. This approach doesn't scale when the team is very small or
-when releases are extremely frequent. It's also a waste of humanity to
-ask people to step through a script that could be automated. More
-prosaically, people are slower and more error prone than a machine for
-dull repetitive tasks.  Manual testing wasn't an option.
+%% Where automation is difficult, it's common to rely on manual
+%% testing. This approach doesn't scale when the team is very small or
+%% when releases are extremely frequent. It's also a waste of humanity to
+%% ask people to step through a script that could be automated. More
+%% prosaically, people are slower and more error prone than a machine for
+%% dull repetitive tasks.  Manual testing wasn't an option.
+自動化が困難なときには手動でのテストに頼るのが一般的だ。しかし、チームの規模が小さいときやリリース頻度が極端に高いときなどにはこの方式はスケールしない。また、自動化できるはずの手順をいちいちやってもらうように頼むのも、彼らの人間性を浪費しているように思える。はっきり言って、人はくだらない繰り返し作業をするのが苦手だ。機械に比べて能率も悪いし間違いも多い。手動でのテストも選択肢から消えた。
 
-Fortunately, all the browsers being tested supported Javascript. It
-made sense to Jason and the team he was working with to write a
-testing tool in that language which could be used to verify the
-behavior of the application. Inspired by work being done on
-FIT\footnote{\url{http://fit.c2.com}}, a table-based syntax was placed
-over the raw Javascript and this allowed tests to be written by people
-with limited programming experience using a keyword-driven approach in
-HTML files. This tool, originally called ``Selenium'' but later
-referred to as ``Selenium Core'', was released under the Apache 2
-license in 2004.
+%% Fortunately, all the browsers being tested supported Javascript. It
+%% made sense to Jason and the team he was working with to write a
+%% testing tool in that language which could be used to verify the
+%% behavior of the application. Inspired by work being done on
+%% FIT\footnote{\url{http://fit.c2.com}}, a table-based syntax was placed
+%% over the raw Javascript and this allowed tests to be written by people
+%% with limited programming experience using a keyword-driven approach in
+%% HTML files. This tool, originally called ``Selenium'' but later
+%% referred to as ``Selenium Core'', was released under the Apache 2
+%% license in 2004.
+幸いなことに、テスト対象のブラウザはすべてJavascriptをサポートしていた。ジェイソンやチームのメンバーがJavascriptを使ってテストツールを書こうとしたのも自然なことだった。そのツールを使って、アプリケーションのふるまいを検証しようとしたのだ。既にあったFIT\footnote{\url{http://fit.c2.com}}の影響を受け、生のJavascriptではなく表形式の構文を採用した。そのおかげて、プログラミングの経験が少ない人でもHTMLファイルにキーワードを書き込んでテストを書けるようになった。このツールは当初``Selenium''と呼ばれていたが、後に``Selenium Core''という名前に変わり、Apache 2ライセンスで2004年に公開された。
 
-The table format of Selenium is structured similarly to the
-ActionFixture from FIT\@. Each row of the table is split into three
-columns. The first column gives the name of the command to execute,
-the second column typically contains an element identifier and the
-third column contains an optional value. For example, this is how to
-type the string ``Selenium WebDriver'' into an element identified with
-the name ``q'':
+%% The table format of Selenium is structured similarly to the
+%% ActionFixture from FIT\@. Each row of the table is split into three
+%% columns. The first column gives the name of the command to execute,
+%% the second column typically contains an element identifier and the
+%% third column contains an optional value. For example, this is how to
+%% type the string ``Selenium WebDriver'' into an element identified with
+%% the name ``q'':
+Seleniumの表の書式は、FITのActionFixtureと似ており、テーブルの各行が三つのカラムに分かれている。最初のカラムには実行するコマンド名を指定し、次のカラムには要素のID、そして最後のカラムにはオプションの値を指定する。たとえばこれは、``Selenium WebDriver''という文字列ををnameが``q''である要素に入力する例だ。
 
 \begin{verbatim}
 type       name=q       Selenium WebDriver
 \end{verbatim}
 
-Because Selenium was written in pure Javascript,
-its initial design required developers to host Core and
-their tests on the same server as the application under test
-(AUT) in order to avoid falling foul of the browser's security
-policies and the Javascript sandbox. This was not always
-practical or possible.  Worse, although a
-developer's IDE gives them the ability to swiftly manipulate code and
-navigate a large codebase, there is no such tool for HTML\@. It rapidly
-became clear that maintaining even a medium-sized suite of tests was
-an unwieldy and painful proposition.\footnote{This is very similar to
-FIT, and James Shore, one of that project's coordinators, helps
-explain some of the drawbacks at
-\url{http://jamesshore.com/Blog/The-Problems-With-Acceptance-Testing.html}.}
+%% Because Selenium was written in pure Javascript,
+%% its initial design required developers to host Core and
+%% their tests on the same server as the application under test
+%% (AUT) in order to avoid falling foul of the browser's security
+%% policies and the Javascript sandbox. This was not always
+%% practical or possible.  Worse, although a
+%% developer's IDE gives them the ability to swiftly manipulate code and
+%% navigate a large codebase, there is no such tool for HTML\@. It rapidly
+%% became clear that maintaining even a medium-sized suite of tests was
+%% an unwieldy and painful proposition.\footnote{This is very similar to
+%% FIT, and James Shore, one of that project's coordinators, helps
+%% explain some of the drawbacks at
+%% \url{http://jamesshore.com/Blog/The-Problems-With-Acceptance-Testing.html}.}
+SeleniumはJavascriptだけで書かれているので、初期の設計ではCoreやテスト群をテスト対象のアプリケーション(AUT)と同じサーバーに置く必要があった。ブラウザのセキュリティポリシーやJavascriptのサンドボックスの制限を回避するためである。しかし、現実的にそれが不可能な場合だってある。さらに悪いことに、開発者用のIDEには巨大なコードベースを縦横無尽に渡り歩くための機能が用意されているのに、HTML用のツールにはそういったものが存在しない。程なくわかったことだが、そんなに大きくないテストスイートの保守ですら面倒できつい作業になった。\footnote{これはFITでも同じだった。プロジェクトのメンバーの一人であるジェイムズ・ショアが、その弱点について\url{http://jamesshore.com/Blog/The-Problems-With-Acceptance-Testing.html}で説明している。}
 
 
-To resolve this and other issues, an HTTP proxy was written so that
-every HTTP request could be intercepted by Selenium. Using this
-proxy made it possible to side-step many of the constraints of the ``same host
-origin'' policy, where a browser won't allow Javascript to make calls
-to anything other than the server from which the current page has been
-served, allowing the first weakness to be mitigated. The design opened
-up the possibility of writing Selenium bindings in multiple languages:
-they just needed to be able to send HTTP requests to a particular
-URL\@. The wire format was closely modeled on the table-based syntax of
-Selenium Core and it, along with the table-based syntax, became
-known as ``Selenese''. Because the language bindings were controlling
-the browser at a distance, the tool was called ``Selenium Remote
-Control'', or ``Selenium RC''.
+%% To resolve this and other issues, an HTTP proxy was written so that
+%% every HTTP request could be intercepted by Selenium. Using this
+%% proxy made it possible to side-step many of the constraints of the ``same host
+%% origin'' policy, where a browser won't allow Javascript to make calls
+%% to anything other than the server from which the current page has been
+%% served, allowing the first weakness to be mitigated. The design opened
+%% up the possibility of writing Selenium bindings in multiple languages:
+%% they just needed to be able to send HTTP requests to a particular
+%% URL\@. The wire format was closely modeled on the table-based syntax of
+%% Selenium Core and it, along with the table-based syntax, became
+%% known as ``Selenese''. Because the language bindings were controlling
+%% the browser at a distance, the tool was called ``Selenium Remote
+%% Control'', or ``Selenium RC''.
+この問題やその他の問題を解決するために、HTTPプロキシが書かれた。これを使い、すべてのHTTPリクエストをSeleniumで捕捉できるようにしたのだ。このプロキシを使えば、``同一生成元ポリシー''の制約の多くを回避できるようになった。このポリシーは、Javascriptからそのページを提供するサーバー以外への呼び出しを許可しないというものである。これを回避できたことで、最初の弱点は何とかしのげるようになった。この設計のおかげて、Seleniumのバインディングを複数の言語で書けるようにもなった。必要なのは、単に特定のURLにHTTPリクエストを送信する機能だけである。連結用の書式はSelenium Coreの表形式の構文をもとにして作られ、その表形式の構文と併せて後に``Selenese''として知られるようになった。他言語のバインディングはブラウザを遠隔操作するものだったので、このツールは``Selenium Remote Control''あるいは``Selenium RC''と呼ばれることになった。
 
-While Selenium was being developed, another browser automation
-framework was brewing at ThoughtWorks: WebDriver. The initial code for
-this was released early in 2007. WebDriver was derived from work on
-projects which wanted to isolate their end-to-end tests from the
-underlying test tool.  Typically, the way that this isolation is done
-is via the Adapter pattern.  WebDriver grew out of insight
-developed by applying this approach consistently over numerous
-projects, and initially was a wrapper around HtmlUnit. Internet
-Explorer and Firefox support followed rapidly after release.
+%% While Selenium was being developed, another browser automation
+%% framework was brewing at ThoughtWorks: WebDriver. The initial code for
+%% this was released early in 2007. WebDriver was derived from work on
+%% projects which wanted to isolate their end-to-end tests from the
+%% underlying test tool.  Typically, the way that this isolation is done
+%% is via the Adapter pattern.  WebDriver grew out of insight
+%% developed by applying this approach consistently over numerous
+%% projects, and initially was a wrapper around HtmlUnit. Internet
+%% Explorer and Firefox support followed rapidly after release.
+Seleniumの開発が進む一方で、別のブラウザ自動化フレームワークもThoughtWorksで生まれていた。それがWebDriverで、最初のコードは2007年始めに公開された。WebDriverは、あるプロジェクトから派生したツールである。そのプロジェクトでは、エンドツーエンドテストをテストツールから分離しようとしていたのだ。一般的な例にならい、分離する方法としてAdapterパターンを使った。WebDriverは、これまでに多数のプロジェクトに適用されてきた結果から生み出されたもので、当初はHtmlUnitに対するラッパーだった。その後、Internet ExplorerやFirefoxのサポートもすぐに追加された。
 
-When WebDriver was released there were significant differences between
-it and Selenium RC, though they sat in the same software niche of an
-API for browser automation.  The most obvious difference to a user was
-that Selenium RC had a dictionary-based API, with all methods exposed
-on a single class, whereas WebDriver had a more object-oriented API\@.
-In addition, WebDriver only supported Java, whereas Selenium RC
-offered support for a wide-range of languages.  There were also strong
-technical differences: Selenium Core (on which RC was based) was
-essentially a Javascript application, running inside the browser's
-security sandbox. WebDriver attempted to bind natively to the browser,
-side-stepping the browser's security model at the cost of
-significantly increased development effort for the framework itself.
+%% When WebDriver was released there were significant differences between
+%% it and Selenium RC, though they sat in the same software niche of an
+%% API for browser automation.  The most obvious difference to a user was
+%% that Selenium RC had a dictionary-based API, with all methods exposed
+%% on a single class, whereas WebDriver had a more object-oriented API\@.
+%% In addition, WebDriver only supported Java, whereas Selenium RC
+%% offered support for a wide-range of languages.  There were also strong
+%% technical differences: Selenium Core (on which RC was based) was
+%% essentially a Javascript application, running inside the browser's
+%% security sandbox. WebDriver attempted to bind natively to the browser,
+%% side-stepping the browser's security model at the cost of
+%% significantly increased development effort for the framework itself.
+WebDriverが公開されたとき、WebDriverとSelenium RCの間には大きな違いがあった。しかしどちらも、ブラウザの自動化のためのAPIを提供するというニッチを狙っているという点では共通していた。ユーザーから見たときの最大の相違点は、Selenium RCは辞書ベースのAPIですべてのメソッドを単一のクラスで公開しているのに対してWebDriverはよりオブジェクト指向なAPIを提供していることだった。さらに、WebDriverがサポートするのがJavaだけであるのに対してSelenium RCはさまざまな言語に対応していた。それ以外にも技術的な違いがあった。Selenium Core (RCの元になっているもの)は基本的にJavascriptアプリケーションで、ブラウザのセキュリティサンドボックス内で動作する。WebDriverはネイティブにブラウザにバインドすることを試みており、フレームワーク自身の開発に要する労力を犠牲にしてでもブラウザのセキュリティモデルを回避しようとしている。
 
-In August, 2009, it was announced that the two projects would merge,
-and Selenium WebDriver is the result of those merged projects.
-As I write this, WebDriver supports language bindings for Java, C\#,
-Python and Ruby. It offers support for Chrome, Firefox, Internet
-Explorer, Opera, and the Android and iPhone browsers. There are sister
-projects, not kept in the same source code repository but working
-closely with the main project, that provide Perl bindings, an
-implementation for the BlackBerry browser, and for ``headless''
-WebKit---useful for those times where tests need to run on a
-continuous integration server without a proper display. The original
-Selenium RC mechanism is still maintained and allows WebDriver to
-provide support for browsers that would otherwise be unsupported.
+%% In August, 2009, it was announced that the two projects would merge,
+%% and Selenium WebDriver is the result of those merged projects.
+%% As I write this, WebDriver supports language bindings for Java, C\#,
+%% Python and Ruby. It offers support for Chrome, Firefox, Internet
+%% Explorer, Opera, and the Android and iPhone browsers. There are sister
+%% projects, not kept in the same source code repository but working
+%% closely with the main project, that provide Perl bindings, an
+%% implementation for the BlackBerry browser, and for ``headless''
+%% WebKit---useful for those times where tests need to run on a
+%% continuous integration server without a proper display. The original
+%% Selenium RC mechanism is still maintained and allows WebDriver to
+%% provide support for browsers that would otherwise be unsupported.
+2009年8月、二つのプロジェクトが合流することが発表された。その結果として登場したのがSelenium WebDriverだ。執筆時点では、WebDriverがサポートしている言語はJavaとC\#、Python、そしてRubyである。また、ChromeやFirefox、Internet Explorer、Opera、そしてAndroidやiPhoneのブラウザに対応している。Selenium WebDriverには姉妹プロジェクトもある。ソースコードリポジトリは別だが本体のプロジェクトと密接に連携して開発が進められており、PerlのバインディングやBlackBerryのブラウザ用の実装を用意している。また、``headless(画面なし)''のWebKitにも対応する。これはテストを継続的インテグレーションサーバーで画面なしで実行しなければならないときに便利だ。元々のSelenium RCの仕組みは今でも保守されており、WebDriverが未対応なブラウザもこれでサポートすることができる。
 
 \end{aosasect1}
 

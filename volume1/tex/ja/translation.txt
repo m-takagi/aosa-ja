@@ -22,7 +22,7 @@ mercurial.tex
 nosql.tex
 packaging.tex
 riak.tex
-selenium.tex        TAKAGI Masahiro <matakagi@gmail.com>        5
+selenium.tex        TAKAGI Masahiro <matakagi@gmail.com>       10
 sendmail.tex
 snowflock.tex
 socialcalc.tex
