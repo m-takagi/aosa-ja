@@ -154,39 +154,46 @@ WebDriverが公開されたとき、WebDriverとSelenium RCの間には大きな
 
 \end{aosasect1}
 
-\begin{aosasect1}{A Digression About Jargon}
+%% \begin{aosasect1}{A Digression About Jargon}
+\begin{aosasect1}{ジャーゴンについての余談}
 
-Unfortunately, the Selenium project uses a lot of jargon.  To recap
-what we've already come across:
+%% Unfortunately, the Selenium project uses a lot of jargon.  To recap
+%% what we've already come across:
+残念ながら、Seleniumプロジェクトにはジャーゴンが氾濫している。これまでに登場したものをまとめてみよう。
 
 \begin{aosaitemize}
 
-  \item \emph{Selenium Core} is the heart of the original Selenium implementation,
-  and is a set of Javascript scripts that control the browser. This is
-  sometimes referred to as ``Selenium'' and sometimes as ``Core''.
+  %% \item \emph{Selenium Core} is the heart of the original Selenium implementation,
+  %% and is a set of Javascript scripts that control the browser. This is
+  %% sometimes referred to as ``Selenium'' and sometimes as ``Core''.
+  \item \emph{Selenium Core} は当初のSeleniumの実装の中心となる部分のことで、ブラウザを制御するためのJavascript群である。時には``Selenium''と呼ばれることもあるし、``Core''と呼ばれることもある。
 
-  \item \emph{Selenium RC} was the name given to the language bindings for Selenium
-  Core, and is commonly, and confusingly, referred to as just
-  ``Selenium'' or ``RC''.  It has now been replaced by Selenium
-  WebDriver, where RC's API is referred to as the ``Selenium 1.x API''.
+  %% \item \emph{Selenium RC} was the name given to the language bindings for Selenium
+  %% Core, and is commonly, and confusingly, referred to as just
+  %% ``Selenium'' or ``RC''.  It has now been replaced by Selenium
+  %% WebDriver, where RC's API is referred to as the ``Selenium 1.x API''.
+  \item \emph{Selenium RC} は、Selenium Core用の言語バインディングを表す。紛らわしいことに、これもまた``Selenium''と呼ばれることもあるし``RC''と呼ばれることもある。現在はSelenium WebDriverに置き換わっており、RCのAPIは``Selenium 1.x API''と呼ばれる。
 
-  \item \emph{Selenium WebDriver} fits in the same niche as RC did, and has subsumed
-  the original 1.x bindings.  It refers to both the language bindings
-  and the implementations of the individual browser controlling
-  code. This is commonly referred to as just ``WebDriver'' or sometimes
-  as Selenium 2. Doubtless, this will be contracted to ``Selenium'' over
-  time.
+  %% \item \emph{Selenium WebDriver} fits in the same niche as RC did, and has subsumed
+  %% the original 1.x bindings.  It refers to both the language bindings
+  %% and the implementations of the individual browser controlling
+  %% code. This is commonly referred to as just ``WebDriver'' or sometimes
+  %% as Selenium 2. Doubtless, this will be contracted to ``Selenium'' over
+  %% time.
+  \item \emph{Selenium WebDriver} は、かつてRCが扱っていたのと同じニッチを埋めるものであり、1.x系のバインディングを包含している。この言葉は、言語バインディングだけでなく個別のブラウザ制御用コードの実装のことも指す。一般的には単に``WebDriver''と呼ばれており、時にはSelenium 2と呼ばれることもある。そのうち、さらに短縮して``Selenium''と呼ばれるようになるであろうことは疑う余地もない。
 
 \end{aosaitemize}
 
-The astute reader will have noticed that ``Selenium'' is used in a
-fairly general sense. Fortunately, context normally makes it clear
-which particular Selenium people are referring to.
+%% The astute reader will have noticed that ``Selenium'' is used in a
+%% fairly general sense. Fortunately, context normally makes it clear
+%% which particular Selenium people are referring to.
+賢明な読者のみなさんはお気づきだろうが、``Selenium''という用語があまりにもいろんな場面で使われすぎている。しかし幸いなことに、その「Selenium」が何を表すのかは話の流れで明確になることが多い。
 
-Finally, there's one more phrase which I'll be using, and there's no
-graceful way of introducing it: ``driver'' is the name given to a
-particular implementation of the WebDriver API\@. For example, there is
-a Firefox driver, and an Internet Explorer driver.
+%% Finally, there's one more phrase which I'll be using, and there's no
+%% graceful way of introducing it: ``driver'' is the name given to a
+%% particular implementation of the WebDriver API\@. For example, there is
+%% a Firefox driver, and an Internet Explorer driver.
+最後に、これから使うであろうフレーズをもうひとつ紹介しておく。``ドライバ''だ。この用語は、WebDriver APIの特定の実装を指す名前として使う。たとえば、FirefoxドライバやInternet Explorerドライバといった使い方をする。
 
 \end{aosasect1}
 
