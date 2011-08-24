@@ -416,27 +416,30 @@ WebDriverが制御するブラウザは、別のプロセスで動いている�
 
 \end{aosasect1}
 
-\begin{aosasect1}{Coping with Complexity}
+%% \begin{aosasect1}{Coping with Complexity}
+\begin{aosasect1}{複雑性への対応}
 
-Software is a lumpy construct. The lumps are complexity, and as
-designers of an API we have a choice as where to push that
-complexity. At one extreme we could spread the complexity as evenly as
-possible, meaning that every consumer of the API needs to be party to
-it. The other extreme suggests taking as much of the complexity as
-possible and isolating it in a single place. That single place would
-be a place of darkness and terror for many if they have to venture
-there, but the trade-off is that users of the API, who need not delve
-into the implementation, have that cost of complexity paid up-front
-for them.
+%% Software is a lumpy construct. The lumps are complexity, and as
+%% designers of an API we have a choice as where to push that
+%% complexity. At one extreme we could spread the complexity as evenly as
+%% possible, meaning that every consumer of the API needs to be party to
+%% it. The other extreme suggests taking as much of the complexity as
+%% possible and isolating it in a single place. That single place would
+%% be a place of darkness and terror for many if they have to venture
+%% there, but the trade-off is that users of the API, who need not delve
+%% into the implementation, have that cost of complexity paid up-front
+%% for them.
+ソフトウェアは、こぶだらけででこぼこな構造である。その原因は複雑性であり、APIを設計する側の立場で考えると、その複雑性をどこに押し込めるかを判断しなければならない。究極の選択として、複雑性を可能な限りまんべんなく広げるという方法がある。これは、APIの利用者に複雑性をすべて押しつけてしまうというものである。その対極にあるのが、API側で可能な限り複雑性を囲い込み、一か所に隔離してしまうという方法である。囲い込んだ場所は暗黒地帯となり、そこに手を入れるのはとても恐ろしい作業になるだろう。しかしその見返りとして、APIのユーザーは実装に深入りせずに済むようになる。つまり、ユーザーが複雑性に立ち向かうためのコストを設計者側で前払いしたことになる。
 
-The WebDriver developers lean more towards finding and isolating the
-complexity in a few places rather than spreading it out. One reason
-for this is our users. They're exceptionally good at finding problems
-and issues, as a glance at our bug list shows, but because many of
-them are not developers a complex API isn't going to work well. We
-sought to provide an API that guides people in the right direction. As
-an example, consider the following methods from the original Selenium
-API, each of which can be used to set the value of an input element:
+%% The WebDriver developers lean more towards finding and isolating the
+%% complexity in a few places rather than spreading it out. One reason
+%% for this is our users. They're exceptionally good at finding problems
+%% and issues, as a glance at our bug list shows, but because many of
+%% them are not developers a complex API isn't going to work well. We
+%% sought to provide an API that guides people in the right direction. As
+%% an example, consider the following methods from the original Selenium
+%% API, each of which can be used to set the value of an input element:
+WebDriverの開発者は、複雑性を見つけたらそれをできるだけ特定のいくつかの場所に隔離するよう心がけている。そのまま広めることはしない。その理由のひとつはユーザー層である。彼らはバグや問題点を見つけることにかけては並はずれた力を持っている。それは我々のバグリストを見れば明らかだ。しかし、彼らの多くは開発者ではないので、あまり複雑なAPIはうまく使いこなせない。我々が求めるAPIは、利用者を正しい方向に導けるようなものだ。たとえば、オリジナルのSelenium APIのこれらのメソッドについて考えてみよう。これらはどれも、input要素に値を設定するために使うものだ。
 
 \begin{aosaitemize}
 
@@ -462,7 +465,8 @@ API, each of which can be used to set the value of an input element:
 
 \end{aosaitemize}
 
-Here's the equivalent in the WebDriver API:
+%% Here's the equivalent in the WebDriver API:
+同じことを実現するためのWebDriverのAPIは、これだ。
 
 \begin{aosaitemize}
 
@@ -470,58 +474,72 @@ Here's the equivalent in the WebDriver API:
 
 \end{aosaitemize}
 
-As discussed earlier, this highlights one of the major philosophical
-differences between RC and WebDriver in that WebDriver is striving to
-emulate the user, whereas RC offers APIs that deal at a lower level
-that a user would find hard or impossible to reach. The distinction
-between \code{typeKeys} and \code{typeKeysNative} is that the former
-always uses synthetic events, whereas the latter attempts to use the
-AWT Robot to type the keys. Disappointingly, the AWT Robot sends the
-key presses to whichever window has focus, which may not necessarily
-be the browser. WebDriver's native events, by contrast, are sent
-directly to the window handle, avoiding the requirement that the
-browser window have focus.
+%% As discussed earlier, this highlights one of the major philosophical
+%% differences between RC and WebDriver in that WebDriver is striving to
+%% emulate the user, whereas RC offers APIs that deal at a lower level
+%% that a user would find hard or impossible to reach. The distinction
+%% between \code{typeKeys} and \code{typeKeysNative} is that the former
+%% always uses synthetic events, whereas the latter attempts to use the
+%% AWT Robot to type the keys. Disappointingly, the AWT Robot sends the
+%% key presses to whichever window has focus, which may not necessarily
+%% be the browser. WebDriver's native events, by contrast, are sent
+%% directly to the window handle, avoiding the requirement that the
+%% browser window have focus.
+先述のとおり、これはRCとWebDriverの思想の大きな違いのひとつを表している。WebDriverが目指すのがユーザーをエミュレートすることであるのに対して、RCが提供するAPIはより低レベルのものであり、ユーザーの視点では見つけづらかったり到達不能だったりするものである。\code{typeKeys}と\code{typeKeysNative}の違いは、前者が常に合成イベントを使うのに対して後者はAWTのRobotを使ったキータイプを試みるという点である。残念なことに、AWTのRobotがキープレスイベントを送信する先はフォーカスがあたっているウィンドウになる。これは必ずしもブラウザであるとは限らない。WebDriverは、それとは対照的に、ウィンドウハンドルに対して直接イベントを送信する。そのため、ブラウザのウィンドウにフォーカスがあたっている必要はない。
 
-\begin{aosasect2}{The WebDriver Design}
+%% \begin{aosasect2}{The WebDriver Design}
+\begin{aosasect2}{WebDriverの設計}
 
-The team refers to WebDriver's API as being ``object-based''. The
-interfaces are clearly defined and try to adhere to having only a
-single role or responsibility, but rather than modeling every single
-possible HTML tag as its own class we only have a single
-\code{WebElement} interface. By following this approach developers
-who are using an IDE which supports auto-completion can be led towards
-the next step to take. The result is that coding sessions may
-look like this (in Java):
+%% The team refers to WebDriver's API as being ``object-based''. The
+%% interfaces are clearly defined and try to adhere to having only a
+%% single role or responsibility, but rather than modeling every single
+%% possible HTML tag as its own class we only have a single
+%% \code{WebElement} interface. By following this approach developers
+%% who are using an IDE which supports auto-completion can be led towards
+%% the next step to take. The result is that coding sessions may
+%% look like this (in Java):
+開発チームでは、WebDriverのAPIが``オブジェクトベース''であるよう心がけている。インターフェイスを明確に定義して単一のロールあるいは責務だけを受け持たせようとする。しかし、考えうるすべてのHTMLタグを個別にモデル化するわけではなく、我々が用意したのは一つの\code{WebElement}インターフェイスだけである。この方針で進めると、自動補完機能を持つIDEを使う開発者に対して次に進むべき道を示せる。コーディングは、(たとえばJavaの場合)このような具合になる。
 
+%% \begin{verbatim}
+%% WebDriver driver = new FirefoxDriver();
+%% driver.<user hits space>
+%% \end{verbatim}
 \begin{verbatim}
 WebDriver driver = new FirefoxDriver();
-driver.<user hits space>
+driver.<ここでスペースキーを打つ>
 \end{verbatim}
 
-\noindent At this point, a relatively short list of 13 methods to pick from
-appears. The user selects one:
+%% \noindent At this point, a relatively short list of 13 methods to pick from
+%% appears. The user selects one:
+\noindent このときに現れるのは、比較的少なめな13種類のメソッドである。その中から適切なものを選ぶことになる。
 
+%% \begin{verbatim}
+%% driver.findElement(<user hits space>)
+%% \end{verbatim}
 \begin{verbatim}
-driver.findElement(<user hits space>)
+driver.findElement(<ここでスペースキーを打つ>)
 \end{verbatim}
 
-\noindent Most IDEs will now drop a hint about the type of the argument
-expected, in this case a ``By''. There are a number of preconfigured
-factory methods for ``By'' objects declared as static methods on the
-By itself. Our user will quickly end up with a line of code that looks
-like:
+%% \noindent Most IDEs will now drop a hint about the type of the argument
+%% expected, in this case a ``By''. There are a number of preconfigured
+%% factory methods for ``By'' objects declared as static methods on the
+%% By itself. Our user will quickly end up with a line of code that looks
+%% like:
+\noindent たいていのIDEは、ここで引数の型に関するヒントを表示する。この場合は``By''である。``By''オブジェクトには定義済みのファクトリーメソッドが数多く用意されており、By自身のスタティックメソッドとして宣言されている。ユーザーは、あっという間にこのような状態までたどりつけるだろう。
 
 \begin{verbatim}
 driver.findElement(By.id("some_id"));
 \end{verbatim}
 
-\begin{aosabox}{Role-based Interfaces}
+%% \begin{aosabox}{Role-based Interfaces}
+\begin{aosabox}{ロールベースのインターフェイス}
 
-Think of a simplified \code{Shop} class. Every day, it needs to be
-restocked, and it collaborates with a \code{Stockist} to deliver this
-new stock. Every month, it needs to pay staff and taxes. For the sake
-of argument, let's assume that it does this using an
-\code{Accountant}. One way of modeling this looks like:
+%% Think of a simplified \code{Shop} class. Every day, it needs to be
+%% restocked, and it collaborates with a \code{Stockist} to deliver this
+%% new stock. Every month, it needs to pay staff and taxes. For the sake
+%% of argument, let's assume that it does this using an
+%% \code{Accountant}. One way of modeling this looks like:
+単純な\code{Shop}クラスを考えてみよう。この店では、毎日のように在庫の補充が必要となる。そこで、\code{Stockist}と協調して新たな在庫を配達する。また、従業員への給与の支払いや税金の支払いが毎月発生する。議論の都合上、これらの処理には\code{Accountant}を使うものとしよう。これをモデリングした一例を次に示す。
 
 \begin{verbatim}
 public interface Shop {
@@ -530,21 +548,24 @@ public interface Shop {
 }
 \end{verbatim}
 
-We have two choices about where to draw the boundaries when defining
-the interface between the Shop, the Accountant and the Stockist. We
-could draw a theoretical line as shown in \aosafigref{fig.sel.int1}.
+%% We have two choices about where to draw the boundaries when defining
+%% the interface between the Shop, the Accountant and the Stockist. We
+%% could draw a theoretical line as shown in \aosafigref{fig.sel.int1}.
+ShopとAccountantそしてStockistの間のインターフェイスを定義するときにどのあたりに境界線を引くか。この問いにはふたつの選択肢がある。理論上の線を\aosafigref{fig.sel.int1}のように引ける。
 
-This would mean that both \code{Accountant} and \code{Stockist} would
-accept a \code{Shop} as an argument to their respective methods. The
-drawback here, though, is that it's unlikely that the Accountant
-really wants to stack shelves, and it's probably not a great idea for
-the Stockist to realize the vast mark-up on prices that the Shop is
-adding. So, a better place to draw the line is shown in
-\aosafigref{fig.sel.int2}.
+%% This would mean that both \code{Accountant} and \code{Stockist} would
+%% accept a \code{Shop} as an argument to their respective methods. The
+%% drawback here, though, is that it's unlikely that the Accountant
+%% really wants to stack shelves, and it's probably not a great idea for
+%% the Stockist to realize the vast mark-up on prices that the Shop is
+%% adding. So, a better place to draw the line is shown in
+%% \aosafigref{fig.sel.int2}.
+これはつまり、\code{Accountant}や\code{Stockist}がそれぞれのメソッドの引数として\code{Shop}を受け付けることを意味する。しかし、この方式には問題もある。Accountantがほんとうに在庫棚を使いたがっているとは思えないし、StockistにとってはShopが追加したさまざまな商品の値上げ情報など知らせる必要もない。そこで、もう少しましな線の引き方を\aosafigref{fig.sel.int2}に示す。
 
-We'll need two interfaces that the Shop needs to implement, but these
-interfaces clearly define the role that the Shop fulfills for both the
-Accountant and the Stockist. They are role-based interfaces:
+%% We'll need two interfaces that the Shop needs to implement, but these
+%% interfaces clearly define the role that the Shop fulfills for both the
+%% Accountant and the Stockist. They are role-based interfaces:
+この場合、Shopはふたつのインターフェイスを実装しなければならない。しかし、これらのインターフェイスは、ShopがAccountantとStockistに対して満たすべきロールを明確に定義している。これが、ロールベースのインターフェイスである。
 
 \begin{verbatim}
 public interface HasBalance {
@@ -560,19 +581,22 @@ public interface Shop extends HasBalance, Stockable {
 \end{verbatim}
 \end{aosabox}
 
-I find \code{UnsupportedOperationExceptions} and their ilk deeply
-displeasing, but there needs to be something that allows functionality
-to be exposed for the subset of users who might need it without
-cluttering the rest of the APIs for the majority of users. To this
-end, WebDriver makes extensive use of role-based interfaces. For
-example, there is a \code{JavascriptExecutor} interface that provides
-the ability to execute arbitrary chunks of Javascript in the context
-of the current page. A successful cast of a WebDriver instance to that
-interface indicates that you can expect the methods on it to work.
+%% I find \code{UnsupportedOperationExceptions} and their ilk deeply
+%% displeasing, but there needs to be something that allows functionality
+%% to be exposed for the subset of users who might need it without
+%% cluttering the rest of the APIs for the majority of users. To this
+%% end, WebDriver makes extensive use of role-based interfaces. For
+%% example, there is a \code{JavascriptExecutor} interface that provides
+%% the ability to execute arbitrary chunks of Javascript in the context
+%% of the current page. A successful cast of a WebDriver instance to that
+%% interface indicates that you can expect the methods on it to work.
+\code{UnsupportedOperationExceptions}やその仲間たちはとても不愉快なものだったが、その機能を必要とする一部のユーザーに対して何らかの手段で機能を公開する必要があった。大多数の他のユーザー向けの他のAPIには影響を及ぼさない形式で。そのための手段として、WebDriverではロールベースのインターフェイスを活用した。たとえば\code{JavascriptExecutor}インターフェイスは、任意のJavascriptコード片を現在のページのコンテキストで実行する機能を提供する。WebDriverのインスタンスをこのインターフェイスにあわせてキャストすれば、このインターフェイスの持つメソッドを使える。
 
-\aosafigure[235pt]{../images/selenium/role-based-interfaces-one-interface.eps}{Accountant and Stockist Depend on Shop}{fig.sel.int1}
+%% \aosafigure[235pt]{../images/selenium/role-based-interfaces-one-interface.eps}{Accountant and Stockist Depend on Shop}{fig.sel.int1}
+\aosafigure[235pt]{../images/selenium/role-based-interfaces-one-interface.eps}{AccountantとStockistがShopに依存する}{fig.sel.int1}
 
-\aosafigure[235pt]{../images/selenium/role-based-interfaces-two-interfaces.eps}{Shop Implements HasBalance and Stockable}{fig.sel.int2}
+%% \aosafigure[235pt]{../images/selenium/role-based-interfaces-two-interfaces.eps}{Shop Implements HasBalance and Stockable}{fig.sel.int2}
+\aosafigure[235pt]{../images/selenium/role-based-interfaces-two-interfaces.eps}{ShopはHasBalanceとStockableを実装する}{fig.sel.int2}
 
 \end{aosasect2}
 
