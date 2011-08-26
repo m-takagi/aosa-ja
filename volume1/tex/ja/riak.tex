@@ -1,59 +1,109 @@
-\begin{aosachapter}{Riak and Erlang/OTP}{s:riak}{Francesco Cesarini, Andy Gross, and Justin Sheehy}
+%\begin{aosachapter}{Riak and Erlang/OTP}{s:riak}{Francesco Cesarini, Andy Gross, and Justin Sheehy}
+\begin{aosachapter}{RiakとErlang/OTP}{s:riak}{Francesco Cesarini, Andy Gross, and Justin Sheehy}
 %% Based on EN-Revision r236
 
-Riak is a distributed, fault tolerant, open source database that
-illustrates how to build large scale systems using Erlang/OTP\@.  Thanks
-in large part to Erlang's support for massively scalable distributed
-systems, Riak offers features that are uncommon in databases, such as
-high-availability and linear scalability of both capacity and
-throughput.
+%% Riak is a distributed, fault tolerant, open source database that
+%% is a distributed, fault tolerant, open source database that
+%% illustrates how to build large scale systems using Erlang/OTP\@.  Thanks
+%% in large part to Erlang's support for massively scalable distributed
+%% systems, Riak offers features that are uncommon in databases, such as
+%% high-availability and linear scalability of both capacity and
+%% throughput.
 
-Erlang/OTP provides an ideal platform for developing systems like Riak
-because it provides inter-node communication, message queues, failure
-detectors, and client-server abstractions out of the box.  What's
-more, most frequently-used patterns in Erlang have been implemented
-in library modules, commonly referred to as OTP behaviors. They
-contain the generic code framework for concurrency and error handling,
-simplifying concurrent programming and protecting
-the developer from many common pitfalls. Behaviors are monitored by
-supervisors, themselves a behavior, and grouped together in
-supervision trees. A supervision tree is packaged in an application,
-creating a building block of an Erlang program.
+Riakは分散型の耐障害性を備えたオープンソースのデータベースで、
+Erlang/OTP\@を使って大規模システムを作るよい例にもなっている。大規模な
+分散システムをErlangがサポートしてくれているおかげで、Riakは高可用性や、
+容量とスループットの両面における線形スケーラビリティといった、データベー
+スではあまり見られない機能を備えている。
 
-A complete Erlang system such as Riak is a set of loosely coupled
-applications that interact with each other. Some of these applications
-have been written by the developer, some are part of the standard
-Erlang/OTP distribution, and some may be other open source
-components. They are sequentially loaded and started by a boot script
-generated from a list of applications and versions.
+%% Erlang/OTP provides an ideal platform for developing systems like Riak
+%% because it provides inter-node communication, message queues, failure
+%% detectors, and client-server abstractions out of the box.  What's
+%% more, most frequently-used patterns in Erlang have been implemented
+%% in library modules, commonly referred to as OTP behaviors. They
+%% contain the generic code framework for concurrency and error handling,
+%% simplifying concurrent programming and protecting
+%% the developer from many common pitfalls. Behaviors are monitored by
+%% supervisors, themselves a behavior, and grouped together in
+%% supervision trees. A supervision tree is packaged in an application,
+%% creating a building block of an Erlang program.
 
-What \emph{differs} among systems are the applications that are part
-of the release which is started. In the standard Erlang distribution,
-the boot files will start the \emph{Kernel} and \emph{StdLib}
-(Standard Library) applications. In some installations, the
-\emph{SASL} (Systems Architecture Support Library) application is also
-started. SASL contains release and software upgrade tools together
-with logging capabilities. Riak is no different, other than starting
-the Riak specific applications as well as their runtime dependencies,
-which include \emph{Kernel}, \emph{StdLib} and \emph{SASL}. A complete and
-ready-to-run build of Riak actually embeds these standard elements of
-the Erlang/OTP distribution and starts them all in unison when
-\code{riak start} is invoked on the command line. Riak consists of
-many complex applications, so this chapter should not be
-interpreted as a complete guide. It should be seen as an introduction
-to OTP where examples from the Riak source code are used. The figures
-and examples have been abbreviated and shortened for demonstration
-purposes.
+Erlang/OTPにはノード間通信、メッセージ・キュー、失敗の検出、クライアン
+ト/サーバの抽象化がもともとあるので、Riakのようなシステムを開発するのに
+理想的なプラットフォームだ。さらに、Erlangでよく使われるパターンは(OTP
+ビヘイビアと呼ばれる)ライブラリ・モジュールとして実装されている。並行プ
+ログラミングを簡単にしたり、開発者がよくある間違いを犯さないようにする
+ため、ビヘイビアには並行実行やエラー処理のための汎用コード・フレームワー
+クが入っている。ビヘイビアはスーパバイザによって監視されていて(スーパバ
+イザ自体もビヘイビアだ)、監視ツリー／＊supervision trees＊／の形でまと
+められる。監視ツリーはアプリケーションとしてパッケージ化され、Erlangプ
+ログラムを構築する際の1つのブロックになる。
 
-\begin{aosasect1}{An Abridged Introduction to Erlang}
+%% A complete Erlang system such as Riak is a set of loosely coupled
+%% applications that interact with each other. Some of these applications
+%% have been written by the developer, some are part of the standard
+%% Erlang/OTP distribution, and some may be other open source
+%% components. They are sequentially loaded and started by a boot script
+%% generated from a list of applications and versions.
 
-Erlang is a concurrent functional programming language that compiles
-to byte code and runs in a virtual machine. Programs consist of
-functions that call each other, often resulting in side effects such
-as inter-process message passing, I/O and database operations. Erlang
-variables are single assignment, i.e., once they have been given
-values, they cannot be updated.  The language makes extensive use of
-pattern matching, as shown in the factorial example below:
+Riakのように完結したErlangシステムは、互いにやり取りし合う疎結合のアプ
+リケーションが集まってできている。このようなアプリケーションには、開発
+者自身が書いたものや、Erlang/OTPの標準配布物に入っているもの、他のオー
+プンソースのものがある。アプリケーションを順番にロードするのはブート・
+スクリプトの役目で、ブート・スクリプトはアプリケーションとそのバージョ
+ンのリストから生成される。
+
+%% What \emph{differs} among systems are the applications that are part
+%% of the release which is started. In the standard Erlang distribution,
+%% the boot files will start the \emph{Kernel} and \emph{StdLib}
+%% (Standard Library) applications. In some installations, the
+%% \emph{SASL} (Systems Architecture Support Library) application is also
+%% started. SASL contains release and software upgrade tools together
+%% with logging capabilities. Riak is no different, other than starting
+%% the Riak specific applications as well as their runtime dependencies,
+%% which include \emph{Kernel}, \emph{StdLib} and \emph{SASL}. A complete and
+%% ready-to-run build of Riak actually embeds these standard elements of
+%% the Erlang/OTP distribution and starts them all in unison when
+%% \code{riak start} is invoked on the command line. Riak consists of
+%% many complex applications, so this chapter should not be
+%% interpreted as a complete guide. It should be seen as an introduction
+%% to OTP where examples from the Riak source code are used. The figures
+%% and examples have been abbreviated and shortened for demonstration
+%% purposes.
+
+
+個々のシステムを特徴付けるのは、リリース物／＊which is started＊／に含
+まれているアプリケーションたちだ。Erlangの標準配布物では、ブート・ファ
+イルから\emph{Kernel}アプリケーションと\emph{StdLib} (Standard
+Library)アプリケーションが起動する。インストール環境によっては、
+\emph{SASL} (Systems Architecture Support Library)アプリケーションも起
+動する。SASLにはリリースやソフトウェア・アップグレードのためのツールと、
+ログ機能が入っている。Riakも同様だが、Riak固有のアプリケーション群と、
+それらが実行時に依存する\emph{Kernel}、\emph{StdLib}、\emph{SASL}も起動
+する。完成して実行可能な状態になっているRiakのビルドにはこれらの
+Erlang/OTP配布物の標準要素が埋め込まれていて、コマンド・ラインから
+\code{riak start}を実行すると順番に起動される。Riakは多数の複雑なアプリ
+ケーションで構成されているので、この章ですべてがわかるとは思わないで、
+Riakのソース・コードに例を取ったOTPの紹介と考えてほしい。説明をわかりや
+すくするため、図や例は省略したり短縮してある。
+
+%% \begin{aosasect1}{An Abridged Introduction to Erlang}
+\begin{aosasect1}{Erlangの簡単な紹介}
+
+%% Erlang is a concurrent functional programming language that compiles
+%% to byte code and runs in a virtual machine. Programs consist of
+%% functions that call each other, often resulting in side effects such
+%% as inter-process message passing, I/O and database operations. Erlang
+%% variables are single assignment, i.e., once they have been given
+%% values, they cannot be updated.  The language makes extensive use of
+%% pattern matching, as shown in the factorial example below:
+
+Erlangは並行実行をサポートした関数型プログラミング言語で、コンパイルし
+たバイト・コードを仮想マシンで実行する。プログラムは関数の呼び出しで構
+成されるが、プロセス間メッセージ・パッシングやI/O、データベース操作など
+の副作用を伴なうこともある。Erlangにおける変数は単一代入だ。つまり、変
+数にいったん値を与えたら、その値を変更することはできない。次の階乗の例
+のように、Erlangではパターン・マッチングを多用する。
 
 \begin{verbatim}
 -module(factorial).
@@ -64,72 +114,133 @@ fac(N) when N>0 ->
    N*Prev.
 \end{verbatim}
 
-\noindent Here, the first clause gives the factorial of zero, the second
-factorials of positive numbers. The body of each clause is a sequence
-of expressions, and the final expression in the body is the result of
-that clause. Calling the function with a negative number will result
-in a run time error, as none of the clauses match. Not handling this
-case is an example of non-defensive programming, a practice encouraged
-in Erlang.
+%% \noindent Here, the first clause gives the factorial of zero, the second
+%% factorials of positive numbers. The body of each clause is a sequence
+%% of expressions, and the final expression in the body is the result of
+%% that clause. Calling the function with a negative number will result
+%% in a run time error, as none of the clauses match. Not handling this
+%% case is an example of non-defensive programming, a practice encouraged
+%% in Erlang.
 
-Within the module, functions are called in the usual way; outside, the
-name of the module is prepended, as in \code{factorial:fac(3)}. It
-is possible to define functions with the same name but different
-numbers of arguments---this is called their \emph{arity}. In the export
-directive in the \code{factorial} module the \code{fac} function of
-arity one is denoted by \code{fac/1}.
+\noindent ここでは、最初の節では0の階乗を定義し、2番目の節では正の数の
+階乗を定義している。各節の本体(ボディ部)には式を並べるが、節の結果とし
+ては最後の式が使われる。負の数に対してこの関数を呼び出すと、どの節にも
+マッチしないため実行時エラーになる。このような場合についての処理をあえ
+て用意しておかないのは、Erlangで推奨される非防御的プログラミング／＊
+non-defensive programming＊／の1つの例だ。
 
-Erlang supports tuples (also called product types) and lists. Tuples
-are enclosed in curly brackets, as in \code{\{ok,37\}}. In tuples, we
-access elements by position. Records are another data type; they allow
-us to store a fixed number of elements which are then accessed and
-manipulated by name. We define a record using the \code{-record(state,
-\{id, msg\_list=[]\}).}  To create an instance, we use the
-expression \code{Var = \#state\{id=1\}}, and we examine its contents
-using \code{Var\#state.id}.  For a variable number of elements, we use
-lists defined in square brackets such as in \code{{[}23,34{]}}. The
-notation \code{{[}X|Xs{]}} matches a non-empty list with head \code{X}
-and tail \code{Xs}. Identifiers beginning with a lower case letter
-denote atoms, which simply stand for themselves; the \code{ok} in the
-tuple \code{\{ok,37\}} is an example of an atom. Atoms used in this
-way are often used to distinguish between different kinds of function
-result: as well as \code{ok} results, there might be results of the
-form \code{\{error, "Error String"\}}.
+%% Within the module, functions are called in the usual way; outside, the
+%% name of the module is prepended, as in \code{factorial:fac(3)}. It
+%% is possible to define functions with the same name but different
+%% numbers of arguments---this is called their \emph{arity}. In the export
+%% directive in the \code{factorial} module the \code{fac} function of
+%% arity one is denoted by \code{fac/1}.
 
-Processes in Erlang systems run concurrently in separate memory, and
-communicate with each other by message passing. Processes can be used
-for a wealth of applications, including gateways to databases, as
-handlers for protocol stacks, and to manage the logging of trace
-messages from other processes. Although these processes handle
-different requests, there will be similarities in how these requests
-are handled.
+モジュール内での関数の呼び出し方法は特に変ったところはないが、モジュー
+ルを越えて関数を呼び出す場合は、\code{factorial:fac(3)}のようにモジュー
+ル名を先頭に付ける。名前が同じだが引数の個数(\emph{arity}と呼ばれる)が
+異なる関数を定義することもできる。\code{factorial} モジュールのexportディ
+レクティブを見るとわかるように、アリティが1の\code{fac}関数を
+\code{fac/1}と表記している。
 
-As processes exist only within the virtual machine, a single VM can
-simultaneously run millions of processes, a feature Riak exploits
-extensively. For example, each request to the database---reads, writes, and
-deletes---is modeled as a separate process, an approach that would
-not be possible with most OS-level threading implementations.
+%% Erlang supports tuples (also called product types) and lists. Tuples
+%% are enclosed in curly brackets, as in \code{\{ok,37\}}. In tuples, we
+%% access elements by position. Records are another data type; they allow
+%% us to store a fixed number of elements which are then accessed and
+%% manipulated by name. We define a record using the \code{-record(state,
+%% \{id, msg\_list=[]\}).}  To create an instance, we use the
+%% expression \code{Var = \#state\{id=1\}}, and we examine its contents
+%% using \code{Var\#state.id}.  For a variable number of elements, we use
+%% lists defined in square brackets such as in \code{{[}23,34{]}}. The
+%% notation \code{{[}X|Xs{]}} matches a non-empty list with head \code{X}
+%% and tail \code{Xs}. Identifiers beginning with a lower case letter
+%% denote atoms, which simply stand for themselves; the \code{ok} in the
+%% tuple \code{\{ok,37\}} is an example of an atom. Atoms used in this
+%% way are often used to distinguish between different kinds of function
+%% result: as well as \code{ok} results, there might be results of the
+%% form \code{\{error, "Error String"\}}.
 
-Processes are identified by process identifiers, called PIDs, but
-they can also be registered under an alias; this should only be used
-for long-lived ``static'' processes. Registering a process with its
-alias allows other processes to send it messages without knowing its
-PID. Processes are created using the \code{spawn(Module, Function,
- Arguments)} built-in function (BIF). BIFs are functions integrated
-in the VM and used to do what is impossible or slow to execute in pure
-Erlang. The \code{spawn/3} BIF takes a \code{Module}, a
-\code{Function} and a list of \code{Arguments} as parameters. The call
-returns the PID of the newly spawned process and as a side effect,
-creates a new process that starts executing the function in the module
-with the arguments mentioned earlier.
+Erlangはタプル(積型とも呼ばれる)とリストをサポートしている。タプルは
+\code{\{ok,37\}}のように波括弧でくくる。タプルの各要素は位置を指定して
+アクセスする。レコードというデータ型もある。レコードは決まった個数の要
+素を持ち、各要素は名前を指定してアクセスしたり操作したりできる。レコー
+ドを定義するには\code{-record(state, \{id, msg\_list=[]\}).}を使う。レ
+コードのインスタンスを作るには\code{Var = \#state\{id=1\}}という式を使
+い、その要素を取り出すには\code{Var\#state.id}とする。要素の個数が一定
+でない場合はリストを使う。リストは\code{{[}23,34{]}}のように角括弧で定
+義する。\code{{[}X|Xs{]}}という表記はヘッドが\code{X}でテールが
+\code{Xs}の空でないリストにマッチする。小文字で始まる識別子はアトム(そ
+れ自身を表わすもの)を示す。たとえば、タプル\code{\{ok,37\}}の\code{ok}
+はアトムだ。このように、アトムは関数が返す様々な結果を区別するのに使う。
+たとえば、関数の結果として\code{ok}の他に\code{\{error, "Error
+  String"\}}というのも考えられる。
 
-A message \code{Msg} is sent to a process with process id \code{Pid}
-using \code{Pid ! Msg}. A process can find out its PID by calling the
-BIF \code{self}, and this can then be sent to other processes for them
-to use to communicate with the original process. Suppose that a
-process expects to receive messages of the form \code{\{ok, N\}} and
-\code{\{error, Reason\}}. To process these it uses a receive
-statement:
+%% Processes in Erlang systems run concurrently in separate memory, and
+%% communicate with each other by message passing. Processes can be used
+%% for a wealth of applications, including gateways to databases, as
+%% handlers for protocol stacks, and to manage the logging of trace
+%% messages from other processes. Although these processes handle
+%% different requests, there will be similarities in how these requests
+%% are handled.
+
+Erlangシステムにおけるプロセスはそれぞれ独立したメモリ空間で並行に動作
+し、メッセージ・パッシングを使って通信する。プロセスの用途は広く、デー
+タベースへのゲートウェイ、プロトコル・スタックのハンドラ、他のプロセス
+からのトレース・メッセージのログ管理などに使える。プロセスは用途に応じ
+て様々な要求を処理するが、要求の処理方法には似た部分がある。
+
+%% As processes exist only within the virtual machine, a single VM can
+%% simultaneously run millions of processes, a feature Riak exploits
+%% extensively. For example, each request to the database---reads, writes, and
+%% deletes---is modeled as a separate process, an approach that would
+%% not be possible with most OS-level threading implementations.
+
+プロセスは仮想マシン(VM)内にしか存在しないため、1つのVMは数百万ものプロ
+セスを同時に実行できる。Riakはこの機能を多いに利用している。たとえば、
+データベースへの要求の1つ1つ(読み出し、書き込み、削除)をそれぞれ独立し
+たプロセスとしてモデル化することができる。このような手法はOSレベルのス
+レッドを用いた実装では非常に困難だろう。
+
+%% Processes are identified by process identifiers, called PIDs, but
+%% they can also be registered under an alias; this should only be used
+%% for long-lived ``static'' processes. Registering a process with its
+%% alias allows other processes to send it messages without knowing its
+%% PID. Processes are created using the \code{spawn(Module, Function,
+%%  Arguments)} built-in function (BIF). BIFs are functions integrated
+%% in the VM and used to do what is impossible or slow to execute in pure
+%% Erlang. The \code{spawn/3} BIF takes a \code{Module}, a
+%% \code{Function} and a list of \code{Arguments} as parameters. The call
+%% returns the PID of the newly spawned process and as a side effect,
+%% creates a new process that starts executing the function in the module
+%% with the arguments mentioned earlier.
+
+プロセスを識別するにはプロセス識別子(PID)を使うが、PIDは別名を付けて登
+録することもできる。ただし、PIDの登録は寿命の長い静的なプロセスだけにし
+ておくべきだ。プロセスを別名付きで登録しておくと、他のプロセスはそのプ
+ロセスのPIDを知らなくてもメッセージを送れるようになる。プロセスを生成す
+るには\code{spawn(Module, Function, Arguments)}組み込み関数(BIF)を使う。
+BIFとはVM内に組み込まれている関数で、純粋なErlangコードでは実現不可能だっ
+たり、速度的に問題がある場合に使われる。\code{spawn/3} BIFはパラメータ
+として\code{Module}、\code{Function}、リストの\code{Arguments}を受け取
+る。この関数は副作用として新しいプロセスを生成し、そのプロセスのPIDを返
+す。生成されたプロセスは、指定されたモジュールにある指定された関数を、
+指定された引数を渡して実行する。
+
+%% A message \code{Msg} is sent to a process with process id \code{Pid}
+%% using \code{Pid ! Msg}. A process can find out its PID by calling the
+%% BIF \code{self}, and this can then be sent to other processes for them
+%% to use to communicate with the original process. Suppose that a
+%% process expects to receive messages of the form \code{\{ok, N\}} and
+%% \code{\{error, Reason\}}. To process these it uses a receive
+%% statement:
+
+プロセスIDが\code{Pid}のプロセスにメッセージ\code{Msg}を送るには
+\code{Pid ! Msg}を使う。自分自身のPIDを知るには、BIFの\code{self}を呼び
+出す。自分自身のPIDを他のプロセスに送ることによって、送信先のプロセスは
+送信元のプロセスとさらに通信できる。たとえば、\code{\{ok, N\}}と
+\code{\{error, Reason\}}という形のメッセージを受信することを期待してい
+るプロセスがあるとする。このようなメッセージを処理するには、
+\code{receive}文を使う。
 
 \begin{verbatim}
 receive
@@ -140,181 +251,317 @@ receive
 end
 \end{verbatim}
 
-\noindent The result of this is a number determined by the pattern-matched
-clause. When the value of a variable is not needed in the pattern
-match, the underscore wild-card can be used as shown above.
+%% \noindent The result of this is a number determined by the pattern-matched
+%% clause. When the value of a variable is not needed in the pattern
+%% match, the underscore wild-card can be used as shown above.
 
-Message passing between processes is asynchronous, and the messages
-received by a process are placed in the process's mailbox in the order
-in which they arrive. Suppose that now the \code{receive} expression
-above is to be executed: if the first element in the mailbox is either
-\code{\{ok, N\}} or \code{\{error, Reason\}} the corresponding result
-will be returned. If the first message in the mailbox is not of this
-form, it is retained in the mailbox and the second is processed in a
-similar way. If no message matches, the receive will wait for a
-matching message to be received.
+\noindent この文の結果はパターンがマッチした節によって決まる数になる。
+変数の値がパターン・マッチに不要な場合は、上記の例のようにワイルド・カー
+ドとしてアンダースコアを使う。
 
-Processes terminate for two reasons. If there is no more code to
-execute, they are said to terminate with reason \emph{normal}. If a
-process encounters a run-time error, it is said to terminate with a
-\emph{non-normal} reason. A process terminating will not affect other
-processes unless they are linked to it. Processes can link to each
-other through the \code{link(Pid)} BIF or when calling the
-\code{spawn\_link(Module, Function, Arguments)}. If a process
-terminates, it sends an EXIT signal to processes in its link set. If
-the termination reason is non-normal, the process terminates itself,
-propagating the EXIT signal further. By calling the
-\code{process\_flag(trap\_exit, true)} BIF, processes can receive the
-EXIT signals as Erlang messages in their mailbox instead of
-terminating.
+%% Message passing between processes is asynchronous, and the messages
+%% received by a process are placed in the process's mailbox in the order
+%% in which they arrive. Suppose that now the \code{receive} expression
+%% above is to be executed: if the first element in the mailbox is either
+%% \code{\{ok, N\}} or \code{\{error, Reason\}} the corresponding result
+%% will be returned. If the first message in the mailbox is not of this
+%% form, it is retained in the mailbox and the second is processed in a
+%% similar way. If no message matches, the receive will wait for a
+%% matching message to be received.
 
-Riak uses EXIT signals to monitor the well-being of helper processes
-performing non-critical work initiated by the request-driving finite
-state machines. When these helper processes terminate abnormally, the
-EXIT signal allows the parent to either ignore the error or restart
-the process.
+プロセス間のメッセージ・パッシングは非同期に行なわれ、プロセスが受信す
+るメッセージは到着順にプロセスのメールボックスに置かれる。たとえば上記
+の\code{receive}式を実行するとしよう。メールボックスの最初の要素が
+\code{\{ok, N\}}または\code{\{error, Reason\}}ならば、それに対応する結
+果が返される。メールボックスの最初のメッセージがこの形式でなければ、そ
+のメッセージはメールボックスに留め置かれ、次のメッセージが同様に処理さ
+れる。どのメッセージもマッチしなければ、マッチするメッセージを受信する
+までreceiveは待機する。
+
+%% Processes terminate for two reasons. If there is no more code to
+%% execute, they are said to terminate with reason \emph{normal}. If a
+%% process encounters a run-time error, it is said to terminate with a
+%% \emph{non-normal} reason. A process terminating will not affect other
+%% processes unless they are linked to it. Processes can link to each
+%% other through the \code{link(Pid)} BIF or when calling the
+%% \code{spawn\_link(Module, Function, Arguments)}. If a process
+%% terminates, it sends an EXIT signal to processes in its link set. If
+%% the termination reason is non-normal, the process terminates itself,
+%% propagating the EXIT signal further. By calling the
+%% \code{process\_flag(trap\_exit, true)} BIF, processes can receive the
+%% EXIT signals as Erlang messages in their mailbox instead of
+%% terminating.
+
+プロセスが終了する理由には2つある。これ以上実行するコードがない場合は、
+\emph{通常}終了と呼ばれる。実行時エラーが発生した場合は、\emph{異常／＊
+  non-normal＊／}終了と呼ばれる。プロセスが他のプロセスにリンクしていな
+ければ、プロセスが終了しても他のプロセスには影響を与えない。プロセス同
+士をリンクするには、\code{link(Pid)} BIFを使うか、
+\code{spawn\_link(Module, Function, Arguments)}を使ってプロセスを生成す
+る。プロセスは終了するときに自分のリンク・セットに含まれるプロセス群に
+EXITシグナルを送信する。終了理由が異常の場合、プロセスは自分自身を終了
+し、EXITシグナルをさらに伝播させる。\code{process\_flag(trap\_exit,
+  true)} BIFを呼び出しておくことによって、EXITシグナルが発生した場合に
+プロセスは終了せずにEXITシグナルをメールボックスへのErlangメッセージと
+して受信できる。
+
+%% Riak uses EXIT signals to monitor the well-being of helper processes
+%% performing non-critical work initiated by the request-driving finite
+%% state machines. When these helper processes terminate abnormally, the
+%% EXIT signal allows the parent to either ignore the error or restart
+%% the process.
+
+Riakでは、要求を生成する有限状態マシン群が起動したクリティカルでない作
+業を実行するヘルパー・プロセスの状態を監視するためにEXITシグナルを利用
+している。／＊長いので分割すべき?＊／このようなヘルパー・プロセスが異常
+終了した場合、親プロセスはEXITシグナルを利用して、エラーを無視したりプ
+ロセスを起動するといった対処ができる。
 
 \end{aosasect1}
 
-\begin{aosasect1}{Process Skeletons}
+%% \begin{aosasect1}{Process Skeletons}
+\begin{aosasect1}{プロセスの骨格}
 
-We previously introduced the notion that processes follow a common
-pattern regardless of the particular purpose for which the process was
-created. To start off, a process has to be spawned and then,
-optionally, have its alias registered. The first action of the newly
-spawned process is to initialize the process loop data. The loop data
-is often the result of arguments passed to the \code{spawn} built-in
-function at the initialization of the process. Its loop data is stored
-in a variable we refer to as the process state. The state, often
-stored in a record, is passed to a receive-evaluate function, running
-a loop which receives a message, handles it, updates the state, and
-passes it back as an argument to a tail-recursive call. If one of the
-messages it handles is a `stop' message, the receiving process will
-clean up after itself and then terminate.
+%% We previously introduced the notion that processes follow a common
+%% pattern regardless of the particular purpose for which the process was
+%% created. To start off, a process has to be spawned and then,
+%% optionally, have its alias registered. The first action of the newly
+%% spawned process is to initialize the process loop data. The loop data
+%% is often the result of arguments passed to the \code{spawn} built-in
+%% function at the initialization of the process. Its loop data is stored
+%% in a variable we refer to as the process state. The state, often
+%% stored in a record, is passed to a receive-evaluate function, running
+%% a loop which receives a message, handles it, updates the state, and
+%% passes it back as an argument to a tail-recursive call. If one of the
+%% messages it handles is a `stop' message, the receiving process will
+%% clean up after itself and then terminate.
 
-This is a recurring theme among processes that will occur regardless
-of the task the process has been assigned to perform. With this in
-mind, let's look at the differences between the processes that conform
-to this pattern:
+ここまでで、プロセスはその用途に関わらずある共通のパターンに従うことを
+学んだ。まず、プロセスは生成する必要があり、必要ならばその別名を登録し
+ておくこともできる。新しく生成されたプロセスの最初の動作は、プロセスの
+ループ・データの初期化だ。プロセスの初期化時に\code{spawn}組み込み関数
+に渡された引数の結果をループ・データとして使うことが多い。このループ・
+データはプロセス状態と呼ばれる変数に格納する。この状態はレコー
+ドに格納することが多く、受信/評価関数／＊receive-evalutate function＊／
+に渡される。受信/評価関数が実行するループはメッセージを受信して処理し、
+状態を更新してその結果を末尾再帰呼び出しに渡す。「停止(stop)」メッ
+セージを受信したプロセスは後始末をしてから終了する。
+
+%% This is a recurring theme among processes that will occur regardless
+%% of the task the process has been assigned to perform. With this in
+%% mind, let's look at the differences between the processes that conform
+%% to this pattern:
+
+プロセスに与えられた役割に関わらず、この処理パターンはよく使われる。こ
+のことを念頭に、この処理パターンに従ったプロセス同士で何が違うか見てみ
+よう。
 
 \begin{aosaitemize}
 
-  \item The arguments passed to the \code{spawn} BIF calls will differ
-  from one process to another.
+  %% \item The arguments passed to the \code{spawn} BIF calls will differ
+  %% from one process to another.
 
-  \item You have to decide whether you should register a process under
-  an alias, and if you do, what alias should be used.
+  \item \code{spawn} BIFに渡された引数はプロセスごとに異なる。
 
-  \item In the function that initializes the process state, the actions
-  taken will differ based on the tasks the process will perform.
+  %% \item You have to decide whether you should register a process under
+  %% an alias, and if you do, what alias should be used.
 
-  \item The state of the system is represented by the loop data in every
-  case, but the contents of the loop data will vary among processes.
+  \item プロセスを別名で登録するかどうか、登録するならばどのような名前
+    にするかを決める必要がある。
 
-  \item When in the body of the receive-evaluate loop, processes will
-  receive different messages and handle them in different ways.
+  %% \item In the function that initializes the process state, the actions
+  %% taken will differ based on the tasks the process will perform.
 
-  \item Finally, on termination, the cleanup will vary from process to
-  process.
+  \item プロセス状態を初期化する関数は、プロセスが実行する作業に応じて
+    異なる動作を行なう。
+
+  %% \item The state of the system is represented by the loop data in every
+  %% case, but the contents of the loop data will vary among processes.
+
+  \item システムの状態はどの場合でもループ・データで表わされるが、ルー
+    プ・データの内容はプロセスによって異なる。
+
+  %% \item When in the body of the receive-evaluate loop, processes will
+  %% receive different messages and handle them in different ways.
+
+  \item 受信/評価ループの本体部分では、プロセスは異なるメッセージを受信
+    して異なる処理を行なう。
+
+  %% \item Finally, on termination, the cleanup will vary from process to
+  %% process.
+
+  \item 最後に、終了時の後始末はプロセスによって異なる。
 
 \end{aosaitemize}
 
-So, even if a skeleton of generic actions exists, these actions are
-complemented by specific ones that are directly related to the tasks
-assigned to the process. Using this skeleton as a template,
-programmers can create Erlang processes that act as servers, finite
-state machines, event handlers and supervisors. But instead of
-re-implementing these patterns every time, they have been placed in
-library modules referred to as behaviors. They come as part as the OTP
-middleware.
+%% So, even if a skeleton of generic actions exists, these actions are
+%% complemented by specific ones that are directly related to the tasks
+%% assigned to the process. Using this skeleton as a template,
+%% programmers can create Erlang processes that act as servers, finite
+%% state machines, event handlers and supervisors. But instead of
+%% re-implementing these patterns every time, they have been placed in
+%% library modules referred to as behaviors. They come as part as the OTP
+%% middleware.
+
+このように、汎用の動作の骨格はあるが、プロセスの役割に直接関わる特定の
+動作で補うことになる。この骨格をテンプレートとして使えば、サーバーや有
+限状態マシン、イベント・ハンドラ、スーパバイザなどとして動作するErlang
+プロセスを作ることができる。しかし、これらのパターンは、毎度実装しなお
+さなくてよいように、ビヘイビアと呼ばれるライブラリ・モジュールになって
+いる。ビヘイビアはOTPミドルウェアに入っている。
 
 \end{aosasect1}
 
-\begin{aosasect1}{OTP Behaviors}
+%% \begin{aosasect1}{OTP Behaviors}
+\begin{aosasect1}{OTPビヘイビア}
 
-The core team of developers committing to Riak is spread across nearly
-a dozen geographical locations.  Without very tight coordination and
-templates to work from, the result would consist of different
-client/server implementations not handling special borderline cases
-and concurrency-related errors. There would probably be no uniform way
-to handle client and server crashes or guaranteeing that a response
-from a request is indeed the response, and not just any message that
-conforms to the internal message protocol.
+%% The core team of developers committing to Riak is spread across nearly
+%% a dozen geographical locations.  Without very tight coordination and
+%% templates to work from, the result would consist of different
+%% client/server implementations not handling special borderline cases
+%% and concurrency-related errors. There would probably be no uniform way
+%% to handle client and server crashes or guaranteeing that a response
+%% from a request is indeed the response, and not just any message that
+%% conforms to the internal message protocol.
 
-OTP is a set of Erlang libraries and design principles providing
-ready-made tools with which to develop robust systems. Many of these
-patterns and libraries are provided in the form of ``behaviors.''
+Riakにコミットしている開発者のコア・チームは、十数もの場所に散らばって
+いる。緊密な調整とベースになるテンプレートがなければ、特殊な境界条件や
+並行実行関連のエラーをまともに扱えないクライアント/サーバ実装がばらばら
+にできてしまうだろう。クライアントやサーバのクラッシュを扱う方法も一貫
+しないだろうし、要求に対する応答が単に内部メッセージ・プロトコルに準拠
+しているだけではなくて、期待したものであることを保証する方法も1つに定ま
+らないだろう。
 
-OTP behaviors address these issues by providing library modules that
-implement the most common concurrent design patterns. Behind the
-scenes, without the programmer having to be aware of it, the library
-modules ensure that errors and special cases are handled in a
-consistent way. As a result, OTP behaviors provide a set of
-standardized building blocks used in designing and building
-industrial-grade systems.
+%% OTP is a set of Erlang libraries and design principles providing
+%% ready-made tools with which to develop robust systems. Many of these
+%% patterns and libraries are provided in the form of ``behaviors.''
 
-\begin{aosasect2}{Introduction}
+OTPはErlangのライブラリ群といくつかの基本原理で構成されていて、頑健なシ
+ステムを開発するための既製ツールとして利用できる。OTPのパターンやライブ
+ラリの多くは``behaviors''として用意されている。
 
-OTP behaviors are provided as library modules in the \code{stdlib}
-application which comes as part of the Erlang/OTP distribution. The
-specific code, written by the programmer, is placed in a separate
-module and called through a set of predefined callback functions
-standardized for each behavior. This callback module will contain all
-of the specific code required to deliver the desired functionality.
+%% OTP behaviors address these issues by providing library modules that
+%% implement the most common concurrent design patterns. Behind the
+%% scenes, without the programmer having to be aware of it, the library
+%% modules ensure that errors and special cases are handled in a
+%% consistent way. As a result, OTP behaviors provide a set of
+%% standardized building blocks used in designing and building
+%% industrial-grade systems.
 
-OTP behaviors include worker processes, which do the actual
-processing, and supervisors, whose task is to monitor workers and
-other supervisors. Worker behaviors, often denoted in diagrams as
-circles, include servers, event handlers, and finite state
-machines. Supervisors, denoted in illustrations as squares, monitor
-their children, both workers and other supervisors, creating what is
-called a supervision tree.
+上記のような問題は、よくある並行デザイン・パターンを実装したライブラリ・
+モジュールであるOTPビヘイビアによって解決できる。プログラマが気にかけな
+くても、エラーや特別な場合が一貫した方法で処理されるように裏でライブラ
+リ・モジュールが対処してくれる。このため、OTPビヘイビアは実用／＊
+industrial-grade＊／システムの設計や構築で利用できる、標準化されたブロッ
+クの集合となっている。
+
+%% \begin{aosasect2}{Introduction}
+\begin{aosasect2}{はじめに}
+
+%% OTP behaviors are provided as library modules in the \code{stdlib}
+%% application which comes as part of the Erlang/OTP distribution. The
+%% specific code, written by the programmer, is placed in a separate
+%% module and called through a set of predefined callback functions
+%% standardized for each behavior. This callback module will contain all
+%% of the specific code required to deliver the desired functionality.
+
+OTPビヘイビアは、Erlang/OTP配布物に含まれている\code{stdlib}アプリケー
+ションのライブラリ・モジュールとして提供されている。プログラマが書くア
+プリケーションごとのコードは別のモジュールに置かれ、各ビヘイビアごとに
+標準化されている定義済みコールバック関数を通じて呼び出される。このコー
+ルバック・モジュールには、必要な機能を実現するために必要なコードをすべ
+て入れておく。
+
+%% OTP behaviors include worker processes, which do the actual
+%% processing, and supervisors, whose task is to monitor workers and
+%% other supervisors. Worker behaviors, often denoted in diagrams as
+%% circles, include servers, event handlers, and finite state
+%% machines. Supervisors, denoted in illustrations as squares, monitor
+%% their children, both workers and other supervisors, creating what is
+%% called a supervision tree.
+
+OTPビヘイビアには、実際の処理を行なうワーカ・プロセスと、ワーカや他のスー
+パバイザを監視するためのスーパバイザが含まれている。ワーカ・ビヘイビア
+(図では円で示す場合が多い)には、サーバ、イベント・ハンドラ、有限状態マ
+シンがある。スーパバイザ(図では四角で示す)は監視ツリーを構成する子プロ
+セス群(ワーカや他のスーパバイザ)を監視する。
 
 \aosafigure{../images/riak/supervision-tree.eps}{OTP Riak Supervision Tree}{fig.erlang.supervision}
 
-Supervision trees are packaged into a behavior called an
-application. OTP applications are not only the building blocks of
-Erlang systems, but are also a way to package reusable
-components. Industrial-grade systems like Riak consist of a set of
-loosely coupled, possibly distributed applications. Some of these
-applications are part of the standard Erlang distribution and some are
-the pieces that make up the specific functionality of Riak.
+%% Supervision trees are packaged into a behavior called an
+%% application. OTP applications are not only the building blocks of
+%% Erlang systems, but are also a way to package reusable
+%% components. Industrial-grade systems like Riak consist of a set of
+%% loosely coupled, possibly distributed applications. Some of these
+%% applications are part of the standard Erlang distribution and some are
+%% the pieces that make up the specific functionality of Riak.
 
-Examples of OTP applications include the Corba ORB or the Simple
-Network Management Protocol (SNMP) agent. An OTP application is a
-reusable component that packages library modules together with
-supervisor and worker processes. From now on, when we refer to an
-application, we will mean an OTP application.
+監視ツリーはアプリケーションと呼ばれるビヘイビアにまとめられる。OTPアプ
+リケーションはErlangシステムの構築単位になるだけでなく、再利用可能なコ
+ンポーネントをパッケージ化するための方法としても使われる。Riakのような
+実用システムは、疎結合の、場合によっては分散したアプリケーションの集合
+で構成される。このようなアプリケーションには、Erlangの標準配布物に入っ
+ているものと、Riak特有の機能を実現するためのものがある。
 
-The behavior modules contain all of the generic code for each given
-behavior type. Although it is possible to implement your own behavior
-module, doing so is rare because the ones that come with the
-Erlang/OTP distribution will cater to most of the design patterns you
-would use in your code. The generic functionality provided in a
-behavior module includes operations such as:
+%% Examples of OTP applications include the Corba ORB or the Simple
+%% Network Management Protocol (SNMP) agent. An OTP application is a
+%% reusable component that packages library modules together with
+%% supervisor and worker processes. From now on, when we refer to an
+%% application, we will mean an OTP application.
+
+OTPアプリケーションの例としては、Corba ORBやSNMP (Simple Network
+Management Protocol)エージェントがある。OTPアプリケーションは、スーパバ
+イザとワーカ・プロセス群をまとめたライブラリ・モジュールの集合を再利用
+可能なコンポーネントとしてパッケージ化したものだ。以降では、アプリケー
+ションとはOTPアプリケーションのことを指すものとする。
+
+%% The behavior modules contain all of the generic code for each given
+%% behavior type. Although it is possible to implement your own behavior
+%% module, doing so is rare because the ones that come with the
+%% Erlang/OTP distribution will cater to most of the design patterns you
+%% would use in your code. The generic functionality provided in a
+%% behavior module includes operations such as:
+
+ビヘイビアのモジュールには、そのビヘイビア・タイプに必要な汎用コードが
+すべて入っている。自分でビヘイビア・モジュールを実装することもできるが、
+必要になりそうなデザイン・パターンのほとんどはErlang/OTPの配布物に入っ
+ているもので間に合うため、その必要はほとんどないだろう。ビヘイビア・モ
+ジュールが用意する汎用の機能には以下のようなものがある:
 
 \begin{aosaitemize}
 
-  \item spawning and possibly registering the process;
+  %% \item spawning and possibly registering the process;
+  \item プロセスの生成と、場合によっては登録
 
-  \item sending and receiving client messages as synchronous or
-  asynchronous calls, including defining the internal message protocol;
+  %% \item sending and receiving client messages as synchronous or
+  %% asynchronous calls, including defining the internal message protocol;
+  \item 同期または非同期の呼び出しによるクライアント・メッセージの送受
+    信。内部メッセージ・プロトコルの定義も含む
 
-  \item storing the loop data and managing the process loop; and
+  %% \item storing the loop data and managing the process loop; and
+  \item ループ・データの格納とプロセス・ループの管理
 
-  \item stopping the process.
+  \item プロセスの停止
 
 \end{aosaitemize}
 
-The loop data is a variable that will contain the data the behavior
-needs to store in between calls. After the call, an updated variant of
-the loop data is returned. This updated loop data, often referred to
-as the new loop data, is passed as an argument in the next call. Loop
-data is also often referred to as the behavior state.
+%% The loop data is a variable that will contain the data the behavior
+%% needs to store in between calls. After the call, an updated variant of
+%% the loop data is returned. This updated loop data, often referred to
+%% as the new loop data, is passed as an argument in the next call. Loop
+%% data is also often referred to as the behavior state.
 
-The functionality to be included in the callback module for the
-generic server application to deliver the specific required behavior
-includes the following:
+ループ・データとは、ビヘイビアが呼び出しを越えて覚えておく必要があるデー
+タを格納する変数だ。呼び出しの後、更新されたループ・データが返される。
+更新されたループ・データ(新ループ・データと呼ばれることが多い)は次の呼
+び出しの引数として渡される。ループ・データはビヘイビアの状態とも呼ばれ
+る。
+
+%% The functionality to be included in the callback module for the
+%% generic server application to deliver the specific required behavior
+%% includes the following:
+
+あるビヘイビアを実現するための汎用サーバ・アプリケーションのコールバック・モジュールには、以下のような機能を入れる:
 
 \begin{aosaitemize}
 
