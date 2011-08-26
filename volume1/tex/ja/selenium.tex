@@ -600,93 +600,103 @@ public interface Shop extends HasBalance, Stockable {
 
 \end{aosasect2}
 
-\begin{aosasect2}{Dealing with the Combinatorial Explosion}
+%% \begin{aosasect2}{Dealing with the Combinatorial Explosion}
+\begin{aosasect2}{組み合わせの激増への対処}
 
-One of the first things that is apparent from a moment's thought about
-the wide range of browsers and languages that WebDriver supports is
-that unless care is taken it would quickly face an escalating cost of
-maintenance. With X browsers and Y languages, it would be very easy to
-fall into the trap of maintaining X${\times}$Y implementations.
+%% One of the first things that is apparent from a moment's thought about
+%% the wide range of browsers and languages that WebDriver supports is
+%% that unless care is taken it would quickly face an escalating cost of
+%% maintenance. With X browsers and Y languages, it would be very easy to
+%% fall into the trap of maintaining X${\times}$Y implementations.
+ちょっと考えればすぐにわかることだが、WebDriverがさまざまなブランザや言語に対応しているということは、よっぽど注意しないと保守のコストが激増してしまうということである。X種類のブラウザとY種類の言語に対応しようとすると、最悪X${\times}$Y種類の実装を保守するはめになる。
 
-Reducing the number of languages that WebDriver supports would be one
-way to reduce this cost, but we don't want to go down this route for
-two reasons. Firstly, there's a cognitive load to be paid when
-switching from one language to another, so it's advantageous to users
-of the framework to be able to write their tests in the same language
-that they do the majority of their development work in. Secondly,
-mixing several languages on a single project is something that teams
-may not be comfortable with, and corporate coding standards and
-requirements often seem to demand a technology monoculture (although,
-pleasingly, I think that this second point is becoming less true over
-time), therefore reducing the number of supported languages isn't an
-available option.
+%% Reducing the number of languages that WebDriver supports would be one
+%% way to reduce this cost, but we don't want to go down this route for
+%% two reasons. Firstly, there's a cognitive load to be paid when
+%% switching from one language to another, so it's advantageous to users
+%% of the framework to be able to write their tests in the same language
+%% that they do the majority of their development work in. Secondly,
+%% mixing several languages on a single project is something that teams
+%% may not be comfortable with, and corporate coding standards and
+%% requirements often seem to demand a technology monoculture (although,
+%% pleasingly, I think that this second point is becoming less true over
+%% time), therefore reducing the number of supported languages isn't an
+%% available option.
+WebDriver でサポートする言語を減らすのもひとつの方法ではあるが、その道をゆくつもりはなかった。理由はふたつある。まず、ある言語から別の言語への切り替えには認識を切り替えるコストがかかる。つまり、フレームワークのユーザーにとっては、開発時に使っているのと同じ言語でテストを書ければ好都合になる。次に、ひとつのプロジェクトに複数の言語を混在させるとチーム内で不満が出る可能性がある。場合によっては、会社のコーディング規約などで特定の技術だけを使うよう強制されているかもしれない(しかし、ありがたいことに、最近は二番目の理由はあまり聞かなくなってきた)。したがって、サポートする言語を減らすという選択肢は取れなかった。
 
-Reducing the number of supported browsers also isn't an option---there
-were vociferous arguments when we phased out support for Firefox 2 in
-WebDriver, despite the fact that when we made this choice it
-represented less than 1\% of the browser market.
+%% Reducing the number of supported browsers also isn't an option---there
+%% were vociferous arguments when we phased out support for Firefox 2 in
+%% WebDriver, despite the fact that when we made this choice it
+%% represented less than 1\% of the browser market.
+サポートするブラウザを減らすというのも、あり得ない話だ。かつてWebDriverでFirefox 2のサポートを打ち切ったときには大騒ぎになった。当時のブラウザ市場でのFirefox 2のシェアは既に1\%を割っていたというのに。
 
-The only choice we have left is to try and make all the browsers look
-identical to the language bindings: they should offer a uniform
-interface that can be addressed easily in a wide variety of languages.
-What is more, we want the language bindings themselves to be as easy
-to write as possible, which suggests that we want to keep them as slim
-as possible. We push as much logic as we can into the underlying
-driver in order to support this: every piece of functionality we fail
-to push into the driver is something that needs to be implemented in
-every language we support, and this can represent a significant amount
-of work.
+%% The only choice we have left is to try and make all the browsers look
+%% identical to the language bindings: they should offer a uniform
+%% interface that can be addressed easily in a wide variety of languages.
+%% What is more, we want the language bindings themselves to be as easy
+%% to write as possible, which suggests that we want to keep them as slim
+%% as possible. We push as much logic as we can into the underlying
+%% driver in order to support this: every piece of functionality we fail
+%% to push into the driver is something that needs to be implemented in
+%% every language we support, and this can represent a significant amount
+%% of work.
+残された道はひとつ。各言語のバインディングから、すべてのブラウザを同じように扱えるようにするという道だ。統一形式のインターフェイスを用意し、さまざまな言語から容易にアクセスできるようにする。さらに考えたのは、言語バインディングそのものもできる限り書きやすくするということだった。そのためには、言語バインディングをできるだけスリムにしておくことを考えた。これを実現するため、できる限りのロジックをベースとなるドライバ側に押し込めた。ドライバに組み込めなかった機能はすべての言語のバインディング側で実装する必要があり、大変な作業となってしまう。
 
-As an example, the IE driver has successfully pushed the
-responsibility for locating and starting IE into the main driver
-logic. Although this has resulted in a surprising number of lines of
-code being in the driver, the language binding for creating a new
-instance boils down to a single method call into that driver. For
-comparison, the Firefox driver has failed to make this change. In the
-Java world alone, this means that we have three major classes that
-handle configuring and starting Firefox weighing in at around 1300
-lines of code. These classes are duplicated in every language binding
-that wants to support the FirefoxDriver without relying on starting a
-Java server. That's a lot of additional code to maintain.
+%% As an example, the IE driver has successfully pushed the
+%% responsibility for locating and starting IE into the main driver
+%% logic. Although this has resulted in a surprising number of lines of
+%% code being in the driver, the language binding for creating a new
+%% instance boils down to a single method call into that driver. For
+%% comparison, the Firefox driver has failed to make this change. In the
+%% Java world alone, this means that we have three major classes that
+%% handle configuring and starting Firefox weighing in at around 1300
+%% lines of code. These classes are duplicated in every language binding
+%% that wants to support the FirefoxDriver without relying on starting a
+%% Java server. That's a lot of additional code to maintain.
+たとえばIEドライバでは、IEを探して起動する責務をドライバ本体のロジックに組み込めた。その結果としてドライバ側のコードの行数はおそろしいほどに膨れ上がったが、新しいインスタンスを作るための言語バインディングはドライバのメソッドをひとつ呼び出すだけで済むことになった。ちなみに、Firefoxドライバの場合はこの変更に失敗した。Javaの世界だけでも、三つの巨大なクラスでFirefoxの設定や起動を処理していた。行数にして1300行ほどである。Javaサーバーを立てずにFirefoxDriverをサポートしようとすると、すべての言語のバインディングでこれらのクラスが重複することになる。つまり、同じようなコードを大量に保守しなければならないということだ。
 
 \end{aosasect2}
 
-\begin{aosasect2}{Flaws in the WebDriver Design}
+%% \begin{aosasect2}{Flaws in the WebDriver Design}
+\begin{aosasect2}{WebDriverの設計の問題点}
 
-The downside of the decision to expose capabilities in this way is
-that until someone knows that a particular interface exists they may
-not realize that WebDriver supports that type of functionality;
-there's a loss of explorability in the API\@. Certainly when WebDriver
-was new we seemed to spend a lot of time just pointing people towards
-particular interfaces. We've now put a lot more effort into our
-documentation and as the API gets more widely used it becomes easier
-and easier for users to find the information they need.
+%% The downside of the decision to expose capabilities in this way is
+%% that until someone knows that a particular interface exists they may
+%% not realize that WebDriver supports that type of functionality;
+%% there's a loss of explorability in the API\@. Certainly when WebDriver
+%% was new we seemed to spend a lot of time just pointing people towards
+%% particular interfaces. We've now put a lot more effort into our
+%% documentation and as the API gets more widely used it becomes easier
+%% and easier for users to find the information they need.
+この方式で機能を公開したことによるマイナスは、あるインターフェイスの存在に気づくまではWebDriverがそんな機能を持っていることに気づけないということである。これは、APIの探索性を損ねてしまう。実際、WebDriverが登場したばかりのころは、利用者にそのインターフェイスの存在に気づかせるために多くの時間を費やしていた。最近ではドキュメントにより力を注ぐようになり、APIも幅広く使われるようになったので、ユーザーにとっては必要な情報を見つけやすくなってきた。
 
-There is one place where I think our API is particularly poor. We have
-an interface called \code{RenderedWebElement} which has a strange
-mish-mash of methods to do with querying the rendered state of the
-element (\code{isDisplayed}, \code{getSize} and \code{getLocation}),
-performing operations on it (\code{hover} and drag and drop methods),
-and a handy method for getting the value of a particular CSS
-property. It was created because the HtmlUnit driver didn't expose the
-required information, but the Firefox and IE drivers did. It
-originally only had the first set of methods but we added the other
-methods before I'd done hard thinking about how I wanted the API to
-evolve. The interface is well known now, and the tough choice is
-whether we keep this unsightly corner of the API given that it's
-widely used, or whether we attempt to delete it. My preference is not
-to leave a ``broken window'' behind, so fixing this before we release
-Selenium 2.0 is important.
-As a result, by the time you read this chapter,
-\code{RenderedWebElement} may well be gone.
+%% There is one place where I think our API is particularly poor. We have
+%% an interface called \code{RenderedWebElement} which has a strange
+%% mish-mash of methods to do with querying the rendered state of the
+%% element (\code{isDisplayed}, \code{getSize} and \code{getLocation}),
+%% performing operations on it (\code{hover} and drag and drop methods),
+%% and a handy method for getting the value of a particular CSS
+%% property. It was created because the HtmlUnit driver didn't expose the
+%% required information, but the Firefox and IE drivers did. It
+%% originally only had the first set of methods but we added the other
+%% methods before I'd done hard thinking about how I wanted the API to
+%% evolve. The interface is well known now, and the tough choice is
+%% whether we keep this unsightly corner of the API given that it's
+%% widely used, or whether we attempt to delete it. My preference is not
+%% to leave a ``broken window'' behind, so fixing this before we release
+%% Selenium 2.0 is important.
+%% As a result, by the time you read this chapter,
+%% \code{RenderedWebElement} may well be gone.
+自分たちのAPIって本当に貧弱だなあと感じる箇所をひとつ紹介しよう。\code{RenderedWebElement}というインターフェイスがあるのだが、これはいろんなメソッドがごちゃ混ぜになったものである。たとえばレンダリング後の要素の状態を取得したり(\code{isDisplayed}や\code{getSize}そして\code{getLocation})、その要素に対して何らかの操作をしたり(\code{hover}やドラッグ\&ドロップなど)、CSSのプロパティの値を取得したりといったことができる。そもそもこのインターフェイスが作られた理由はHtmlUnitドライバが必要な情報を公開していなかったことだが、FirefoxやIEのドライバは情報を公開していた。最初は要素の状態を取得するメソッド群しか提供していなかったが、どんどん他のメソッドが増えていった。メソッドを増やす前に、APIをどのように育てていくかを熟考すべきだったと後悔している。このインターフェイスは今や広く使われているため、どのように対処するかが難しい。見苦しいAPIではあるけれども広く使われているのだからそのまま維持し続けるのか、いっそのこと削除してしまうのか。私は``割れ窓''を放置しておきたくなかった。そこで、Selenium 2.0のリリースまでにこれを何とかすることが重要となった。その結果どうなったか。みなさんがこれを読むころには\code{RenderedWebElement}は削除されているはずだ。
 
-From an implementor's point of view, binding tightly to a browser is
-also a design flaw, albeit an inescapable one. It takes significant
-effort to support a new browser, and often several attempts need to be
-made in order to get it right. As a concrete example, the Chrome
-driver has gone through four complete rewrites, and the IE driver has
-had three major rewrites too. The advantage of binding tightly to a
-browser is that it offers more control.
+%% From an implementor's point of view, binding tightly to a browser is
+%% also a design flaw, albeit an inescapable one. It takes significant
+%% effort to support a new browser, and often several attempts need to be
+%% made in order to get it right. As a concrete example, the Chrome
+%% driver has gone through four complete rewrites, and the IE driver has
+%% had three major rewrites too. The advantage of binding tightly to a
+%% browser is that it offers more control.
+実装側の観点で考えると、ブラウザと密に結合してしまう設計にも問題がある。たとえそれが不可避なものであったとしてもである。新しいブラウザに対応するのは大変な作業になるし、うまく動かすにはたいてい試行錯誤が必要となるだろう。具体例を挙げると、Chromeドライバは4回ほどゼロから書き直したし、IEドライバも3回は大幅に書き直している。ブラウザと密結合する利点は、ブラウザをより細かく制御できるという点である。
 
 \end{aosasect2}
 
