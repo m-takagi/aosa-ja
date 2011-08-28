@@ -561,34 +561,47 @@ Management Protocol)エージェントがある。OTPアプリケーションは
 %% generic server application to deliver the specific required behavior
 %% includes the following:
 
-あるビヘイビアを実現するための汎用サーバ・アプリケーションのコールバック・モジュールには、以下のような機能を入れる:
+あるビヘイビアを実現するための汎用サーバ・アプリケーションのコールバッ
+ク・モジュールに入れる機能には以下のようなものがある:
 
 \begin{aosaitemize}
 
-  \item Initializing the process loop data, and, if the process is
-  registered, the process name.
+  %% \item Initializing the process loop data, and, if the process is
+  %% registered, the process name.
+  \item プロセスのループ・データの初期化。プロセスを登録する場合はプロ
+    セス名の初期化も
 
-  \item Handling the specific client requests, and, if synchronous, the
-  replies sent back to the client.
+  %% \item Handling the specific client requests, and, if synchronous, the
+  %% replies sent back to the client.
+  \item 特定のクライアント要求の処理。同期型の場合はクライアントへの応答の送信
 
-  \item Handling and updating the process loop data in between the
-  process requests.
+  %% \item Handling and updating the process loop data in between the
+  %% process requests.
+  \item プロセスへの要求の合間に行なう、プロセス・ループ・データの処理と更新
 
-  \item Cleaning up the process loop data upon termination.
+  \item 終了時のプロセス・ループ・データの後始末
 
 \end{aosaitemize}
 
 \end{aosasect2}
 
-\begin{aosasect2}{Generic Servers}
+%% \begin{aosasect2}{Generic Servers}
+\begin{aosasect2}{汎用サーバ}
 
-Generic servers that implement client/server behaviors are defined in
-the \code{gen\_server} behavior that comes as part of the standard
-library application. In explaining generic servers, we will use the
-\code{riak\_core\_node\_watcher.erl} module from the \code{riak\_core}
-application. It is a server that tracks and reports on which
-sub-services and nodes in a Riak cluster are available. The module
-headers and directives are as follows:
+%% Generic servers that implement client/server behaviors are defined in
+%% the \code{gen\_server} behavior that comes as part of the standard
+%% library application. In explaining generic servers, we will use the
+%% \code{riak\_core\_node\_watcher.erl} module from the \code{riak\_core}
+%% application. It is a server that tracks and reports on which
+%% sub-services and nodes in a Riak cluster are available. The module
+%% headers and directives are as follows:
+
+クライアント/サーバ型のビヘイビアを実装する汎用サーバは、標準ライブラリ・
+アプリケーションの一部である\code{gen\_server}ビヘイビアで定義されてい
+る。この汎用サーバの解説では、\code{riak\_core}アプリケーションの
+\code{riak\_core\_node\_watcher.erl}モジュールを使う。このモジュールは、
+Riakクラスタ内のどのサブサービスやノードが利用可能か追跡して報告するサー
+バだ。モジュールのヘッダとディレクティブは以下のようになっている:
 
 \begin{verbatim}
 -module(riak_core_node_watcher).
@@ -603,117 +616,180 @@ headers and directives are as follows:
                 bcast_mod={gen_server, abcast}}).
 \end{verbatim}
 
-We can easily recognize generic servers through the
-\code{-behavior(gen\_server).} directive. This directive is used by
-the compiler to ensure all callback functions are properly
-exported. The record state is used in the server loop data.
+%% We can easily recognize generic servers through the
+%% \code{-behavior(gen\_server).} directive. This directive is used by
+%% the compiler to ensure all callback functions are properly
+%% exported. The record state is used in the server loop data.
+
+これが汎用サーバであることは\code{-behavior(gen\_server)}ディレクティブ
+から容易にわかる。このディレクティブは、ールバック関数をすべて適切にエ
+クスポートされているかコンパイラがチェックするために使われる。stateレコー
+ドはサーバのループ・データで使われる。
 
 \end{aosasect2}
 
-\begin{aosasect2}{Starting Your Server}
+%% \begin{aosasect2}{Starting Your Server}
+\begin{aosasect2}{サーバの起動}
 
-With the \code{gen\_server} behavior, instead of using the
-\code{spawn} and \code{spawn\_link} BIFs, you will use the
-\code{gen\_server:start} and \code{gen\_server:start\_link}
-functions. The main difference between \code{spawn} and \code{start}
-is the synchronous nature of the call. Using \code{start} instead of
-\code{spawn} makes starting the worker process more deterministic and
-prevents unforeseen race conditions, as the call will not return the
-PID of the worker until it has been initialized. You call the
-functions with either of:
+%% With the \code{gen\_server} behavior, instead of using the
+%% \code{spawn} and \code{spawn\_link} BIFs, you will use the
+%% \code{gen\_server:start} and \code{gen\_server:start\_link}
+%% functions. The main difference between \code{spawn} and \code{start}
+%% is the synchronous nature of the call. Using \code{start} instead of
+%% \code{spawn} makes starting the worker process more deterministic and
+%% prevents unforeseen race conditions, as the call will not return the
+%% PID of the worker until it has been initialized. You call the
+%% functions with either of:
+
+\code{gen\_server}ビヘイビアでは、\code{spawn} BIFと\code{spawn\_link}
+BIFを使う代わりに、\code{gen\_server:start}関数と
+\code{gen\_server:start\_link}関数を使う。\code{spawn}と\code{start}の
+主な違いは、呼び出しが同期型かどうかだ。\code{spawn}ではなく
+\code{start}を使うことによって、ワーカ・プロセスのPIDが初期化されるまで
+呼び出しが戻らなくなるため、ワーカ・プロセスの起動をより決定的にするこ
+とができ、予期しない競合条件による問題を予防できる。\code{start}は次の
+いずれかの形で呼び出す:
 
 \begin{verbatim}
 gen_server:start_link(ServerName, CallbackModule, Arguments, Options)
 gen_server:start_link(CallbackModule, Arguments, Options)
 \end{verbatim}
 
-\noindent \code{ServerName} is a tuple of the format \code{\{local, Name\}} or
-\code{\{global, Name\}}, denoting a local or global \code{Name} for the
-process alias if it is to be registered. Global names allow servers
-to be transparently accessed across a cluster of distributed Erlang
-nodes. If you do not want to register the process and instead
-reference it using its PID, you omit the argument and use a
-\code{start\_link/3} or \code{start/3} function call
-instead. \code{CallbackModule} is the name of the module in which
-the specific callback functions are placed, \code{Arguments} is a
-valid Erlang term that is passed to the \code{init/1} callback
-function, while \code{Options} is a list that allows you to set the
-memory management flags \code{fullsweep\_after} and \code{heapsize},
-as well as other tracing and debugging flags.
+%% \noindent \code{ServerName} is a tuple of the format \code{\{local, Name\}} or
+%% \code{\{global, Name\}}, denoting a local or global \code{Name} for the
+%% process alias if it is to be registered. Global names allow servers
+%% to be transparently accessed across a cluster of distributed Erlang
+%% nodes. If you do not want to register the process and instead
+%% reference it using its PID, you omit the argument and use a
+%% \code{start\_link/3} or \code{start/3} function call
+%% instead. \code{CallbackModule} is the name of the module in which
+%% the specific callback functions are placed, \code{Arguments} is a
+%% valid Erlang term that is passed to the \code{init/1} callback
+%% function, while \code{Options} is a list that allows you to set the
+%% memory management flags \code{fullsweep\_after} and \code{heapsize},
+%% as well as other tracing and debugging flags.
 
-In our example, we call \code{start\_link/4}, registering the process
-with the same name as the callback module, using the \code{?MODULE}
-macro call. This macro is expanded to the name of the module it is
-defined in by the preprocessor when compiling the code. It is always
-good practice to name your behavior with an alias that is the same as
-the callback module it is implemented in. We don't pass any arguments,
-and as a result, just send the empty list. The options list is kept
-empty:
+\noindent \code{ServerName}は\code{\{local, Name\}}または\code{\{global, Name\}}という形のタプルで、プロセスを登録する際のプロセス別名を示すローカルまたはグローバルの\code{Name}になる。グローバルな名前を使うと、分散Erlangノードのクラスタからサーバを透過的にアクセスできる。プロセスを登録せずにPIDでプロセスを参照する場合は、この引数を持たない\code{start\_link/3}または\code{start/3}を使う。\code{CallbackModule}はコールバック関数が置かれているモジュールの名前、\code{Arguments}は\code{init/1}コールバック関数に渡される有効なErlang項だ。また、\code{Options}には、メモリ管理関連の\code{fullsweep\_after}フラグや\code{heapsize}フラグ、その他トレース用やデバッグ用のフラグのリストを指定できる。
+
+%% In our example, we call \code{start\_link/4}, registering the process
+%% with the same name as the callback module, using the \code{?MODULE}
+%% macro call. This macro is expanded to the name of the module it is
+%% defined in by the preprocessor when compiling the code. It is always
+%% good practice to name your behavior with an alias that is the same as
+%% the callback module it is implemented in. We don't pass any arguments,
+%% and as a result, just send the empty list. The options list is kept
+%% empty:
+
+この例では、\code{?MODULE}を利用して\code{start\_link/4}を呼び出し、コールバック・モジュールと同じ名前でプロセスを登録する。このマクロは、コードをコンパイルする際にプリプロセッサによってモジュール名に展開される。ビヘイビアの名前と、そのビヘイビアを実装しているコールバック・モジュールはいつも同じにしておいたほうがよい。引数は渡さないので、結果的に空のリストを送信することになる。オプション・リストは空のままだ:
 
 \begin{verbatim}
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 \end{verbatim}
 
-\noindent The obvious difference between the \code{start\_link} and \code{start}
-functions is that \code{start\_link} links to its parent, most often a
-supervisor, while \code{start} doesn't. This needs a special mention
-as it is an OTP behavior's responsibility to link itself to the
-supervisor. The \code{start} functions are often used when testing
-behaviors from the shell, as a typing error causing the shell process
-to crash would not affect the behavior. All variants of the
-\code{start} and \code{start\_link} functions return \code{\{ok, Pid\}}.
+%% \noindent The obvious difference between the \code{start\_link} and \code{start}
+%% functions is that \code{start\_link} links to its parent, most often a
+%% supervisor, while \code{start} doesn't. This needs a special mention
+%% as it is an OTP behavior's responsibility to link itself to the
+%% supervisor. The \code{start} functions are often used when testing
+%% behaviors from the shell, as a typing error causing the shell process
+%% to crash would not affect the behavior. All variants of the
+%% \code{start} and \code{start\_link} functions return \code{\{ok, Pid\}}.
 
-The \code{start} and \code{start\_link} functions will spawn a new
-process that calls the \code{init(Arguments)} callback function in the
-\code{CallbackModule}, with the \code{Arguments} supplied. The
-\code{init} function must initialize the \code{LoopData} of the server
-and has to return a tuple of the format \code{\{ok,
-LoopData\}}. \code{LoopData} contains the first instance of the loop
-data that will be passed between the callback functions. If you want
-to store some of the arguments you passed to the \code{init} function, you
-would do so in the \code{LoopData} variable. The \code{LoopData} in
-the Riak node watcher server is the result of the
-\code{schedule\_broadcast/1} called with a record of type \code{state}
-where the fields are set to the default values:
+\noindent \code{start\_link}関数と\code{start}関数の明らかな違いは、
+\code{start\_link}は親(たいていはスーパバイザ)にリンクするのに対し、
+\code{start}はリンクしない点だ。自分自身をスーパバイザにリンクするのは
+OTPビヘイビアの責任になるため、この点は注意が必要だ。\code{start}関数は
+ビヘイビアをシェルからテストする際によく使う。入力ミスでシェル・プロセ
+スをクラッシュさせてしまってもビヘイビアには影響がないからだ。
+\code{start}関数や\code{start\_link}関数とそれらの変種はすべて
+\code{\{ok, Pid\}}を返す。
+
+%% The \code{start} and \code{start\_link} functions will spawn a new
+%% process that calls the \code{init(Arguments)} callback function in the
+%% \code{CallbackModule}, with the \code{Arguments} supplied. The
+%% \code{init} function must initialize the \code{LoopData} of the server
+%% and has to return a tuple of the format \code{\{ok,
+%% LoopData\}}. \code{LoopData} contains the first instance of the loop
+%% data that will be passed between the callback functions. If you want
+%% to store some of the arguments you passed to the \code{init} function, you
+%% would do so in the \code{LoopData} variable. The \code{LoopData} in
+%% the Riak node watcher server is the result of the
+%% \code{schedule\_broadcast/1} called with a record of type \code{state}
+%% where the fields are set to the default values:
+
+\code{start}関数と\code{start\_link}関数は、\code{CallbackModule}にある\code{init(Arguments)}コールバック関数を呼び出すプロセスを生成する。この関数には\code{Arguments}が渡される。\code{init}関数はサーバの\code{LoopData}を初期化し、\code{\{ok, LoopData\}}という形のタプルを返す必要がある。\code{LoopData}にはループ・データの最初のインスタンスを格納する。このループ・データはコールバック関数の間で受け渡される。\code{init}関数に渡された引数の一部を取っておきたい場合は、\code{LoopData}変数に入れておけばよい。Riakのノード監視サーバの\code{LoopData}は、\code{state}型のレコードを渡して呼び出された\code{schedule\_broadcast/1}の結果だ。各フィールドにはデフォルト値が設定される:
+
+%% \begin{verbatim}
+%% init([]) ->
+
+%%     %% Watch for node up/down events
+%%     net_kernel:monitor_nodes(true),
+
+%%     %% Setup ETS table to track node status
+%%     ets:new(?MODULE, [protected, named_table]),
+
+%%     {ok, schedule_broadcast(#state{})}.
+%% \end{verbatim}
 
 \begin{verbatim}
 init([]) ->
 
-    %% Watch for node up/down events
+    %% ノードのアップ/ダウン・イベントを監視する
     net_kernel:monitor_nodes(true),
 
-    %% Setup ETS table to track node status
+    %% ノードのステータスを追跡するためのETSテーブルを用意する
     ets:new(?MODULE, [protected, named_table]),
 
     {ok, schedule_broadcast(#state{})}.
 \end{verbatim}
 
-Although the supervisor process might call the \code{start\_link/4}
-function, a different process calls the \code{init/1} callback: the
-one that was just spawned.  As the purpose of this server is to
-notice, record, and broadcast the availability of sub-services within
-Riak, the initialization asks the Erlang runtime to notify it of such
-events, and sets up a table to store this information in.  This needs
-to be done during initialization, as any calls to the server would
-fail if that structure did not yet exist. Do only what is necessary
-and minimize the operations in your \code{init} function, as the call
-to \code{init} is a synchronous call that prevents all of the other
-serialized processes from starting until it returns.
+%% Although the supervisor process might call the \code{start\_link/4}
+%% function, a different process calls the \code{init/1} callback: the
+%% one that was just spawned.  As the purpose of this server is to
+%% notice, record, and broadcast the availability of sub-services within
+%% Riak, the initialization asks the Erlang runtime to notify it of such
+%% events, and sets up a table to store this information in.  This needs
+%% to be done during initialization, as any calls to the server would
+%% fail if that structure did not yet exist. Do only what is necessary
+%% and minimize the operations in your \code{init} function, as the call
+%% to \code{init} is a synchronous call that prevents all of the other
+%% serialized processes from starting until it returns.
+
+\code{start\_link/4}関数を呼び出すのはスーパバイザ・プロセスだが、
+\code{init/1}コールバックを呼び出すのは別のプロセス、つまり生成されたば
+かりのプロセスだ。このサーバの役割はRiakの各サブサービスの利用可能状態
+を監視、記録、ブロードキャストすることなので、初期化処理ではそのような
+イベントが通知されるようにErlangランタイムに依頼し、その情報を記録する
+ためのテーブルを用意する。このデータ構造が存在しないとサーバの呼び出し
+はすべて失敗してしまうため、この準備は初期化中にやっておかなければなら
+ない。\code{init}の呼び出しは同期型で、この呼び出しが戻るまでほかの逐次
+実行プロセスはどれも実行できないので、\code{init}関数での処理は必要最小
+限に抑えるべきだ。
 
 \end{aosasect2}
 
-\begin{aosasect2}{Passing Messages}
+%% \begin{aosasect2}{Passing Messages}
+\begin{aosasect2}{メッセージの受け渡し}
 
-If you want to send a synchronous message to your server, you use the
-\code{gen\_server:call/2} function. Asynchronous calls are made using
-the \code{gen\_server:cast/2} function. Let's start by taking two
-functions from Riak's service API; we will provide the rest of the
-code later. They are called by the client process and result in a
-synchronous message being sent to the server process registered with
-the same name as the callback module. Note that validating the data
-sent to the server should occur on the client side. If the client
-sends incorrect information, the server should terminate.
+%% If you want to send a synchronous message to your server, you use the
+%% \code{gen\_server:call/2} function. Asynchronous calls are made using
+%% the \code{gen\_server:cast/2} function. Let's start by taking two
+%% functions from Riak's service API; we will provide the rest of the
+%% code later. They are called by the client process and result in a
+%% synchronous message being sent to the server process registered with
+%% the same name as the callback module. Note that validating the data
+%% sent to the server should occur on the client side. If the client
+%% sends incorrect information, the server should terminate.
+
+サーバに同期型メッセージを送信する必要があるときは、
+\code{gen\_server:call/2}関数を使う。非同期型呼び出しには
+\code{gen\_server:cast/2}関数を使う。まず、RiakのサービスAPIの2つの関数
+を例に見てみよう。残りのコードは後で説明する。クライアント・プロセスが
+これらの関数を呼び出すと、コールバック・モジュールと同じ名前で登録され
+ているサーバ・プロセスに同期型メッセージが送信される。ただし、サーバに
+送信されるデータの検証／＊validating＊／はクライアント側で行なわれる。
+クライアントが不正な情報を送ってきた場合、サーバは終了する。
 
 \begin{verbatim}
 service_up(Id, Pid) ->
@@ -723,37 +799,70 @@ service_down(Id) ->
     gen_server:call(?MODULE, {service_down, Id}).
 \end{verbatim}
 
-\noindent Upon receiving the messages, the \code{gen\_server} process calls the
-\code{handle\_call/3} callback function dealing with the messages in
-the same order in which they were sent:
+%% \noindent Upon receiving the messages, the \code{gen\_server} process calls the
+%% \code{handle\_call/3} callback function dealing with the messages in
+%% the same order in which they were sent:
+
+\noindent \code{gen\_server}プロセスはメッセージを受信すると\code{handle\_call/3}コールバック関数を呼び出す。この関数は、メッセージを送信順に／＊受信順?＊／処理する:
+
+%% \begin{verbatim}
+%% handle_call({service_up, Id, Pid}, _From, State) ->
+%%     %% Update the set of active services locally
+%%     Services = ordsets:add_element(Id, State#state.services),
+%%     S2 = State#state { services = Services },
+
+%%     %% Remove any existing mrefs for this service
+%%     delete_service_mref(Id),
+
+%%     %% Setup a monitor for the Pid representing this service
+%%     Mref = erlang:monitor(process, Pid),
+%%     erlang:put(Mref, Id),
+%%     erlang:put(Id, Mref),
+
+%%     %% Update our local ETS table and broadcast
+%%     S3 = local_update(S2),
+%%     {reply, ok, update_avsn(S3)};
+
+%% handle_call({service_down, Id}, _From, State) ->
+%%     %% Update the set of active services locally
+%%     Services = ordsets:del_element(Id, State#state.services),
+%%     S2 = State#state { services = Services },
+
+%%     %% Remove any existing mrefs for this service
+%%     delete_service_mref(Id),
+
+%%     %% Update local ETS table and broadcast
+%%     S3 = local_update(S2),
+%%     {reply, ok, update_avsn(S3)};
+%% \end{verbatim}
 
 \begin{verbatim}
 handle_call({service_up, Id, Pid}, _From, State) ->
-    %% Update the set of active services locally
+    %% アクティブなサービスの集合をローカルに更新する／＊要確認＊／
     Services = ordsets:add_element(Id, State#state.services),
     S2 = State#state { services = Services },
 
-    %% Remove any existing mrefs for this service
+    %% このサービスの既存のmrefをすべて削除する
     delete_service_mref(Id),
 
-    %% Setup a monitor for the Pid representing this service
+    %% このサービスを示すPidのモニタを用意する
     Mref = erlang:monitor(process, Pid),
     erlang:put(Mref, Id),
     erlang:put(Id, Mref),
 
-    %% Update our local ETS table and broadcast
+    %% ローカルなETSを更新しブロードキャストする
     S3 = local_update(S2),
     {reply, ok, update_avsn(S3)};
 
 handle_call({service_down, Id}, _From, State) ->
-    %% Update the set of active services locally
+    %% アクティブなサービスの集合をローカルに更新する
     Services = ordsets:del_element(Id, State#state.services),
     S2 = State#state { services = Services },
 
-    %% Remove any existing mrefs for this service
+    %% このサービスの既存のmrefをすべて削除する
     delete_service_mref(Id),
 
-    %% Update local ETS table and broadcast
+    %% ローカルなETSを更新しブロードキャストする
     S3 = local_update(S2),
     {reply, ok, update_avsn(S3)};
 \end{verbatim}
