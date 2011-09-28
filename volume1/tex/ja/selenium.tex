@@ -702,91 +702,103 @@ WebDriver でサポートする言語を減らすのもひとつの方法では�
 
 \end{aosasect1}
 
-\begin{aosasect1}{Layers and Javascript}
+%% \begin{aosasect1}{Layers and Javascript}
+\begin{aosasect1}{レイヤーとJavascript}
 \label{sec.selenium.layers}
 
-A browser automation tool is essentially built of three moving parts:
+%% A browser automation tool is essentially built of three moving parts:
+ブラウザの自動化ツールは、基本的にこれらの三つの部分から構成されている。
 
 \begin{aosaitemize}
 
-\item A way of interrogating the DOM.
+%% \item A way of interrogating the DOM.
+\item DOMへの問い合わせ手段。
 
-\item A mechanism for executing Javascript.
+%% \item A mechanism for executing Javascript.
+\item Javascriptを実行する仕組み。
 
-\item Some means of emulating user input.
+%% \item Some means of emulating user input.
+\item ユーザーの入力をエミュレートする何らかの手段。
 
 \end{aosaitemize}
 
-This section focuses on the first part: providing a mechanism to
-interrogate the DOM\@. The lingua franca of the browser is Javascript,
-and this seems like the ideal language to use when interrogating the
-DOM\@. Although this choice seems obvious, making it leads to some
-interesting challenges and competing requirements that need balancing
-when thinking about Javascript.
+%% This section focuses on the first part: providing a mechanism to
+%% interrogate the DOM\@. The lingua franca of the browser is Javascript,
+%% and this seems like the ideal language to use when interrogating the
+%% DOM\@. Although this choice seems obvious, making it leads to some
+%% interesting challenges and competing requirements that need balancing
+%% when thinking about Javascript.
+このセクションで扱うのは最初の項目、つまりDOMへの問い合わせの仕組みである。ブラウザの世界の共通語はJavascriptであり、これを使ってDOMの問い合わせができれば理想的であろう。この選択は一見明らかなようだが、Javascriptを採用するにはいくつかの問題や競合する要件があり、バランスをとる必要がある。
 
-Like most large projects, Selenium makes use of a layered set of
-libraries.  The bottom layer is Google's Closure Library, which
-supplies primitives and a modularization mechanism allowing source
-files to be kept focused and as small as possible. Above this, there
-is a utility library providing functions that range from simple tasks
-such as getting the value of an attribute, through determining whether
-an element would be visible to an end user, to far more complex
-actions such as simulating a click using synthesized events. Within
-the project, these are viewed as offering the smallest units of
-browser automation, and so are called Browser Automation Atoms or
-atoms. Finally, there are adapter layers that compose atoms in order
-to meet the API contracts of both WebDriver and Core.
+%% Like most large projects, Selenium makes use of a layered set of
+%% libraries.  The bottom layer is Google's Closure Library, which
+%% supplies primitives and a modularization mechanism allowing source
+%% files to be kept focused and as small as possible. Above this, there
+%% is a utility library providing functions that range from simple tasks
+%% such as getting the value of an attribute, through determining whether
+%% an element would be visible to an end user, to far more complex
+%% actions such as simulating a click using synthesized events. Within
+%% the project, these are viewed as offering the smallest units of
+%% browser automation, and so are called Browser Automation Atoms or
+%% atoms. Finally, there are adapter layers that compose atoms in order
+%% to meet the API contracts of both WebDriver and Core.
+多くの大規模プロジェクトと同様、Seleniumのライブラリ群は階層構造になっている。最下層にあるのがGoogleのClosure Libraryで、これはプリミティブやモジュール化機構を提供する。これを使うと、ソースファイルを集中的に保持しつつサイズを小さくできる。その上に乗るのがユーティリティライブラリで、このライブラリではさまざまな関数を提供する。属性の値を取得したりある要素がユーザーに見えるかどうかを調べたりといった単純なタスクをこなす関数もあれば、同期イベントを使ってクリック操作をシミュレートするなどの複雑な関数もある。プロジェクト全体から見たときに、このライブラリはブラウザ自動化の最小単位の機能を提供するものに見える。そのため、このライブラリはBrowser Automation Atomsあるいはatomsと呼ばれる。最後に、その上に乗るのがアダプタ層である。これが、WebDriverおよびコアとのAPIの役割をする。
 
-\aosafigure[150pt]{../images/selenium/atoms.eps}{Layers of Selenium Javascript Library}{fig.sel.atoms}
+%% \aosafigure[150pt]{../images/selenium/atoms.eps}{Layers of Selenium Javascript Library}{fig.sel.atoms}
+\aosafigure[150pt]{../images/selenium/atoms.eps}{Selenium Javascriptライブラリの階層}{fig.sel.atoms}
 
-The Closure Library was chosen for several reasons. The main one was
-that the Closure Compiler understands the modularization technique the
-Library uses. The Closure Compiler is a compiler targeting Javascript
-as the output language. ``Compilation'' can be as simple as ordering
-input files in dependency order, concatenating and pretty printing
-them, or as complex as doing advanced minification and dead code
-removal. Another undeniable advantage was that several members of the
-team doing the work on the Javascript code were very familiar with
-Closure Library.
+%% The Closure Library was chosen for several reasons. The main one was
+%% that the Closure Compiler understands the modularization technique the
+%% Library uses. The Closure Compiler is a compiler targeting Javascript
+%% as the output language. ``Compilation'' can be as simple as ordering
+%% input files in dependency order, concatenating and pretty printing
+%% them, or as complex as doing advanced minification and dead code
+%% removal. Another undeniable advantage was that several members of the
+%% team doing the work on the Javascript code were very familiar with
+%% Closure Library.
+Closure Libraryが選ばれたのにはいくつか理由がある。最大の理由は、Closure Compilerがそのライブラリの使っているモジュール化技術を理解するということだ。Closure Compilerは、出力言語としてJavascriptを対象としたコンパイラである。``コンパイル''とひとことで言ってもその幅は広い。単に入力ファイルを依存関係の順で並べ替えて連結・整形するだけのこともあれば、高度な最適化や未使用コードの削除まで含めることもある。Closure Libraryには、それ以外にもまぎれもない利点があった。Javascriptのコードを開発するチームのメンバーの中に、Closure Libraryにとても詳しい人が何人かいたのだ。
 
-This ``atomic'' library of code is used pervasively throughout the
-project when there is a requirement to interrogate the DOM\@.  For RC
-and those drivers largely composed of Javascript, the library is used
-directly, typically compiled as a monolithic script. For drivers
-written in Java, individual functions from the WebDriver adapter layer
-are compiled with full optimization enabled, and the generated
-Javascript included as resources in the JARs. For drivers written in C
-variants, such as the iPhone and IE drivers, not only are the
-individual functions compiled with full optimization, but the
-generated output is converted to a constant defined in a header which
-is executed via the driver's normal Javascript execution mechanism on
-demand. Although this seems like a strange thing to do, it allows the
-Javascript to be pushed into the underlying driver without needing to
-expose the raw source in multiple places.
+%% This ``atomic'' library of code is used pervasively throughout the
+%% project when there is a requirement to interrogate the DOM\@.  For RC
+%% and those drivers largely composed of Javascript, the library is used
+%% directly, typically compiled as a monolithic script. For drivers
+%% written in Java, individual functions from the WebDriver adapter layer
+%% are compiled with full optimization enabled, and the generated
+%% Javascript included as resources in the JARs. For drivers written in C
+%% variants, such as the iPhone and IE drivers, not only are the
+%% individual functions compiled with full optimization, but the
+%% generated output is converted to a constant defined in a header which
+%% is executed via the driver's normal Javascript execution mechanism on
+%% demand. Although this seems like a strange thing to do, it allows the
+%% Javascript to be pushed into the underlying driver without needing to
+%% expose the raw source in multiple places.
+この``核となる''ライブラリは、プロジェクト全般でDOMを扱う必要のある場面に幅広く用いられている。RCや主にJavascriptで書かれたドライバの場合は、このライブラリを直接使う。ひとつのスクリプトにまとめてしまうことが多い。Javaで書かれたドライバの場合は、WebDriverアダプタ層の個々の関数を完全に最適化した状態でコンパイルし、生成されたJavascriptをJARにリソースとして組み込む。C系の言語で書かれたドライバ、たとえばiPhone用やIE用のドライバの場合は、個々の関数を最適化してコンパイルするだけではなく、生成された出力をヘッダで定義する定数に変換する。そしてそれを、ドライバの標準的なJavascript実行機能を使って必要に応じて実行する。奇妙なことに思えるかもしれないが、Javascriptを基盤のドライバに押し込むこともできる。そうすれば、複数の場所で生のソースを公開する必要がなくなる。
 
-Because the atoms are used pervasively it's possible to ensure
-consistent behavior between the different browsers, and because the
-library is written in Javascript and doesn't require elevated
-privileges to execute the development cycle, is easy and fast. The
-Closure Library can load dependencies dynamically, so the Selenium
-developer need only write a test and load it in a browser, modifying
-code and hitting the refresh button as required. Once the test is
-passing in one browser, it's easy to load it in another browser and
-confirm that it passes there. Because the Closure Library does a good
-job of abstracting away the differences between browsers, this is
-often enough, though it's reassuring to know that there are continuous
-builds that will run the test suite in every supported browser.
+%% Because the atoms are used pervasively it's possible to ensure
+%% consistent behavior between the different browsers, and because the
+%% library is written in Javascript and doesn't require elevated
+%% privileges to execute the development cycle, is easy and fast. The
+%% Closure Library can load dependencies dynamically, so the Selenium
+%% developer need only write a test and load it in a browser, modifying
+%% code and hitting the refresh button as required. Once the test is
+%% passing in one browser, it's easy to load it in another browser and
+%% confirm that it passes there. Because the Closure Library does a good
+%% job of abstracting away the differences between browsers, this is
+%% often enough, though it's reassuring to know that there are continuous
+%% builds that will run the test suite in every supported browser.
+atomsは広範囲で使われているので、さまざまなブラウザで一貫したふるまいを保証できる。また、ライブラリがJavascriptで書かれていて実行するのに権限の昇格が不要なので、開発サイクルを手軽にすばやく回せるようになる。Closure Libraryは動的に依存を読み込めるので、Seleniumの開発者はただ単にテストを書いてそれをブラウザに読ませるだけでよい。コードを修正したら、必要に応じて再読み込みさせる。あるブラウザでテストが通れば、あとはそれを他のブラウザでも読ませてテストが通ることを確認するだけである。Closure Libraryがうまい具合にブラウザ間の差異を取り去ってくれているので通常はこれで十分だが、サポート対象の全ブラウザ用のテストスイートを実行する継続的ビルド環境もあることを知ればさらに安心できるだろう。
 
-Originally Core and WebDriver had many areas of congruent code---code
-that performed the same function in slightly different ways. When we
-started work on the atoms, this code was combed through to try and
-find the ``best of breed'' functionality. After all, both projects had
-been used extensively and their code was very robust so throwing away
-everything and starting from scratch would not only have been wasteful
-but foolish.  As each atom was extracted, the sites at which it would
-be used were identified and switched to using the atom. For example,
-the Firefox driver's \code{getAttribute} method shrunk from
-approximately 50 lines of code to 6 lines long, including blank lines:
+%% Originally Core and WebDriver had many areas of congruent code---code
+%% that performed the same function in slightly different ways. When we
+%% started work on the atoms, this code was combed through to try and
+%% find the ``best of breed'' functionality. After all, both projects had
+%% been used extensively and their code was very robust so throwing away
+%% everything and starting from scratch would not only have been wasteful
+%% but foolish.  As each atom was extracted, the sites at which it would
+%% be used were identified and switched to using the atom. For example,
+%% the Firefox driver's \code{getAttribute} method shrunk from
+%% approximately 50 lines of code to 6 lines long, including blank lines:
+もともと、CoreとWebDriverで同じようなことをしているコードは多かった。同じ機能を微妙に異なる方法で実現していたのだ。atomsを使った開発を始める際に、我々はコードを念入りに調べて``最適なもの''を残そうとした。結局のところ、どちらのプロジェクトについても、幅広く使われていたこともあってコードは非常に堅牢だった。すべての投げ捨ててゼロから書き直すのは無駄だし馬鹿げていた。個々のatomをピックアップして、それを使うであろう場面を調べてatomを使うように切り替えた。たとえばFirefoxドライバの\code{getAttribute}メソッドは、もともと50行ほどあったのが空行込みで6行にまで縮まった。
 
 \begin{verbatim}
 FirefoxDriver.prototype.getElementAttribute =
@@ -800,54 +812,60 @@ FirefoxDriver.prototype.getElementAttribute =
 };
 \end{verbatim}
 
-\noindent That second-to-last line, where \code{respond.value} is assigned to,
-is using the atomic WebDriver library.
+%% \noindent That second-to-last line, where \code{respond.value} is assigned to,
+%% is using the atomic WebDriver library.
+\noindent 最後から2行目の\code{respond.value}に代入しているところで、WebDriver用のatomを使っている。
 
-The atoms are a practical demonstration of several of the
-architectural themes of the project. Naturally they enforce the
-requirement that an implementation of an API be sympathetic to a
-Javascript implementation. What's even better is that the same library
-is shared throughout the codebase; where once a bug had to be verified
-and fixed across multiple implementations, it is now enough to fix the
-bug in one place, which reduces the cost of change while improving
-stability and effectiveness. The atoms also make the bus factor of the
-project more favorable. Since a normal Javascript unit test can be
-used to check that a fix works the barrier to joining the Open Source
-project is considerably lower than it was when knowledge of how each
-driver was implemented was required.
+%% The atoms are a practical demonstration of several of the
+%% architectural themes of the project. Naturally they enforce the
+%% requirement that an implementation of an API be sympathetic to a
+%% Javascript implementation. What's even better is that the same library
+%% is shared throughout the codebase; where once a bug had to be verified
+%% and fixed across multiple implementations, it is now enough to fix the
+%% bug in one place, which reduces the cost of change while improving
+%% stability and effectiveness. The atoms also make the bus factor of the
+%% project more favorable. Since a normal Javascript unit test can be
+%% used to check that a fix works the barrier to joining the Open Source
+%% project is considerably lower than it was when knowledge of how each
+%% driver was implemented was required.
+atomsは、このプロジェクトのアーキテクチャに関する主題のいくつかを現実的に実証したものである。当然、APIの実装はJavascriptの実装に従うという要件を強要する。さらによい点は、同じライブラリをコードベース全体で共有しているというところだ。複数のプラットフォームにまたがるバグが検出されて修正することになっても、一か所でバグを修正するだけでよくなる。変更に対するコストは下がり、安定性や効率性も向上した。atomsを使えば、プロジェクトのバス係数をより好ましい方向に進められる。通常のJavascriptのユニットテストツールをつかえば修正がうまく機能するかどうかを検証できるので、プロジェクトへの新規参入障壁はかなり下がるだろう。参加する前に各ドライバの実装の詳細を知っておく必要がなくなる。
 
-There is another benefit to using the atoms. A layer emulating the
-existing RC implementation but backed by WebDriver is an important
-tool for teams looking to migrate in a controlled fashion to the newer
-WebDriver APIs. As Selenium Core is atomized it becomes possible to
-compile each function from it individually, making the task of writing
-this emulating layer both easier to implement and more accurate.
+%% There is another benefit to using the atoms. A layer emulating the
+%% existing RC implementation but backed by WebDriver is an important
+%% tool for teams looking to migrate in a controlled fashion to the newer
+%% WebDriver APIs. As Selenium Core is atomized it becomes possible to
+%% compile each function from it individually, making the task of writing
+%% this emulating layer both easier to implement and more accurate.
+atomsを使うメリットはそれ以外にもある。既存のRCの実装をエミュレートした(しかし裏側にはWebDriverがいる)レイヤーをうまく使えば、きちんと管理された方法で新しいWebDriverのAPIに移行させることができる。Selenium Coreはatom化されているので、その各関数を個別にコンパイルできるようになった。そのおかげで、このエミュレートレイヤーを書く作業は容易になり、より正確に書けるようになった。
 
-It goes without saying that there are downsides to the approach taken.
-Most importantly, compiling Javascript to a C \code{const} is a very
-strange thing to do, and it always baffles new contributors to the
-project who want to work on the C code. It is also a rare developer
-who has every version of every browser and is dedicated enough to run
-every test in all of those browsers---it is possible for someone to
-inadvertently cause a regression in an unexpected place, and it can
-take some time to identify the problem, particularly if the continuous
-builds are being flaky.
+%% It goes without saying that there are downsides to the approach taken.
+%% Most importantly, compiling Javascript to a C \code{const} is a very
+%% strange thing to do, and it always baffles new contributors to the
+%% project who want to work on the C code. It is also a rare developer
+%% who has every version of every browser and is dedicated enough to run
+%% every test in all of those browsers---it is possible for someone to
+%% inadvertently cause a regression in an unexpected place, and it can
+%% take some time to identify the problem, particularly if the continuous
+%% builds are being flaky.
+もちろん、このアプローチには弱点もあることは言うまでもない。中でも最も重大なのが、JavascriptをコンパイルしてCの定数にしてしまうという奇妙な作業だ。これは、Cのコードでプロジェクトに貢献したいと考えている人の気持ちを挫折させてしまうに十分だ。また、すべてのブラウザの全バージョンを持っていてそのすべてで全テストを実行できるような開発者などめったにいない。誰かが不注意で予期せぬ場所にバグを作りこんでしまうこともあり得るし、もし継続的ビルドがうまく機能していなければ、そんなバグが見つかるまでにはある程度の時間を要してしまうだろう。
 
-Because the atoms normalize return values between browsers, there can
-also be unexpected return values. For example, consider this HTML:
+%% Because the atoms normalize return values between browsers, there can
+%% also be unexpected return values. For example, consider this HTML:
+atomsはブラウザごとの返り値を正規化するので、予期せぬ値が返ってくることもあり得る。たとえば、このようなHTMLを考えよう。
 
 \begin{verbatim}
 <input name="example" checked>
 \end{verbatim}
 
-\noindent The value of the \code{checked} attribute will depend on the browser
-being used. The atoms normalize this, and other Boolean attributes
-defined in the HTML5 spec, to be ``true'' or ``false''. When this atom
-was introduced to the code base, we discovered many places where
-people were making browser-dependent assumptions about what the return
-value should be. While the value was now consistent there was an
-extended period where we explained to the community what had happened
-and why.
+%% \noindent The value of the \code{checked} attribute will depend on the browser
+%% being used. The atoms normalize this, and other Boolean attributes
+%% defined in the HTML5 spec, to be ``true'' or ``false''. When this atom
+%% was introduced to the code base, we discovered many places where
+%% people were making browser-dependent assumptions about what the return
+%% value should be. While the value was now consistent there was an
+%% extended period where we explained to the community what had happened
+%% and why.
+\noindent \code{checked}属性のvalueが何になるかはブラウザに依存する。atomsはこれを正規化し、その他HTML5仕様で定義されているすべてのBoolean属性の値を``true''か``false''に揃える。このatomをはじめてコードベースに投入したときに気付いたのは、返り値に関してブラウザ依存の値を前提としているコードがいかに多いかということだった。この値は今は一貫しているが、それまでにはコミュニティに対して「何が起こったのか」「なぜそうなったのか」を説明するための期間を要した。
 
 \end{aosasect1}
 
