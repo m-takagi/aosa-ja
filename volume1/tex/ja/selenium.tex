@@ -869,164 +869,184 @@ atomsはブラウザごとの返り値を正規化するので、予期せぬ値
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Remote Driver, and the Firefox Driver in Particular}
+%% \begin{aosasect1}{The Remote Driver, and the Firefox Driver in Particular}
+\begin{aosasect1}{リモートドライバ、中でも特にFirefoxドライバについて}
 
-The remote WebDriver was originally a glorified RPC mechanism. It has
-since evolved into one of the key mechanisms we use to reduce the cost
-of maintaining WebDriver by providing a uniform interface that
-language bindings can code against. Even though we've pushed as much
-of the logic as we can out of the language bindings and into the
-driver, if each driver needed to communicate via a unique protocol we
-would still have an enormous amount of code to repeat across all the
-language bindings.
+%% The remote WebDriver was originally a glorified RPC mechanism. It has
+%% since evolved into one of the key mechanisms we use to reduce the cost
+%% of maintaining WebDriver by providing a uniform interface that
+%% language bindings can code against. Even though we've pushed as much
+%% of the logic as we can out of the language bindings and into the
+%% driver, if each driver needed to communicate via a unique protocol we
+%% would still have an enormous amount of code to repeat across all the
+%% language bindings.
+リモートWebDriverは、当初からRPCの仕組みを尊重していた。それは徐々に成長してWebDriverの主要な仕組みのひとつとなり、保守コストの軽減に役立った。統一インターフェイスを提供することで、各言語のバインディングがそれを使えるようにしたのだ。ロジックのほとんどを言語バインディングからドライバ側に移してはいるが、もしドライバ側から独自のプロトコルでの通信が必要になったときは、それに対応するコードがすべての言語バインディングにまたがって用意されている。
 
-The remote WebDriver protocol is used wherever we need to communicate
-with a browser instance that's running out of process.  Designing this
-protocol meant taking into consideration a number of concerns. Most of
-these were technical, but, this being open source, there was also the
-social aspect to consider.
+%% The remote WebDriver protocol is used wherever we need to communicate
+%% with a browser instance that's running out of process.  Designing this
+%% protocol meant taking into consideration a number of concerns. Most of
+%% these were technical, but, this being open source, there was also the
+%% social aspect to consider.
+リモートWebDriverプロトコルは、別プロセスで動いているブラウザのインスタンスとの通信が必要になったときに使うものである。このプロトコルの設計にあたっては、さまざまな内容を検討した。ほとんどは技術的なものだが、オープンソースプロジェクトであることを鑑みて、ソーシャルな面も検討材料のひとつになった。
 
-Any RPC mechanism is split into two pieces: the transport and the
-encoding. We knew that however we implemented the remote WebDriver
-protocol, we would need support for both pieces in the languages we
-wanted to use as clients. The first iteration of the design was
-developed as part of the Firefox driver.
+%% Any RPC mechanism is split into two pieces: the transport and the
+%% encoding. We knew that however we implemented the remote WebDriver
+%% protocol, we would need support for both pieces in the languages we
+%% wanted to use as clients. The first iteration of the design was
+%% developed as part of the Firefox driver.
+あらゆるRPC機構は、二つの部分に分かれる。トランスポートとエンコーディングだ。リモートWebDriverプロトコルをどのように実装したところで、クライアントとして想定するすべての言語に対してこれら両方のサポートが必要になることはわかっていた。設計の最初のイテレーションでは、Firefoxドライバについて検討した。
 
-Mozilla, and therefore Firefox, was always seen as being a
-multi-platform application by its developers. In order to facilitate
-the development, Mozilla created a framework inspired by Microsoft's
-COM that allowed components to be built and bolted together called
-XPCOM (cross-platform COM). An XPCOM interface is declared using IDL,
-and there are
-language bindings for C and Javascript as well as other languages. Because
-XPCOM is used to construct Firefox, and because XPCOM has Javascript
-bindings, it's possible to make use of XPCOM objects in Firefox
-extensions.
+%% Mozilla, and therefore Firefox, was always seen as being a
+%% multi-platform application by its developers. In order to facilitate
+%% the development, Mozilla created a framework inspired by Microsoft's
+%% COM that allowed components to be built and bolted together called
+%% XPCOM (cross-platform COM). An XPCOM interface is declared using IDL,
+%% and there are
+%% language bindings for C and Javascript as well as other languages. Because
+%% XPCOM is used to construct Firefox, and because XPCOM has Javascript
+%% bindings, it's possible to make use of XPCOM objects in Firefox
+%% extensions.
+Mozillaは(つまりFirefoxも)常に、マルチプラットフォームアプリケーションとして開発されてきた。その開発を促進するために、MozillaはMicrosoftのCOMに似たフレームワークを作った。このフレームワークを使うと、コンポーネントの組み立てや連携がXPCOM(クロスプラットフォームCOM)という仕組みで可能となる。XPCOMのインターフェイスはIDLで宣言されており、CやJavascriptだけでなくその他の言語のバインディングも用意されている。XPCOMはFirefox自体を作るためにも使われており、さらにJavascriptバインディングを持っているので、XPCOMオブジェクトをFirefox拡張で使うことができる。
 
-Normal Win32 COM allows interfaces to be accessed remotely. There were
-plans to add the same ability to XPCOM too, and Darin Fisher added an
-XPCOM ServerSocket implementation to facilitate this. Although the
-plans for D-XPCOM never came to fruition, like an appendix, the
-vestigial infrastructure is still there.  We took advantage of this to
-create a very basic server within a custom Firefox extension
-containing all the logic for controlling Firefox. The protocol used
-was originally text-based and line-oriented, encoding all strings as
-UTF-2. Each request or response began with a number, indicating how
-many newlines to count before concluding that the request or reply had
-been sent. Crucially, this scheme was easy to implement in Javascript
-as SeaMonkey (Firefox's Javascript engine at the time) stores
-Javascript strings internally as 16 bit unsigned integers.
+%% Normal Win32 COM allows interfaces to be accessed remotely. There were
+%% plans to add the same ability to XPCOM too, and Darin Fisher added an
+%% XPCOM ServerSocket implementation to facilitate this. Although the
+%% plans for D-XPCOM never came to fruition, like an appendix, the
+%% vestigial infrastructure is still there.  We took advantage of this to
+%% create a very basic server within a custom Firefox extension
+%% containing all the logic for controlling Firefox. The protocol used
+%% was originally text-based and line-oriented, encoding all strings as
+%% UTF-2. Each request or response began with a number, indicating how
+%% many newlines to count before concluding that the request or reply had
+%% been sent. Crucially, this scheme was easy to implement in Javascript
+%% as SeaMonkey (Firefox's Javascript engine at the time) stores
+%% Javascript strings internally as 16 bit unsigned integers.
+Win32 COMには、リモートからアクセスするためのインターフェイスが用意されている。XPCOMにも同様の機能を追加する計画があった。実際、ダーリン・フィッシャーがXPCOM ServerSocketの実装を追加してこれを実現しようとしていた。結局このD-XPCOM計画が日の目を見ることはなかったが、その基盤の痕跡は今でも残っている。我々はこの機能を使い、基本的なサーバー機能をFirefoxの拡張機能として実装した。そしてそこに、Firefoxの制御のためのすべてのロジックを閉じ込めた。利用したプロトコルは、テキストベースで行指向なもので、すべての文字列をUTF-2でエンコードしていた。個々のリクエストやレスポンスは数値から始まる。この数値は、リクエストやレスポンスに達するまでに改行文字がいくつ現れるかを指している。最も重要だったのは、このスキームはJavascriptでSeaMonkey(当時のFirefoxが採用していたJavascriptエンジン)として実装しやすかったということだ。これは、Javascriptの文字列を内部的に符号なし16ビット整数値で格納している。
 
-Although futzing with custom encoding protocols over raw sockets is a
-fun way to pass the time, it has several drawbacks. There were no
-widely available libraries for the custom protocol, so it needed to be
-implemented from the ground up for every language that we wanted to
-support. This requirement to implement more code would make it less
-likely that generous Open Source contributors would participate in the
-development of new language bindings. Also, although a line-oriented
-protocol was fine when we were only sending text-based data around, it
-brought problems when we wanted to send images (such as screenshots)
-around.
+%% Although futzing with custom encoding protocols over raw sockets is a
+%% fun way to pass the time, it has several drawbacks. There were no
+%% widely available libraries for the custom protocol, so it needed to be
+%% implemented from the ground up for every language that we wanted to
+%% support. This requirement to implement more code would make it less
+%% likely that generous Open Source contributors would participate in the
+%% development of new language bindings. Also, although a line-oriented
+%% protocol was fine when we were only sending text-based data around, it
+%% brought problems when we wanted to send images (such as screenshots)
+%% around.
+独自の符号化プロトコルを生のソケットにのせてやりとりするのは、暇つぶしとしてはいいだろう。しかし、いくつかの問題点もある。まず、自前のプロトコルに対応したライブラリは広く出回っていないので、サポートしたいすべての言語についてライブラリをゼロから自前で実装する必要がある。実装すべきコードの量もそのぶん多くなるので、新しい言語のバインディングを作って貢献しようと考える人たちにとっての敷居が高くなってしまう。また、また、行指向のプロトコルはテキストデータを扱う限りは便利なのだが、スクリーンショットなど画像を扱おうとし始めると問題になる。
 
-It became very obvious, very quickly that this original RPC mechanism
-wasn't practical. Fortunately, there was a well-known transport that
-has widespread adoption and support in almost every language that
-would allow us to do what we wanted: HTTP.
+%% It became very obvious, very quickly that this original RPC mechanism
+%% wasn't practical. Fortunately, there was a well-known transport that
+%% has widespread adoption and support in almost every language that
+%% would allow us to do what we wanted: HTTP.
+最初に採用したRPCの仕組みは実践的ではないということが、間もなくはっきりとしてきた。幸いにも、それ以外にもよく知られたトランスポートの仕組みがあった。幅広く採用されており、ほぼすべての言語でサポートされているという、まさに我々の望み通りのもの。それがHTTPだ。
 
-Once we had decided to use HTTP for a transport mechanism, the next
-choice that needed to be made was whether to use a single end-point
-(\`{a} la SOAP) or multiple end points (in the style of REST) The
-original Selenese protocol used a single end-point and had encoded
-commands and arguments in the query string. While this approach worked
-well, it didn't ``feel'' right: we had visions of being able to
-connect to a remote WebDriver instance in a browser to view the state
-of the server. We ended up choosing an approach we call ``REST-ish'':
-multiple end-point URLs using the verbs of HTTP to help provide
-meaning, but breaking a number of the constraints required for a truly
-RESTful system, notably around the location of state and cacheability,
-largely because there is only one location for the application state
-to meaningfully exist.
+%% Once we had decided to use HTTP for a transport mechanism, the next
+%% choice that needed to be made was whether to use a single end-point
+%% (\`{a} la SOAP) or multiple end points (in the style of REST) The
+%% original Selenese protocol used a single end-point and had encoded
+%% commands and arguments in the query string. While this approach worked
+%% well, it didn't ``feel'' right: we had visions of being able to
+%% connect to a remote WebDriver instance in a browser to view the state
+%% of the server. We ended up choosing an approach we call ``REST-ish'':
+%% multiple end-point URLs using the verbs of HTTP to help provide
+%% meaning, but breaking a number of the constraints required for a truly
+%% RESTful system, notably around the location of state and cacheability,
+%% largely because there is only one location for the application state
+%% to meaningfully exist.
+我々はHTTPをトランスポートとして採用することに決めた。次に決める必要があったのが、エンドポイントを単一にする(SOAP風)かあるいは複数にする(REST風)かということだった。当初のSeleniumプロトコルは単一エンドポイント方式で、コマンドと引数を符号化したクエリ文字列を使っていた。この手法はうまく機能していたが、どうも``気分的に''間違っている感じがした。我々が思い描いていたのは、リモートのWebDriverインスタンスにブラウザ内から接続して、サーバーの状態を見られるようにすることだった。そして最終的に採用したのが、``REST的な''手法だった。複数のエンドポイントURLを用意し、HTTPメソッドを使って意味づけをする。しかし、真にRESTfulなシステムに求められる制約のいくつかは満たしていない。状態を保持する場所やキャッシュなどである。その大きな理由は、アプリケーションの状態が存在する箇所はひとつだけだからである。
 
-Although HTTP makes it easy to support multiple ways of encoding data
-based on content type negotiation, we decided that we needed a
-canonical form that all implementations of the remote WebDriver
-protocol could work with. There were a handful of obvious choices:
-HTML, XML or JSON\@. We quickly ruled out XML: although it's a
-perfectly reasonable data format and there are libraries that support
-it for almost every language, my perception of how well-liked it is in
-the Open Source community was that people don't enjoy working with
-it. In addition, it was entirely possible that although the returned
-data would share a common ``shape'' it would be easy for additional
-fields to be added\footnote{For example, the remote server returns a
-base64-encoded screen grab with every exception as a debugging aid
-but the Firefox driver doesn't.}. Although these extensions could be
-modeled using XML namespaces this would start to introduce Yet More
-Complexity into the client code: something I was keen to avoid.  XML
-was discarded as an option.  HTML wasn't really a good choice, as we
-needed to be able to define our own data format, and though an
-embedded micro-format could have been devised and used that seems like
-using a hammer to crack an egg.
+%% Although HTTP makes it easy to support multiple ways of encoding data
+%% based on content type negotiation, we decided that we needed a
+%% canonical form that all implementations of the remote WebDriver
+%% protocol could work with. There were a handful of obvious choices:
+%% HTML, XML or JSON\@. We quickly ruled out XML: although it's a
+%% perfectly reasonable data format and there are libraries that support
+%% it for almost every language, my perception of how well-liked it is in
+%% the Open Source community was that people don't enjoy working with
+%% it. In addition, it was entirely possible that although the returned
+%% data would share a common ``shape'' it would be easy for additional
+%% fields to be added\footnote{For example, the remote server returns a
+%% base64-encoded screen grab with every exception as a debugging aid
+%% but the Firefox driver doesn't.}. Although these extensions could be
+%% modeled using XML namespaces this would start to introduce Yet More
+%% Complexity into the client code: something I was keen to avoid.  XML
+%% was discarded as an option.  HTML wasn't really a good choice, as we
+%% needed to be able to define our own data format, and though an
+%% embedded micro-format could have been devised and used that seems like
+%% using a hammer to crack an egg.
+HTTPを採用したおかげで、符号化されたデータも(コンテンツネゴシエーションに基づく)さまざまな方法でサポートできるようになった。しかし、正式な形式をひとつ用意して、すべてのリモートWebDriverプロトコルがそれに対応できるように実装すべきだと判断した。選択肢としてすぐ候補にあがるのが、HTMLやXMLあるいはJSONである。XMLは真っ先に候補から外した。データフォーマットとしてはよくできているしライブラリのサポートもほぼすべての言語でそろっているとはいえ、経験上オープンソースのコミュニティではあまりXMLが好まれないこともわかっていた。さらに、返されるデータは共通の``形式''ではあるものの、フィールドが追加されることも十分あり得た\footnote{たとえば、リモートサーバーはbase64でエンコードしたスクリーンショットに加えて発生した例外もすべて返し、デバッグの助けにしている。しかしFirefoxドライバはそれを返さない。}。これらの拡張機能でXML名前空間を使ったモデリングもできたが、そんなことをしたらクライアント側のコードが無駄に複雑化してしまう。それだけは避けたかった。そこで、XMLは「オプションで使うこともできる」という扱いになった。HTMLはまったくもってうまい選択だと言えないだろう。我々は自前のデータフォーマットを定義しなければならない。マイクロフォーマットで無理やりフォーマットを埋め込むこともできるが、それはまるで、卵を割るときにハンマーを使うようなものだ。
 
-The final possibility considered was Javascript Object Notation
-(JSON). Browsers can transform a string into an object using either a
-straight call to \code{eval} or, on more recent browsers, with
-primitives designed to transform a Javascript object to and from a
-string securely and without side-effects. From a practical
-perspective, JSON is a popular data format with libraries for handling
-it available for almost every language and all the cool kids like
-it. An easy choice.
+%% The final possibility considered was Javascript Object Notation
+%% (JSON). Browsers can transform a string into an object using either a
+%% straight call to \code{eval} or, on more recent browsers, with
+%% primitives designed to transform a Javascript object to and from a
+%% string securely and without side-effects. From a practical
+%% perspective, JSON is a popular data format with libraries for handling
+%% it available for almost every language and all the cool kids like
+%% it. An easy choice.
+最終的に残った候補がJavascript Object Notation (JSON)だった。ブラウザ側での文字列からオブジェクトへの変換は直接\code{eval}を呼ぶだけでいいし、最近のブラウザならJavascriptオブジェクトと文字列の相互変換を安全に副作用なしで行うプリミティブが用意されている。現実的な観点からも、JSONはよく使われているデータフォーマットであり、ほとんどすべての言語でJSON処理用のライブラリが用意されている。また、開発者にも人気が高い。無難な選択肢と言える。
 
-The second iteration of the remote WebDriver protocol therefore used
-HTTP as the transport mechanism and UTF-8 encoded JSON as the default
-encoding scheme. UTF-8 was picked as the default encoding so that
-clients could easily be written in languages with limited support for
-Unicode, as UTF-8 is backwardly compatible with ASCII\@. Commands sent
-to the server used the URL to determine which command was being sent,
-and encoded the parameters for the command in an array.
+%% The second iteration of the remote WebDriver protocol therefore used
+%% HTTP as the transport mechanism and UTF-8 encoded JSON as the default
+%% encoding scheme. UTF-8 was picked as the default encoding so that
+%% clients could easily be written in languages with limited support for
+%% Unicode, as UTF-8 is backwardly compatible with ASCII\@. Commands sent
+%% to the server used the URL to determine which command was being sent,
+%% and encoded the parameters for the command in an array.
+リモートWebDriverプロトコルの第2イテレーションでは、HTTPをトランスポートとして採用し、UTF-8でエンコードしたJSONをデフォルトの符号化スキームとした。UTF-8はデフォルトの符号化方式として選ばれたものであり、Unicodeのサポートがあまり充実していない言語でクライアントを書くのも容易である。というのも、UTF-8はASCIIと後方互換性があるからだ。サーバーに送信するコマンドは、URLを使ってどのコマンドが送信されたのかを判断し、コマンドへのパラメータは配列形式でエンコードする。
 
-For example a call to \code{WebDriver.get("http://www.example.com")}
-mapped to a POST request to a URL encoding the session ID and ending
-with ``/url'', with the array of parameters looking like
-\code{{[}'http://www.example.com'{]}}.  The returned result was a
-little more structured, and had place-holders for a returned value and
-an error code.  It wasn't long until the third iteration of remote
-protocol, which replaced the request's array of parameters with a
-dictionary of named parameters. This had the benefit of making
-debugging requests significantly easier, and removed the possibility
-of clients mistakenly mis-ordering parameters, making the system as a
-whole more robust.  Naturally, it was decided to use normal HTTP error
-codes to indicate certain return values and responses where they were
-the most appropriate way to do so; for example, if a user attempts to
-call a URL with nothing mapped to it, or when we want to indicate the
-``empty response''.
+%% For example a call to \code{WebDriver.get("http://www.example.com")}
+%% mapped to a POST request to a URL encoding the session ID and ending
+%% with ``/url'', with the array of parameters looking like
+%% \code{{[}'http://www.example.com'{]}}.  The returned result was a
+%% little more structured, and had place-holders for a returned value and
+%% an error code.  It wasn't long until the third iteration of remote
+%% protocol, which replaced the request's array of parameters with a
+%% dictionary of named parameters. This had the benefit of making
+%% debugging requests significantly easier, and removed the possibility
+%% of clients mistakenly mis-ordering parameters, making the system as a
+%% whole more robust.  Naturally, it was decided to use normal HTTP error
+%% codes to indicate certain return values and responses where they were
+%% the most appropriate way to do so; for example, if a user attempts to
+%% call a URL with nothing mapped to it, or when we want to indicate the
+%% ``empty response''.
+たとえば\code{WebDriver.get("http://www.example.com")}の呼び出しは、セッションIDをエンコードして最後に``/url''をつけたURLへのPOSTリクエストにマップされる。このとき、パラメータの配列は\code{{[}'http://www.example.com'{]}}のようになる。返される結果はもう少し構造化されており、返り値やエラーコード用のプレースホルダーが用意されている。この形式は、リモートプロトコルの第3イテレーションまでしか続かなかった。リクエストにおけるパラメータの配列は、そのイテレーションで名前つきパラメータの辞書に変わった。この変更によって、デバッグ用のリクエストがとても簡単に実行できるようになった。また、クライアントがパラメータの順番を間違えてしまう可能性をなくし、システム全体としてより堅牢になった。必然的に、通常のHTTPステータスコードを使って特定の返り値や応答を表すようになった。それが最も適切な方法だったからである。たとえば、どこにもマップされていないURLを呼ぼうとしたときや``空のレスポンス''を表したいときなどに使える。
 
-The remote WebDriver protocol has two levels of error handling, one
-for invalid requests, and one for failed commands. An example of an
-invalid request is for a resource that doesn't exist on the server, or
-perhaps for a verb that the resource doesn't understand (such as
-sending a DELETE command to the the resource used for dealing with the
-URL of the current page) In those cases, a normal HTTP 4xx response is
-sent. For a failed command, the responses error code is set to 500
-(``Internal Server Error'') and the returned data contains a more
-detailed breakdown of what went wrong.
+%% The remote WebDriver protocol has two levels of error handling, one
+%% for invalid requests, and one for failed commands. An example of an
+%% invalid request is for a resource that doesn't exist on the server, or
+%% perhaps for a verb that the resource doesn't understand (such as
+%% sending a DELETE command to the the resource used for dealing with the
+%% URL of the current page) In those cases, a normal HTTP 4xx response is
+%% sent. For a failed command, the responses error code is set to 500
+%% (``Internal Server Error'') and the returned data contains a more
+%% detailed breakdown of what went wrong.
+リモートWebDriverプロトコルには二段階のエラー処理がある。無効なリクエストを扱うものと、コマンドが失敗した場合を扱うものである。無効なリクエストの例としては、サーバー上に存在しないリソースへのリクエストあるいはそのリソースが処理できないメソッドでのリクエスト(たとえば、現在のページのURLを指すリソースに対するDELETEコマンド)などがある。このような場合は、通常のHTTP 4xxレスポンスが送出される。コマンドが失敗した場合には、レスポンスのエラーコードは500 (``Internal Server Error'')となり、返すデータの中により詳しい情報を含めて何が悪かったのかをわかりやすくする。
 
-When a response containing data is sent from the server, it takes the
-form of a JSON object:\\
+%% When a response containing data is sent from the server, it takes the
+%% form of a JSON object:\\
+データを含むレスポンスがサーバーから返されるときには、JSONオブジェクト形式となる。
 
 \begin{tabular}{|lp{4in}|}
 \hline
-Key & Description \\
+%% Key & Description \\
+キー & 説明 \\
 \hline
-sessionId & An opaque handle used by the server to determine where to route session-specific commands. \\
-status & A numeric status code summarizing the result of the command. A non-zero value indicates that the command failed. \\
-value & The response JSON value. \\
+%% sessionId & An opaque handle used by the server to determine where to route session-specific commands. \\
+sessionId & 非透過的なハンドル。サーバーがセッション固有のコマンドの送り先を決めるために使う。\\
+%% status & A numeric status code summarizing the result of the command. A non-zero value indicates that the command failed. \\
+status & コマンドの結果を表す数値のステータスコード。ゼロ以外の値は、コマンドが失敗したことを表す。\\
+%% value & The response JSON value. \\
+value & レスポンスのJSONデータ。\\
 \hline
 \end{tabular}
 
 ~\\
 
 \noindent
-An example response would be:
+%% An example response would be:
+レスポンスは、たとえばこのようになる。
 
 \begin{verbatim}
 {
@@ -1036,85 +1056,96 @@ An example response would be:
 }
 \end{verbatim}
 
-\noindent As can be seen, we encode status codes in the response, with a
-non-zero value indicating that something has gone horribly awry. The
-IE driver was the first to use status codes, and the values used in
-the wire protocol mirror these. Because all error codes are consistent
-between drivers, it is possible to share error handling code between
-all the drivers written in a particular language, making the job of
-the client-side implementors easier.
+%% \noindent As can be seen, we encode status codes in the response, with a
+%% non-zero value indicating that something has gone horribly awry. The
+%% IE driver was the first to use status codes, and the values used in
+%% the wire protocol mirror these. Because all error codes are consistent
+%% between drivers, it is possible to share error handling code between
+%% all the drivers written in a particular language, making the job of
+%% the client-side implementors easier.
+\noindent 見てわかるとおり、ステータスコードをレスポンス内で符号化しており、ゼロではない値が入っていることから何かがうまくいかなかったことがわかる。IEドライバはまず最初にステータスコードを使い、プロトコル内で使う値はこの値をミラーしている。すべてのエラーコードは各ドライバで共通なので、エラー処理のコードは特定の言語で書いてすべてのドライバで共有できる。これにより、クライアント側の実装がより容易になる。
 
-The Remote WebDriver Server is simply a Java servlet that acts as a
-multiplexer, routing any commands it receives to an appropriate
-WebDriver instance. It's the sort of thing that a second year graduate
-student could write. The Firefox driver also implements the remote
-WebDriver protocol, and its architecture is far more interesting, so
-let's follow a request through from the call in the language bindings
-to that back-end until it returns to the user.
+%% The Remote WebDriver Server is simply a Java servlet that acts as a
+%% multiplexer, routing any commands it receives to an appropriate
+%% WebDriver instance. It's the sort of thing that a second year graduate
+%% student could write. The Firefox driver also implements the remote
+%% WebDriver protocol, and its architecture is far more interesting, so
+%% let's follow a request through from the call in the language bindings
+%% to that back-end until it returns to the user.
+Remote WebDriver Serverは単なるJavaサーブレットである。これはマルチプレクサとして動作し、受け付けたコマンドを適切なWebDriverインスタンスに振り向ける。まあ大学院の二年目くらいでも書けるレベルのものだ。FirefoxドライバでもリモートWebDriverプロトコルを実装しており、そのアーキテクチャのほうがずっと興味深い。そこで、言語バインディングから受け取ったリクエストがバックエンドに到達してからユーザーに応答を返すまでの流れを追いかけてみよう。
 
-\pagebreak
+%% \pagebreak
 
-Assuming that we're using Java, and that ``element'' is an instance of
-WebElement, it all starts here:
+%% Assuming that we're using Java, and that ``element'' is an instance of
+%% WebElement, it all starts here:
+ここではJavaを使っているものとする。また``element''がWebElementのインスタンスである。すべてはこの行からはじまる。
 
 \begin{verbatim}
 element.getAttribute(``row'');
 \end{verbatim}
 
-\noindent Internally, the element has an opaque ``id'' that the server-side uses
-to identify which element we're talking about. For the sake of this
-discussion, we'll imagine it has the value ``some\_opaque\_id''. This
-is encoded into a Java \code{Command} object with a \code{Map} holding
-the (now named) parameters \code{id} for the element ID
-and \code{name} for the name of the attribute being queried.
+%% \noindent Internally, the element has an opaque ``id'' that the server-side uses
+%% to identify which element we're talking about. For the sake of this
+%% discussion, we'll imagine it has the value ``some\_opaque\_id''. This
+%% is encoded into a Java \code{Command} object with a \code{Map} holding
+%% the (now named) parameters \code{id} for the element ID
+%% and \code{name} for the name of the attribute being queried.
+\noindent 内部的に、elementは非透過的な``id''を保持している。サーバーサイドではこれを使い、対話相手の要素を識別する。ここでは仮に、idの値が``some\_opaque\_id''であるものとして話を進める。これはJavaの\code{Command}オブジェクトに\code{Map}として符号化されており、(名前付きの)パラメータ\code{id}に要素のID、そして\code{name}に問い合わせ対象の属性の名前を保持する。
 
-A quick look up in a table indicates that the correct URL is:
+%% A quick look up in a table indicates that the correct URL is:
+正しいURLを指すテーブル内での検索は、このようになる。
 
 \begin{verbatim}
 /session/:sessionId/element/:id/attribute/:name
 \end{verbatim}
 
-\noindent Any section of the URL that begins with a colon is assumed to be a
-variable that requires substitution. We've been given the \code{id}
-and \code{name} parameters already, and the \code{sessionId} is
-another opaque handle that is used for routing when a server can
-handle more than one session at a time (which the Firefox driver
-cannot). This URL therefore typically expands to something like:
+%% \noindent Any section of the URL that begins with a colon is assumed to be a
+%% variable that requires substitution. We've been given the \code{id}
+%% and \code{name} parameters already, and the \code{sessionId} is
+%% another opaque handle that is used for routing when a server can
+%% handle more than one session at a time (which the Firefox driver
+%% cannot). This URL therefore typically expands to something like:
+\noindent URLのセクションの中でコロンから始まるものはすべて、変数であって後で何かの値で置き換えられるものである。パラメータ\code{id}と\code{name}は既に指定している。\code{sessionId}はもうひとつの非透過的なハンドルで、ルーティングのために使う。これを使えば、サーバーが複数のセッションを同時に扱えるようになる(Firefoxドライバではこれができない)。このURLを展開したものは、たとえばこのようになる。
 
 \begin{verbatim}
 http://localhost:7055/hub/session/XXX/element/some_opaque_id/attribute/row
 \end{verbatim}
 
-As an aside, WebDriver's remote wire protocol was originally developed
-at the same time as URL Templates were proposed as a draft RFC\@. Both
-our scheme for specifying URLs and URL Templates allow variables to be
-expanded (and therefore derived) within a URL\@. Sadly, although URL
-Templates were proposed at the same time, we only became aware of them
-relatively late in the day, and therefore they are not used to
-describe the wire protocol.
+%% As an aside, WebDriver's remote wire protocol was originally developed
+%% at the same time as URL Templates were proposed as a draft RFC\@. Both
+%% our scheme for specifying URLs and URL Templates allow variables to be
+%% expanded (and therefore derived) within a URL\@. Sadly, although URL
+%% Templates were proposed at the same time, we only became aware of them
+%% relatively late in the day, and therefore they are not used to
+%% describe the wire protocol.
+余談だが、WebDriverのリモートワイヤプロトコルの開発が始まったのは、URL TemplatesがRFC草案として提案されたのとほぼ同時期だった。我々が考えたURLの指定方法もURL Templatesも、どちらもURL内での変数の展開(そして派生)を許していた。残念なことに、URL Templatesが提案されていることを我々が知ったのはかなり後になってからのことだった。そのため、ワイヤプロトコルの記述にURL Templatesを使うことができなかった。
 
-Because the method we're executing is idempotent\footnote{I.e., always
-returns the same result.}, the correct HTTP method to use is a
-GET\@. We delegate down to a Java library that can handle HTTP (the
-Apache HTTP Client) to call the server.
+%% Because the method we're executing is idempotent\footnote{I.e., always
+%% returns the same result.}, the correct HTTP method to use is a
+%% GET\@. We delegate down to a Java library that can handle HTTP (the
+%% Apache HTTP Client) to call the server.
+我々の実装するメソッドは冪等\footnote{すなわち、何度実行しても同じ値を返す。}なので、ここで使うべき正しいHTTPメソッドはGETである。このあたりの処理は、HTTPを話せるJavaライブラリ(Apache HTTP Client)に委譲して、そのライブラリにサーバーを呼ばせる。
 
-\aosafigure{../images/selenium/firefox-driver-overall-architecture.eps}{Overview of the Firefox Driver Architecture}{fig.sel.ffdr}
+%% \aosafigure{../images/selenium/firefox-driver-overall-architecture.eps}{Overview of the Firefox Driver Architecture}{fig.sel.ffdr}
+\aosafigure{../images/selenium/firefox-driver-overall-architecture.eps}{Firefoxドライバのアーキテクチャ概要}{fig.sel.ffdr}
 
-The Firefox driver is implemented as a Firefox extension, the basic
-design of which is shown in~\aosafigref{fig.sel.ffdr}.
-Somewhat unusually, it has an embedded HTTP server.  Although
-originally we used one that we had built ourselves, writing HTTP
-servers in XPCOM wasn't one of our core competencies, so when the
-opportunity arose we replaced it with a basic HTTPD written by Mozilla
-themselves.  Requests are received by the HTTPD and almost straight
-away passed to a \code{dispatcher} object.
+%% The Firefox driver is implemented as a Firefox extension, the basic
+%% design of which is shown in~\aosafigref{fig.sel.ffdr}.
+%% Somewhat unusually, it has an embedded HTTP server.  Although
+%% originally we used one that we had built ourselves, writing HTTP
+%% servers in XPCOM wasn't one of our core competencies, so when the
+%% opportunity arose we replaced it with a basic HTTPD written by Mozilla
+%% themselves.  Requests are received by the HTTPD and almost straight
+%% away passed to a \code{dispatcher} object.
+Firefoxドライバは、Firefoxの拡張機能として実装されている。その基本的な設計は\aosafigref{fig.sel.ffdr}のとおりだ。多少風変わりなところがあるとすれば、それはHTTPサーバーを組み込んでいるところだ。元々は自前でこれを実装していたのだが、HTTPサーバーをXPCOMで書くというのは我々の得意分野ではない。そこで、Mozilla自身が用意している基本的なHTTPDでそれを置き換えた。リクエストはこのHTTPDが受け取り、ほぼそのままの形で\code{dispatcher}オブジェクトに渡される。
 
-The dispatcher takes the request and iterates over a known list of
-supported URLs, attempting to find one that matches the request. This
-matching is done with knowledge of the variable interpolation that
-went on in the client side. Once an exact match is found, including
-the verb being used, a JSON object, representing the command to
-execute, is constructed. In our case it looks like:
+%% The dispatcher takes the request and iterates over a known list of
+%% supported URLs, attempting to find one that matches the request. This
+%% matching is done with knowledge of the variable interpolation that
+%% went on in the client side. Once an exact match is found, including
+%% the verb being used, a JSON object, representing the command to
+%% execute, is constructed. In our case it looks like:
+ディスパッチャは、リクエストを受け取ってからサポートする既知のURLリストを順にたどり、リクエストにマッチするURLを探す。このマッチングは、クライアント側で行われた変数の置換に基づいて行われる。リクエストメソッドも含めて完全に一致するものが見つかれば、実行するコマンドを表すJSONオブジェクトを組み立てる。今回の場合は、このようなオブジェクトになる。
 
 \begin{verbatim}
 {
@@ -1127,9 +1158,29 @@ execute, is constructed. In our case it looks like:
 }
 \end{verbatim}
 
-\noindent This is then passed as a JSON string to a custom XPCOM component we've
-written called the CommandProcessor. Here's the code:
+%% \noindent This is then passed as a JSON string to a custom XPCOM component we've
+%% written called the CommandProcessor. Here's the code:
+\noindent 次にこれが、JSON文字列として我々の書いたXPCOMコンポーネントに渡される。このコンポーネントはCommandProcessorと呼ばれている。このようなコードだ。
 
+%% \begin{verbatim}
+%% var jsonResponseString = JSON.stringify(json);
+%% var callback = function(jsonResponseString) {
+%%   var jsonResponse = JSON.parse(jsonResponseString);
+
+%%   if (jsonResponse.status != ErrorCode.SUCCESS) {
+%%     response.setStatus(Response.INTERNAL_ERROR);
+%%   }
+
+%%   response.setContentType('application/json');
+%%   response.setBody(jsonResponseString);
+%%   response.commit();
+%% };
+
+%% // Dispatch the command.
+%% Components.classes['@googlecode.com/webdriver/command-processor;1'].
+%%     getService(Components.interfaces.nsICommandProcessor).
+%%     execute(jsonString, callback);
+%% \end{verbatim}
 \begin{verbatim}
 var jsonResponseString = JSON.stringify(json);
 var callback = function(jsonResponseString) {
@@ -1144,34 +1195,36 @@ var callback = function(jsonResponseString) {
   response.commit();
 };
 
-// Dispatch the command.
+// コマンドをディスパッチする
 Components.classes['@googlecode.com/webdriver/command-processor;1'].
     getService(Components.interfaces.nsICommandProcessor).
     execute(jsonString, callback);
 \end{verbatim}
 
-\pagebreak
+%% \pagebreak
 
-There's quite a lot of code here, but there are two key points. First,
-we converted the object above to a JSON string.  Secondly, we pass a
-callback to the execute method that causes the HTTP response to be
-sent.
+%% There's quite a lot of code here, but there are two key points. First,
+%% we converted the object above to a JSON string.  Secondly, we pass a
+%% callback to the execute method that causes the HTTP response to be
+%% sent.
+やたら大量のコードがあるが、ポイントとなるのは次のふたつだ。まず、上のオブジェクトをJSON文字列に変換する。次に、コールバックを渡してメソッドを実行させる。これが、送出するHTTPレスポンスを作る。
 
-The execute method of the command processor looks up the ``name'' to
-determine which function to call, which it then does. The first
-parameter given to this implementing function is a \code{respond}''
-object (so called because it was originally just the function used to
-send the response back to the user), which encapsulates not only the
-possible values that might be sent, but also has a method that allows
-the response to be dispatched back to the user and mechanisms to find
-out information about the DOM\@. The second parameter is the value of
-the \code{parameters} object seen above (in this case, \code{id} and
-\code{name}). The advantage of this scheme is that each function has a
-uniform interface that mirrors the structure used on the client
-side. This means that the mental models used for thinking about the
-code on each side are similar.  Here's the underlying implementation
-of \code{getAttribute}, which you've seen before in
-\aosasecref{sec.selenium.layers}:
+%% The execute method of the command processor looks up the ``name'' to
+%% determine which function to call, which it then does. The first
+%% parameter given to this implementing function is a \code{respond}''
+%% object (so called because it was originally just the function used to
+%% send the response back to the user), which encapsulates not only the
+%% possible values that might be sent, but also has a method that allows
+%% the response to be dispatched back to the user and mechanisms to find
+%% out information about the DOM\@. The second parameter is the value of
+%% the \code{parameters} object seen above (in this case, \code{id} and
+%% \code{name}). The advantage of this scheme is that each function has a
+%% uniform interface that mirrors the structure used on the client
+%% side. This means that the mental models used for thinking about the
+%% code on each side are similar.  Here's the underlying implementation
+%% of \code{getAttribute}, which you've seen before in
+%% \aosasecref{sec.selenium.layers}:
+コマンドプロセッサで実行するメソッドは、``name''を見てどの関数を呼ぶかを判断し、そしてそれを実行する。この実装関数に渡す最初のパラメータは\code{respond}オブジェクトで(このように呼ばれているのは、もともとこの関数は単にユーザーにレスポンスを返すためだけのものだったからである)、これは返す値をカプセル化するだけではなく、レスポンスをユーザーに送り返せるようにするメソッドやDOMの情報を見つけるための仕組みも用意されている。二番目のパラメータは、先述の\code{parameters}オブジェクトの値(この場合は\code{id}と\code{name})である。この方式のメリットは、各関数が統一インターフェイスを持っていて、それがクライアント側で使うデータ構造を反映しているということだ。つまり、コードを書くときに頭の中で考えるモデルがクライアント側でもサーバー側でも同じようになるのだ。ここに\code{getAttribute}の実装を示す。これは先ほど\aosasecref{sec.selenium.layers}で見たものである。
 
 \begin{verbatim}
 FirefoxDriver.prototype.getElementAttribute = function(respond, parameters) {
@@ -1184,24 +1237,27 @@ FirefoxDriver.prototype.getElementAttribute = function(respond, parameters) {
 };
 \end{verbatim}
 
-\noindent In order to make element references consistent, the first line simply
-looks up the element referred to by the opaque ID in a cache. In the
-Firefox driver, that opaque ID is a UUID and the ``cache'' is simply a
-map.  The \code{getElementAt} method also checks to see if the
-referred to element is both known and attached to the DOM\@. If either
-check fails, the ID is removed from the cache (if necessary) and an
-exception is thrown and returned to the user.
+%% \noindent In order to make element references consistent, the first line simply
+%% looks up the element referred to by the opaque ID in a cache. In the
+%% Firefox driver, that opaque ID is a UUID and the ``cache'' is simply a
+%% map.  The \code{getElementAt} method also checks to see if the
+%% referred to element is both known and attached to the DOM\@. If either
+%% check fails, the ID is removed from the cache (if necessary) and an
+%% exception is thrown and returned to the user.
+\noindent 要素の参照に矛盾を生じさせないようにするために、最初の行は単にキャッシュ内の非透過的なIDが参照する要素を探すだけになっている。Firefoxドライバの場合、この非透過的なIDはUUIDであり、``キャッシュ''は単なるマップである。\code{getElementAt}メソッドは、要素への参照が既知のものであるかどうかとそれがDOMにアタッチされているかどうかもチェックする。どちらかのチェックに失敗すると、そのIDは(必要に応じて)キャッシュから削除され、例外を投げてそれをユーザーに返す。
 
-The second line from the end makes use of the browser automation atoms
-discussed earlier, this time compiled as a monolithic script and
-loaded as part of the extension.
+%% The second line from the end makes use of the browser automation atoms
+%% discussed earlier, this time compiled as a monolithic script and
+%% loaded as part of the extension.
+最後から二行目では、先述のブラウザ自動化用atomを使っている。ここでは一つのスクリプトとしてコンパイルされ、拡張機能の一部として読み込まれている。
 
-In the final line, the \code{send} method is called.  This does a
-simple check to ensure that we only send a response once before it
-calls the callback given to the execute method. The response is sent
-back to the user in the form of a JSON string, which is decanted into
-an object that looks like (assuming that \code{getAttribute} returned
-``7'', meaning the element wasn't found):
+%% In the final line, the \code{send} method is called.  This does a
+%% simple check to ensure that we only send a response once before it
+%% calls the callback given to the execute method. The response is sent
+%% back to the user in the form of a JSON string, which is decanted into
+%% an object that looks like (assuming that \code{getAttribute} returned
+%% ``7'', meaning the element wasn't found):
+最後の行で呼ばれているのが\code{send}メソッドだ。このメソッドはシンプルなチェックを行い、executeメソッドで指定したコールバックを呼んでからレスポンスを送出する。レスポンスはJSON文字列形式でユーザーに戻され、それがこのような形式のオブジェクトに移される(\code{getAttribute}の返り値が``7''、つまりその要素が見つからなかったものと仮定する)。
 
 \begin{verbatim}
 {
@@ -1211,41 +1267,46 @@ an object that looks like (assuming that \code{getAttribute} returned
 }
 \end{verbatim}
 
-The Java client then checks the value of the status field. If that
-value is non-zero, it converts the numeric status code into an
-exception of the correct type and throws that, using the ``value''
-field to help set the message sent to the user. If the status is zero
-the value of the ``value'' field is returned to to the user.
+%% The Java client then checks the value of the status field. If that
+%% value is non-zero, it converts the numeric status code into an
+%% exception of the correct type and throws that, using the ``value''
+%% field to help set the message sent to the user. If the status is zero
+%% the value of the ``value'' field is returned to to the user.
+その後、Javaクライアントがstatusフィールドの値をチェックする。もし値がゼロでなければ、数値のステータスコードを適切な型の例外オブジェクトに変換して投げる。その際に、``value''フィールドの値を使ってユーザー向けのメッセージを設定する。statusがゼロの場合は、``value''フィールドの値をユーザーに返す。
 
-Most of this makes a certain amount of sense, but there was one piece
-that an astute reader will raise questions about: why did the
-dispatcher convert the object it had into a string before calling the
-\code{execute} method?
+%% Most of this makes a certain amount of sense, but there was one piece
+%% that an astute reader will raise questions about: why did the
+%% dispatcher convert the object it had into a string before calling the
+%% \code{execute} method?
+ほとんどは、ごく自然な処理だろう。しかし一カ所だけ、賢明な読者なら疑問に思うところがあるはずだ。なぜディスパッチャは、\code{execute}メソッドを呼ぶ前にわざわざオブジェクトを文字列に変換するのだろう?
 
-The reason for this is that the Firefox Driver also supports running
-tests written in pure Javascript. Normally, this would be an extremely
-difficult thing to support: the tests are running in the context of
-the browser's Javascript security sandbox, and so may not do a range
-of things that are useful in tests, such as traveling between domains
-or uploading files. The WebDriver Firefox extension, however, provides
-an escape hatch from the sandbox. It announces its presence by adding
-a \code{webdriver} property to the document element. The WebDriver
-Javascript API uses this as an indicator that it can add JSON
-serialized command objects as the value of a \code{command} property on
-the document element, fire a custom \code{webdriverCommand} event and
-then listen for a \code{webdriverResponse} event on the same element to
-be notified that the \code{response} property has been set.
+%% The reason for this is that the Firefox Driver also supports running
+%% tests written in pure Javascript. Normally, this would be an extremely
+%% difficult thing to support: the tests are running in the context of
+%% the browser's Javascript security sandbox, and so may not do a range
+%% of things that are useful in tests, such as traveling between domains
+%% or uploading files. The WebDriver Firefox extension, however, provides
+%% an escape hatch from the sandbox. It announces its presence by adding
+%% a \code{webdriver} property to the document element. The WebDriver
+%% Javascript API uses this as an indicator that it can add JSON
+%% serialized command objects as the value of a \code{command} property on
+%% the document element, fire a custom \code{webdriverCommand} event and
+%% then listen for a \code{webdriverResponse} event on the same element to
+%% be notified that the \code{response} property has been set.
+なぜそうしているかというと、FirefoxドライバはJavascriptだけで書かれたテストの実行もサポートしているからである。普通は、これをサポートするのはかなり難しい。テストが実行されるのはブラウザのJavascriptセキュリティサンドボックスの中であり、テストで有用な多くの作業(別ドメインへの移動やファイルのアップロードなど)に制限が出てしまうからである。しかしFirefoxのWebDriver拡張機能では、サンドボックスから脱出するためのハッチを提供している。document要素に\code{webdriver}というプロパティを追加しているのだ。WebDriverのJavascript APIはこれを見て、次のような操作ができると判断する。JSONでシリアライズしたコマンドオブジェクトをdocument要素の\code{command}プロパティに追加して\code{webdriverCommand}イベントを発火させ、何らかの要素での\code{webdriverResponse}イベントの発生を監視する。このイベントが、\code{response}プロパティの値が設定されたことを示す。
 
-This suggests that browsing the web in a copy of Firefox with the
-WebDriver extension installed is a seriously bad idea as it makes it
-trivially easy for someone to remotely control the browser.
+%% This suggests that browsing the web in a copy of Firefox with the
+%% WebDriver extension installed is a seriously bad idea as it makes it
+%% trivially easy for someone to remotely control the browser.
+これはつまり、WebDriver拡張機能をインストールしたFirefoxでウェブをブラウズするのは非常に危険だということだ。悪意のある人なら、リモートから容易にブラウザを乗っ取れてしまうからである。
 
-Behind the scenes, there is a DOM messenger, waiting for the
-\code{webdriverCommand} this reads the serialized JSON object and calls
-the \code{execute} method on the command processor. This time, the
-callback is one that simply sets the \code{response} attribute on the
-document element and then fires the expected \code{webdriverResponse}
-event.
+%% Behind the scenes, there is a DOM messenger, waiting for the
+%% \code{webdriverCommand} this reads the serialized JSON object and calls
+%% the \code{execute} method on the command processor. This time, the
+%% callback is one that simply sets the \code{response} attribute on the
+%% document element and then fires the expected \code{webdriverResponse}
+%% event.
+その裏側ではDOMメッセンジャーが動いていて\code{webdriverCommand}を待機している。シリアライズしたJSONオブジェクトをこれが読み込み、コマンドプロセッサの\code{execute}メソッドを呼び出す。このとき、コールバックは単にdocument要素の\code{response}属性に設定されるだけである。それが、期待する\code{webdriverResponse}イベントを発火させる。
 
 \end{aosasect1}
 
@@ -1665,3 +1726,4 @@ source project, you'd be welcome to join us for the journey at
 \end{aosasect1}
 
 \end{aosachapter}
+
