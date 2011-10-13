@@ -1544,109 +1544,121 @@ public String getAttribute(String name) {
 
 \end{aosasect1}
 
+%% \begin{aosasect1}{Selenium RC}
 \begin{aosasect1}{Selenium RC}
 
-It's not always possible to bind tightly to a particular browser. In
-those cases, WebDriver falls back to the original mechanism used by
-Selenium. This means using Selenium Core, a pure Javascript framework,
-which introduces a number of drawbacks as it executes firmly in the
-context of the Javascript sandbox. From a user of WebDriver's APIs
-this means that the list of supported browsers falls into tiers, with
-some being tightly integrated with and offering exceptional control,
-and others being driven via Javascript and offering the same level of
-control as the original Selenium RC.
+%% It's not always possible to bind tightly to a particular browser. In
+%% those cases, WebDriver falls back to the original mechanism used by
+%% Selenium. This means using Selenium Core, a pure Javascript framework,
+%% which introduces a number of drawbacks as it executes firmly in the
+%% context of the Javascript sandbox. From a user of WebDriver's APIs
+%% this means that the list of supported browsers falls into tiers, with
+%% some being tightly integrated with and offering exceptional control,
+%% and others being driven via Javascript and offering the same level of
+%% control as the original Selenium RC.
+特定のブラウザとの密な結合が常に可能だとは限らない。そんな場合、WebDriverは次善の策としてもともとSeleniumが使っていた仕組みを利用する。つまりSelenium Coreを使うということだ。これはピュアJavascriptフレームワークであり、Javascriptサンドボックスのコンテキストで動くこともあっていろいろ制約も多い。WebDriverのAPIを使う側から見ると、サポート対象とされているブラウザの中にもいくつかのレベルがあるということだ。いくつかのブラウザは密に統合されているので期待通りの制御ができるが、そうでないブラウザはJavascriptによるサポートしかなく、もともとのSelenium RCが持っていた機能と同程度の制御しかできないということになる。
 
-Conceptually, the design used is pretty simple, as you can see in
-\aosafigref{fig.sel.arch}.
+%% Conceptually, the design used is pretty simple, as you can see in
+%% \aosafigref{fig.sel.arch}.
+概念的には、ここで採用する設計は\aosafigref{fig.sel.arch}のように極めてシンプルなものである。
 
-\aosafigureTop[250pt]{../images/selenium/selenium-rc.eps}{Outline of Selenium RC's Architecture}{fig.sel.arch}
+%% \aosafigureTop[250pt]{../images/selenium/selenium-rc.eps}{Outline of Selenium RC's Architecture}{fig.sel.arch}
+\aosafigureTop[250pt]{../images/selenium/selenium-rc.eps}{Selenium RCのアーキテクチャの概要}{fig.sel.arch}
 
-As you can see, there are three moving pieces here: the client code,
-the intermediate server and the Javascript code of Selenium Core
-running in the browser. The client side is just an HTTP client that
-serializes commands to the server-side piece. Unlike the remote
-WebDriver, there is just a single end-point, and the HTTP verb used is
-largely irrelevant. This is partly because the Selenium RC protocol is
-derived from the table-based API offered by Selenium Core, and this
-means that the entire API can be described using three URL query
-parameters.
+%% As you can see, there are three moving pieces here: the client code,
+%% the intermediate server and the Javascript code of Selenium Core
+%% running in the browser. The client side is just an HTTP client that
+%% serializes commands to the server-side piece. Unlike the remote
+%% WebDriver, there is just a single end-point, and the HTTP verb used is
+%% largely irrelevant. This is partly because the Selenium RC protocol is
+%% derived from the table-based API offered by Selenium Core, and this
+%% means that the entire API can be described using three URL query
+%% parameters.
+ご覧の通り、全体が大きく三つに分かれている。クライアントのコード、中間サーバー、そしてブラウザ内で動作するSelenium CoreのJavascriptコードだ。クライアント側は単なるHTTPクライアントであり、シリアライズしたコマンドをサーバー側に送る。リモートWebDriverとは違って単にエンドポイントがひとつあるだけであり、どのHTTPメソッドを使うかはあまり関係ない。その理由のひとつは、Selenium RCのプロトコルがSelenium CoreのテーブルベースなAPIを元にしていることだ。そのため、URLのクエリパラメータを三つ使うだけでAPI全体をカバーできてしまう。
 
-When the client starts a new session, the Selenium server looks up the
-requested ``browser string'' to identify a matching browser
-launcher. The launcher is responsible for configuring and starting an
-instance of the requested browser. In the case of Firefox, this is as
-simple as expanding a pre-built profile with a handful of extensions
-pre-installed (one for handling a ``quit'' command, and another for
-modeling ``document.readyState'' which wasn't present on older
-Firefox releases that we still support). The key piece of
-configuration that's done is that the server configures itself as a
-proxy for the browser, meaning that at least some requests (those for
-``/selenium-server'') are routed through it.  Selenium RC can operate
-in one of three modes: controlling a frame in a single window
-(``singlewindow'' mode), in a separate window controlling the AUT in a
-second window (``multiwindow'' mode) or by injecting itself into the
-page via a proxy (``proxyinjection'' mode). Depending on the mode of
-operation, all requests may be proxied.
+%% When the client starts a new session, the Selenium server looks up the
+%% requested ``browser string'' to identify a matching browser
+%% launcher. The launcher is responsible for configuring and starting an
+%% instance of the requested browser. In the case of Firefox, this is as
+%% simple as expanding a pre-built profile with a handful of extensions
+%% pre-installed (one for handling a ``quit'' command, and another for
+%% modeling ``document.readyState'' which wasn't present on older
+%% Firefox releases that we still support). The key piece of
+%% configuration that's done is that the server configures itself as a
+%% proxy for the browser, meaning that at least some requests (those for
+%% ``/selenium-server'') are routed through it.  Selenium RC can operate
+%% in one of three modes: controlling a frame in a single window
+%% (``singlewindow'' mode), in a separate window controlling the AUT in a
+%% second window (``multiwindow'' mode) or by injecting itself into the
+%% page via a proxy (``proxyinjection'' mode). Depending on the mode of
+%% operation, all requests may be proxied.
+クライアントが新しいセッションを開始すると、Selenium Serverはリクエストされた``ブラウザ文字列''に対応するブラウザランチャーを探す。そしてランチャーが、指定されたブラウザの構成を設定してブラウザのインスタンスを立ち上げる。Firefoxの場合は、事前に用意したプロファイルやプレインストールの拡張機能(``quit''コマンドを処理するための拡張や、``document.readyState''に対応する拡張など。``document.readyState''は、SeleniumがサポートするFirefoxのバージョンの中でも古いものには存在しない)を展開するだけのことだ。ここで行われる設定の中でもポイントとなるのが、Selenium Serverが自分自身をブラウザのプロキシに設定するということだ。これにより、少なくとも一部のリクエスト(``/selenium-server''に向けたもの)をSelenium Serverでルーティングできるようになる。Selenium RCは、次の三つのモードのうちのいずれかで動作する。一つのウィンドウ内のフレームを制御するモード(``singlewindow''モード)、別のウィンドウを開いてAUTをそのウィンドウで制御するモード(``multiwindow''モード)、そして自分自身をプロキシ経由でページに差し込むモード(``proxyinjection''モード)だ。処理モードによっては、すべてのリクエストがプロキシ経由となることがある。
 
-Once the browser is configured, it is started, with an initial URL
-pointing to a page hosted on the Selenium
-server---\code{RemoteRunner.html}. This page is responsible for
-bootstrapping the process by loading all the required Javascript files
-for Selenium Core. Once complete, the ``runSeleniumTest'' function is
-called. This uses reflection of the \code{Selenium} object to
-initialize the list of available commands that are available before
-kicking off the main command processing loop.
+%% Once the browser is configured, it is started, with an initial URL
+%% pointing to a page hosted on the Selenium
+%% server---\code{RemoteRunner.html}. This page is responsible for
+%% bootstrapping the process by loading all the required Javascript files
+%% for Selenium Core. Once complete, the ``runSeleniumTest'' function is
+%% called. This uses reflection of the \code{Selenium} object to
+%% initialize the list of available commands that are available before
+%% kicking off the main command processing loop.
+ブラウザの設定を終えたらブラウザを立ち上げる。そのときの初期URLは、Selenium Serverが稼働するページ---\code{RemoteRunner.html}である。このページがすべての初期化処理を受け持ち、Selenium Coreに必要なJavascriptファイル群をすべてここで読み込む。読み込みが完了すると、``runSeleniumTest''関数が呼ばれる。この関数は、\code{Selenium}オブジェクトのリフレクションを使って利用可能なコマンド群を初期化をしてから、メインのコマンド処理ループを起動する。
 
-The Javascript executing in the browser opens an XMLHttpRequest to a
-URL on the waiting server (\code{/selenium-server/driver}), relying on
-the fact that the server is proxying all requests to ensure that the
-request actually goes somewhere valid. Rather than making a request,
-the first thing that this does is send the response from the
-previously executed command, or ``OK'' in the case where the browser
-is just starting up. The server then keeps the request open until a
-new command is received from the user's test via the client, which is
-then sent as the response to the waiting Javascript.  This mechanism
-was originally dubbed ``Response/Request'', but would now be more
-likely to be called ``Comet with AJAX long polling''.
+%% The Javascript executing in the browser opens an XMLHttpRequest to a
+%% URL on the waiting server (\code{/selenium-server/driver}), relying on
+%% the fact that the server is proxying all requests to ensure that the
+%% request actually goes somewhere valid. Rather than making a request,
+%% the first thing that this does is send the response from the
+%% previously executed command, or ``OK'' in the case where the browser
+%% is just starting up. The server then keeps the request open until a
+%% new command is received from the user's test via the client, which is
+%% then sent as the response to the waiting Javascript.  This mechanism
+%% was originally dubbed ``Response/Request'', but would now be more
+%% likely to be called ``Comet with AJAX long polling''.
+ブラウザ内で動くJavascriptがXMLHttpRequestを待ち受けサーバーのURL(\code{/selenium-server/driver})に送る。このサーバーがすべてのリクエストのプロキシとなり、リクエストが正しい場所に届くことを保証する。リクエストを送るだけではなく、その前に前回実行したコマンドのレスポンスを送信したり、ブラウザが立ち上がったときに``OK''を送ったりもする。サーバーはその後リクエストをオープンし続け、クライアントからユーザーのテストのコマンドを受け取ったら、オープンしていたリクエストのレスポンスをJavascriptに返す。この方式は俗に``Response/Request''と呼ばれていたが、最近では``Comet with AJAX long polling''と呼ばれることが多い。
 
-Why does RC work this way? The server needs to be configured as a
-proxy so that it can intercept any requests that are made to it
-without causing the calling Javascript to fall foul of the ``Single
-Host Origin'' policy, which states that only resources from the same
-server that the script was served from can be requested via
-Javascript.  This is in place as a security measure, but from the
-point of view of a browser automation framework developer, it's pretty
-frustrating and requires a hack such as this.
+%% Why does RC work this way? The server needs to be configured as a
+%% proxy so that it can intercept any requests that are made to it
+%% without causing the calling Javascript to fall foul of the ``Single
+%% Host Origin'' policy, which states that only resources from the same
+%% server that the script was served from can be requested via
+%% Javascript.  This is in place as a security measure, but from the
+%% point of view of a browser automation framework developer, it's pretty
+%% frustrating and requires a hack such as this.
+なぜRCの挙動がそうなっているのかって? Serverをプロキシとして設定しなければならない理由は、Javascriptの``同一生成元''ポリシーに違反せずにすべてのリクエストを横取りするためだ。``同一生成元''ポリシーとは、Javascriptではスクリプトがある場所と同じサーバー上のリソースしかリクエストできないという制限のことである。そもそもこれはセキュリティを考慮して用意されたポリシーだが、ブラウザ自動化フレームワークの開発者から見ると極めて邪魔なものであり、こうでもしないとどうにもならないのだ。
 
-The reason for making an XmlHttpRequest call to the server is
-two-fold.  Firstly, and most importantly, until WebSockets, a part of
-HTML5, become available in the majority of browsers there is no way to
-start up a server process reliably within a browser.  That means that
-the server had to live elsewhere. Secondly, an XMLHttpRequest calls
-the response callback asynchronously, which means that while we're
-waiting for the next command the normal execution of the browser is
-unaffected. The other two ways to wait for the next command would have
-been to poll the server on a regular basis to see if there was another
-command to execute, which would have introduced latency to the users
-tests, or to put the Javascript into a busy loop which would have
-pushed CPU usage through the roof and would have prevented other
-Javascript from executing in the browser (since there is only ever one
-Javascript thread executing in the context of a single window).
+%% The reason for making an XmlHttpRequest call to the server is
+%% two-fold.  Firstly, and most importantly, until WebSockets, a part of
+%% HTML5, become available in the majority of browsers there is no way to
+%% start up a server process reliably within a browser.  That means that
+%% the server had to live elsewhere. Secondly, an XMLHttpRequest calls
+%% the response callback asynchronously, which means that while we're
+%% waiting for the next command the normal execution of the browser is
+%% unaffected. The other two ways to wait for the next command would have
+%% been to poll the server on a regular basis to see if there was another
+%% command to execute, which would have introduced latency to the users
+%% tests, or to put the Javascript into a busy loop which would have
+%% pushed CPU usage through the roof and would have prevented other
+%% Javascript from executing in the browser (since there is only ever one
+%% Javascript thread executing in the context of a single window).
+XmlHttpRequestコールをサーバーに向けて行う理由は次のふたつだ。まずは最も重要な理由から。HTML5の一部であるWebSocketsが大半のブラウザに実装されるようになるまでは、サーバープロセスをブラウザ側から立ち上げるための信頼できる方法が存在しないということである。つまり、サーバーはどこか別の場所で立ち上げないといけないということだ。もうひとつの理由は、XMLHttpRequestがレスポンスコールバックを非同期で呼び出すことだ。これはつまり、次のコマンドを待ち受けている間にも、操作中のブラウザの動きには何の影響も及ぼさないと言うことである。次のコマンドを待ち受ける方法は、それ以外にも二通り存在する。ひとつは、定期的にサーバーをポーリングして、何か別のコマンドが実行されていないかを調べる方法だ。しかしこの方法だと、ユーザーのテストにある程度の遅延が生じてしまう。もうひとつの方法は、Javascriptをビジーループの中に置いてしまうことだ。しかしこの方法はCPUを食いつぶしてしまい、他のJavascriptをブラウザ内から実行できなくなってしまう(ひとつのウィンドウ内のコンテキストには、Javascriptのスレッドをひとつしか実行できないからである)。
 
-Inside Selenium Core there are two major moving pieces. These are the
-main \code{selenium} object, which acts as the host for all available
-commands and mirrors the API offered to users. The second piece is the
-\code{browserbot}. This is used by the Selenium object to abstract
-away the differences present in each browser and to present an
-idealized view of commonly used browser functionality. This means that
-the functions in \code{selenium} are clearer and easier to maintain,
-whilst the \code{browserbot} is tightly focused.
+%% Inside Selenium Core there are two major moving pieces. These are the
+%% main \code{selenium} object, which acts as the host for all available
+%% commands and mirrors the API offered to users. The second piece is the
+%% \code{browserbot}. This is used by the Selenium object to abstract
+%% away the differences present in each browser and to present an
+%% idealized view of commonly used browser functionality. This means that
+%% the functions in \code{selenium} are clearer and easier to maintain,
+%% whilst the \code{browserbot} is tightly focused.
+Selenium Coreの中は、大きく二つの部分に分かれている。本体の\code{selenium}オブジェクトは利用可能なすべてのコマンドのホストとして機能し、そのAPIをユーザー向けに提供する。もうひとつの部分が\code{browserbot}だ。これは、Seleniumオブジェクトが各ブラウザの差異を取り払うための抽象化として使うもので、一般的なブラウザの機能を理想的な状態で表している。これによって\code{selenium}の関数はよりきれいで保守しやすくなり、一方で\code{browserbot}にすべてを集中させることになる。
 
-Increasingly, Core is being converted to make use of the Automation
-Atoms. Both \code{selenium} and \code{browserbot} will probably need
-to remain as there is an extensive amount of code that relies on using
-the APIs it exposes, but it is expected that they will ultimately be
-shell classes, delegating to the atoms as quickly as possible.
+%% Increasingly, Core is being converted to make use of the Automation
+%% Atoms. Both \code{selenium} and \code{browserbot} will probably need
+%% to remain as there is an extensive amount of code that relies on using
+%% the APIs it exposes, but it is expected that they will ultimately be
+%% shell classes, delegating to the atoms as quickly as possible.
+Selenium Coreも、徐々にAutomation Atomsを使うように書き換えているところだ。\code{selenium}と\code{browserbot}はおそらく残さざるを得ないだろう。大量のコードがこれらの公開するAPIに依存しているからである。しかし、最終的にはこれらも単なるガワだけのクラスにしてしまって、内部の実装はすぐにでもatomsに委譲させてしまいたいところだ。
 
 \end{aosasect1}
 
