@@ -1662,55 +1662,60 @@ Selenium Coreも、徐々にAutomation Atomsを使うように書き換えてい
 
 \end{aosasect1}
 
-\begin{aosasect1}{Looking Back}
+%% \begin{aosasect1}{Looking Back}
+\begin{aosasect1}{過去を振り返って}
 
-Building a browser automation framework is a lot like painting a room;
-at first glance, it looks like something that should be pretty easy to
-do.  All it takes is a few coats of paint, and the job's done. The
-problem is, the closer you get, the more tasks and details emerge, and
-the longer the task becomes. With a room, it's things like working
-around light fittings, radiators and the skirting boards that start to
-consume time.  For a browser automation framework, it's the quirks and
-differing capabilities of browsers that make the situation more
-complex. The extreme case of this was expressed by Daniel Wagner-Hall
-as he sat next to me working on the Chrome driver; he banged his hands
-on the desk and in frustration muttered, "It's all edge cases!" It
-would be nice to be able to go back and tell myself that, and that the
-project is going to take a lot longer than I expected.
+%% Building a browser automation framework is a lot like painting a room;
+%% at first glance, it looks like something that should be pretty easy to
+%% do.  All it takes is a few coats of paint, and the job's done. The
+%% problem is, the closer you get, the more tasks and details emerge, and
+%% the longer the task becomes. With a room, it's things like working
+%% around light fittings, radiators and the skirting boards that start to
+%% consume time.  For a browser automation framework, it's the quirks and
+%% differing capabilities of browsers that make the situation more
+%% complex. The extreme case of this was expressed by Daniel Wagner-Hall
+%% as he sat next to me working on the Chrome driver; he banged his hands
+%% on the desk and in frustration muttered, "It's all edge cases!" It
+%% would be nice to be able to go back and tell myself that, and that the
+%% project is going to take a lot longer than I expected.
+ブラウザの自動化フレームワークを作るという作業は、部屋の塗装に似ている。始める前にはとても簡単な作業に思えるのだ。「要するに、ざっと塗ってしまえばそれでおしまいでしょ?」実際はそうではなく、作業をすればするほどやるべきことが増えてきて、ひとつひとつのタスクが面倒なものになっていく。部屋の塗装の例だと、照明周りや幅木などを手掛け始めるととたんに時間がかかるようになる。ブラウザの自動化フレームワークでこれにあたるのが、ブラウザごとの機能の違いや微妙な動きだ。そのおかげで作業はさらに複雑になる。極めつけが、私の隣の席でChromeドライバを開発するダニエル・ワグナー=ホールだ。あまりにもイライラした彼は、デスクに両手をたたきつけてこう叫んだ。「なんでこんなあり得ないことばかり起こるんだよ!」できることなら過去にさかのぼって当時の自分にこう伝えてやりたい。「そのプロジェクト、たぶん思ってるよりもずっと時間がかかるよ」と。
 
-I also can't help but wonder where the project would be if we'd
-identified and acted upon the need for a layer like the automation
-atoms sooner than we did. It would certainly have made some of the
-challenges the project faced, internal and external, technically and
-socially, easier to deal with. Core and RC were implemented in a
-focused set of languages---essentially just Javascript and Java. Jason
-Huggins used to refer to this as providing Selenium with a level of
-``hackability'', which made it easy for people to get involved with
-the project. It's only with the atoms that this level of hackability
-has become widely available in WebDriver. Balanced against this, the
-reason why the atoms can be so widely applied is because of the
-Closure compiler, which we adopted almost as soon as it was released
-as Open Source.
+%% I also can't help but wonder where the project would be if we'd
+%% identified and acted upon the need for a layer like the automation
+%% atoms sooner than we did. It would certainly have made some of the
+%% challenges the project faced, internal and external, technically and
+%% socially, easier to deal with. Core and RC were implemented in a
+%% focused set of languages---essentially just Javascript and Java. Jason
+%% Huggins used to refer to this as providing Selenium with a level of
+%% ``hackability'', which made it easy for people to get involved with
+%% the project. It's only with the atoms that this level of hackability
+%% has become widely available in WebDriver. Balanced against this, the
+%% reason why the atoms can be so widely applied is because of the
+%% Closure compiler, which we adopted almost as soon as it was released
+%% as Open Source.
+今さらどうにもならないことではあるが、もしAutomation Atomのようなレイヤーの必要性をもっと早くに認識して対応していたらどうなっただろうかと考えることもある。きっと、これまでに我々が直面してきた問題(内部的な問題も外部的な問題も、そして技術的な問題も社会的な問題も)のいくつかは、もっと容易に対処できたことだろう。CoreやRCは、特定の言語---基本的にJavascriptとJava---に注力しすぎた実装になっている。ジェイソン・ハギンズはかつて、これを指摘してSeleniumの``ハッカビリティ''を改善し、そのおかげでプロジェクトに参加するための敷居が下がった。atomがあったからこそ、WebDriverが幅広いハッカビリティを確保できたのだ。我々がatomを幅広く適用できたのは、Closureコンパイラのおかげである。Closureコンパイラがオープンソースでリリースされるとすぐに、それを採用した。
 
-It's also interesting to reflect on the things that we got right. The
-decision to write the framework from the viewpoint of the user is
-something that I still feel is correct. Initially, this paid off as
-early adopters highlighted areas for improvement, allowing the utility
-of the tool to increase rapidly. Later, as WebDriver gets asked to do
-more and harder things and the number of developers using it
-increases, it means that new APIs are added with care and attention,
-keeping the focus of the project tight. Given the scope of what we're
-trying to do, this focus is vital.
+%% It's also interesting to reflect on the things that we got right. The
+%% decision to write the framework from the viewpoint of the user is
+%% something that I still feel is correct. Initially, this paid off as
+%% early adopters highlighted areas for improvement, allowing the utility
+%% of the tool to increase rapidly. Later, as WebDriver gets asked to do
+%% more and harder things and the number of developers using it
+%% increases, it means that new APIs are added with care and attention,
+%% keeping the focus of the project tight. Given the scope of what we're
+%% trying to do, this focus is vital.
+「こうすればよかった」だけではなく、「これはうまくできた」ということを振り返るのもいいだろう。フレームワークを書くときにユーザーの視点を重視したという判断は、今でも間違いではなかったと思っている。初期の段階では、改善すべき点をアーリーアダプターが指摘してくれたおかげで、ツールの使いやすさを急速に改善することができた。後に、WebDriverがより高度な作業を行うようになるにつれて、利用する開発者の数も増えてきた。新たなAPIを追加するときには今まで以上に注意を払うようになり、それがプロジェクトを引き締めることにもつながった。我々がやろうとしていることを考えると、これは非常に大切なことだ。
 
-Binding tightly to the browser is something that is both right and
-wrong.  It's right, as it has allowed us to emulate the user with
-extreme fidelity, and to control the browser extremely well. It's
-wrong because this approach is extremely technically demanding,
-particularly when finding the necessary hook point into the
-browser. The constant evolution of the IE driver is a demonstration of
-this in action, and, although it's not covered here, the same is true
-of the Chrome driver, which has a long and storied history. At some
-point, we'll need to find a way to deal with this complexity.
+%% Binding tightly to the browser is something that is both right and
+%% wrong.  It's right, as it has allowed us to emulate the user with
+%% extreme fidelity, and to control the browser extremely well. It's
+%% wrong because this approach is extremely technically demanding,
+%% particularly when finding the necessary hook point into the
+%% browser. The constant evolution of the IE driver is a demonstration of
+%% this in action, and, although it's not covered here, the same is true
+%% of the Chrome driver, which has a long and storied history. At some
+%% point, we'll need to find a way to deal with this complexity.
+ブラウザと密に結合させたことには、功罪の両面がある。よい面は、忠実にユーザーをエミュレートしてブラウザを完璧に制御できるようになったということだ。逆に悪い面は、この手法をとると技術的な要求が厳しくなるということだ。特に、ブラウザのフックポイントを見つけ出すのが大変になる。その大変さは、IEドライバの開発の進み具合を見ればよくわかる。ここでは紹介できなかったがChromeドライバも同様で、これもまた話せば長くなる経緯がある。いつの日か、この複雑性とうまく向き合う方法を見つけ出したいものだ。
 
 \end{aosasect1}
 
