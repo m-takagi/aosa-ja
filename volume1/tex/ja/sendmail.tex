@@ -473,32 +473,35 @@ Sendmail 3は4.1a BSDおよび4.1c BSD (ベータ版)に同梱され、sendmail 
 %% \begin{aosasect2}{Wave 3: The Chaos Years}
 \begin{aosasect2}{第三波: カオスな日々}
 
-After I left Berkeley and went to a startup company, my time available
-to work on sendmail rapidly decreased. But the Internet was starting
-to seriously explode and sendmail was being used in a variety of new
-(and larger) environments. Most of the Unix system vendors (Sun, DEC,
-and IBM in particular) created their own versions of sendmail, all of
-which were mutually incompatible. There were also attempts to build
-open source versions, notably IDA sendmail and KJS.
+%% After I left Berkeley and went to a startup company, my time available
+%% to work on sendmail rapidly decreased. But the Internet was starting
+%% to seriously explode and sendmail was being used in a variety of new
+%% (and larger) environments. Most of the Unix system vendors (Sun, DEC,
+%% and IBM in particular) created their own versions of sendmail, all of
+%% which were mutually incompatible. There were also attempts to build
+%% open source versions, notably IDA sendmail and KJS.
+バークレーを去ってスタートアップ企業に転職してから、私がsendmailに割ける時間は大幅に減少した。しかし、インターネットの世界はどんどん拡大し続け、sendmailもさまざまな新しい(そして巨大な)環境で使われるようになった。主要Unixベンダーのほとんど(Sun、DEC、そしてIBMなど)は自前のsendmailを用意しており、お互いに互換性がなくなっていた。オープンソースのsendmailを作ろうという試みもあった。特筆すべきはIDA sendmailとKJSだ。
 
-IDA sendmail came from Link\"{o}ping University.  IDA included extensions
-to make it easier to install and manage in larger environments and a
-completely new configuration system. One of the major new features was
-the inclusion of dbm(3) database maps to support highly dynamic
-sites. These were available using a new syntax in the configuration
-file and were used for many functions including mapping of addresses
-to and from external syntax (for example, sending out mail as
-john\_doe@example.com instead of johnd@example.com) and routing.
+%% IDA sendmail came from Link\"{o}ping University.  IDA included extensions
+%% to make it easier to install and manage in larger environments and a
+%% completely new configuration system. One of the major new features was
+%% the inclusion of dbm(3) database maps to support highly dynamic
+%% sites. These were available using a new syntax in the configuration
+%% file and were used for many functions including mapping of addresses
+%% to and from external syntax (for example, sending out mail as
+%% john\_doe@example.com instead of johnd@example.com) and routing.
+IDA sendmailは、リンシェーピン大学によるものだ。IDAが含めた拡張は、大規模な環境やまったく新しい構成のシステムへのインストールや管理を容易にするものだった。主な新機能のひとつはdbm(3)データベースを含めたことで、これで活発なサイトもサポートできるようになった。設定ファイルに新しい構文を導入しており、外部のシステムでのアドレスの構文とのマッピング(たとえばjohnd@example.comのかわりにjohn\_doe@example.com宛てにメールを送るなど)やルーティングなどができるようになった。
 
-King James Sendmail (KJS, produced by Paul Vixie) was an attempt to
-unify all the various versions of sendmail that had sprung
-up. Unfortunately, it never really got enough traction to have the
-desired effect.  This era was also driven by a plethora of new
-technologies that were reflected in the mail system. For example,
-Sun's creation of diskless clusters added the YP (later NIS) directory
-services and NFS, the Network File System.  In particular, YP had to be
-visible to sendmail,
-since aliases were stored in YP rather than in local files.
+%% King James Sendmail (KJS, produced by Paul Vixie) was an attempt to
+%% unify all the various versions of sendmail that had sprung
+%% up. Unfortunately, it never really got enough traction to have the
+%% desired effect.  This era was also driven by a plethora of new
+%% technologies that were reflected in the mail system. For example,
+%% Sun's creation of diskless clusters added the YP (later NIS) directory
+%% services and NFS, the Network File System.  In particular, YP had to be
+%% visible to sendmail,
+%% since aliases were stored in YP rather than in local files.
+King James Sendmail (略してKJS。ポール・ヴィクシーが作ったもの)は、そこら中にわき出したさまざまなバージョンのsendmailを統一しようとした試みである。残念ながら、期待していたほどの影響を及ぼすにはとうてい及ばなかった。新しい技術をメールシステムに取り込もうとしすぎて失敗したのだ。たとえば、Sunが作ったディスクレスクラスタに、YP(後のNIS)ディレクトリサービスやNFS(Network File System)を追加したりした。特に、YPはsendmailに見えなければならない。エイリアスをローカルファイルではなくYPに保存していたからである。
 
 \end{aosasect2}
 
