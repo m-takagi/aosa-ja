@@ -330,44 +330,48 @@ sendmail以前のメールシステム(大半のメール配送システムも�
 %% \begin{aosasect1}{Development Phases}
 \begin{aosasect1}{開発フェーズ}
 
-Like most long-lived software, sendmail was developed in phases, each
-with its own basic theme and feeling.
+%% Like most long-lived software, sendmail was developed in phases, each
+%% with its own basic theme and feeling.
+古くからあるソフトウェアはだいたいそうだが、sendmailの開発もいくつかのフェーズに分けることができ、個々のフェーズについて基本テーマや考えがある。
 
 %% \begin{aosasect2}{Wave 1: delivermail}
 \begin{aosasect2}{第一波: delivermail}
 
-The first instantiation of sendmail was known as delivermail. It was
-extremely simple, if not simplistic. Its sole job was to forward mail
-from one program to another; in particular, it had no SMTP support,
-and so never made any direct network connections. No queuing
-was necessary because each network already had its own queue, so the
-program was really just a crossbar switch. Since delivermail had no
-direct network protocol support, there was no reason for it to run as
-a daemon---it would be invoked to route each message as it was
-submitted, pass it to the appropriate program that would implement the
-next hop, and terminate.  Also, there was no attempt to rewrite
-headers to match the network to which a message was being
-delivered. This commonly resulted in messages being forwarded that
-could not be replied to. The situation was so bad that an entire book
-was written about addressing mail (called, fittingly,
-\emph{!\%\@:: A Directory of Electronic Mail Addressing \& Networks}
-\cite{bib:adams:email}).
+%% The first instantiation of sendmail was known as delivermail. It was
+%% extremely simple, if not simplistic. Its sole job was to forward mail
+%% from one program to another; in particular, it had no SMTP support,
+%% and so never made any direct network connections. No queuing
+%% was necessary because each network already had its own queue, so the
+%% program was really just a crossbar switch. Since delivermail had no
+%% direct network protocol support, there was no reason for it to run as
+%% a daemon---it would be invoked to route each message as it was
+%% submitted, pass it to the appropriate program that would implement the
+%% next hop, and terminate.  Also, there was no attempt to rewrite
+%% headers to match the network to which a message was being
+%% delivered. This commonly resulted in messages being forwarded that
+%% could not be replied to. The situation was so bad that an entire book
+%% was written about addressing mail (called, fittingly,
+%% \emph{!\%\@:: A Directory of Electronic Mail Addressing \& Networks}
+%% \cite{bib:adams:email}).
+sendmailが最初に登場したときには、delivermailと呼ばれていた。単純化しすぎとは言わないまでも、シンプル極まりないものだった。唯一の機能は、あるプログラムから別のプログラムにメールを転送することだった。実際のところSMTPすらサポートしておらず、直接のネットワーク接続も一切行わなかった。キューなんか不要だった。だって、それぞれのネットワークが自分でキューを持っているんだから。プログラムは、単にクロスバースイッチになればよいだけのことだ。delivermailはネットワークプロトコルを直接にはサポートしていなかったので、デーモンとして動かす理由などなかった。メッセージが投稿されるたびに起動してメッセージを仕分け、次のホップを実装する適切なプログラムにそれを渡し、あとは終了するだけでよい。また、ヘッダを書き換えてメッセージの配送先のネットワークにマッチさせるということもしなかった。そのせいで、転送したメッセージに返信することができないということになりがちだった。さすがにそれはまずかったので、メールの処理だけを扱う本が書かれたりした(\emph{!\%\@:: A Directory of Electronic Mail Addressing \& Networks} \cite{bib:adams:email} という、ぴったりな名前がついている)。
 
-All configuration in delivermail was compiled in and was based only on
-special characters in each address.  The characters had
-precedence. For example, a host configuration might search for an
-``@'' sign and, if one was found, send the entire address to a
-designated Arpanet relay host. Otherwise, it might search for a colon,
-and send the message to BerkNET with the designated host and user if
-it found one, then could check for an exclamation point (``!'')
-signalling that the message should be forwarded to a designated UUCP
-relay.  Otherwise it would attempt local delivery. This configuration
-might result in the following:
+%% All configuration in delivermail was compiled in and was based only on
+%% special characters in each address.  The characters had
+%% precedence. For example, a host configuration might search for an
+%% ``@'' sign and, if one was found, send the entire address to a
+%% designated Arpanet relay host. Otherwise, it might search for a colon,
+%% and send the message to BerkNET with the designated host and user if
+%% it found one, then could check for an exclamation point (``!'')
+%% signalling that the message should be forwarded to a designated UUCP
+%% relay.  Otherwise it would attempt local delivery. This configuration
+%% might result in the following:
+delivermailはすべてコンパイルされる。また、すべてアドレス内に埋め込まれた特殊文字を利用していた。特殊文字には優先順位があった。たとえば、ホストの設定に関しては``@''記号を探し、もし見つかれば、そのアドレス全体を割り当てられたArpanetリレーホストに送信する。見つからなければ次にコロンを探し、割り当てられたホストとユーザー(見つかれば)にBerkNETでメッセージを送る。そして次に感嘆符(``!'')を探す。これは、そのメッセージをUUCPリレーに転送することを表す。見つからなければ、ローカルへの配送を試みる。この設定をまとめると、次のようになる。
 
 \begin{table}[h!]\centering
 \begin{tabular}{|ll|}
 \hline
-Input & Sent To {net, host, user} \\
+%% Input & Sent To {net, host, user} \\
+入力 & 送信先 {ネットワーク、ホスト、ユーザー} \\
 \hline
 foo@bar & \{Arpanet, bar, foo\} \\
 foo:bar & \{Berknet, foo, bar\} \\
@@ -377,24 +381,28 @@ foo!bar@baz & \{Arpanet, baz, foo!bar\} \\
 \end{tabular}
 \end{table}
 
+%% \noindent
+%% Note that address delimiters differed in their associativity,
+%% resulting in ambiguities that could only be resolved using heuristics.
+%% For example, the last example might reasonably be parsed as
+%% \{Uucp, foo, bar@baz\} 
+%% at another site.
 \noindent
-Note that address delimiters differed in their associativity,
-resulting in ambiguities that could only be resolved using heuristics.
-For example, the last example might reasonably be parsed as
-\{Uucp, foo, bar@baz\} 
-at another site.
+アドレスの区切り文字はその組み合わせによって異なり、結果的に曖昧な状態になってしまって経験則でしか解決できなくなることもある。たとえば最後の例は、別のサイトなら\{Uucp, foo, bar@baz\}と解釈されることもあり得るだろう。
 
-The configuration was compiled in for several reasons: first, with a
-16 bit address space and limited memory, parsing a runtime
-configuration was too expensive. Second, the systems of the time had
-been so highly customized that recompiling was a good idea, just to
-make sure you had the local versions of the libraries (shared
-libraries did not exist with Unix 6th Edition).
+%% The configuration was compiled in for several reasons: first, with a
+%% 16 bit address space and limited memory, parsing a runtime
+%% configuration was too expensive. Second, the systems of the time had
+%% been so highly customized that recompiling was a good idea, just to
+%% make sure you had the local versions of the libraries (shared
+%% libraries did not exist with Unix 6th Edition).
+設定をコンパイルする理由はいくつかある。まず、アドレス空間が16ビットでメモリも限られているので、実行時に設定をパースするのはコストがかかりすぎだった。次に、当時のシステムは個々のサイトで非常にカスタマイズされていたので、再コンパイルをするのも理にかなっていた。ローカルに、必要なバージョンのライブラリがあることを確実にするためにである(共有ライブラリは、Unix 6th Editionの時点ではまだなかった)。
 
-Delivermail was distributed with 4.0 and 4.1 BSD and was more
-successful than expected; Berkeley was far from the only site with
-hybrid network architectures.  It became clear that more work was
-required.
+%% Delivermail was distributed with 4.0 and 4.1 BSD and was more
+%% successful than expected; Berkeley was far from the only site with
+%% hybrid network architectures.  It became clear that more work was
+%% required.
+Delivermailは4.0 BSDおよび4.1 BSDに同梱され、予想以上の好評を得た。ハイブリッドなネットワークアーキテクチャを採用しているのはバークレーだけではなかったというわけだ。その証拠に、いろいろな要求が出てきた。
 
 \end{aosasect2}
 
