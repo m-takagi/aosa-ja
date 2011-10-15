@@ -407,61 +407,66 @@ Delivermailは4.0 BSDおよび4.1 BSDに同梱され、予想以上の好評を�
 \end{aosasect2}
 
 %% \begin{aosasect2}{Wave 2: sendmail 3, 4, and 5}
-\begin{aosasect2}{第二波: sendmail 3, 4, そして 5}
+\begin{aosasect2}{第二波: sendmail 3、4、そして5}
 
-Versions 1 and 2 were distributed under the delivermail name. In March
-1981 work began on version 3, which would be distributed under the
-sendmail name. At this point the 16-bit PDP-11 was still in common use
-but the 32-bit VAX-11 was becoming popular, so many of the original
-constraints associated with small address spaces were starting to be
-relaxed.
+%% Versions 1 and 2 were distributed under the delivermail name. In March
+%% 1981 work began on version 3, which would be distributed under the
+%% sendmail name. At this point the 16-bit PDP-11 was still in common use
+%% but the 32-bit VAX-11 was becoming popular, so many of the original
+%% constraints associated with small address spaces were starting to be
+%% relaxed.
+バージョン1とバージョン2は、delivermailという名前で公開された。1981年3月にバージョン3の開発が始まる。このバージョンからは、sendmailという名前で公開されるようになった。この時点ではまだ16ビットのPDP-11が一般的に使われていたが、32ビットのVAX-11もポピュラーになりつつあった。当初の制約の中でもアドレス空間による制約については、これで和らぎはじめた。
 
-The initial goals of sendmail were to convert to runtime
-configuration, allow message modification to provide compatibility
-across networks for forwarded mail, and have a richer language on
-which to make routing decisions. The technique used was essentially
-textual rewriting of addresses (based on tokens rather than
-character strings),
-a mechanism used in some expert systems at the time. There was ad hoc
-code to extract and save any comment strings (in parentheses) as well
-as to re-insert them after the programmatic rewriting completed. It
-was also important to be able to add or augment header fields (e.g.,
-adding a \code{Date} header field or including the full name of the
-sender in the \code{From} header if it was known).
+%% The initial goals of sendmail were to convert to runtime
+%% configuration, allow message modification to provide compatibility
+%% across networks for forwarded mail, and have a richer language on
+%% which to make routing decisions. The technique used was essentially
+%% textual rewriting of addresses (based on tokens rather than
+%% character strings),
+%% a mechanism used in some expert systems at the time. There was ad hoc
+%% code to extract and save any comment strings (in parentheses) as well
+%% as to re-insert them after the programmatic rewriting completed. It
+%% was also important to be able to add or augment header fields (e.g.,
+%% adding a \code{Date} header field or including the full name of the
+%% sender in the \code{From} header if it was known).
+sendmailの初期の目標は、実行時の設定に変換して別のネットワークへのメッセージの転送をできるよう容易することだった。また、ルーティングを設定するためのリッチな言語を提供することだった。利用していたテクニックは基本的にテキストレベルでのアクセスの書き換え(文字ではなくトークンにもとづいたもの)で、当時の大規模システムでも一般的に使われていたものだ。アドホックなコードを使い、コメント文字列(括弧で囲まれたもの)を切り出して保存した後でプログラムによる書き換えを終えてからもう一度挿入する。ヘッダフィールドを追加したり拡張したり(たとえば\code{Date}ヘッダフィールドを追加したり、送信者のフルネームがわかっている場合は\code{From}ヘッダにそれを含めるなど)できるようにしておくことも大切だ。
 
-SMTP development started in November 1981.
-The Computer Science Research Group (CSRG) at U.C. Berkeley had gotten
-the DARPA contract to produce a Unix-based platform to support DARPA
-funded research, with the intent of making sharing between projects
-easier.  The initial work on the TCP/IP stack was done by that time,
-although the details of the socket interface were still changing.
-Basic application protocols such as Telnet and FTP were done, but SMTP
-had yet to be implemented. In fact, the SMTP protocol wasn't even
-finalized at that point; there had been a huge debate about how mail
-should be sent using a protocol to be creatively named Mail Transfer
-Protocol (MTP). As the debate raged, MTP got more and more complex
-until in frustration SMTP (Simple Mail Transfer Protocol) was drafted
-more-or-less by fiat (but not officially published until August 1982).
-Officially, I was working on the INGRES Relational Database Management
-System, but since I knew more about the mail system than anyone else
-around Berkeley at the time, I got talked into implementing SMTP.
+%% SMTP development started in November 1981.
+%% The Computer Science Research Group (CSRG) at U.C. Berkeley had gotten
+%% the DARPA contract to produce a Unix-based platform to support DARPA
+%% funded research, with the intent of making sharing between projects
+%% easier.  The initial work on the TCP/IP stack was done by that time,
+%% although the details of the socket interface were still changing.
+%% Basic application protocols such as Telnet and FTP were done, but SMTP
+%% had yet to be implemented. In fact, the SMTP protocol wasn't even
+%% finalized at that point; there had been a huge debate about how mail
+%% should be sent using a protocol to be creatively named Mail Transfer
+%% Protocol (MTP). As the debate raged, MTP got more and more complex
+%% until in frustration SMTP (Simple Mail Transfer Protocol) was drafted
+%% more-or-less by fiat (but not officially published until August 1982).
+%% Officially, I was working on the INGRES Relational Database Management
+%% System, but since I knew more about the mail system than anyone else
+%% around Berkeley at the time, I got talked into implementing SMTP.
+SMTPの開発が始まったのは1981年11月のことだった。カリフォルニア大学バークレー校のThe Computer Science Research Group (CSRG)がDARPAと契約を結び、Unixベースのプラットフォーム作ってDARPAが出資する研究をサポートした。その意図は、プロジェクト間の共有をしやすくすることだった。TCP/IPスタックを初めて手がけたのがちょうどこの頃だが、ソケットのインターフェイスの詳細はまだ確定していなかった。TelnetやFTPといった基本的なアプリケーションプロトコルはできていたが、SMTPはまだ実装されていなかったのだ。実際、その時点ではまだSMTPプロトコルの策定に決着がついていなかった。メールをどのように送信すべきかの議論は収束しておらず、プロトコルの名前はMail Transfer Protocol (MTP)と呼ばれていた。議論は白熱し、MTPはどんどん複雑になっていった。結局、業を煮やしてSMTP (Simple Mail Transfer Protocol)の提案が出された。多かれ少なかれ、恣意が入っていた(公式に公開されるのは1982年8月のことだ)。公式には、私がかかわっているのはINGRES Relational Database Management Systemだった。しかし、当時のバークレーの中で私以上にメールシステムを知っている人はいなかったので、SMTPの実装にもかかわることになった。
 
-My initial thought was to create a separate SMTP mailer that would
-have its own queueing and daemon; that subsystem would attach to
-sendmail to do the routing. However, several features of SMTP made
-this problematic. For example, the \code{EXPN} and \code{VRFY} commands required
-access to the parsing, aliasing, and local address verification
-modules. Also, at the time I thought it was important that the \code{RCPT}
-command return immediately if the address was unknown, rather than
-accepting the message and then having to send a delivery failure
-message later. This turns out to have been a prescient
-decision. Ironically, later MTAs often got this wrong, exacerbating
-the spam backscatter problem. These issues drove the decision to
-include SMTP as part of sendmail itself.
+%% My initial thought was to create a separate SMTP mailer that would
+%% have its own queueing and daemon; that subsystem would attach to
+%% sendmail to do the routing. However, several features of SMTP made
+%% this problematic. For example, the \code{EXPN} and \code{VRFY} commands required
+%% access to the parsing, aliasing, and local address verification
+%% modules. Also, at the time I thought it was important that the \code{RCPT}
+%% command return immediately if the address was unknown, rather than
+%% accepting the message and then having to send a delivery failure
+%% message later. This turns out to have been a prescient
+%% decision. Ironically, later MTAs often got this wrong, exacerbating
+%% the spam backscatter problem. These issues drove the decision to
+%% include SMTP as part of sendmail itself.
+私が最初に考えたのは、SMTPを話すメーラーを別に作って自前のキューを持たせ、デーモンとして動かすことだった。このサブシステムをsendmailにアタッチして、ルーティングを任せる。しかし、SMTPの機能のいくつかのせいで、この案は困難になった。たとえば、\code{EXPN}コマンドや\code{VRFY}コマンドは、パース処理やエイリアス処理そしてローカルアドレスの検証モジュールにアクセスできなければならない。また、当時の私が重視していたのが、\code{RCPT}コマンドは未知のアドレスを受け取ったときにすぐに結果を返すということだった。いったんメッセージを受け付けてから後で配送失敗のメッセージを返すのではいけないと考えたのだ。これは後に、先見の明があったと判明する。皮肉なことに、後のMTAの多くはここを誤り、spamの反乱を招いてしまっている。これらの問題があったので、SMTPはsendmail本体に含めることに決めた。
 
-Sendmail 3 was distributed with 4.1a and 4.1c BSD (beta versions),
-sendmail 4 was distributed with 4.2 BSD, and sendmail 5 was
-distributed with 4.3 BSD.
+%% Sendmail 3 was distributed with 4.1a and 4.1c BSD (beta versions),
+%% sendmail 4 was distributed with 4.2 BSD, and sendmail 5 was
+%% distributed with 4.3 BSD.
+Sendmail 3は4.1a BSDおよび4.1c BSD (ベータ版)に同梱され、sendmail 4は4.2 BSDに含まれた。そしてsendmail 5は4.3 BSDに含まれることになった。
 
 \end{aosasect2}
 
