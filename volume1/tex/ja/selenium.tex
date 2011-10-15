@@ -1719,51 +1719,57 @@ Selenium Coreも、徐々にAutomation Atomsを使うように書き換えてい
 
 \end{aosasect1}
 
-\begin{aosasect1}{Looking to the Future}
+%% \begin{aosasect1}{Looking to the Future}
+\begin{aosasect1}{今後に向けて}
 
-There will always be browsers that WebDriver can't integrate tightly
-to, so there will always be a need for Selenium Core. Migrating this
-from its current traditional design to a more modular design based on
-the same Closure Library that the atoms are using is underway. We also
-expect to embed the atoms more deeply within the existing WebDriver
-implementations.
+%% There will always be browsers that WebDriver can't integrate tightly
+%% to, so there will always be a need for Selenium Core. Migrating this
+%% from its current traditional design to a more modular design based on
+%% the same Closure Library that the atoms are using is underway. We also
+%% expect to embed the atoms more deeply within the existing WebDriver
+%% implementations.
+WebDriverとの密な結合ができないブラウザってのが、常に存在する。なので、Selenium Coreは今後もいつだって必要になるだろう。当初から続く現在の設計を変更して、atomsも使っているClosure Libraryと同じものを使うように変更しようという動きが進行中である。また、既存のWebDriverの実装にも、atomsをより深く埋め込んでいこうという動きもある。
 
-One of the initial goals of WebDriver was to act as a building block
-for other APIs and tools. Of course, Selenium doesn't live in a
-vacuum: there are plenty of other Open Source browser automation
-tools. One of these is Watir (Web Application Testing In Ruby), and
-work has begun, as a joint effort by the Selenium and Watir
-developers, to place the Watir API over the WebDriver core. We're keen
-to work with other projects too, as successfully driving all the
-browsers out there is hard work. It would be nice to have a solid
-kernel that others could build on. Our hope is that the kernel is
-WebDriver.
+%% One of the initial goals of WebDriver was to act as a building block
+%% for other APIs and tools. Of course, Selenium doesn't live in a
+%% vacuum: there are plenty of other Open Source browser automation
+%% tools. One of these is Watir (Web Application Testing In Ruby), and
+%% work has begun, as a joint effort by the Selenium and Watir
+%% developers, to place the Watir API over the WebDriver core. We're keen
+%% to work with other projects too, as successfully driving all the
+%% browsers out there is hard work. It would be nice to have a solid
+%% kernel that others could build on. Our hope is that the kernel is
+%% WebDriver.
+WebDriverの当初の目標のひとつが、他のAPIやツールを組み立てるためのブロックとして使えるようにすることだった。もちろん、Seleniumが唯一のブラウザ自動化ツールというわけではない。それ以外にも、オープンソースのブラウザ自動化ツールはいくらでも存在する。そのひとつがWatir (Web Application Testing In Ruby)であり、SeleniumとWatirの開発者が協力して、Watir APIをWebDriverのコアにのせようという動きも始まっている。我々は、他のプロジェクトとの協力を望んでいる。すべてのブラウザに対応し続けるという作業はたいへんなものだからである。しっかりとした中核があって、他の開発者たちがその上に何かを構築しやすいようにできれば、すばらしいことだろう。我々としては、その中核がWebDriverとなって欲しい。
 
-A glimpse of this future is offered by Opera Software, who have
-independently implemented the WebDriver API, using the WebDriver test
-suites to verify the behavior of their code, and who will be
-releasing their own OperaDriver. Members of the Selenium team are also
-working with members of the Chromium team to add better hooks and
-support for WebDriver to that browser, and by extension to Chrome
-too. We have a friendly relationship with Mozilla, who have
-contributed code for the FirefoxDriver, and with the developers of the
-popular HtmlUnit Java browser emulator.
+%% A glimpse of this future is offered by Opera Software, who have
+%% independently implemented the WebDriver API, using the WebDriver test
+%% suites to verify the behavior of their code, and who will be
+%% releasing their own OperaDriver. Members of the Selenium team are also
+%% working with members of the Chromium team to add better hooks and
+%% support for WebDriver to that browser, and by extension to Chrome
+%% too. We have a friendly relationship with Mozilla, who have
+%% contributed code for the FirefoxDriver, and with the developers of the
+%% popular HtmlUnit Java browser emulator.
+そんな将来をうかがわせるような申し出がOpera Softwareからあった。彼らは独自にWebDriver APIを実装し、WebDriverのテストスイートを使ってそのコードのふるまいを検証し、そしてOperaDriverとしてリリースする。SeleniumチームのメンバーはChromiumチームとも共同作業をしており、WebDriverのサポートやよりよいフックをChromiumに追加しようとしている。Chromeに対しても同様だ。Mozillaとも良好な関係を築いている。彼らはFirefoxDriverのコードに貢献してくれたし、あの有名なJavaブラウザエミュレータであるHtmlUnitの開発者も提供してくれた。
 
-One view of the future sees this trend continue, with automation hooks
-being exposed in a uniform way across many different browsers. The
-advantages for people keen to write tests for web applications are
-clear, and the advantages for browser manufacturers are also
-obvious. For example, given the relative expense of manual testing,
-many large projects rely heavily on automated testing. If it's not
-possible, or even if it's ``only'' extremely taxing, to test with a
-particular browser, then tests just aren't run for it, with knock-on
-effects for how well complex applications work with that
-browser. Whether those automation hooks are going to be based on
-WebDriver is an open question, but we can hope!
+%% One view of the future sees this trend continue, with automation hooks
+%% being exposed in a uniform way across many different browsers. The
+%% advantages for people keen to write tests for web applications are
+%% clear, and the advantages for browser manufacturers are also
+%% obvious. For example, given the relative expense of manual testing,
+%% many large projects rely heavily on automated testing. If it's not
+%% possible, or even if it's ``only'' extremely taxing, to test with a
+%% particular browser, then tests just aren't run for it, with knock-on
+%% effects for how well complex applications work with that
+%% browser. Whether those automation hooks are going to be based on
+%% WebDriver is an open question, but we can hope!
+ひとつの見方として、この傾向は今後も続くだろう。さまざまなブラウザで、統一された方法で自動化のフックができるようになるという流れだ。ウェブアプリケーションのテストを書く開発者にとってのメリットは明白だし、ブラウザを作る側にとってもその利点は明らかだ。たとえば、手動テストのコストと比較して、多くの大規模プロジェクトでは自動テストにより依存している。もし特定のブラウザでのテストが不可能(あるいはばかみたいに高いコストがかかる)なら、そのブラウザに対するテストは行われないだろう。アプリケーションが複雑になればなるほど、テストしていないブラウザでそれがうまく動くかどうかは怪しくなる。最終的に統一された自動化フックがWebDriverベースのものになるかどうかはわからない。でも、そうあって欲しいものだね!
 
-The next few years are going to be very interesting. As we're an open
-source project, you'd be welcome to join us for the journey at
-\url{http://selenium.googlecode.com/}.
+%% The next few years are going to be very interesting. As we're an open
+%% source project, you'd be welcome to join us for the journey at
+%% \url{http://selenium.googlecode.com/}.
+今後数年の動きが楽しみだ。我々はオープンソースプロジェクトなので、いつでもみなさんの参加を歓迎する。さあ、一緒に\url{http://selenium.googlecode.com/}への旅に出ないかい?
 
 \end{aosasect1}
 
