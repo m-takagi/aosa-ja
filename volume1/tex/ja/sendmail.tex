@@ -1,156 +1,170 @@
 \begin{aosachapter}{Sendmail}{s:sendmail}{Eric Allman}
 %% Based on EN-Revision r229
 
-Most people think of electronic mail as the program that they interact
-with---their mail client, technically known as a Mail User Agent
-(MUA).  But another important part of electronic mail is the software
-that actually transfers the mail from the sender to the
-recipient---the Mail Transfer Agent (MTA).  The first MTA on the
-Internet, and still the most prevalent, was sendmail.
+%% Most people think of electronic mail as the program that they interact
+%% with---their mail client, technically known as a Mail User Agent
+%% (MUA).  But another important part of electronic mail is the software
+%% that actually transfers the mail from the sender to the
+%% recipient---the Mail Transfer Agent (MTA).  The first MTA on the
+%% Internet, and still the most prevalent, was sendmail.
+電子メールのプログラムと聞いて、たいていの人が思い浮かべるのはメールクライアントだろう。厳密には、Mail User Agent (MUA)と呼ばれているものだ。しかし、電子メールを扱うソフトウェアには、もうひとつ重要なものがある。それが、実際に送信者から受信者にメールを配送するソフトウェア---Mail Transfer Agent (MTA)である。インターネット上で最初に登場したMTAであり、現在でも幅広く使われているものがsendmailだ。
 
-Sendmail was first created before the Internet officially existed. It
-has been extraordinarily successful, having grown from 1981, when it
-wasn't at all obvious that the Internet was going to be more than an
-academic experiment with only a few hundred hosts, to today, with over
-800 million Internet hosts as of January
-2011\footnote{\url{http://ftp.isc.org/www/survey/reports/2011/01/}}.
-Sendmail remains among the most used implementations of SMTP on the Internet.
+%% Sendmail was first created before the Internet officially existed. It
+%% has been extraordinarily successful, having grown from 1981, when it
+%% wasn't at all obvious that the Internet was going to be more than an
+%% academic experiment with only a few hundred hosts, to today, with over
+%% 800 million Internet hosts as of January
+%% 2011\footnote{\url{http://ftp.isc.org/www/survey/reports/2011/01/}}.
+%% Sendmail remains among the most used implementations of SMTP on the Internet.
+Sendmailが最初に作られたのは、まだインターネットが公式には存在しなかったころである。そして、それから大成功を収めた。1981年に最初に作られたころ、インターネットはまだ学術的な実験段階で、接続されているホストはたかだか数百台に過ぎなかった。それが今や、2011年1月の時点でインターネットに接続されているホストは8億を超える\footnote{\url{http://ftp.isc.org/www/survey/reports/2011/01/}}。当時、今のこの状況を想像できた人はあまりいなかっただろう。Sendmailは、インターネット上のSMTPの実装として、今でも最も使われているものである。
 
 %% \begin{aosasect1}{Once Upon a Time\ldots}
 \begin{aosasect1}{むかしむかし\ldots}
 
-The first versions of the program that would become known as sendmail
-were written in 1980. It started as a quick hack to forward messages
-between different networks.  The Internet was being developed but was
-not functional at that time.  In fact, many different networks had been
-proposed with no obvious consensus emerging.  The Arpanet was in use
-in the United States and the Internet was being designed as an
-upgrade, but Europe had thrown its weight behind the OSI (Open Systems
-Interconnect) effort, and for a while it appeared that OSI might
-triumph. Both of these used leased lines from the phone companies; in
-the US that speed was 56 Kbps.
+%% The first versions of the program that would become known as sendmail
+%% were written in 1980. It started as a quick hack to forward messages
+%% between different networks.  The Internet was being developed but was
+%% not functional at that time.  In fact, many different networks had been
+%% proposed with no obvious consensus emerging.  The Arpanet was in use
+%% in the United States and the Internet was being designed as an
+%% upgrade, but Europe had thrown its weight behind the OSI (Open Systems
+%% Interconnect) effort, and for a while it appeared that OSI might
+%% triumph. Both of these used leased lines from the phone companies; in
+%% the US that speed was 56 Kbps.
+後にsendmailとして知られることになるプログラムの最初のバージョンが書かれたのは1980年のことだった。もともとは、メッセージを別のネットワークに転送するためのちょっとしたハックだった。インターネットは構築されていたが、当時はまだそれほど機能的ではなかった。実際のところ、当時はさまざまなネットワークがコンセンサスを得ないままに提案されていた。アメリカではArpanetが使われており、インターネットはその上位版として設計された。しかしヨーロッパではOSI (Open Systems Interconnect)の取り組みを支持しており、おそらくOSIのほうが勝ちを収めるだろうとみられていたこともあった。どちらも電話会社から借りた専用線を使っており、米国での速度は56 Kbpsだった。
 
-Probably the most successful network of the time,
-in terms of numbers of computers
-and people connected, was the UUCP network, which was unusual in that
-it had absolutely no central authority. It was, in some sense, the
-original peer-to-peer network, which ran over dialup phone lines: 9600
-bps was about the fastest available for some time. The fastest network
-(at 3 Mbps) was based on the Ethernet from Xerox, which ran a protocol
-called XNS (Xerox Network Systems)---but it didn't work outside of a
-local installation.
+%% Probably the most successful network of the time,
+%% in terms of numbers of computers
+%% and people connected, was the UUCP network, which was unusual in that
+%% it had absolutely no central authority. It was, in some sense, the
+%% original peer-to-peer network, which ran over dialup phone lines: 9600
+%% bps was about the fastest available for some time. The fastest network
+%% (at 3 Mbps) was based on the Ethernet from Xerox, which ran a protocol
+%% called XNS (Xerox Network Systems)---but it didn't work outside of a
+%% local installation.
+おそらく、(接続するマシンやユーザーの数で考えると)当時最も成功していたネットワークはUUCPネットワークだろう。このネットワークの特徴は、中央管理型の権限がどこにもなかったことだ。ある意味では、ピアツーピアのネットワークの元祖と言えるだろう。このネットワークは電話回線でのダイアルアップで動いており、最大で9600 bpsの速度しか出なかった。その当時の最速のネットワーク(3 Mbps)はXeroxのEthernetをベースとしたもので、これはXNS (Xerox Network Systems)というプロトコルで動いていた---しかし、ローカルにインストールした環境以外では動作しなかった。
 
-The environment of the time was rather different than what exists
-today.  Computers were highly heterogeneous, to the extent that there
-wasn't even complete agreement to use 8-bit bytes.
-For example, other machines included the PDP-10 (36 bit words, 9 bit bytes),
-the PDP-11 (16 bit words, 8 bit bytes),
-the CDC 6000 series (60 bit words, 6 bit characters),
-the IBM 360 (32 bit words, 8 bit bytes),
-the XDS 940, the ICL 470, and the Sigma 7.
-One of the up-and-coming platforms was Unix,
-which at that time came from Bell Laboratories.
-Most Unix-based
-machines had 16-bit addresses spaces: at that time the PDP-11 was the
-major Unix machine, with the Data General 8/32 and the VAX-11/780 just
-appearing.  Threads didn't exist---in fact, the concept of dynamic
-processes was still fairly new (Unix had them, but ``serious'' systems
-such as IBM's OS/360 did not). File locking was not supported in the
-Unix kernel (but tricks were possible using filesystem links).
+%% The environment of the time was rather different than what exists
+%% today.  Computers were highly heterogeneous, to the extent that there
+%% wasn't even complete agreement to use 8-bit bytes.
+%% For example, other machines included the PDP-10 (36 bit words, 9 bit bytes),
+%% the PDP-11 (16 bit words, 8 bit bytes),
+%% the CDC 6000 series (60 bit words, 6 bit characters),
+%% the IBM 360 (32 bit words, 8 bit bytes),
+%% the XDS 940, the ICL 470, and the Sigma 7.
+%% One of the up-and-coming platforms was Unix,
+%% which at that time came from Bell Laboratories.
+%% Most Unix-based
+%% machines had 16-bit addresses spaces: at that time the PDP-11 was the
+%% major Unix machine, with the Data General 8/32 and the VAX-11/780 just
+%% appearing.  Threads didn't exist---in fact, the concept of dynamic
+%% processes was still fairly new (Unix had them, but ``serious'' systems
+%% such as IBM's OS/360 did not). File locking was not supported in the
+%% Unix kernel (but tricks were possible using filesystem links).
+当時の環境は、今とは異なっていた。コンピュータはそれぞれ異質なものであり、そもそも1バイトを8ビットにするかどうかさえ完全には合意されていなかった。たとえばPDP-10(1ワードが36ビット、1バイトが9ビット)、PDP-11(1ワードが16ビット、1バイトが8ビット)、CDC 6000シリーズ(1ワードが60ビット、1文字が6ビット)、IBM 360(1ワードが32ビット、1バイトが8ビット)、そしてXDS 940やICL 470、Sigma 7などがあった。そのころ赤丸急上昇中だったプラットフォームのひとつがUnixで、これはベル研究所が発表したものだった。Unixベースのマシンの大半は16ビットアドレス空間を保持していた。当時のUnixマシンの主流はPDP-11で、Data General 8/32やVAX-11/780が登場してきたころだった。スレッドはまだ存在しなかった---実際のところ、ダイナミックプロセスという概念自体がまだまだ出たてのものだったのだ(Unixにはスレッドがあったが、IBMのOS/360みたいな``本物の''システムにはまだ実装されていなかった)。ファイルのロックはまだUnixカーネルではサポートされていなかった(ファイルシステムのリンクを使うという裏技はあった)。
 
-To the extent they existed at all, networks were generally low speed
-(many based on 9600-baud TTY lines; the truly rich might have had
-Ethernet available, but for local use only). The venerable socket
-interface wasn't going to be invented for many years. Public key
-encryption hadn't been invented either, so most network security as we
-know it today wasn't feasible.
+%% To the extent they existed at all, networks were generally low speed
+%% (many based on 9600-baud TTY lines; the truly rich might have had
+%% Ethernet available, but for local use only). The venerable socket
+%% interface wasn't going to be invented for many years. Public key
+%% encryption hadn't been invented either, so most network security as we
+%% know it today wasn't feasible.
+とりあえずあるにはあったものの、ネットワークは一般的に低速だった(その多くは9600ボーのTTY回線を使っていた。お金持ちの中にはEthernetを使っているところもあったが、それでもローカルネットワークだけの話だった)。あの由緒あるソケットインターフェイスが発明されるのは、それから何年か後のことである。公開鍵による暗号化の仕組みもまだ発明されていなかったので、ネットワークセキュリティに関して我々の知る仕組みのほとんどは実現不可能だった。
 
-Network email already existed on Unix, but it was created using
-hacks.  The primary user agent at the time was the \code{/bin/mail}
-command (today sometimes referred to as \code{binmail} or
-\code{v7mail}), but some sites had other user agents such as
-\code{Mail} from Berkeley, which actually understood how to
-treat messages as individual items rather than being a glorified
-\code{cat} program.  Every user agent read (and usually wrote!)
-\code{/usr/spool/mail} directly; there was no abstraction for how the
-messages were actually stored.
+%% Network email already existed on Unix, but it was created using
+%% hacks.  The primary user agent at the time was the \code{/bin/mail}
+%% command (today sometimes referred to as \code{binmail} or
+%% \code{v7mail}), but some sites had other user agents such as
+%% \code{Mail} from Berkeley, which actually understood how to
+%% treat messages as individual items rather than being a glorified
+%% \code{cat} program.  Every user agent read (and usually wrote!)
+%% \code{/usr/spool/mail} directly; there was no abstraction for how the
+%% messages were actually stored.
+ネットワーク上を流れる電子メールはUnixで既に実現されていたが、そのためにはちょっとしたハックを要した。当時のユーザーエージェントとして一番よく使われていたのが\code{/bin/mail}コマンド(現在では\code{binmail}や\code{v7mail}と呼ばれることもある)だが、それ以外のユーザーエージェントを使っているところもあった。たとえばバークレーの\code{Mail}は、メッセージを個別のアイテムとして扱う方法を知っていた。単に\code{cat}プログラムに任せるだけではなかった。どのユーザーエージェントも、\code{/usr/spool/mail}ディレクトリを直接読んだり(そして直接書き込んだり!)していた。実際に格納されるメッセージを抽象化することなどなかったのだ。
 
-The logic to route a message to the network versus local e-mail was nothing
-more than seeing if the address contained an exclamation point (UUCP)
-or a colon (BerkNET). People with Arpanet access had to use a
-completely separate mail program, which would not interoperate with
-other networks, and which even stored local mail in a different place
-and in a different format.
+%% The logic to route a message to the network versus local e-mail was nothing
+%% more than seeing if the address contained an exclamation point (UUCP)
+%% or a colon (BerkNET). People with Arpanet access had to use a
+%% completely separate mail program, which would not interoperate with
+%% other networks, and which even stored local mail in a different place
+%% and in a different format.
+メッセージをネットワークに送るかローカルの電子メールに送るかの振り分けロジックは、単にアドレスを見て中に感嘆符(UUTPの場合)あるいはコロン(BerkNETの場合)が含まれているかどうかを見るだけのことでしかなかった。Arpanetにアクセスする人たちは、完全に個別のメールプログラムを使う必要があった。これは他のネットワークとの相互運用ができず、ローカルメールも別の場所に異なる書式で保存していた。
 
-To make things even more interesting, there was virtually no
-standardization on the format of the messages themselves.  There was
-general agreement that there would be a block of header fields at the
-top of the message, that each header field would be on a new line, and
-that header field names and values would be separated by a
-colon. Beyond that, there was very little standardization in either the
-selection of header field names or the syntaxes of individual
-fields. For example, some systems used \code{Subj:} instead of
-\code{Subject:}, \code{Date:} fields were different syntaxes, and some
-systems didn't understand full names in a \code{From:} field. On top
-of all of this, what was documented was often ambiguous or not quite
-what was actually in use. In particular, RFC~733 (which purported to
-describe the format of Arpanet messages) was different from what was
-actually used in subtle but sometimes important ways, and the method
-of actually transmitting messages was not officially documented at all
-(although several RFCs made reference to the mechanism, none defined
-it). The result was that there was somewhat of a priesthood around
-messaging systems.
+%% To make things even more interesting, there was virtually no
+%% standardization on the format of the messages themselves.  There was
+%% general agreement that there would be a block of header fields at the
+%% top of the message, that each header field would be on a new line, and
+%% that header field names and values would be separated by a
+%% colon. Beyond that, there was very little standardization in either the
+%% selection of header field names or the syntaxes of individual
+%% fields. For example, some systems used \code{Subj:} instead of
+%% \code{Subject:}, \code{Date:} fields were different syntaxes, and some
+%% systems didn't understand full names in a \code{From:} field. On top
+%% of all of this, what was documented was often ambiguous or not quite
+%% what was actually in use. In particular, RFC~733 (which purported to
+%% describe the format of Arpanet messages) was different from what was
+%% actually used in subtle but sometimes important ways, and the method
+%% of actually transmitting messages was not officially documented at all
+%% (although several RFCs made reference to the mechanism, none defined
+%% it). The result was that there was somewhat of a priesthood around
+%% messaging systems.
+さらにおもしろいのが、この時点ではまだ、メッセージ自体の書式についても事実上標準化されていなかったということだ。大まかに決まっていたのは、メッセージの先頭にヘッダフィールドを置き、各ヘッダフィールドの後には改行を置いて、フィールド名とその値はコロンで区切るということくらいだった。それ以外のこと、たとえばどんなヘッダフィールド名を使うかや個々のフィールドの構文などについてはほとんど標準化されていなかった。たとえば\code{Subject:}の代わりに\code{Subj:}を使うシステムもあったし\code{Date:}フィールドの構文もそれぞればらばらだったし、システムによっては\code{From:}フィールドのフルネームを解釈できないものもあった。さらに、ドキュメントもあいまいなものばかりだったし、ドキュメントが実際の内容と食い違っていることもあった。特にRFC~733(Arpanetメッセージについての説明)は実際に使われている内容と微妙に異なっていた(しかし重要な違いであることもあった)。そして、実際のメッセージ送信の仕組みは実際のところ公式には文書化されていなかった(その仕組みを扱うRFCはいくつかあったが、きちんとした定義はどこにもなかった)。メッセージングシステムまわりはこんなひどい状況だった。
 
-In 1979, the INGRES Relational Database Management Project
-(a.k.a. my day job)
-got a DARPA grant, and with it a 9600bps Arpanet connection
-to our PDP-11.
-At the time it was the only Arpanet connection available in
-the Computer Science Division,
-so everyone wanted access to our machine so they could get to the Arpanet.
-However, that machine was already maxed out,
-and so we could only make two login ports available for everyone in the
-department to share.
-This caused substantial contention and frequent conflicts.
-However, I noticed that what people wanted most of all was not
-remote login or file transfer, but e-mail.
+%% In 1979, the INGRES Relational Database Management Project
+%% (a.k.a. my day job)
+%% got a DARPA grant, and with it a 9600bps Arpanet connection
+%% to our PDP-11.
+%% At the time it was the only Arpanet connection available in
+%% the Computer Science Division,
+%% so everyone wanted access to our machine so they could get to the Arpanet.
+%% However, that machine was already maxed out,
+%% and so we could only make two login ports available for everyone in the
+%% department to share.
+%% This caused substantial contention and frequent conflicts.
+%% However, I noticed that what people wanted most of all was not
+%% remote login or file transfer, but e-mail.
+1979年、INGRES Relational Database Management Project(私の昼間の業務だった)はDARPAの資金援助を受け、9600bpsのArpanet接続を我々のPDP-11につなげることになった。その当時、コンピュータサービス部門でArpanetに接続しているマシンはそれだけだったので、誰もが我々のマシンを使ってArpanetを使いたがった。しかし、そのマシンはすでに最大限に使い切っており、使えるログインポートはあとふたつしか残っていなかった。そこで、そのふたつを部門内で共有した。そのため、頻繁に争いが発生した。しかし、私は気づいた。我々の大半はリモートログインやファイル転送を求めているのではなく、単に電子メールが使いたいだけだったのだ。
 
-Into this, sendmail (initially called delivermail) emerged as an
-attempt to unify the chaos into one place. Every MUA (mail user agent,
-or mail client) would just call delivermail to deliver email rather than
-figuring out how to do it on an ad hoc (and often incompatible) basis.
-Delivermail/sendmail made no attempt to dictate how local mail should be stored or
-delivered; it did absolutely nothing except shuffle mail between other
-programs. (This changed when SMTP was added, as we'll see shortly.)
-In some sense it was just glue to hold the various mail systems
-together rather than being a mail system in its own right.
+%% Into this, sendmail (initially called delivermail) emerged as an
+%% attempt to unify the chaos into one place. Every MUA (mail user agent,
+%% or mail client) would just call delivermail to deliver email rather than
+%% figuring out how to do it on an ad hoc (and often incompatible) basis.
+%% Delivermail/sendmail made no attempt to dictate how local mail should be stored or
+%% delivered; it did absolutely nothing except shuffle mail between other
+%% programs. (This changed when SMTP was added, as we'll see shortly.)
+%% In some sense it was just glue to hold the various mail systems
+%% together rather than being a mail system in its own right.
+そんなところに、sendmail(当初はdelivermailという名前だった)が登場した。このカオスを何とか統一しようという試みだ。すべてのMUA(Mail User Agent、あるいはメールクライアント)は、単にdelivermailを呼び出すだけでメールを配送することができた。いちいち調査をしてアドホックな(そして、たいてい互換性のない)対応をする必要もない。Delivermail/sendmailは、ローカルメールの保存方法や配送方法に関しては一切関知しなかった。つまり、単に他のプログラムとの間でメールを入れ替える以外のことは何もしなかったのだ(これは、後にSMTPが追加されたことで変わった。詳しくは後ほど)。ある意味では、自分自身がメールシステムであるというよりは、さまざまなメールシステムの間をつなぐ糊に過ぎなかったのだ。
 
 \pagebreak
 
-During the development of sendmail the Arpanet was transformed into
-the Internet. The changes were extensive, from the low level packets
-on the wire up through application protocols, and did not happen
-instantly.  Sendmail was literally developed concurrently with the
-standards, and in some cases influenced them. It's also notable that
-sendmail has survived and even thrived as ``the network'' (as we think
-of it today) scaled from a few hundred hosts to hundreds of millions
-of hosts.
+%% During the development of sendmail the Arpanet was transformed into
+%% the Internet. The changes were extensive, from the low level packets
+%% on the wire up through application protocols, and did not happen
+%% instantly.  Sendmail was literally developed concurrently with the
+%% standards, and in some cases influenced them. It's also notable that
+%% sendmail has survived and even thrived as ``the network'' (as we think
+%% of it today) scaled from a few hundred hosts to hundreds of millions
+%% of hosts.
+Sendmailの開発を進めるうちに、Arpanetはインターネットに姿を変えた。その変更点は幅広く、ローレベルのパケットからその上にのるアプリケーションプロトコルまですべて変化した。そして、その変化は一斉に起こったわけではなかった。Sendmailの開発は標準規格の策定とまさに文字通り並行して進んでおり、Sendmailが標準規格に影響を及ぼすこともあった。もうひとつ特筆すべき点は、いま我々が思い浮かべる``ネットワーク''がまだ数百台規模だったころから何億台規模に成長するまでの間、sendmailがずっと生き残って成長を続けたという事実である。
 
-\begin{aosabox}{Another Network}
+%% \begin{aosabox}{Another Network}
+\begin{aosabox}{もうひとつのネットワーク}
 
-It's worth mentioning that another completely separate
-mail standard was proposed at the
-time called X.400, which was a part of ISO/OSI (International
-Standards Organization/Open Systems Interconnect).  X.400 was a binary
-protocol, with the message encoded using ASN.1 (Abstract Syntax
-Notation 1), which is still in use in some Internet protocols today
-such as LDAP\@. LDAP was in turn a simplification of X.500, which was
-the directory service used by X.400.  Sendmail made no attempt
-whatsoever to be directly compatible with X.400, although there were
-some gateway services extant at the time. Although X.400 was initially
-adopted by many of the commercial vendors at the time, Internet mail
-and SMTP
-ended up winning in the marketplace.
+%% It's worth mentioning that another completely separate
+%% mail standard was proposed at the
+%% time called X.400, which was a part of ISO/OSI (International
+%% Standards Organization/Open Systems Interconnect).  X.400 was a binary
+%% protocol, with the message encoded using ASN.1 (Abstract Syntax
+%% Notation 1), which is still in use in some Internet protocols today
+%% such as LDAP\@. LDAP was in turn a simplification of X.500, which was
+%% the directory service used by X.400.  Sendmail made no attempt
+%% whatsoever to be directly compatible with X.400, although there were
+%% some gateway services extant at the time. Although X.400 was initially
+%% adopted by many of the commercial vendors at the time, Internet mail
+%% and SMTP
+%% ended up winning in the marketplace.
+ちなみに、当時まったく別のメール標準規格も提案されていた。それはX.400と呼ばれ、ISO/OSI (International Standards Organization/Open Systems Interconnect)の一部だった。X.400はバイナリプロトコルで、メッセージはASN.1(Abstract Syntax Notation 1)で符号化する。この仕組みは、今でもLDAPなどの一部のインターネットプロトコルで使われている。LDAPはX.500を単純化したものであり、X.500はX.400が使っているディレクトリサービスだ。SendmailはX.400との直接の互換性に関しては一切考慮していない。しかし、両者の橋渡しをするゲートウェイが存在する。X.400は当初から多くの商用ベンダーに採用されていたが、最終的に市場を制したのはインターネットメールとSMTPだった。
 
 \end{aosabox}
 
