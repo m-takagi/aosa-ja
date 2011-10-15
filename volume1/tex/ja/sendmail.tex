@@ -461,7 +461,7 @@ SMTPの開発が始まったのは1981年11月のことだった。カリフォ�
 %% decision. Ironically, later MTAs often got this wrong, exacerbating
 %% the spam backscatter problem. These issues drove the decision to
 %% include SMTP as part of sendmail itself.
-私が最初に考えたのは、SMTPを話すメーラーを別に作って自前のキューを持たせ、デーモンとして動かすことだった。このサブシステムをsendmailにアタッチして、ルーティングを任せる。しかし、SMTPの機能のいくつかのせいで、この案は困難になった。たとえば、\code{EXPN}コマンドや\code{VRFY}コマンドは、パース処理やエイリアス処理そしてローカルアドレスの検証モジュールにアクセスできなければならない。また、当時の私が重視していたのが、\code{RCPT}コマンドは未知のアドレスを受け取ったときにすぐに結果を返すということだった。いったんメッセージを受け付けてから後で配送失敗のメッセージを返すのではいけないと考えたのだ。これは後に、先見の明があったと判明する。皮肉なことに、後のMTAの多くはここを誤り、spamの反乱を招いてしまっている。これらの問題があったので、SMTPはsendmail本体に含めることに決めた。
+私が最初に考えたのは、SMTPを話すメーラーを別に作って自前のキューを持たせ、デーモンとして動かすことだった。このサブシステムをsendmailにアタッチして、ルーティングを任せる。しかし、SMTPの機能のいくつかのせいで、この案は困難になった。たとえば、\code{EXPN}コマンドや\code{VRFY}コマンドは、パース処理やエイリアス処理そしてローカルアドレスの検証モジュールにアクセスできなければならない。また、当時の私が重視していたのが、\code{RCPT}コマンドは未知のアドレスを受け取ったときにすぐに結果を返すということだった。いったんメッセージを受け付けてから後で配送失敗のメッセージを返すのではいけないと考えたのだ。これは後に、先見の明があったと判明する。皮肉なことに、後のMTAの多くはここを誤り、spamの氾濫を招いてしまっている。これらの問題があったので、SMTPはsendmail本体に含めることに決めた。
 
 %% Sendmail 3 was distributed with 4.1a and 4.1c BSD (beta versions),
 %% sendmail 4 was distributed with 4.2 BSD, and sendmail 5 was
