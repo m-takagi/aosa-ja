@@ -173,146 +173,155 @@ Sendmailの開発を進めるうちに、Arpanetはインターネットに姿�
 %% \begin{aosasect1}{Design Principles}
 \begin{aosasect1}{設計の原則}
 
-While developing sendmail, I adhered to several design principles. All
-of these in some sense came down to one thing: do as little as
-possible.  This is in sharp contrast to some of the other efforts of
-the time that had much broader goals and required much larger
-implementations.
+%% While developing sendmail, I adhered to several design principles. All
+%% of these in some sense came down to one thing: do as little as
+%% possible.  This is in sharp contrast to some of the other efforts of
+%% the time that had much broader goals and required much larger
+%% implementations.
+Sendmailの開発中にこだわっている設計指針をいくつか紹介する。これらは結局ひとことでまとめることができて、要するに「無駄なことはしない」ということだ。これは、その当時の流れに反するものだった。当時は、より幅広い目標を達成するために実装をどんどん膨らませる方向に進んでいる人が多かった。
 
 %% \begin{aosasect2}{Accept that One Programmer Is Finite}
 \begin{aosasect2}{プログラマには限界があることを受け入れる}
 
-I wrote sendmail as a part-time, unpaid project. It was intended to be
-a quick way of making Arpanet mail more accessible to people at
-U.C. Berkeley. The key was to forward mail between existing networks,
-all of which were implemented as standalone programs that were unaware
-that more than one network even existed. Modifying more than a tiny
-amount of the existing software was infeasible with only one part-time
-programmer.  The design had to minimize the amount of existing code
-that needed to be modified as well as the amount of new code that
-needed to be written.  This constraint drove most of the rest of the
-design principles. As it turned out, in most cases they would have
-been the right thing to do even if there had been a larger team
-available.
+%% I wrote sendmail as a part-time, unpaid project. It was intended to be
+%% a quick way of making Arpanet mail more accessible to people at
+%% U.C. Berkeley. The key was to forward mail between existing networks,
+%% all of which were implemented as standalone programs that were unaware
+%% that more than one network even existed. Modifying more than a tiny
+%% amount of the existing software was infeasible with only one part-time
+%% programmer.  The design had to minimize the amount of existing code
+%% that needed to be modified as well as the amount of new code that
+%% needed to be written.  This constraint drove most of the rest of the
+%% design principles. As it turned out, in most cases they would have
+%% been the right thing to do even if there had been a larger team
+%% available.
+もともとsendmailは、業務としてではなく空き時間を使って書いたものだ。Arpanetメールをカリフォルニア大学バークレー校の人たちがより使いやすくするための手っ取り早い手段として作られた。その肝となるのが既存のネットワーク間でのメールの転送だった。すべての処理はスタンドアロンのプログラムとして実装されており、複数のネットワークが存在することを想定していなかった。既存のソフトウェアにそれなりに手を入れるというのは、一人のプログラマーが空き時間だけでこなすには不可能な作業である。既存のコードをできるだけ変更せずに済み、かつ新しいコードもできるだけ書かずに済むような設計を目指す必要があった。後述する指針の大半も、この考えに基づいている。仮に大規模なチームがいたとしても、この指針は間違いではなかっただろう。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Don't Redesign User Agents}
 \begin{aosasect2}{ユーザーエージェントの再設計はしない}
 
-A Mail User Agent (MUA) is what most end users think of as the ``mail
-system''---it's the program that they use to read, write, and answer
-mail. It is quite distinct from the Mail Transfer Agent (MTA), which
-routes email from the sender to the receiver. At the time sendmail was
-written, many implementations at least partly combined these two
-functions, so they were often developed in tandem. Trying to work on
-both at the same time would have been too much, so Sendmail completely
-punted on the user interface problem: the only changes to MUAs were to
-have them invoke sendmail instead of doing their own routing. In
-particular, there were already several user agents, and people were
-often quite emotional about how they interacted with mail.
-Trying to work on both at the same time would have been too much.
-This
-separation of the MUA from the MTA is accepted wisdom now, but was far
-from standard practice at the time.
+%% A Mail User Agent (MUA) is what most end users think of as the ``mail
+%% system''---it's the program that they use to read, write, and answer
+%% mail. It is quite distinct from the Mail Transfer Agent (MTA), which
+%% routes email from the sender to the receiver. At the time sendmail was
+%% written, many implementations at least partly combined these two
+%% functions, so they were often developed in tandem. Trying to work on
+%% both at the same time would have been too much, so Sendmail completely
+%% punted on the user interface problem: the only changes to MUAs were to
+%% have them invoke sendmail instead of doing their own routing. In
+%% particular, there were already several user agents, and people were
+%% often quite emotional about how they interacted with mail.
+%% Trying to work on both at the same time would have been too much.
+%% This
+%% separation of the MUA from the MTA is accepted wisdom now, but was far
+%% from standard practice at the time.
+Mail User Agent (MUA)とは、エンドユーザーの多くが``メールソフト''と聞いて真っ先に思い浮かべるもの---メールの読み書きや返信のために使うプログラムである。Mail Transfer Agent (MTA)はそれとはまったく別で、電子メールを送信者から受信者に向けて配送する役割を果たす。Sendmailが書かれた当時、多くの実装はこれらふたつの機能を組み合わせたものであり、協力して開発を進めていた。両方同時に作業を進めるのはキツかったので、Sendmailではユーザーインターフェイスの問題を完全に投げ捨てた。MUAに対して行った唯一の変更は、自前のルーティング処理の代わりにsendmailを起動させるようにする変更だった。実際、ユーザーエージェントは既にいろいろなものがあったし、実際にメールを操作する部分なのでユーザーの好みも人それぞれだ。MUAをMTAから切り離すという判断は今でこそ受け入れられるだろうが、当時の常識からは完全にかけ離れていた。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Don't Redesign the Local Mail Store}
-\begin{aosasect2}{ローカルのメールストアの再設計はしない}
+\begin{aosasect2}{ローカルメールストアの再設計はしない}
 
-The local mail store (where messages would be saved until the
-recipient came along to read them) was not formally standardized. Some sites
-liked to store them in a centralized place, such as \code{/usr/mail},
-\code{/var/mail}, or \code{/var/spool/mail}. Other sites liked to
-store them in the recipient's home directory (e.g., as a file called
-\code{.mail}). Most sites started each message with a line beginning
-``From'' followed by a space character (an extraordinarily bad
-decision, but that was the convention at the time), but sites that
-were Arpanet-focused usually stored messages separated by a line
-containing four control-A characters. Some sites attempted to lock the
-mailbox to prevent collisions, but they used different locking
-conventions (file locking primitives were not yet available). In
-short, the only reasonable thing to do was treat local mail storage as
-a black box.
+%% The local mail store (where messages would be saved until the
+%% recipient came along to read them) was not formally standardized. Some sites
+%% liked to store them in a centralized place, such as \code{/usr/mail},
+%% \code{/var/mail}, or \code{/var/spool/mail}. Other sites liked to
+%% store them in the recipient's home directory (e.g., as a file called
+%% \code{.mail}). Most sites started each message with a line beginning
+%% ``From'' followed by a space character (an extraordinarily bad
+%% decision, but that was the convention at the time), but sites that
+%% were Arpanet-focused usually stored messages separated by a line
+%% containing four control-A characters. Some sites attempted to lock the
+%% mailbox to prevent collisions, but they used different locking
+%% conventions (file locking primitives were not yet available). In
+%% short, the only reasonable thing to do was treat local mail storage as
+%% a black box.
+ローカルメールストア(受信者がメールを読むまでの受信メールの保存場所)は、正式には標準化されていなかった。\code{/usr/mail}や\code{/var/mail}あるいは\code{/var/spool/mail}のような場所で中央管理する方式をとっているところもあれば、受信者のホームディレクトリに(\code{.mail}などといった名前のファイルで)保存しているところもあった。大半のサイトでは``From''で始まってその後スペースが続く行があればそこからメッセージが始まるものとしていた(あまりにも筋が悪すぎるが、当時はそういう決まりだった)が、Arpanetに注力していたサイトでは、control-Aが4文字続く行でメッセージを区切って保管していた。一部のサイトではメールボックスをロックして衝突を回避していたが、サイトによってロックの規約が異なっていた(ファイルロックのプリミティブは当時まだなかった)。要するに、やれることがあるとすれば、ローカルのメールストレージは完全にブラックボックスとして扱うことくらいだった。
 
-On nearly all sites, the actual mechanism for doing local mailbox
-storage was embodied in the \code{/bin/mail} program. This had a
-(quite primitive) user interface, routing, and storage built into one
-program. To incorporate sendmail, the routing portion was pulled out
-and replaced with a call to sendmail.  A \code{-d} flag was added to
-force final delivery, i.e., it prevented \code{/bin/mail} from calling
-sendmail to do the routing. In later years the code used to deliver a
-message to a physical mailbox was extracted into another program
-called \code{mail.local}. The \code{/bin/mail} program exists today
-only to include a lowest common denominator for scripts to send
-mail.
+%% On nearly all sites, the actual mechanism for doing local mailbox
+%% storage was embodied in the \code{/bin/mail} program. This had a
+%% (quite primitive) user interface, routing, and storage built into one
+%% program. To incorporate sendmail, the routing portion was pulled out
+%% and replaced with a call to sendmail.  A \code{-d} flag was added to
+%% force final delivery, i.e., it prevented \code{/bin/mail} from calling
+%% sendmail to do the routing. In later years the code used to deliver a
+%% message to a physical mailbox was extracted into another program
+%% called \code{mail.local}. The \code{/bin/mail} program exists today
+%% only to include a lowest common denominator for scripts to send
+%% mail.
+ほぼすべてのサイトで、実際にローカルメールボックスのストレージを扱う処理は\code{/bin/mail}に埋め込まれていた。このプログラムは、(極めて原始的な)ユーザーインターフェイスとルーティング、そしてストレージ操作の処理をひとつにまとめたものである。sendmailと組み合わせるために、ルーティング部分は外に切り出してsendmailを呼び出す処理に切り替えた。最終的な配送を強制するための\code{-d}フラグが追加された。つまり、\code{/bin/mail}がsendmailを呼び出してルーティングするのをやめさせるということだ。後になって、物理的なメールボックスにメッセージを配送するコードが切り出され、\code{mail.local}という別のプログラムになった。現在の\code{/bin/mail}は、メールを送信するための最小限の共通処理だけを残したものになっている。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Make Sendmail Adapt to the World, Not the Other Way Around}
 \begin{aosasect2}{Sendmailが世界に合わせるのであって、世界をSendmailに合わせるのではない}
 
-Protocols such as UUCP and BerkNET were already implemented as
-separate programs that had their own, sometimes quirky, command line
-structure. In some cases they were being actively developed at the
-same time as sendmail. It was clear that reimplementing them (for
-example, to convert them to standard calling conventions) was going to
-be painful. This led directly to the principle that sendmail should
-adapt to the rest of the world rather than trying to make the rest of
-the world adapt to sendmail.
+%% Protocols such as UUCP and BerkNET were already implemented as
+%% separate programs that had their own, sometimes quirky, command line
+%% structure. In some cases they were being actively developed at the
+%% same time as sendmail. It was clear that reimplementing them (for
+%% example, to convert them to standard calling conventions) was going to
+%% be painful. This led directly to the principle that sendmail should
+%% adapt to the rest of the world rather than trying to make the rest of
+%% the world adapt to sendmail.
+UUCPやBerkNETといったプロトコルが既に個別のプログラムとして実装されており、それぞれ自前の(時にちょっと奇妙な)コマンドライン構造をもっていた。時には、それらのプログラムもsendmailと同時に活発な開発が進むこともあった。sendmailで再実装してしまう(たとえば、標準の呼び出し規約に変換する)のは、どう見てもつらいだろう。ここから、次の原則が得られる。つまり、sendmailのほうが他の世界に合わせるのであって、他の世界のほうをsendmailの流儀に合わせようとしてはいけないということだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Change as Little as Possible}
 \begin{aosasect2}{変更はできる限り少なく}
 
-To the fullest extent possible, during the development of sendmail I
-didn't touch anything I didn't absolutely have to touch. Besides just
-not having enough time to do it, there was a culture at Berkeley at
-the time that eschewed most formal code ownership in favor of a policy
-of ``the last person who touched the code is the go-to person for that
-program'' (or more simply, ``you touch it, you own it''). Although
-that sounds chaotic by most modern-day standards, it worked quite well
-in a world where no one at Berkeley was assigned full time to work on
-Unix; individuals worked on parts of the system that they were
-interested in and committed to and didn't touch the rest of the code
-base except in dire circumstances.
+%% To the fullest extent possible, during the development of sendmail I
+%% didn't touch anything I didn't absolutely have to touch. Besides just
+%% not having enough time to do it, there was a culture at Berkeley at
+%% the time that eschewed most formal code ownership in favor of a policy
+%% of ``the last person who touched the code is the go-to person for that
+%% program'' (or more simply, ``you touch it, you own it''). Although
+%% that sounds chaotic by most modern-day standards, it worked quite well
+%% in a world where no one at Berkeley was assigned full time to work on
+%% Unix; individuals worked on parts of the system that they were
+%% interested in and committed to and didn't touch the rest of the code
+%% base except in dire circumstances.
+最大限の注意を払い、sendmailの開発中には、触る必要のないものには一切触らないようにした。単に時間がないというだけの理由ではない。当時のバークレーには、コードの所有者を厳密に定めるのではなく``最後にコードを触った人が、そのプログラムの担当になる''(簡単に言うと``触ったら、責任を持て'')という文化があったのだ。今どきの常識で考えるとあり得ない話だが、これでうまく回っていた。当時のバークレーにはフルタイムでUnixに関わっている人はいなかったのだ。各人が、それぞれ自分が興味を持った部分の作業をしてコミットし、それ以外の部分についてはよっぽどの緊急事態でない限り手を触れなかった。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Think About Reliability Early}
 \begin{aosasect2}{信頼性をまず考える}
 
-The mail system prior to sendmail (including most of the transport
-systems) wasn't terribly concerned about reliability. For example,
-versions of Unix prior to 4.2BSD did not have native file locking,
-although it could be simulated by creating a temporary file and then
-linking it to a lock file (if the lock file already existed the link
-call would fail). However, sometimes different programs writing the
-same data file wouldn't agree on how the locking should be done (for
-example, they might use a different lock file name or even make no attempt
-to do locking at all), and so it wasn't
-that uncommon to lose mail.  Sendmail took the approach that losing
-mail wasn't an option (possibly a result of my background as a
-database guy, where losing data is a mortal sin).
+%% The mail system prior to sendmail (including most of the transport
+%% systems) wasn't terribly concerned about reliability. For example,
+%% versions of Unix prior to 4.2BSD did not have native file locking,
+%% although it could be simulated by creating a temporary file and then
+%% linking it to a lock file (if the lock file already existed the link
+%% call would fail). However, sometimes different programs writing the
+%% same data file wouldn't agree on how the locking should be done (for
+%% example, they might use a different lock file name or even make no attempt
+%% to do locking at all), and so it wasn't
+%% that uncommon to lose mail.  Sendmail took the approach that losing
+%% mail wasn't an option (possibly a result of my background as a
+%% database guy, where losing data is a mortal sin).
+sendmail以前のメールシステム(大半のメール配送システムも含む)は、信頼性についてあまりにも無神経すぎた。たとえば、4.2BSDよりも前のバージョンのUnixにはネイティブなファイルロックの仕組みがなかった。その代わりの手段として、テンポラリファイルを使ってファイルロックをシミュレートしていた。つまり、テンポラリファイルを作成してそれをロックファイルにリンクさせたのだ(もしロックファイルが既に存在すれば、リンクのコールが失敗する)。しかし、時には別のプログラムが、ロックファイルとしての扱い方を知らないまま同じファイルに書き込みをしてしまうこともあり(たとえばロックファイル名が違ったり、そもそもロックを考慮していなかったりなど)、メールを失う可能性もあり得るようになってしまう。sendmailでは、メールを失うことなどあり得ないような手法を採用した(これは、もともと私がデータベース屋だったことも関係するかもしれない。データを失うなんてとんでもないという考えだった)。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{What Was Left Out}
 \begin{aosasect2}{その他}
 
-There were many things that were not done in the early versions.
-I did not try to re-architect the mail system
-or build a completely general solution:
-functionality could be added as the need arose.
-Very early versions were not even intended to be completely configurable
-without access to the source code and a compiler
-(although this changed fairly early on).
-In general, the modus operandi for sendmail
-was to get something working quickly
-and then enhance working code as needed
-and as the problem was better understood.
+%% There were many things that were not done in the early versions.
+%% I did not try to re-architect the mail system
+%% or build a completely general solution:
+%% functionality could be added as the need arose.
+%% Very early versions were not even intended to be completely configurable
+%% without access to the source code and a compiler
+%% (although this changed fairly early on).
+%% In general, the modus operandi for sendmail
+%% was to get something working quickly
+%% and then enhance working code as needed
+%% and as the problem was better understood.
+初期のバージョンでは、まだできていないことがたくさんあった。私はメールシステムを一から作り直そうとはしなかったし、完璧なソリューションを構築しようとも思わなかった。単に、必要になったときにその機能を追加するようにしたのだ。最初期のバージョンでは、設定を変更したければソースコードをいじってコンパイルし直せといった具合だった(さすがにそれはすぐになくなったが)。sendmailのやり方は、だいたいこんな感じだ。まず、何か動くものを手早く作る。そして、必要に応じて機能拡張し、問題があれば対応する。
 
 \end{aosasect2}
 
