@@ -16,7 +16,8 @@ academic experiment with only a few hundred hosts, to today, with over
 2011\footnote{\url{http://ftp.isc.org/www/survey/reports/2011/01/}}.
 Sendmail remains among the most used implementations of SMTP on the Internet.
 
-\begin{aosasect1}{Once Upon a Time\ldots}
+%% \begin{aosasect1}{Once Upon a Time\ldots}
+\begin{aosasect1}{むかしむかし\ldots}
 
 The first versions of the program that would become known as sendmail
 were written in 1980. It started as a quick hack to forward messages
@@ -155,7 +156,8 @@ ended up winning in the marketplace.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Design Principles}
+%% \begin{aosasect1}{Design Principles}
+\begin{aosasect1}{設計の原則}
 
 While developing sendmail, I adhered to several design principles. All
 of these in some sense came down to one thing: do as little as
@@ -163,7 +165,8 @@ possible.  This is in sharp contrast to some of the other efforts of
 the time that had much broader goals and required much larger
 implementations.
 
-\begin{aosasect2}{Accept that One Programmer Is Finite}
+%% \begin{aosasect2}{Accept that One Programmer Is Finite}
+\begin{aosasect2}{プログラマには限界があることを受け入れる}
 
 I wrote sendmail as a part-time, unpaid project. It was intended to be
 a quick way of making Arpanet mail more accessible to people at
@@ -180,7 +183,8 @@ available.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Don't Redesign User Agents}
+%% \begin{aosasect2}{Don't Redesign User Agents}
+\begin{aosasect2}{ユーザーエージェントの再設計はしない}
 
 A Mail User Agent (MUA) is what most end users think of as the ``mail
 system''---it's the program that they use to read, write, and answer
@@ -200,7 +204,8 @@ from standard practice at the time.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Don't Redesign the Local Mail Store}
+%% \begin{aosasect2}{Don't Redesign the Local Mail Store}
+\begin{aosasect2}{ローカルのメールストアの再設計はしない}
 
 The local mail store (where messages would be saved until the
 recipient came along to read them) was not formally standardized. Some sites
@@ -231,7 +236,8 @@ mail.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Make Sendmail Adapt to the World, Not the Other Way Around}
+%% \begin{aosasect2}{Make Sendmail Adapt to the World, Not the Other Way Around}
+\begin{aosasect2}{Sendmailが世界に合わせるのであって、世界をSendmailに合わせるのではない}
 
 Protocols such as UUCP and BerkNET were already implemented as
 separate programs that had their own, sometimes quirky, command line
@@ -244,7 +250,8 @@ the world adapt to sendmail.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Change as Little as Possible}
+%% \begin{aosasect2}{Change as Little as Possible}
+\begin{aosasect2}{変更はできる限り少なく}
 
 To the fullest extent possible, during the development of sendmail I
 didn't touch anything I didn't absolutely have to touch. Besides just
@@ -260,7 +267,8 @@ base except in dire circumstances.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Think About Reliability Early}
+%% \begin{aosasect2}{Think About Reliability Early}
+\begin{aosasect2}{信頼性をまず考える}
 
 The mail system prior to sendmail (including most of the transport
 systems) wasn't terribly concerned about reliability. For example,
@@ -277,7 +285,8 @@ database guy, where losing data is a mortal sin).
 
 \end{aosasect2}
 
-\begin{aosasect2}{What Was Left Out}
+%% \begin{aosasect2}{What Was Left Out}
+\begin{aosasect2}{その他}
 
 There were many things that were not done in the early versions.
 I did not try to re-architect the mail system
@@ -295,12 +304,14 @@ and as the problem was better understood.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Development Phases}
+%% \begin{aosasect1}{Development Phases}
+\begin{aosasect1}{開発フェーズ}
 
 Like most long-lived software, sendmail was developed in phases, each
 with its own basic theme and feeling.
 
-\begin{aosasect2}{Wave 1: delivermail}
+%% \begin{aosasect2}{Wave 1: delivermail}
+\begin{aosasect2}{第一波: delivermail}
 
 The first instantiation of sendmail was known as delivermail. It was
 extremely simple, if not simplistic. Its sole job was to forward mail
@@ -364,7 +375,8 @@ required.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Wave 2: sendmail 3, 4, and 5}
+%% \begin{aosasect2}{Wave 2: sendmail 3, 4, and 5}
+\begin{aosasect2}{第二波: sendmail 3, 4, そして 5}
 
 Versions 1 and 2 were distributed under the delivermail name. In March
 1981 work began on version 3, which would be distributed under the
@@ -422,7 +434,8 @@ distributed with 4.3 BSD.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Wave 3: The Chaos Years}
+%% \begin{aosasect2}{Wave 3: The Chaos Years}
+\begin{aosasect2}{第三波: カオスな日々}
 
 After I left Berkeley and went to a startup company, my time available
 to work on sendmail rapidly decreased. But the Internet was starting
@@ -453,7 +466,8 @@ since aliases were stored in YP rather than in local files.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Wave 4: sendmail 8}
+%% \begin{aosasect2}{Wave 4: sendmail 8}
+\begin{aosasect2}{第四波: sendmail 8}
 
 After several years, I returned to Berkeley as a staff member. My job
 was to manage a group installing and supporting shared infrastructure
@@ -505,7 +519,8 @@ sendmail 8.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Wave 5: The Commercial Years}
+%% \begin{aosasect2}{Wave 5: The Commercial Years}
+\begin{aosasect2}{第五波: 商売の日々}
 
 As the Internet grew and the number of sendmail sites expanded,
 support for the ever larger user base became more problematic.  For a
@@ -534,7 +549,8 @@ company.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Whatever Happened to sendmail 6 and 7?}
+%% \begin{aosasect2}{Whatever Happened to sendmail 6 and 7?}
+\begin{aosasect2}{sendmail 6や7に何が起こったのか?}
 
 Sendmail 6 was essentially the beta for sendmail 8. It was never
 officially released, but was distributed fairly widely. Sendmail 7
@@ -546,13 +562,15 @@ version 8 when 4.4 BSD was released in June 1993.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Design Decisions}
+%% \begin{aosasect1}{Design Decisions}
+\begin{aosasect1}{設計に関する決定}
 
 Some design decisions were right. Some started out right and became
 wrong as the world changed. Some were dubious and haven't become any
 less so.
 
-\begin{aosasect2}{The Syntax of the Configuration File}
+%% \begin{aosasect2}{The Syntax of the Configuration File}
+\begin{aosasect2}{設定ファイルの構文}
 
 The syntax of the configuration file was driven by a couple of issues.
 First, the entire application had to fit into a 16-bit address space,
@@ -590,7 +608,8 @@ making the configuration file difficult to understand.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Rewriting Rules}
+%% \begin{aosasect2}{Rewriting Rules}
+\begin{aosasect2}{ルールの書き換え}
 
 One of the difficult decisions when writing sendmail was how to do the
 necessary rewriting to allow forwarding between networks without
@@ -656,7 +675,8 @@ $++$*@$+.$={mydomain}
 
 \end{aosasect2}
 
-\begin{aosasect2}{Using Rewriting for Parsing}
+%% \begin{aosasect2}{Using Rewriting for Parsing}
+\begin{aosasect2}{パース用の書き換えの使用}
 
 Some have suggested that sendmail should have used conventional
 grammar-based parsing techniques to parse addresses rather than
@@ -693,7 +713,8 @@ be called with different character type tables for differing input.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Embedding SMTP and Queueing in sendmail}
+%% \begin{aosasect2}{Embedding SMTP and Queueing in sendmail}
+\begin{aosasect2}{SMTPやキューのsendmailへの埋め込み}
 
 An ``obvious'' way to implement outgoing (client) SMTP would have been
 to build it as an external mailer, similarly to UUCP,  But this would
@@ -734,7 +755,8 @@ can be finessed with a bit of work.
 
 \end{aosasect2}
 
-\begin{aosasect2}{The Implementation of the Queue}
+%% \begin{aosasect2}{The Implementation of the Queue}
+\begin{aosasect2}{キューの実装}
 
 Sendmail followed the conventions of the time for storing queue files.
 In fact, the format used is extremely similar to the lpr subsystem of
@@ -786,7 +808,8 @@ seemingly innocuous rewriting has the risk of error.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Accepting and Fixing Bogus Input}
+%% \begin{aosasect2}{Accepting and Fixing Bogus Input}
+\begin{aosasect2}{誤入力の受け入れと修正}
 
 Since sendmail was created in a world of multiple protocols and
 disturbingly few written standards, I decided to clean up malformed
@@ -827,7 +850,8 @@ problems for other software on the Internet.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Configuration and the Use of M4}
+%% \begin{aosasect2}{Configuration and the Use of M4}
+\begin{aosasect2}{M4の設定と使用}
 
 For a period I was both making regular changes to the sendmail
 configuration files and personally supporting many machines. Since a
@@ -889,12 +913,14 @@ Great power results from this, but at a non-trivial cost.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Other Considerations}
+%% \begin{aosasect1}{Other Considerations}
+\begin{aosasect1}{その他の検討事項}
 
 Several other architectural and development points deserve to be
 mentioned.
 
-\begin{aosasect2}{A Word About Optimizing Internet Scale Systems}
+%% \begin{aosasect2}{A Word About Optimizing Internet Scale Systems}
+\begin{aosasect2}{インターネットにスケールするシステムの最適化に関して一言}
 
 In most network-based systems there is a tension between the client
 and the server. A good strategy for the client may be the
@@ -926,6 +952,7 @@ developed by the same groups.
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{Milter}
 \begin{aosasect2}{Milter}
 
 One of the most important additions to sendmail was the milter
@@ -968,7 +995,8 @@ be one of sendmail's great successes.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Release Schedules}
+%% \begin{aosasect2}{Release Schedules}
+\begin{aosasect2}{リリーススケジュール}
 
 There is a popular debate between ``release early and often'' and
 ``release stable systems'' schools of thought. Sendmail has used both
@@ -1011,7 +1039,8 @@ and products have different needs than projects.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Security}
+%% \begin{aosasect1}{Security}
+\begin{aosasect1}{セキュリティ}
 
 Sendmail has had a tumultuous life, security-wise. Some of this is
 well deserved, but some not, as our concept of ``security'' changed
@@ -1093,7 +1122,8 @@ security wins over reliability.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Evolution of Sendmail}
+%% \begin{aosasect1}{Evolution of Sendmail}
+\begin{aosasect1}{Sendmailの進化}
 \label{sec.sendmail.evo}
 
 Software doesn't survive in a rapidly changing environment without
@@ -1105,7 +1135,8 @@ environments.  Change is inevitable; to succeed you have to accept and
 embrace change.  This section describes some of the more important
 changes that have occurred as sendmail evolved.
 
-\begin{aosasect2}{Configuration Became More Verbose}
+%% \begin{aosasect2}{Configuration Became More Verbose}
+\begin{aosasect2}{設定はより冗長に}
 
 The original configuration of sendmail was quite terse. For example,
 the names of options and macros were all single characters. There were
@@ -1129,7 +1160,8 @@ dramatically improved the understandability of the configuration file.
 
 \end{aosasect2}
 
-\begin{aosasect2}{More Connections with Other Subsystems: Greater Integration}
+%% \begin{aosasect2}{More Connections with Other Subsystems: Greater Integration}
+\begin{aosasect2}{他のサブシステムとの接続: さらなる統合}
 
 When sendmail was written the mail system was largely isolated from
 the rest of the operating system.  There were a few services that
@@ -1155,7 +1187,8 @@ parts'' are added.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Adaptation to a Hostile World}
+%% \begin{aosasect2}{Adaptation to a Hostile World}
+\begin{aosasect2}{敵対勢力との順応}
 
 Sendmail was developed in a world that seems completely foreign by
 today's standards. The user population on the early network were
@@ -1199,7 +1232,8 @@ a mail system, but was absolutely necessary to adapt to today's world.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Incorporation of New Technologies}
+%% \begin{aosasect2}{Incorporation of New Technologies}
+\begin{aosasect2}{新技術の採用}
 
 Many new standards have come along over the years that required
 significant changes to sendmail. For example, the addition of TLS
@@ -1223,7 +1257,8 @@ complicating both the code base and the configuration file.
 
 \end{aosasect1}
 
-\begin{aosasect1}{What If I Did It Today?}
+%% \begin{aosasect1}{What If I Did It Today?}
+\begin{aosasect1}{もし今やりなおせるとしたら?}
 
 Hindsight is 20/20. There are many things I would do differently
 today.  Some were unforeseeable at the time (e.g., how spam would
@@ -1235,7 +1270,8 @@ and about programming itself---everyone grows as they code.
 But there are also many things I would do the same, some in
 contradiction to the standard wisdom.
 
-\begin{aosasect2}{Things I Would Do Differently}
+%% \begin{aosasect2}{Things I Would Do Differently}
+\begin{aosasect2}{違うやりかたにしたいところ}
 
 Perhaps my biggest mistake with sendmail was to not recognize early
 enough how important it was going to be. I had several opportunities
@@ -1249,7 +1285,8 @@ I didn't want to cause the installed user base undue pain. In
 retrospect it would have been better to improve things early and
 cause temporary pain in order to produce a better long-term result.
 
-\begin{aosasect3}{Version 7 Mailbox Syntax}
+%% \begin{aosasect3}{Version 7 Mailbox Syntax}
+\begin{aosasect3}{バージョン7のMailboxの構文}
 
 One example of this was the way version 7 mailboxes separated
 messages.  They used a line beginning ``From\textvisiblespace'' (where
@@ -1269,7 +1306,8 @@ the world a heap of trouble.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Syntax and Contents of Configuration File}
+%% \begin{aosasect3}{Syntax and Contents of Configuration File}
+\begin{aosasect3}{設定ファイルの構文とその中身}
 
 Perhaps my biggest mistake in the syntax of the configuration file was
 the use of tab (HT, 0x09) in rewriting rules
@@ -1306,7 +1344,8 @@ used for local configuration.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Use of Tools}
+%% \begin{aosasect3}{Use of Tools}
+\begin{aosasect3}{使うツール}
 
 There are many new tools available today---for example, for
 configuring and building the software. Tools can be good leverage if
@@ -1318,7 +1357,8 @@ reservations I would almost certainly use autoconf today.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Backward Compatibility}
+%% \begin{aosasect3}{Backward Compatibility}
+\begin{aosasect3}{後方互換性}
 
 With the benefit of hindsight, and knowing how ubiquitous sendmail
 became, I would not worry so much about breaking existing
@@ -1333,7 +1373,8 @@ try to create one from the information in the envelope.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Internal Abstractions}
+%% \begin{aosasect3}{Internal Abstractions}
+\begin{aosasect3}{内部的な抽象化}
 
 There are certain internal abstractions that I would not attempt
 again, and others that I would add. For example, I would not use
@@ -1355,10 +1396,12 @@ never receive e-mail.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Things I Would Do The Same}
+%% \begin{aosasect2}{Things I Would Do The Same}
+\begin{aosasect2}{同じようにしたいところ}
 
 Of course, some things \emph{did} work well\ldots
 
+%% \begin{aosasect3}{Syslog}
 \begin{aosasect3}{Syslog}
 
 One of the successful side projects from sendmail was syslog. At the
@@ -1374,7 +1417,8 @@ failed to predict the existence of log monitoring.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Rewriting Rules}
+%% \begin{aosasect3}{Rewriting Rules}
+\begin{aosasect3}{リライトルール}
 
 Rewriting rules have been much maligned, but I would use them again
 (although probably not for as many things as they are used for now).
@@ -1386,7 +1430,8 @@ using a pattern-replace paradigm worked well and was very flexible.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Avoid Unnecessary Tools}
+%% \begin{aosasect3}{Avoid Unnecessary Tools}
+\begin{aosasect3}{不要なツールは使わない}
 
 Despite my comment above that I would use more existing tools, I am
 reluctant to use many of the run-time libraries available today. In my
@@ -1400,7 +1445,8 @@ today.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Code in C}
+%% \begin{aosasect3}{Code in C}
+\begin{aosasect3}{コードをCで書く}
 
 Some people have suggested that a more natural implementation language
 would be Java or C++. Despite the well-known problems with C, I would
@@ -1419,7 +1465,8 @@ completely object-oriented is wasteful and overly restrictive.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Conclusions}
+%% \begin{aosasect1}{Conclusions}
+\begin{aosasect1}{まとめ}
 
 The sendmail MTA was born into a world of immense upheaval, a sort of
 ``wild west'' that existed when e-mail was ad hoc and the current mail
