@@ -508,53 +508,58 @@ King James Sendmail (略してKJS。ポール・ヴィクシーが作ったも�
 %% \begin{aosasect2}{Wave 4: sendmail 8}
 \begin{aosasect2}{第四波: sendmail 8}
 
-After several years, I returned to Berkeley as a staff member. My job
-was to manage a group installing and supporting shared infrastructure
-for research around the Computer Science department. For that to
-succeed, the largely ad hoc environments of individual research groups
-had to be unified in some rational way. Much like the early days of
-the Internet, different research groups were running on radically
-different platforms, some of which were quite old. In general, every
-research group ran its own systems, and although some of them were
-well managed, most of them suffered from ``deferred maintenance.''
+%% After several years, I returned to Berkeley as a staff member. My job
+%% was to manage a group installing and supporting shared infrastructure
+%% for research around the Computer Science department. For that to
+%% succeed, the largely ad hoc environments of individual research groups
+%% had to be unified in some rational way. Much like the early days of
+%% the Internet, different research groups were running on radically
+%% different platforms, some of which were quite old. In general, every
+%% research group ran its own systems, and although some of them were
+%% well managed, most of them suffered from ``deferred maintenance.''
+数年を経て、私はふたたびスタッフとしてバークレーに戻ってきた。当時の業務は、計算機科学部の研究用共有基盤のインストールやサポートを管理することだった。そのためには、個々の研究グループでアドホックに構築した大規模な環境を何らかのきちんとした方法で統合する必要があった。インターネットの黎明期と同様、研究グループごとにまったく違うプラットフォームを使っており、中には古すぎるものもあった。一般に、すべての研究グループは独自のシステムを持っていた。しかしほとんどはうまく管理されておらず、大半が``繰越維持費''に悩まされていた。
 
-In most cases email was similarly fractured. Each person's email
-address was ``\path{person@host.berkeley.edu}'', where \code{host} was
-the name of the workstation in their office or the shared server they
-used (the campus didn't even have internal subdomains) with the
-exception of a few special people who had \code{@berkeley.edu} addresses. The
-goal was to switch to internal subdomains (so all individual hosts
-would be in the \code{cs.berkeley.edu} subdomain) and have a unified
-mail system (so each person would have an \code{@cs.berkeley.edu}
-address). This goal was most easily realized by creating a new version
-of sendmail that could be used throughout the department.
+%% In most cases email was similarly fractured. Each person's email
+%% address was ``\path{person@host.berkeley.edu}'', where \code{host} was
+%% the name of the workstation in their office or the shared server they
+%% used (the campus didn't even have internal subdomains) with the
+%% exception of a few special people who had \code{@berkeley.edu} addresses. The
+%% goal was to switch to internal subdomains (so all individual hosts
+%% would be in the \code{cs.berkeley.edu} subdomain) and have a unified
+%% mail system (so each person would have an \code{@cs.berkeley.edu}
+%% address). This goal was most easily realized by creating a new version
+%% of sendmail that could be used throughout the department.
+たいていの場合、電子メールはみな整っていない。各個人の電子メールアドレスは``\path{person@host.berkeley.edu}''のようになっており、\code{host}はオフィスのワークステーション名あるいは共有サーバー名(キャンパス内では内部サブドメインは使っていなかった)だった。例外として、一部の人は\code{@berkeley.edu}アドレスを持っていた。目標は、内部サブドメインを使うようにする(つまり、すべてのホストを\code{cs.berkeley.edu}サブドメインに置く)ことと、統一されたメールシステムを使う(つまり、すべての人が\code{@cs.berkeley.edu}なアドレスを持つ)ことだった。この目標を実現するための最も簡単な方法は、新しいバージョンのsendmailを学部全体で使わせることだった。
 
-I began by studying many of the variants of sendmail that had become
-popular.  My intent was not to start from a different code base but
-rather to understand the functionality that others had found useful.
-Many of those ideas found their way into sendmail 8, often with
-modifications to merge related ideas or make them more generic. For
-example, several versions of sendmail had the ability to access
-external databases such as dbm(3) or NIS; sendmail 8 merged these into
-one ``map'' mechanism that could handle multiple types of databases
-(and even arbitrary non-database transformations).  Similarly, the
-``generics'' database (internal to external name mapping)
-from IDA sendmail was incorporated.
+%% I began by studying many of the variants of sendmail that had become
+%% popular.  My intent was not to start from a different code base but
+%% rather to understand the functionality that others had found useful.
+%% Many of those ideas found their way into sendmail 8, often with
+%% modifications to merge related ideas or make them more generic. For
+%% example, several versions of sendmail had the ability to access
+%% external databases such as dbm(3) or NIS; sendmail 8 merged these into
+%% one ``map'' mechanism that could handle multiple types of databases
+%% (and even arbitrary non-database transformations).  Similarly, the
+%% ``generics'' database (internal to external name mapping)
+%% from IDA sendmail was incorporated.
+まずは、多数出回っているsendmailの類似品の中でもよく使われているものについて調べることにした。違いを探すというよりはむしろ、他の類似品にはない便利な機能について理解することを心がけた。その過程で見つかったアイデアを元にしてsendmail 8を作っていった。関連するアイデアをひとまとめにしたり、より汎用的にしたりなどの変更を加えることもよくあった。たとえば、sendmailの類似品の中にはdbm(3)やNISのような外部のデータベースにアクセスできる機能を持つものもあった。sendmail 8では、これらをひとまとめにした``マップ''という仕組みを導入し、複数の形式のデータベース(データベース以外にもどんな変換方式も使える)を処理できるようにしている。同様に、``汎用''データベース(外部の名前マッピングを利用する)機能は、IDAのsendmailから導入した。
 
-Sendmail 8 also included a new configuration package using the m4(1)
-macro processor.
-This was
-intended to be more declarative than the sendmail 5 configuration
-package, which had been largely procedural. That is, the sendmail 5
-configuration package required the administrator to essentially lay
-out the entire configuration file by hand, really only using the
-``include'' facility from m4 as shorthand. The sendmail 8
-configuration file allowed the administrator to just declare what
-features, mailers, and so on were required, and m4 laid out the final
-configuration file.
+%% Sendmail 8 also included a new configuration package using the m4(1)
+%% macro processor.
+%% This was
+%% intended to be more declarative than the sendmail 5 configuration
+%% package, which had been largely procedural. That is, the sendmail 5
+%% configuration package required the administrator to essentially lay
+%% out the entire configuration file by hand, really only using the
+%% ``include'' facility from m4 as shorthand. The sendmail 8
+%% configuration file allowed the administrator to just declare what
+%% features, mailers, and so on were required, and m4 laid out the final
+%% configuration file.
+Sendmail 8には新たな設定パッケージも導入された。これはm4(1)マクロプロセッサを利用したものだ。sendmail 5の設定パッケージよりもさらに宣言的に記述できるよう心がけ、大部分は手続き型で書けるようになっている。sendmail 5の場合は、管理者が設定ファイルをすべて手で書き換える必要があった。単にm4からのショートカットとして``include''を使うだけであってもだ。sendmail 8の設定ファイルの場合、管理者が宣言できるのは、必要な機能やメーラーなどだけで、最終的な設定ファイルはm4が作成する。
 
-Much of \aosasecref{sec.sendmail.evo} discusses the enhancements in
-sendmail 8.
+%% Much of \aosasecref{sec.sendmail.evo} discusses the enhancements in
+%% sendmail 8.
+\aosasecref{sec.sendmail.evo}で、sendmail 8での機能追加について解説する。
 
 \end{aosasect2}
 
