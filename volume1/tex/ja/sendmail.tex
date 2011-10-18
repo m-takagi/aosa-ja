@@ -564,43 +564,47 @@ Sendmail 8には新たな設定パッケージも導入された。これはm4(1
 \end{aosasect2}
 
 %% \begin{aosasect2}{Wave 5: The Commercial Years}
-\begin{aosasect2}{第五波: 商売の日々}
+\begin{aosasect2}{第五波: ビジネスの日々}
 
-As the Internet grew and the number of sendmail sites expanded,
-support for the ever larger user base became more problematic.  For a
-while I was able to continue support by setting up a group of
-volunteers (informally called the ``Sendmail Consortium'',
-a.k.a.\ sendmail.org) who provided free support via e-mail and
-newsgroup.  But by the late 1990s, the installed base had grown to such
-an extent that it was nearly impossible to support it on a volunteer
-basis.  Together with a more business-savvy friend I founded Sendmail,
-Inc.\footnote{\url{http://www.sendmail.com}},
-with the expectation of getting new resources to bear on the
-code.
+%% As the Internet grew and the number of sendmail sites expanded,
+%% support for the ever larger user base became more problematic.  For a
+%% while I was able to continue support by setting up a group of
+%% volunteers (informally called the ``Sendmail Consortium'',
+%% a.k.a.\ sendmail.org) who provided free support via e-mail and
+%% newsgroup.  But by the late 1990s, the installed base had grown to such
+%% an extent that it was nearly impossible to support it on a volunteer
+%% basis.  Together with a more business-savvy friend I founded Sendmail,
+%% Inc.\footnote{\url{http://www.sendmail.com}},
+%% with the expectation of getting new resources to bear on the
+%% code.
+インターネットが成長するにつれてsendmailを使うサイトも増加し、大量のユーザーをサポートするのが徐々につらくなってきた。しばらくの間は、ボランティアの集まり(非公式にだが、``Sendmail Consortium''あるいはsendmail.orgと呼ばれていた)のおかげで無料サポートを続けることができていた。サポートには電子メールやニューズグループを使っていた。しかし1990年代後半には、インストール数が増えすぎて、もはやボランティアベースでのサポートを続けるのはほぼ無理な状態になっていた。そこで、よりビジネスよりな友人とともにSendmail, Inc.\footnote{\url{http://www.sendmail.com}}を設立し、コードの面倒を見る新たな人材を確保しようとした。
 
-Although the commercial product was originally based largely on
-configuration and management tools, many new features were added to
-the open-source MTA to support the needs of the commercial world.
-Notably, the company added support for TLS (connection encryption),
-SMTP Authentication, site security enhancements such as Denial of
-Service protection, and most importantly mail filtering plugins (the
-Milter interface discussed below).
+%% Although the commercial product was originally based largely on
+%% configuration and management tools, many new features were added to
+%% the open-source MTA to support the needs of the commercial world.
+%% Notably, the company added support for TLS (connection encryption),
+%% SMTP Authentication, site security enhancements such as Denial of
+%% Service protection, and most importantly mail filtering plugins (the
+%% Milter interface discussed below).
+そこで扱っていた商品は、設立当初は設定管理ツールが主だった。しかし、オープンソースのMTAにも、ビジネスの世界の要望に対応するためにさまざまな新機能が追加された。特筆すべき点としては、TLS (connection encryption)やSMTP Authenticationのサポート、Denial of Service対策などサイトのセキュリティ対策の向上、そして最も重要なものとしてはメールのフィルタリング用プラグイン(後述するMilterインターフェイス)などがある。
 
-At of this writing the commercial product has expanded to include a large
-suite of e-mail based applications, nearly all of which are constructed
-on the extensions added to sendmail during the first few years of the
-company.
+%% At of this writing the commercial product has expanded to include a large
+%% suite of e-mail based applications, nearly all of which are constructed
+%% on the extensions added to sendmail during the first few years of the
+%% company.
+本章の執筆時点では、扱う商品はさらに幅広くなり、電子メールベースの大規模なアプリケーションスイートも含まれるようになっている。そのほぼすべてはsendmailの拡張機能として作られており、創業当初の数年間で作られたものだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Whatever Happened to sendmail 6 and 7?}
-\begin{aosasect2}{sendmail 6や7に何が起こったのか?}
+\begin{aosasect2}{sendmail 6や7はどこに行ったの?}
 
-Sendmail 6 was essentially the beta for sendmail 8. It was never
-officially released, but was distributed fairly widely. Sendmail 7
-never existed at all; sendmail jumped directly to version 8 because
-all the other source files for the BSD distribution were bumped to
-version 8 when 4.4 BSD was released in June 1993.
+%% Sendmail 6 was essentially the beta for sendmail 8. It was never
+%% officially released, but was distributed fairly widely. Sendmail 7
+%% never existed at all; sendmail jumped directly to version 8 because
+%% all the other source files for the BSD distribution were bumped to
+%% version 8 when 4.4 BSD was released in June 1993.
+Sendmail 6は、本質的にはsendmail 8のベータ版だった。公式にはリリースされなかったが、かなり広範囲に広まった。Sendmail 7が存在することはなかった。バージョン6からバージョン8に一気に上げたのだ。というのも、1993年6月に4.4 BSDがリリースされたことにあわせて、BSDディストリビューションのファイルをすべてそれにあわせたからである。
 
 \end{aosasect2}
 
