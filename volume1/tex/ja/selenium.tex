@@ -1034,7 +1034,7 @@ HTTPを採用したおかげで、符号化されたデータも(コンテンツ
 キー & 説明 \\
 \hline
 %% sessionId & An opaque handle used by the server to determine where to route session-specific commands. \\
-sessionId & 非透過的なハンドル。サーバーがセッション固有のコマンドの送り先を決めるために使う。\\
+sessionId & 不透過なハンドル。サーバーがセッション固有のコマンドの送り先を決めるために使う。\\
 %% status & A numeric status code summarizing the result of the command. A non-zero value indicates that the command failed. \\
 status & コマンドの結果を表す数値のステータスコード。ゼロ以外の値は、コマンドが失敗したことを表す。\\
 %% value & The response JSON value. \\
@@ -1090,7 +1090,7 @@ element.getAttribute(``row'');
 %% is encoded into a Java \code{Command} object with a \code{Map} holding
 %% the (now named) parameters \code{id} for the element ID
 %% and \code{name} for the name of the attribute being queried.
-\noindent 内部的に、elementは非透過的な``id''を保持している。サーバーサイドではこれを使い、対話相手の要素を識別する。ここでは仮に、idの値が``some\_opaque\_id''であるものとして話を進める。これはJavaの\code{Command}オブジェクトに\code{Map}として符号化されており、(名前付きの)パラメータ\code{id}に要素のID、そして\code{name}に問い合わせ対象の属性の名前を保持する。
+\noindent 内部的に、elementは不透過な``id''を保持している。サーバーサイドではこれを使い、対話相手の要素を識別する。ここでは仮に、idの値が``some\_opaque\_id''であるものとして話を進める。これはJavaの\code{Command}オブジェクトに\code{Map}として符号化されており、(名前付きの)パラメータ\code{id}に要素のID、そして\code{name}に問い合わせ対象の属性の名前を保持する。
 
 %% A quick look up in a table indicates that the correct URL is:
 正しいURLを指すテーブル内での検索は、このようになる。
@@ -1105,7 +1105,7 @@ element.getAttribute(``row'');
 %% another opaque handle that is used for routing when a server can
 %% handle more than one session at a time (which the Firefox driver
 %% cannot). This URL therefore typically expands to something like:
-\noindent URLのセクションの中でコロンから始まるものはすべて、変数であって後で何かの値で置き換えられるものである。パラメータ\code{id}と\code{name}は既に指定している。\code{sessionId}はもうひとつの非透過的なハンドルで、ルーティングのために使う。これを使えば、サーバーが複数のセッションを同時に扱えるようになる(Firefoxドライバではこれができない)。このURLを展開したものは、たとえばこのようになる。
+\noindent URLのセクションの中でコロンから始まるものはすべて、変数であって後で何かの値で置き換えられるものである。パラメータ\code{id}と\code{name}は既に指定している。\code{sessionId}はもうひとつの不透過なハンドルで、ルーティングのために使う。これを使えば、サーバーが複数のセッションを同時に扱えるようになる(Firefoxドライバではこれができない)。このURLを展開したものは、たとえばこのようになる。
 
 \begin{verbatim}
 http://localhost:7055/hub/session/XXX/element/some_opaque_id/attribute/row
@@ -1244,7 +1244,7 @@ FirefoxDriver.prototype.getElementAttribute = function(respond, parameters) {
 %% referred to element is both known and attached to the DOM\@. If either
 %% check fails, the ID is removed from the cache (if necessary) and an
 %% exception is thrown and returned to the user.
-\noindent 要素の参照に矛盾を生じさせないようにするために、最初の行は単にキャッシュ内の非透過的なIDが参照する要素を探すだけになっている。Firefoxドライバの場合、この非透過的なIDはUUIDであり、``キャッシュ''は単なるマップである。\code{getElementAt}メソッドは、要素への参照が既知のものであるかどうかとそれがDOMにアタッチされているかどうかもチェックする。どちらかのチェックに失敗すると、そのIDは(必要に応じて)キャッシュから削除され、例外を投げてそれをユーザーに返す。
+\noindent 要素の参照に矛盾を生じさせないようにするために、最初の行は単にキャッシュ内の不透過なIDが参照する要素を探すだけになっている。Firefoxドライバの場合、この不透過なIDはUUIDであり、``キャッシュ''は単なるマップである。\code{getElementAt}メソッドは、要素への参照が既知のものであるかどうかとそれがDOMにアタッチされているかどうかもチェックする。どちらかのチェックに失敗すると、そのIDは(必要に応じて)キャッシュから削除され、例外を投げてそれをユーザーに返す。
 
 %% The second line from the end makes use of the browser automation atoms
 %% discussed earlier, this time compiled as a monolithic script and
