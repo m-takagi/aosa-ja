@@ -613,46 +613,50 @@ Sendmail 6は、本質的にはsendmail 8のベータ版だった。公式には
 %% \begin{aosasect1}{Design Decisions}
 \begin{aosasect1}{設計に関する決定}
 
-Some design decisions were right. Some started out right and became
-wrong as the world changed. Some were dubious and haven't become any
-less so.
+%% Some design decisions were right. Some started out right and became
+%% wrong as the world changed. Some were dubious and haven't become any
+%% less so.
+正しい判断ができたこともあった。当時は正しい判断だったが、その後状況が変わってまずい判断になったものもあった。そして、どちらとも言えない曖昧なものもあった。
 
 %% \begin{aosasect2}{The Syntax of the Configuration File}
 \begin{aosasect2}{設定ファイルの構文}
 
-The syntax of the configuration file was driven by a couple of issues.
-First, the entire application had to fit into a 16-bit address space,
-so the parser had to be small. Second, early configurations were quite
-short (under one page), so while the syntax was obscure, the file was
-still comprehensible.  However, as time passed, more operational
-decisions moved out of the C code into the configuration file, and the
-file started to grow. The configuration file acquired a reputation for
-being arcane. One particular frustration for many people was the
-choice of the tab character as an active syntax item. This was a
-mistake that was copied from other systems of the time, notably
-\code{make}. That particular problem became more acute as window
-systems (and hence cut-and-paste, which usually did not preserve the
-tabs) became available.
+%% The syntax of the configuration file was driven by a couple of issues.
+%% First, the entire application had to fit into a 16-bit address space,
+%% so the parser had to be small. Second, early configurations were quite
+%% short (under one page), so while the syntax was obscure, the file was
+%% still comprehensible.  However, as time passed, more operational
+%% decisions moved out of the C code into the configuration file, and the
+%% file started to grow. The configuration file acquired a reputation for
+%% being arcane. One particular frustration for many people was the
+%% choice of the tab character as an active syntax item. This was a
+%% mistake that was copied from other systems of the time, notably
+%% \code{make}. That particular problem became more acute as window
+%% systems (and hence cut-and-paste, which usually did not preserve the
+%% tabs) became available.
+設定ファイルの構文は、次のふたつの要因によって決まった。ひとつは、アプリケーション全体を16ビットアドレス空間におさめるために、パーサを小さくする必要があるということ。もうひとつは、初期の設定はごく少なかった(1ページにおさまる程度)ので、多少構文をあいまいにしても、ファイルがそんなに読みにくくはならなかったということ。しかし、時を経て、より多くの判断がCのコードから設定ファイルに追い出されるようになり、設定ファイルが肥大化し始めた。そして、設定ファイルは「難解なもの」という悪評が広まった。多くの人にとってフラストレーションの元となったのが、タブ文字を構文的に意味のある要素とした判断だ。これは、当時他のツール(\code{make}など)で使われていた構文をそのまま使っただけだが、間違いだった。この問題が深刻化したのは、ウィンドウシステムが登場したころ(つまり、カットアンドペーストが多用されるようになったころ。カットアンドペーストではタブ文字の情報が残らない)からである。
 
-In retrospect, as the file got larger and 32-bit machines took over,
-it would have made sense to reconsider the syntax. There was a time
-when I thought about doing this but decided against it because I
-didn't want to break the ``large'' installed base (which at that point
-was probably a few hundred machines). In retrospect this was a
-mistake; I had simply not appreciated how large the install base would
-grow and how many hours it would save me had I changed the syntax
-early.  Also, when the standards stabilized a fair amount of the
-generality could have been pushed back into the C code base, thus
-simplifying the configurations.
+%% In retrospect, as the file got larger and 32-bit machines took over,
+%% it would have made sense to reconsider the syntax. There was a time
+%% when I thought about doing this but decided against it because I
+%% didn't want to break the ``large'' installed base (which at that point
+%% was probably a few hundred machines). In retrospect this was a
+%% mistake; I had simply not appreciated how large the install base would
+%% grow and how many hours it would save me had I changed the syntax
+%% early.  Also, when the standards stabilized a fair amount of the
+%% generality could have been pushed back into the C code base, thus
+%% simplifying the configurations.
+今思えば、設定ファイルが巨大化して世の中が32ビットマシンに取って代わられた頃に、設定ファイルの構文を検討しなおしてもよかった。そのように考えた時期もあったのだが、結局そうしなかった。当時すでに``大量に''インストールされていたsendmail環境を壊してしまいたくなかったからである(実際のところ、その時点で実際にインストールされていたマシンは、おそらく数百台程度だっただろう)。この判断は間違っていた。当時の私は、その後インストール数がどれほど伸びるかを想像できなかったし、早めに構文を変更しておくことで今後どれだけの時間を節約できるのかにも思いが及ばなかったのだ。また、標準規格がある程度安定してきた時点で、一般的な項目はもう一度Cのコード側に戻せば、設定ファイルはもう少しシンプルにできただろう。
 
-Of particular interest was how more functionality got moved into the
-configuration file. I was developing sendmail at the same time as the
-SMTP standard was evolving. By moving operational decisions into the
-configuration file I was able to respond rapidly to design
-changes---usually in under 24 hours. I believe that this improved the
-SMTP standard, since it was possible to get operational experience
-with a proposed design change quite quickly, but only at the cost of
-making the configuration file difficult to understand.
+%% Of particular interest was how more functionality got moved into the
+%% configuration file. I was developing sendmail at the same time as the
+%% SMTP standard was evolving. By moving operational decisions into the
+%% configuration file I was able to respond rapidly to design
+%% changes---usually in under 24 hours. I believe that this improved the
+%% SMTP standard, since it was possible to get operational experience
+%% with a proposed design change quite quickly, but only at the cost of
+%% making the configuration file difficult to understand.
+当時特に気にしていたのは、どれだけの機能を設定ファイルに追い出せるかということだった。私がsendmailの開発を進めていたのは、ちょうどSMTPの標準規格を定めようとしつつある頃だった。SMTP側で設計の変更があれば、すぐに---通常は24時間以内に---それを設定ファイルに追い出すようにしていた。これは、SMTPの策定にも貢献したと思っている。何か設計の変更が提案されればそれをすぐに実際に試すことができたし、試すためには(難解な)設定ファイルを書くだけで済んだからだ。
 
 \end{aosasect2}
 
