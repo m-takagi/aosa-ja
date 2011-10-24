@@ -663,13 +663,14 @@ Sendmail 6は、本質的にはsendmail 8のベータ版だった。公式には
 %% \begin{aosasect2}{Rewriting Rules}
 \begin{aosasect2}{ルールの書き換え}
 
-One of the difficult decisions when writing sendmail was how to do the
-necessary rewriting to allow forwarding between networks without
-violating the standards of the receiving network. The transformations
-required changing metacharacters (for example, BerkNET used colon as a
-separator, which was not legal in SMTP addresses), rearranging address
-components, adding or deleting components, etc. For example, the
-following rewrites would be needed under certain circumstances:
+%% One of the difficult decisions when writing sendmail was how to do the
+%% necessary rewriting to allow forwarding between networks without
+%% violating the standards of the receiving network. The transformations
+%% required changing metacharacters (for example, BerkNET used colon as a
+%% separator, which was not legal in SMTP addresses), rearranging address
+%% components, adding or deleting components, etc. For example, the
+%% following rewrites would be needed under certain circumstances:
+sendmailを書く際に決めづらかったのが、ネットワーク越しの転送を許可するために必要な書き換えを、受信側のネットワークの規約に違反しない方法で行うためにどうすればよいかということだった。ネットワーク越しの通信では、メタ文字の変更(たとえばBerkNETではコロンを区切り文字に使っていたが、コロンはSMTPのアドレスには使えない)やアドレスコンポーネントの並べ替え、そしてコンポーネントの追加や削除などが必要となる。たとえば、状況に応じてこのような書き換えが必要となった。
 
 \begin{table}[h!]\centering
 \begin{tabular}{|ll|}
@@ -683,42 +684,45 @@ a!b!c & b!c@a.uucp \\
 \end{tabular}
 \end{table}
 
-Regular expressions were not a good choice because they didn't have
-good support for word boundaries, quoting, etc. It quickly became
-obvious that it would be nearly impossible to write regular
-expressions that were accurate, much less intelligible. In particular,
-regular expressions reserve a number of metacharacters, including
-``.'', ``*'', ``+'', ``{[}'', and ``{]}'', all of which can appear in
-e-mail addresses. These could have been escaped in configuration files,
-but I deemed that to be complicated, confusing, and a bit
-ugly. (This was tried by UPAS from Bell Laboratories, the mailer for
-Unix Eighth Edition, but it never caught
-on\footnote{\url{http://doc.cat-v.org/bell_labs/upas_mail_system/upas.pdf}}.)
-Instead, a scanning phase was necessary to produce tokens that could
-then be manipulated much like characters in regular expressions. A
-single parameter describing ``operator characters'', which were
-themselves both tokens and token separators, was sufficient. Blank
-spaces separated tokens but were not tokens themselves. The rewriting
-rules were just pattern match/replace pairs organized into what were
-essentially subroutines.
+%% Regular expressions were not a good choice because they didn't have
+%% good support for word boundaries, quoting, etc. It quickly became
+%% obvious that it would be nearly impossible to write regular
+%% expressions that were accurate, much less intelligible. In particular,
+%% regular expressions reserve a number of metacharacters, including
+%% ``.'', ``*'', ``+'', ``{[}'', and ``{]}'', all of which can appear in
+%% e-mail addresses. These could have been escaped in configuration files,
+%% but I deemed that to be complicated, confusing, and a bit
+%% ugly. (This was tried by UPAS from Bell Laboratories, the mailer for
+%% Unix Eighth Edition, but it never caught
+%% on\footnote{\url{http://doc.cat-v.org/bell_labs/upas_mail_system/upas.pdf}}.)
+%% Instead, a scanning phase was necessary to produce tokens that could
+%% then be manipulated much like characters in regular expressions. A
+%% single parameter describing ``operator characters'', which were
+%% themselves both tokens and token separators, was sufficient. Blank
+%% spaces separated tokens but were not tokens themselves. The rewriting
+%% rules were just pattern match/replace pairs organized into what were
+%% essentially subroutines.
+正規表現はあまり良い選択ではなかった。というのも、正規表現ではワードの区切りやクォートなどにうまく対応できなかったからである。すぐに明らかになったことだが、これに対応する正規表現を書くのは事実上ほぼ不可能で、とてもわかりにくいものになってしまった。正規表現では、いくつかのメタ文字を予約語として使っている。たとえば``.''や``*''、``+''、``{[}''そして``{]}''がそれにあたるのだが、これらはみな電子メールアドレスの中に登場しうる文字である。設定ファイルでこれらの文字をエスケープしてしまってもよかったのだが、それは複雑で混乱の元になるし、ちょっと見苦しいと思った(ベル研のUPASがこの方式を採用していた。これはUnix Eighth Editionのメーラーとして採用されたが、まったくヒットしなかった\footnote{\url{http://doc.cat-v.org/bell_labs/upas_mail_system/upas.pdf}})。そのかわりにスキャンフェイズが必要となり、そこでトークンを切り出して正規表現のように文字を操作することにした。``オペレータ文字''を表すひとつのパラメータをトークンやトークンの区切りとみなせば十分だった。空白文字はトークンを区切るが、それ自身はトークンにはならない。書き換えルールは単なるパターンマッチと置換の組み合わせであり、原則的にサブルーチンとして組み込まれた。
 
-Instead of a large number of metacharacters that had to be escaped to
-lose their ``magic'' properties (as used in regular expressions), I
-used a single ``escape'' character that combined with ordinary
-characters to represent wildcard patterns (to match an arbitrary word,
-for example).  The traditional Unix approach would be to use
-backslash, but backslash was already used as a quote character in some
-address syntaxes. As it turned out, ``\$'' was one of the few
-characters that had not already been used as a punctuation character
-in some email syntax.
+%% Instead of a large number of metacharacters that had to be escaped to
+%% lose their ``magic'' properties (as used in regular expressions), I
+%% used a single ``escape'' character that combined with ordinary
+%% characters to represent wildcard patterns (to match an arbitrary word,
+%% for example).  The traditional Unix approach would be to use
+%% backslash, but backslash was already used as a quote character in some
+%% address syntaxes. As it turned out, ``\$'' was one of the few
+%% characters that had not already been used as a punctuation character
+%% in some email syntax.
+大量のメタ文字をエスケープしてそれらの``特殊''機能(正規表現で使われているもの)を消し去るかわりに、私は単一の``エスケープ''文字を使うことにした。これを通常の文字と組み合わせて、ワイルドカードパターン(任意の単語にマッチする、など)を表すのだ。伝統的なUnixのアプローチなら、ここでバックスラッシュを使うところだろう。しかし、バックスラッシュは既に一部のアドレス構文でクォート文字として使われていた。いろいろ調べた結果見つかった数少ない候補のひとつが``\$''で、これなら電子メールの構文で特殊文字としては使われていなかった。
 
-One of the original bad decisions was, ironically, just a matter of how white
-space was used. A space character was a separator, just as in most
-scanned input, and so could have been used freely between tokens in
-patterns. However, the original configuration files distributed did
-not include spaces, resulting in patterns that were far harder to
-understand than necessary. Consider the difference between the
-following two (semantically identical) patterns:
+%% One of the original bad decisions was, ironically, just a matter of how white
+%% space was used. A space character was a separator, just as in most
+%% scanned input, and so could have been used freely between tokens in
+%% patterns. However, the original configuration files distributed did
+%% not include spaces, resulting in patterns that were far harder to
+%% understand than necessary. Consider the difference between the
+%% following two (semantically identical) patterns:
+当初の方針の中で間違っていたと思えるのは、皮肉にも、空白の使い方だった。空白は区切り文字で、これはスキャン対象の入力の大半と同様だった。そこで、パターン内のトークンの間で自由に空白を使うことができた。しかし、元々配布されていた設定ファイルには空白は含まれておらず、結果としてパターンが必要以上に読みづらいものとなってしまった。次のふたつのパターンを比較してみよう(文法的にはどちらも同じ意味だ)。
 
 \begin{verbatim}
 $+ + $* @ $+ . $={mydomain}
