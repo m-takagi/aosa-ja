@@ -732,40 +732,43 @@ $++$*@$+.$={mydomain}
 \end{aosasect2}
 
 %% \begin{aosasect2}{Using Rewriting for Parsing}
-\begin{aosasect2}{パース用の書き換えの使用}
+\begin{aosasect2}{書き換えを使ったパース}
 
-Some have suggested that sendmail should have used conventional
-grammar-based parsing techniques to parse addresses rather than
-rewriting rules and leave the rewriting rules for address modification.
-On the surface this would seem to make sense, given
-that the standards define addresses using a grammar.  The main reason
-for reusing rewriting rules is that in some cases it was necessary to
-parse header field addresses (e.g., in order to extract the sender
-envelope from a header when receiving mail from a network that didn't
-have a formal envelope). Such addresses aren't easy to parse using
-(say) an LALR(1) parser such as YACC and a traditional scanner because
-of the amount of lookahead required. For example, parsing the address:
-\code{allman@foo.bar.baz.com
-  {\textless}eric@example.com{\textgreater}} requires lookahead by
-either the scanner or the parser; you can't know that the initial
-``allman@\ldots'' is not an address until you see the
-``{\textless}''.
-Since LALR(1) parsers only have one token of lookahead
-this would have had to be done in the scanner,
-which would have complicated it substantially.
-Since the rewriting rules already had arbitrary backtracking
-(i.e., they could look ahead arbitrarily far),
-they were sufficient.
+%% Some have suggested that sendmail should have used conventional
+%% grammar-based parsing techniques to parse addresses rather than
+%% rewriting rules and leave the rewriting rules for address modification.
+%% On the surface this would seem to make sense, given
+%% that the standards define addresses using a grammar.  The main reason
+%% for reusing rewriting rules is that in some cases it was necessary to
+%% parse header field addresses (e.g., in order to extract the sender
+%% envelope from a header when receiving mail from a network that didn't
+%% have a formal envelope). Such addresses aren't easy to parse using
+%% (say) an LALR(1) parser such as YACC and a traditional scanner because
+%% of the amount of lookahead required. For example, parsing the address:
+%% \code{allman@foo.bar.baz.com
+%%   {\textless}eric@example.com{\textgreater}} requires lookahead by
+%% either the scanner or the parser; you can't know that the initial
+%% ``allman@\ldots'' is not an address until you see the
+%% ``{\textless}''.
+%% Since LALR(1) parsers only have one token of lookahead
+%% this would have had to be done in the scanner,
+%% which would have complicated it substantially.
+%% Since the rewriting rules already had arbitrary backtracking
+%% (i.e., they could look ahead arbitrarily far),
+%% they were sufficient.
+sendmailでは文法学にもとづいてアドレスをパースすべきであり、書き換えルールを使うべきではないという提案もあった。書き換えルールを使うのはあくまでもアドレスの書き換えだけにすべきだ、と。聞く限りでは理にかなっているように見える。ただし標準規格でのアドレスの定義が文法学に乗っ取っていればの話だが。書き換えルールを使い回している主な理由は、場合によってはヘッダフィールドのアドレスをパースする必要があるということだ(正式なエンベロープを持たないネットワークから受信したメールで、ヘッダから送信者エンベロープを取り出す場合など)。この手のアドレスのパースは、YACCのようなLALR(1)パーサや伝統的なスキャナでは困難である。というのも、相当な先読みを要求されるからだ。たとえば、\code{allman@foo.bar.baz.com   {\textless}eric@example.com{\textgreater}}のようなアドレスをパースすることを考えると、スキャナあるいはパーサで先読みが必要となる。つまり、最初の``allman@\ldots''がアドレスではないということは、少なくとも``{\textless}''まで読まなければわからない。LALR(1)パーサには先読みトークンがひとつしかないので、これはスキャナで行う必要がある。相当複雑な作業だ。書き換えルールには既にいくらでも後戻りできる(つまり、いくらでも先読みできる)ので、こちらのほうが適している。
 
-A secondary reason was that it was relatively easy to make the
-patterns recognize and fix broken input. Finally, rewriting was more
-than powerful enough to do the job, and reusing any code was wise.
+%% A secondary reason was that it was relatively easy to make the
+%% patterns recognize and fix broken input. Finally, rewriting was more
+%% than powerful enough to do the job, and reusing any code was wise. 
+第二の理由は、パターンの認識がしやすいうえに壊れた入力も修正しやすかったということだ。最後の理由は、やりたいことをこなすには書き換えでも十分すぎるくらい高機能だったからである。それに、コードを再利用できるならそうするほうが賢いというものだ。
 
-One unusual point about the rewriting rules: when doing the pattern
-matching, it is useful for both the input and the pattern to be
-tokenized. Hence, the same scanner is used for both the input
-addresses and the patterns themselves. This requires that the scanner
-be called with different character type tables for differing input.
+%% One unusual point about the rewriting rules: when doing the pattern
+%% matching, it is useful for both the input and the pattern to be
+%% tokenized. Hence, the same scanner is used for both the input
+%% addresses and the patterns themselves. This requires that the scanner
+%% be called with different character type tables for differing input.
+書き換えルールに関して特筆すべき点がひとつある。パターンマッチを行うときには入力とパターンをともにトークンに分割したほうが有用だ。そうすれば、入力アドレスとパターンそのものに対して同じスキャナを使える。そのためには、スキャナを呼び出す際に、入力ごとに文字タイプテーブルを切り替えられるようにしなければならない。
 
 \end{aosasect2}
 
