@@ -23,7 +23,7 @@ nosql.tex
 packaging.tex
 riak.tex            Kazuya Sakakiahra <kazuya@violentlyhappy.org>  0
 selenium.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
-sendmail.tex        TAKAGI Masahiro <matakagi@gmail.com>       50
+sendmail.tex        TAKAGI Masahiro <matakagi@gmail.com>       55
 snowflock.tex
 socialcalc.tex
 telepathy.tex

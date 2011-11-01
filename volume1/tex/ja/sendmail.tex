@@ -820,53 +820,58 @@ SMTPの送出側(クライアント側)の実装として``自明な''方法は�
 %% \begin{aosasect2}{The Implementation of the Queue}
 \begin{aosasect2}{キューの実装}
 
-Sendmail followed the conventions of the time for storing queue files.
-In fact, the format used is extremely similar to the lpr subsystem of
-the time.  Each job had two files, one with the control information
-and one with the data. The control file was a flat text file with the
-first character of each line representing the meaning of that line.
+%% Sendmail followed the conventions of the time for storing queue files.
+%% In fact, the format used is extremely similar to the lpr subsystem of
+%% the time.  Each job had two files, one with the control information
+%% and one with the data. The control file was a flat text file with the
+%% first character of each line representing the meaning of that line.
+sendmailは、当時の規約に従ってキューファイルを格納していた。実際のところ、採用したフォーマットは当時のlprサブシステムと極めて似たものだった。各ジョブに対してふたつのファイルがあり、ひとつが制御情報でもうひとつが実際のデータとなっていた。制御ファイルはフラットなテキストファイルで、各行の最初の文字がその行の意味を表していた。
 
-When sendmail wanted to process the queue it had to read all of the
-control files, storing the relevant information in memory, and then
-sort the list. That worked fine with a relatively small number of
-messages in the queue, but started to break down at around 10,000
-queued messages. Specifically, when the directory got large enough to
-require indirect blocks in the filesystem, there was a serious
-performance knee that could reduce performance by as much as an order
-of magnitude. It was possible to ameliorate this problem by having
-sendmail understand multiple queue directories, but that was at best a
-hack.
+%% When sendmail wanted to process the queue it had to read all of the
+%% control files, storing the relevant information in memory, and then
+%% sort the list. That worked fine with a relatively small number of
+%% messages in the queue, but started to break down at around 10,000
+%% queued messages. Specifically, when the directory got large enough to
+%% require indirect blocks in the filesystem, there was a serious
+%% performance knee that could reduce performance by as much as an order
+%% of magnitude. It was possible to ameliorate this problem by having
+%% sendmail understand multiple queue directories, but that was at best a
+%% hack.
+sendmailがキューを処理するときは、制御ファイルをすべて読んだ上で関連する情報をメモリ内に格納し、そしてリストをソートしなければならない。キュー内のメッセージ数が比較的少ないうちは、これはうまく機能した。しかしキュー内のメッセージが10,000前後になった時点から不調になり始めた。特に、ディレクトリが肥大化してファイルシステム内の間接ブロックを要するようになると、そこがパフォーマンスに深刻な影響を及ぼす。大幅にパフォーマンスが落ちてしまうこともあり得る。この問題を改善する手段としてsendmailで複数のキューディレクトリを扱えるようにすることもできた。しかしそうしたところで、せいぜいちょっとしたハック程度の効果しか得られないだろう。
 
-An alternative implementation might be to store all the control files
-in one database file. This wasn't done because when sendmail coding
-began there was no generally available database package, and when
-dbm(3) became available it had several flaws, including the inability
-to reclaim space, a requirement that all keys that hashed together fit
-on one (512 byte) page, and a lack of locking. Robust database
-packages didn't appear for many years.
+%% An alternative implementation might be to store all the control files
+%% in one database file. This wasn't done because when sendmail coding
+%% began there was no generally available database package, and when
+%% dbm(3) became available it had several flaws, including the inability
+%% to reclaim space, a requirement that all keys that hashed together fit
+%% on one (512 byte) page, and a lack of locking. Robust database
+%% packages didn't appear for many years.
+別の実装としては、すべての制御ファイルをひとつのデータベースファイルにまとめることもできただろう。そうしなかった理由は、sendmailを書き始めた頃にはまだ汎用的に使えるデータベースパッケージが存在しなかったことだ。後に登場したdbm(3)にはいくつかの問題があった。たとえば、領域の再配置(すべてのキーを512バイトの単一ページにまとめるために必要)ができないことやロックの仕組みがないことだ。堅牢なデータベースパッケージは、なかなか登場しなかった。
 
-Another alternative implementation would have been to have a separate
-daemon that would keep the state of the queue in memory, probably
-writing a log to allow recovery. Given the relatively low email
-traffic volumes of the time, the lack of memory on most machines,
-the relatively high cost of background processes,
-and the complexity of implementing such a process,
-this didn't seem
-like a good tradeoff at the time.
+%% Another alternative implementation would have been to have a separate
+%% daemon that would keep the state of the queue in memory, probably
+%% writing a log to allow recovery. Given the relatively low email
+%% traffic volumes of the time, the lack of memory on most machines,
+%% the relatively high cost of background processes,
+%% and the complexity of implementing such a process,
+%% this didn't seem
+%% like a good tradeoff at the time.
+それ以外にも、別のデーモンを用意してキューの状態をメモリ上に保持させるという方法もあっただろう。そのデーモンがログを書いておけば、リカバリも可能だ。当時はまだ電子メールのトラフィックがそれほど多くなかったこと、そしてメモリを潤沢に搭載したマシンが少なかったこと、バックグラウンドプロセスのコストが比較的高いこと、プロセスの実装が複雑になることなどを考慮すると、当時としてはこの選択肢は割に合わなかった。
 
-Another design decision was to store the message header in the queue
-control file rather than the data file. The rationale was that most
-headers needed considerable rewriting that varied from destination to
-destination (and since messages could have more than one destination,
-they would have to be customized multiple times), and the cost of
-parsing the headers seemed high, so storing them in a pre-parsed
-format seemed like a savings. In retrospect this was not a good decision,
-as was storing the message body in Unix-standard format (with newline
-endings) rather than in the format in which it was received (which
-could use newlines, carriage-return/line-feed, bare carriage-return,
-or line-feed/carriage-return). As the e-mail world evolved and
-standards were adopted, the need for rewriting diminished, and even
-seemingly innocuous rewriting has the risk of error.
+%% Another design decision was to store the message header in the queue
+%% control file rather than the data file. The rationale was that most
+%% headers needed considerable rewriting that varied from destination to
+%% destination (and since messages could have more than one destination,
+%% they would have to be customized multiple times), and the cost of
+%% parsing the headers seemed high, so storing them in a pre-parsed
+%% format seemed like a savings. In retrospect this was not a good decision,
+%% as was storing the message body in Unix-standard format (with newline
+%% endings) rather than in the format in which it was received (which
+%% could use newlines, carriage-return/line-feed, bare carriage-return,
+%% or line-feed/carriage-return). As the e-mail world evolved and
+%% standards were adopted, the need for rewriting diminished, and even
+%% seemingly innocuous rewriting has the risk of error.
+もうひとつの設計上の判断として、メッセージヘッダをキューのデータファイルではなく制御ファイル側に格納するようにした。その根拠は、ほとんどのヘッダはそれなりの書き換えを要し、書き換え方法も配送先によってさまざまに変わるということ(そしてメッセージの配送先が複数になることもあり、複数回のカスタマイズが必要になる)。そしてヘッダのパースのコストが高そうだったことだ。そこで、パース済みの形式でヘッダを格納しておけばコストを抑えられるだろうと考えた。今思えば、これはあまりよい判断ではなかった。ちょうどメッセージ本文の格納にUnix標準フォーマット(行末がnewline)を使い、受信したメッセージのフォーマット(行末はnewlineかもしれないしcarriage-return/line-feedかもしれない。単にcarriage-returnだけかもしれないしline-feed/carriage-returnかもしれない)を使わなかったように。電子メールの世界が成長して標準が定まっていくにつれて、書き換えの必要性は少なくなった。さらに、どうってことないように見える書き換えであってもエラーのリスクがある。
 
 \end{aosasect2}
 
