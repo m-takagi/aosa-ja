@@ -775,42 +775,45 @@ sendmailでは文法学にもとづいてアドレスをパースすべきであ
 %% \begin{aosasect2}{Embedding SMTP and Queueing in sendmail}
 \begin{aosasect2}{SMTPやキューのsendmailへの埋め込み}
 
-An ``obvious'' way to implement outgoing (client) SMTP would have been
-to build it as an external mailer, similarly to UUCP,  But this would
-raise a number of other questions. For example, would queueing be done
-in sendmail or in the SMTP client module? If it was done in sendmail
-then either separate copies of messages would have to be sent to each
-recipient (i.e., no ``piggybacking'', wherein a single connection can
-be opened and then multiple \code{RCPT} commands can be sent) or a much
-richer communication back-path would be necessary to convey the
-necessary per-recipient status than was possible using simple Unix
-exit codes. If queueing was done in the client module then there was a
-potential for large amounts of replication; in particular, at the time
-other networks such as XNS were still possible
-contenders. Additionally, including the queue into sendmail itself
-provided a more elegant way of dealing with certain kinds of failures,
-notably transient problems such as resource exhaustion.
+%% An ``obvious'' way to implement outgoing (client) SMTP would have been
+%% to build it as an external mailer, similarly to UUCP,  But this would
+%% raise a number of other questions. For example, would queueing be done
+%% in sendmail or in the SMTP client module? If it was done in sendmail
+%% then either separate copies of messages would have to be sent to each
+%% recipient (i.e., no ``piggybacking'', wherein a single connection can
+%% be opened and then multiple \code{RCPT} commands can be sent) or a much
+%% richer communication back-path would be necessary to convey the
+%% necessary per-recipient status than was possible using simple Unix
+%% exit codes. If queueing was done in the client module then there was a
+%% potential for large amounts of replication; in particular, at the time
+%% other networks such as XNS were still possible
+%% contenders. Additionally, including the queue into sendmail itself
+%% provided a more elegant way of dealing with certain kinds of failures,
+%% notably transient problems such as resource exhaustion.
+SMTPの送出側(クライアント側)の実装として``自明な''方法は、UUTPと同様に外部のメーラーとして実装することだ。しかしこの場合、いくつか疑問が出てくる。たとえば、キューイングはsendmailでするのだろうか?それともSMTPクライアントモジュールで行うのだろうか?sendmailで行うのなら、メッセージのコピーを各受信者に送信する(つまり、``piggybacking''はせず、そこで一つの接続を開き、複数の\code{RCPT}コマンドを送る)か、あるいはずっとリッチな逆方向のコミュニケーション手段が必要になる。受信者ごとの状況を知るには、単純にUnixの終了コードを使うだけでは不十分だからである。クライアントモジュール側で行うのなら、大量の複製が発生する可能性が出てくる。特に、当時はXNSなど他のネットワークもまだ候補にあった。さらに、キューをsendmail側に含めれば、よりエレガントな方法で障害に対応できるようになる。特に、リソースの枯渇などの一時的な問題に対応しやすい。
 
-Incoming (server) SMTP involved a different set of decisions. At the
-time, I felt it was important to implement the \code{VRFY} and
-\code{EXPN} SMTP commands faithfully, which required access to the
-alias mechanism.  This would once again require a much richer protocol
-exchange between the server SMTP module and sendmail than was possible
-using command lines and exit codes---in fact, a protocol akin to SMTP
-itself.
+%% Incoming (server) SMTP involved a different set of decisions. At the
+%% time, I felt it was important to implement the \code{VRFY} and
+%% \code{EXPN} SMTP commands faithfully, which required access to the
+%% alias mechanism.  This would once again require a much richer protocol
+%% exchange between the server SMTP module and sendmail than was possible
+%% using command lines and exit codes---in fact, a protocol akin to SMTP
+%% itself.
+受け入れ側(サーバー側)のSMTPについては、難しい決断があった。当時の私は、\code{VRFY}や\code{EXPN}といったSMTPコマンドも忠実に実装することを重視していた。これらのコマンドは、エイリアスの仕組みにアクセスできなければならない。これを実現するには、SMTPサーバーモジュールとsendmailとの間でよりリッチなプロトコルの交換が必要となる。これは、単にコマンドラインと終了コードだけで実現できるものではない---実際のところ、SMTP自体はそのようなプロトコルだったのだが。
 
-I would be much more inclined today to leave queueing in the core
-sendmail but move both sides of the SMTP implementation into other
-processes. One reason is to gain security: once the server side has an
-open instance of port 25 it no longer needs access to root
-permissions. Modern extensions such as TLS and DKIM signing complicate
-the client side (since the private keys should not be accessible to
-unprivileged users), but strictly speaking root access is still not
-necessary. Although the security issue is still an issue here, if the
-client SMTP is running as a non-root user who can read the private
-keys, that user by definition has special privileges, and hence should
-not be communicating directly with other sites. All of these issues
-can be finessed with a bit of work.
+%% I would be much more inclined today to leave queueing in the core
+%% sendmail but move both sides of the SMTP implementation into other
+%% processes. One reason is to gain security: once the server side has an
+%% open instance of port 25 it no longer needs access to root
+%% permissions. Modern extensions such as TLS and DKIM signing complicate
+%% the client side (since the private keys should not be accessible to
+%% unprivileged users), but strictly speaking root access is still not
+%% necessary. Although the security issue is still an issue here, if the
+%% client SMTP is running as a non-root user who can read the private
+%% keys, that user by definition has special privileges, and hence should
+%% not be communicating directly with other sites. All of these issues
+%% can be finessed with a bit of work.
+今なら、キューイングはsendmailのコアに残すだろうがSMTPのクライアント側、サーバー側の実装はそれぞれ別のプロセスに切り出してしまいたいところだ。その理由のひとつはセキュリティの向上である。サーバー側でいったん25番ポートを開いたインスタンスを持てば、もはやroot権限は不要になる。TLSやDKIM署名のようなモダンな拡張のせいでクライアント側は複雑になるが(権限を持たないユーザーに秘密鍵へのアクセスを許してはいけないから)、厳密に言えばこちらもroot権限は不要だ。しかし、セキュリティの問題は依然問題として残る。クライアント側のSMTPが非rootユーザーで稼働していたとしても、秘密鍵を読めるということは特別な権限を持っていることになる。つまり、他のサイトと直接通信すべきではないということだ。これらの問題はすべて、多少の手間でなんとかできる。
 
 \end{aosasect2}
 
