@@ -921,63 +921,70 @@ sendmailが作られた当時の世界にはさまざまなプロトコルが乱
 \end{aosasect2}
 
 %% \begin{aosasect2}{Configuration and the Use of M4}
-\begin{aosasect2}{M4の設定と使用}
+\begin{aosasect2}{設定ファイルでのM4の使用}
 
-For a period I was both making regular changes to the sendmail
-configuration files and personally supporting many machines. Since a
-large amount of the configuration file was the same between different
-machines, the use of a tool to build the configuration files was
-desirable. The m4 macro processor was included with Unix. It was
-designed as a front end for programming languages (notably
-ratfor). Most importantly, it had ``include'' capabilities, like
-``\#include'' in the C language.
-The original configuration files used little
-more than this capability and some minor macro expansions.
+%% For a period I was both making regular changes to the sendmail
+%% configuration files and personally supporting many machines. Since a
+%% large amount of the configuration file was the same between different
+%% machines, the use of a tool to build the configuration files was
+%% desirable. The m4 macro processor was included with Unix. It was
+%% designed as a front end for programming languages (notably
+%% ratfor). Most importantly, it had ``include'' capabilities, like
+%% ``\#include'' in the C language.
+%% The original configuration files used little
+%% more than this capability and some minor macro expansions.
+ある時期、sendmailの設定ファイルに頻繁に変更を加えて個人的にさまざまなマシンに対応させようとしていたことがあった。設定ファイルの大半はマシンが異なっても同じだったため、できれば何かツールを使って設定ファイルを作れたらいいなと考えていた。m4マクロプロセッサはUnixに含まれるツールである。もともとは、プログラミング言語(特にRATFOR)のフロントエンドとして設計された。最も重要なのは、m4が``include''機能に対応していたことだ。これはC言語における``\#include''と同様の機能である。最初の設定ファイルはこの機能に毛が生えた程度で、ちょっとしたマクロによる拡張をしただけのものであった。
 
-IDA sendmail also used m4, but in a dramatically different way. In
-retrospect I should have probably studied these prototypes in more
-detail. They contained many clever ideas, in particular the way they
-handled quoting.
+%% IDA sendmail also used m4, but in a dramatically different way. In
+%% retrospect I should have probably studied these prototypes in more
+%% detail. They contained many clever ideas, in particular the way they
+%% handled quoting.
+IDA sendmailもm4を使っていたが、その使い方はまったく異なっていた。今思えば、当時の私はこれらのプロトタイプをもっと調査するべきだったのだろう。彼らはいろいろうまい使い方をしており、特にクォートの処理方法がすばらしかった。
 
-Starting with sendmail 6, the m4 configuration files were completely
-rewritten to be in a more declarative style and much smaller. This
-used considerably more of the power of the m4 processor, which was
-problematic when the introduction of GNU m4 changed some of
-the semantics in subtle ways.
+%% Starting with sendmail 6, the m4 configuration files were completely
+%% rewritten to be in a more declarative style and much smaller. This
+%% used considerably more of the power of the m4 processor, which was
+%% problematic when the introduction of GNU m4 changed some of
+%% the semantics in subtle ways.
+sendmail 6以降、m4設定ファイルは新たに書き直され、より宣言的なスタイルで分量も少なくなった。この設定ファイルはm4プロセッサのパワーをさらに利用するものとなったが、そのために、GNU m4がその構文を微妙に変更しただけでも問題になることがあった。
 
-The original plan was that the m4
-configurations would follow the 80/20 rule: they would be simple
-(hence 20\% of the work), and would cover 80\% of the cases. This broke
-down fairly quickly, for two reasons.
-The minor reason was that it turned out to be relatively easy to
-handle the vast majority of the cases, at least in the beginning. It
-became much harder as sendmail and the world evolved, notably with the
-inclusion of features such as TLS encryption and SMTP Authentication,
-but those didn't come until quite a bit later.
+%% The original plan was that the m4
+%% configurations would follow the 80/20 rule: they would be simple
+%% (hence 20\% of the work), and would cover 80\% of the cases. This broke
+%% down fairly quickly, for two reasons.
+%% The minor reason was that it turned out to be relatively easy to
+%% handle the vast majority of the cases, at least in the beginning. It
+%% became much harder as sendmail and the world evolved, notably with the
+%% inclusion of features such as TLS encryption and SMTP Authentication,
+%% but those didn't come until quite a bit later.
+最初に考えていたのは、m4の設定は80/20ルールに従って使おうということだった。つまり、m4を使うのは作業全体の20\%だけにしておけばファイルがシンプルになるし、その20\%が問題の80\%をカバーしてくれるということだ。この計画はすぐに頓挫した。その理由はふたつ。まずは些細な理由のほうから話す。少なくとも最初のうちはこの計画はうまくいき、問題の大半は比較的楽に処理できていた。しかしsendmailやそれを取り巻く世界が拡大するにつれて、徐々に難しくなってきた。TLS暗号化やSMTP認証などの機能が組み込まれても、それに対応するのに時間がかかるようになったのだ。
 
-The important reason was that it was becoming clear that the raw
-configuration file was just too difficult for most people to
-manage. In essence, the \code{.cf} (raw) format had become assembly
-code---editable in principle, but in reality quite opaque. The
-``source code'' was an m4 script stored in the \code{.mc} file.
+%% The important reason was that it was becoming clear that the raw
+%% configuration file was just too difficult for most people to
+%% manage. In essence, the \code{.cf} (raw) format had become assembly
+%% code---editable in principle, but in reality quite opaque. The
+%% ``source code'' was an m4 script stored in the \code{.mc} file.
+もうひとつの重要な理由は、生の設定ファイルを直接さわるのがもはやほとんどの人にとって難しくなりつつあったということだ。要するに、生の\code{.cf}フォーマットはアセンブラのコードに等しい状態になった。細心の注意を払えば編集できるが、現実的な話ではない。そこで、m4スクリプトで書かれたその``ソースコード''が\code{.mc}ファイルとして格納されることになった。
 
-Another important distinction is that the raw format configuration
-file was really a programming language. It had procedural code
-(rulesets), subroutine calls, parameter expansion, and loops (but no
-gotos). The syntax was obscure, but in many ways resembled
-the \code{sed} and \code{awk} commands, at
-least conceptually. The m4 format was declarative: although it was
-possible to drop into the low-level raw language, in practice these
-details were hidden from the user.
+%% Another important distinction is that the raw format configuration
+%% file was really a programming language. It had procedural code
+%% (rulesets), subroutine calls, parameter expansion, and loops (but no
+%% gotos). The syntax was obscure, but in many ways resembled
+%% the \code{sed} and \code{awk} commands, at
+%% least conceptually. The m4 format was declarative: although it was
+%% possible to drop into the low-level raw language, in practice these
+%% details were hidden from the user.
+もうひとつの重要な特徴は、生の設定ファイルは実際のところプログラミング言語だったということだ。手続き型のコード(ルールセット)やサブルーチンの呼び出し、パラメータの展開、そしてループなどの機能があった(しかしgotoは使えない)。その文法は曖昧なものものだったが、おおまかには\code{sed}や\code{awk}と似ていた。少なくとも概念的には。m4フォーマットは宣言型だった。低レベルの言語機能を使うこともできたが、現実的にはこれらの詳細はユーザーからは隠されていた。
 
-It isn't clear that this decision was correct or incorrect.
-I felt at the time (and still feel) that with complex systems
-it can be useful to implement what amounts to a Domain Specific Language (DSL)
-for building certain portions of that system.
-However, exposing that DSL to end users as a configuration methodology
-essentially converts all attempts to configure a system
-into a programming problem.
-Great power results from this, but at a non-trivial cost.
+%% It isn't clear that this decision was correct or incorrect.
+%% I felt at the time (and still feel) that with complex systems
+%% it can be useful to implement what amounts to a Domain Specific Language (DSL)
+%% for building certain portions of that system.
+%% However, exposing that DSL to end users as a configuration methodology
+%% essentially converts all attempts to configure a system
+%% into a programming problem.
+%% Great power results from this, but at a non-trivial cost.
+m4を使うという判断が正しかったのかどうかはよくわからない。当時の私が考えていた(そして今もそう思っている)のは、複雑なシステムを便利に使うためには、何らかのDSL(ドメイン特化言語)を実装してシステムを構築できるようにするとよいということだ。しかし、このDSLを設定項目としてエンドユーザーに公開すると、システムの設定がプログラミングの問題になってしまう。DSLは強力なものだが、それを使うためのコストも無視できない。
 
 \end{aosasect2}
 
