@@ -878,42 +878,45 @@ sendmailがキューを処理するときは、制御ファイルをすべて読
 %% \begin{aosasect2}{Accepting and Fixing Bogus Input}
 \begin{aosasect2}{誤入力の受け入れと修正}
 
-Since sendmail was created in a world of multiple protocols and
-disturbingly few written standards, I decided to clean up malformed
-messages wherever possible.
-This matches the ``Robustness Principle'' (a.k.a. Postel's Law)
-articulated in RFC~793\footnote{``Be conservative in what you do,
-be liberal in what you accept from others''}.
-Some of these changes were obvious and even required:
-when sending a
-UUCP message to the Arpanet, the UUCP addresses needed to be converted
-to Arpanet addresses, if only to allow ``reply'' commands to work
-correctly,
-line terminations needed to be converted between the conventions used
-by various platforms, and so on.
-Some were less obvious: if a message was received that did
-not include a \code{From:} header field required in the Internet
-specifications, should you add a \code{From:} header field, pass the
-message on without the \code{From:} header field, or reject the message?  At
-the time, my prime consideration was interoperability, so sendmail
-patched the message, e.g., by adding the \code{From:} header
-field. However, this is claimed to have allowed other broken mail
-systems to be perpetuated long past the time when they should have
-been fixed or killed off.
+%% Since sendmail was created in a world of multiple protocols and
+%% disturbingly few written standards, I decided to clean up malformed
+%% messages wherever possible.
+%% This matches the ``Robustness Principle'' (a.k.a. Postel's Law)
+%% articulated in RFC~793\footnote{``Be conservative in what you do,
+%% be liberal in what you accept from others''}.
+%% Some of these changes were obvious and even required:
+%% when sending a
+%% UUCP message to the Arpanet, the UUCP addresses needed to be converted
+%% to Arpanet addresses, if only to allow ``reply'' commands to work
+%% correctly,
+%% line terminations needed to be converted between the conventions used
+%% by various platforms, and so on.
+%% Some were less obvious: if a message was received that did
+%% not include a \code{From:} header field required in the Internet
+%% specifications, should you add a \code{From:} header field, pass the
+%% message on without the \code{From:} header field, or reject the message?  At
+%% the time, my prime consideration was interoperability, so sendmail
+%% patched the message, e.g., by adding the \code{From:} header
+%% field. However, this is claimed to have allowed other broken mail
+%% systems to be perpetuated long past the time when they should have
+%% been fixed or killed off.
+sendmailが作られた当時の世界にはさまざまなプロトコルが乱立しており、標準規格もほとんど定まっていなかった。そのため、不正な形式のメッセージはできる限りきれいにしようと決めた。これは、RFC~793に明記された``ロバストネス原則'' (またの名をポステルの法則)\footnote{``自分には保守的であれ。他者はリベラルに受け入れよ。''}にもマッチしている。これらの変更の中には、明白であり必須なものもある。UUCPメッセージをArpanetに送信するときには、UUCPアドレスをArpanetアドレスに変換しないと単なる``reply''コマンドすら正常に動作しない。また、行末文字をさまざまなプラットフォームの決まりにあわせて変換したりなどといった作業も必要だ。中には自明だとまでは言えないものもある。受信したメッセージに\code{From:}ヘッダーフィールドがない場合はどうすればいいだろう?このフィールドはInternetの仕様では必須のものだが、ここで\code{From:}ヘッダーフィールドを追加してしまうべきだろうか?それとも\code{From:}ヘッダーフィールドを追加せずにそのまま通してしまうべきだろうか?あるいはそのメッセージを拒否すべきだろうか?当時の私が最重要視していたのは相互運用性だった。そこでsendmailでは、メッセージにパッチをあてて\code{From:}ヘッダーフィールドを追加するなどしていた。しかしそのせいで、壊れている他のメールシステムがそのままの状態で長く生き続けることになってしまった。本来なら、ずっと前に修正されるなりこの世から消えてしまうなりすべきだったはずなのに。
 
-I believe my decision was correct for the time, but is problematic
-today. A high degree of interoperability was important to let mail
-flow unimpeded. Had I rejected malformed messages, most messages at
-the time would have been rejected. Had I passed them through unfixed,
-recipients would have received messages that they couldn't reply to
-and in some cases couldn't even determine who sent the message---that
-or the message would have been rejected by another mailer.
+%% I believe my decision was correct for the time, but is problematic
+%% today. A high degree of interoperability was important to let mail
+%% flow unimpeded. Had I rejected malformed messages, most messages at
+%% the time would have been rejected. Had I passed them through unfixed,
+%% recipients would have received messages that they couldn't reply to
+%% and in some cases couldn't even determine who sent the message---that
+%% or the message would have been rejected by another mailer.
+私の判断は、その当時は正しかったと確信している。しかし今となっては問題もある。高度な相互運用性を維持することは、メールの流れを妨げないためにも重要だった。もし不正なメッセージを拒否していたら、当時のメッセージの大半は拒否されてしまっていただろう。もし何も手を入れずに素通ししていたら、受け取ったメッセージに返信できなくなってしまう。というか、そもそも誰がそのメッセージを送ったのかさえわからなくなる---あるいはそのメッセージが別のメーラーに拒否されたのかどうかもわからない。
 
-Today the standards are written, and for the most part those standards
-are accurate and complete. It is no longer the case that most messages
-would be rejected, and yet there is still mail software out there that
-send out mangled messages. This unnecessarily creates numerous
-problems for other software on the Internet.
+%% Today the standards are written, and for the most part those standards
+%% are accurate and complete. It is no longer the case that most messages
+%% would be rejected, and yet there is still mail software out there that
+%% send out mangled messages. This unnecessarily creates numerous
+%% problems for other software on the Internet.
+現在は標準規格がきちんと定まっており、そのほとんどの部分は正確で完全になっている。もはや、大半のメッセージが拒否されてしまうという状況ではなくなった。しかし今もなお、不正な形式のメッセージを送るメールソフトが残っている。そのせいで、インターネット上の他のソフトウェアの間でも無駄に多くの問題が発生している。
 
 \end{aosasect2}
 
