@@ -993,124 +993,134 @@ m4を使うという判断が正しかったのかどうかはよくわからな
 %% \begin{aosasect1}{Other Considerations}
 \begin{aosasect1}{その他の検討事項}
 
-Several other architectural and development points deserve to be
-mentioned.
+%% Several other architectural and development points deserve to be
+%% mentioned.
+それ以外にも、アーキテクチャや開発に関して話しておくべきポイントがある。
 
 %% \begin{aosasect2}{A Word About Optimizing Internet Scale Systems}
-\begin{aosasect2}{インターネットにスケールするシステムの最適化に関して一言}
+\begin{aosasect2}{インターネット全体に広がるシステムの最適化}
 
-In most network-based systems there is a tension between the client
-and the server. A good strategy for the client may be the
-wrong thing for the server and vice versa. For example, when possible
-the server would like to minimize its processing costs by pushing as
-much as possible back to the client, and of course the client feels
-the same way but in the opposite direction. For example, a server
-might want to keep a connection open while doing spam processing since
-that lowers the cost of rejecting a message (which these days is the
-common case), but the client wants to move on as quickly as
-possible. Looking at the entire system, that is, the Internet as a
-whole, the optimum solution may be to balance these two needs.
+%% In most network-based systems there is a tension between the client
+%% and the server. A good strategy for the client may be the
+%% wrong thing for the server and vice versa. For example, when possible
+%% the server would like to minimize its processing costs by pushing as
+%% much as possible back to the client, and of course the client feels
+%% the same way but in the opposite direction. For example, a server
+%% might want to keep a connection open while doing spam processing since
+%% that lowers the cost of rejecting a message (which these days is the
+%% common case), but the client wants to move on as quickly as
+%% possible. Looking at the entire system, that is, the Internet as a
+%% whole, the optimum solution may be to balance these two needs.
+ネットワークベースのシステムのほとんどには、クライアント側とサーバー側の対立がある。クライアント側にとって都合のいい戦略はサーバー側にとってはあまりよろしくないものであることもあるし、その逆もまたあり得る。たとえば、サーバー側での処理コストを最小限に抑えようとすれば、できる限りの情報をクライアント側にプッシュすることになる。一方クライアント側でも同じように考えたとすると、やることは同じだがその方向が正反対になる。たとえば、サーバー側ではspam処理の間も接続を維持したままにしておきたいだろう。そうすればメッセージの配送を拒否する際のコストが下がるからである(最近は、配送を拒否することが一般的になった)。しかし、クライアント側としてはできるだけ早く次に進みたいはずだ。システム全体を見て、インターネット全体のことを考えれば、クライアント側とサーバー側のニーズに対してうまくバランスをとるのが最適なソリューションとなる。
 
-There have been cases of MTAs that have used strategies that
-explicitly favor either the client or the server. They can do this
-only because they have a relatively small installed base.  When your
-system is used on a significant portion of the Internet you have to
-design it in order to balance the load between both sides in an
-attempt to optimize the Internet as a whole. This is complicated by
-the fact that there will always be MTAs completely skewed in one
-direction or the other---for example, mass mailing systems only care
-about optimizing the outgoing side.
+%% There have been cases of MTAs that have used strategies that
+%% explicitly favor either the client or the server. They can do this
+%% only because they have a relatively small installed base.  When your
+%% system is used on a significant portion of the Internet you have to
+%% design it in order to balance the load between both sides in an
+%% attempt to optimize the Internet as a whole. This is complicated by
+%% the fact that there will always be MTAs completely skewed in one
+%% direction or the other---for example, mass mailing systems only care
+%% about optimizing the outgoing side.
+クライアント側あるいはサーバー側のいずれか一方を明示的に重視した戦略をとるMTAもいくつかあった。そんなことができたのは、それらのMTAがあまり広まっていなかったからというだけの理由にすぎない。自分のシステムがインターネット上の大部分で使われるようになると、両者にかかる負荷のバランスを考慮した設計が必要となる。インターネット全体を最適化するためだ。これは複雑で込み入った作業となる。なぜなら、MTAというものは常にどちらか一方向に完全に傾いてしまっているものだからである。たとえば大量メール配信システムはメールの送出側の最適化しか気にしない。
 
-When designing a system that incorporates both sides of the
-connection, it is important to avoid playing favorites. Note that this
-is in stark contrast to the usual asymmetry of clients and
-services---for example, web servers and web clients are generally not
-developed by the same groups.
+%% When designing a system that incorporates both sides of the
+%% connection, it is important to avoid playing favorites. Note that this
+%% is in stark contrast to the usual asymmetry of clients and
+%% services---for example, web servers and web clients are generally not
+%% developed by the same groups.
+接続の両サイドにかかわるシステムを設計する際には、どちらか一方に注意を向けすぎないようにすることが大切だ。これは、よくあるクライアントとサーバーの不調和とはまったく対照的な話であることに注意しよう---たとえばウェブサーバーとそのクライアントは、通常は別々のグループが開発しているものだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Milter}
 \begin{aosasect2}{Milter}
 
-One of the most important additions to sendmail was the milter
-(\emph{m}ail f\emph{ilter}) interface.  Milter allows for the use of
-offboard plugins (i.e., they run in a separate process) for mail
-processing. These were originally designed for anti-spam
-processing. The milter protocol runs synchronously with the server
-SMTP protocol. As each new SMTP command is received from the client,
-sendmail calls the milters with the information from that command. The
-milter has the opportunity to accept the command or send a rejection,
-which rejects the phase of the protocol appropriate for the SMTP
-command. Milters are modeled as callbacks, so as an SMTP command comes
-in, the appropriate milter subroutine is called. Milters are threaded,
-with a per-connection context pointer handed in to each routine to
-allow passing state.
+%% One of the most important additions to sendmail was the milter
+%% (\emph{m}ail f\emph{ilter}) interface.  Milter allows for the use of
+%% offboard plugins (i.e., they run in a separate process) for mail
+%% processing. These were originally designed for anti-spam
+%% processing. The milter protocol runs synchronously with the server
+%% SMTP protocol. As each new SMTP command is received from the client,
+%% sendmail calls the milters with the information from that command. The
+%% milter has the opportunity to accept the command or send a rejection,
+%% which rejects the phase of the protocol appropriate for the SMTP
+%% command. Milters are modeled as callbacks, so as an SMTP command comes
+%% in, the appropriate milter subroutine is called. Milters are threaded,
+%% with a per-connection context pointer handed in to each routine to
+%% allow passing state.
+sendmailへの機能追加のうち最も重要なもののひとつがmilter (\emph{m}ail f\emph{ilter})インターフェイスだ。milterはオフボードのプラグインとして(つまり、別プロセスで実行させて)メールの処理に使える。もともとはスパム対策のために作られたものだった。milterのプロトコルは、サーバーのSMTPプロトコルと同期して動作する。新たなSMTPコマンドをクライアントから受信するたびに、sendmailはmilterを呼び出してそのコマンドからの情報を渡す。milterは、その内容にあわせてコマンドを受け入れたり拒否したりする。拒否した場合はSMTPプロトコルでのそのコマンドの実行が却下される。milterはコールバックとして設計されており、SMTPコマンドを受け取ると適切なサブルーチンが呼び出される。milterはスレッド化されている。接続単位のコンテキストポインタを保持しており、各ルーチンに状態を渡すことができる。
 
-In theory milters could work as loadable modules in the sendmail
-address space. We declined to do this for three reasons.  First, the
-security issues were too significant: even if sendmail were running as
-a unique non-root user id, that user would have access to all of the
-state of other messages.  Similarly, it was inevitable that some milter
-authors would try to access internal sendmail state.
+%% In theory milters could work as loadable modules in the sendmail
+%% address space. We declined to do this for three reasons.  First, the
+%% security issues were too significant: even if sendmail were running as
+%% a unique non-root user id, that user would have access to all of the
+%% state of other messages.  Similarly, it was inevitable that some milter
+%% authors would try to access internal sendmail state.
+理屈上は、milterはsendmailのアドレス空間内にロードできるモジュールとしても動かせる。しかしそうしなかった。理由は次の三点である。まず第一に、セキュリティの問題が重大だった。仮にsendmail専用にroot権限のないアカウントを作って運用していたとしても、そのユーザーはすべてのメッセージの状態にアクセスできるようになる。同様に、milterの作者がsendmailの内部状態にアクセスしようとすることも避けられない。
 
-Second, we wanted to create a firewall between sendmail and the
-milters: if a milter crashed, we wanted it to be clear who was at
-fault, and for mail to (potentially) continue to flow. Third, it was
-much easier for a milter author to debug a standalone process than
-sendmail as a whole.
+%% Second, we wanted to create a firewall between sendmail and the
+%% milters: if a milter crashed, we wanted it to be clear who was at
+%% fault, and for mail to (potentially) continue to flow. Third, it was
+%% much easier for a milter author to debug a standalone process than
+%% sendmail as a whole.
+第二に、我々はsendmailとmilterの間にファイアウォールを作りたかった。仮にmilterがクラッシュしたとしてもそこで被害を食い止め、メールの流れは妨げられないようにしたかった。第三に、milterの作者にとっては、スタンドアロンのプロセスをデバッグするほうがsendmail全体を相手にするよりもずっと楽だった。
 
-It quickly became clear that the milter was useful for more than
-anti-spam processing. In fact, the milter.org\footnote{\url{http://milter.org}}
-web site lists milters
-for anti-spam, anti-virus, archiving, content monitoring, logging,
-traffic shaping, and many other categories, produced by commercial
-companies and open source projects. The postfix
-mailer\footnote{\url{http://postfix.org}}
-has added
-support for milters using the same interface. Milters have proven to
-be one of sendmail's great successes.
-
+%% It quickly became clear that the milter was useful for more than
+%% anti-spam processing. In fact, the milter.org\footnote{\url{http://milter.org}}
+%% web site lists milters
+%% for anti-spam, anti-virus, archiving, content monitoring, logging,
+%% traffic shaping, and many other categories, produced by commercial
+%% companies and open source projects. The postfix
+%% mailer\footnote{\url{http://postfix.org}}
+%% has added
+%% support for milters using the same interface. Milters have proven to
+%% be one of sendmail's great successes.
+milterがスパム対策以外にも有用であることに、間もなく気づきだした。実際、milter.org\footnote{\url{http://milter.org}}のサイトにはさまざまなmilterが掲載されている。スパム対策以外にもウィルス対策やアーカイブ、コンテンツ監視、ログ出力、トラフィックの削減などさまざまなカテゴリがあり、商用製品もあればオープンソースのプロジェクトも存在する。postfix\footnote{\url{http://postfix.org}}も、同じインターフェイスでmilterをサポートするようになった。milterは、sendmailの大成功を示す一例と言える。
 \end{aosasect2}
 
 %% \begin{aosasect2}{Release Schedules}
 \begin{aosasect2}{リリーススケジュール}
 
-There is a popular debate between ``release early and often'' and
-``release stable systems'' schools of thought. Sendmail has used both
-of these at various times. During times of considerable change I was
-sometimes doing more than one release a day. My general philosophy was
-to make a release after each change. This is similar to providing
-public access to the source management system tree. I personally
-prefer doing releases over providing public source trees, at least in
-part because I use source management in what is now considered an
-unapproved way: for large changes, I will check in non-functioning
-snapshots while I am writing the code. If the tree is shared I will
-use branches for these snapshots, but in any case they are available
-for the world to see and can create considerable confusion. Also,
-creating a release means putting a number on it, which makes it easier
-to track the changes when going through a bug report.
-Of course, this requires that releases be easy to generate,
-which is not always true.
+%% There is a popular debate between ``release early and often'' and
+%% ``release stable systems'' schools of thought. Sendmail has used both
+%% of these at various times. During times of considerable change I was
+%% sometimes doing more than one release a day. My general philosophy was
+%% to make a release after each change. This is similar to providing
+%% public access to the source management system tree. I personally
+%% prefer doing releases over providing public source trees, at least in
+%% part because I use source management in what is now considered an
+%% unapproved way: for large changes, I will check in non-functioning
+%% snapshots while I am writing the code. If the tree is shared I will
+%% use branches for these snapshots, but in any case they are available
+%% for the world to see and can create considerable confusion. Also,
+%% creating a release means putting a number on it, which makes it easier
+%% to track the changes when going through a bug report.
+%% Of course, this requires that releases be easy to generate,
+%% which is not always true.
+よく議論になるのが、``早めに、そして頻繁にリリース''派と``安定したシステムをリリース''派の対立である。sendmailは、このどちらの手法も繰り返し使ってきた。かなり大量の変更をするときには、一日に何度もリリースすることもあった。基本的な考えは、何か変更するたびにリリースするというものだった。これは、ソース管理システムのツリーを一般向けに公開するのと同じようなことだ。私は個人的に、頻繁にリリースするほうがソースツリーを公開するよりも好きだ。少なくともその理由の一部になっているのは、私のソース管理システムの使い方があまり一般的ではないということだ。大規模な変更をするときなど、コードを書いている途中できちんと動作しない状態のスナップショットをチェックインすることもある。もしツリーを公開することになったら私はブランチを切ってスナップショットを扱うことになるだろう。しかし、いずれにしてもそれが全世界に晒されてしまうわけで、かなり戸惑わせてしまうことになる。また、リリースをするということはそれに番号を振るということであり、番号をつけておけばバグレポートに対して変更を追いかけやすくなる。もちろんこのやりかたで進めるにはリリース作業が簡単でなければならないが、常にそうだとは限らない。
 
-As sendmail became used in ever more critical production environments
-this started to become problematic. It wasn't always easy for others
-to tell the difference between changes that I wanted out there for
-people to test versus changes that were really intended to be used in
-the wild. Labeling releases as ``alpha'' or ``beta'' alleviates but
-does not fix the problem. The result was that as sendmail matured it
-moved toward less frequent but larger releases. This became especially
-acute when sendmail got folded into a commercial company which had
-customers who wanted both the latest and greatest but also only stable
-versions, and wouldn't accept that the two are incompatible.
+%% As sendmail became used in ever more critical production environments
+%% this started to become problematic. It wasn't always easy for others
+%% to tell the difference between changes that I wanted out there for
+%% people to test versus changes that were really intended to be used in
+%% the wild. Labeling releases as ``alpha'' or ``beta'' alleviates but
+%% does not fix the problem. The result was that as sendmail matured it
+%% moved toward less frequent but larger releases. This became especially
+%% acute when sendmail got folded into a commercial company which had
+%% customers who wanted both the latest and greatest but also only stable
+%% versions, and wouldn't accept that the two are incompatible.
+sendmailがクリティカルな本番環境で使われるようになり始めると、この方式では問題が出てきた。私が行った変更が「みんなにちょっと試してもらいたいもの」なのか「本番環境に適用して欲しいもの」なのか、それが通じないことが出てきたのだ。リリースするときに``alpha''とか``beta''とか名付けておけばいくらかましになるが、それでも問題は解決しない。その結果どうなったかというと、sendmailが成熟するにつれてリリースの頻度が下がってリリースあたりの変更が大きくなった。これが特に問題となったのは、sendmailが営利企業に組み込まれたときだった。顧客は最新のイケてるバージョンを望むが、同時に安定版も望む。そして、その二つが両立しないという事実を認めようとしないのだ。
 
-This tension between open source developer needs and commercial
-product needs will never go away. There are many advantages to
-releasing early and often, notably the potentially huge audience of
-brave (and sometimes foolish) testers who stress the system in ways
-that you could almost never expect to reproduce in a standard
-development system. But as a project becomes successful it tends to
-turn into a product (even if that product is open source and free),
-and products have different needs than projects.
+%% This tension between open source developer needs and commercial
+%% product needs will never go away. There are many advantages to
+%% releasing early and often, notably the potentially huge audience of
+%% brave (and sometimes foolish) testers who stress the system in ways
+%% that you could almost never expect to reproduce in a standard
+%% development system. But as a project becomes successful it tends to
+%% turn into a product (even if that product is open source and free),
+%% and products have different needs than projects.
+この手のオープンソース開発者のニーズと商用製品のニーズとの対立は、決してなくならない。早めに頻繁にリリースすることには多くのメリットがある。特に、勇気のある(時に無謀な)テスターを多く獲得できるのが大きい。彼らによるテストは、標準的な開発環境では決して再現できないだろう。しかし、プロジェクトがうまく進むとそれは徐々に製品に姿を変える傾向がある(オープンソースであろうとフリーであろうと関係ない)。そして製品になってしまうとそのニーズはプロジェクトのニーズとは変わってくる。
 
 \end{aosasect2}
 
