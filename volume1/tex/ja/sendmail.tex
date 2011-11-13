@@ -1129,83 +1129,90 @@ sendmailがクリティカルな本番環境で使われるようになり始め
 %% \begin{aosasect1}{Security}
 \begin{aosasect1}{セキュリティ}
 
-Sendmail has had a tumultuous life, security-wise. Some of this is
-well deserved, but some not, as our concept of ``security'' changed
-beneath us. The Internet started out with a user base of a few
-thousand people, mostly in academic and research settings. It was, in
-many ways, a kinder, gentler Internet than we know today. The network
-was designed to encourage sharing, not to build firewalls (another
-concept that did not exist in the early days). The net is now a
-dangerous, hostile place, filled with spammers and crackers.
-Increasingly it is being described as a war zone, and in war zones
-there are civilian casualties.
+%% Sendmail has had a tumultuous life, security-wise. Some of this is
+%% well deserved, but some not, as our concept of ``security'' changed
+%% beneath us. The Internet started out with a user base of a few
+%% thousand people, mostly in academic and research settings. It was, in
+%% many ways, a kinder, gentler Internet than we know today. The network
+%% was designed to encourage sharing, not to build firewalls (another
+%% concept that did not exist in the early days). The net is now a
+%% dangerous, hostile place, filled with spammers and crackers.
+%% Increasingly it is being described as a war zone, and in war zones
+%% there are civilian casualties.
+sendmailのこれまでの生き様は、セキュリティの面では波乱に満ちたものだった。さまざまな波乱の中には、起きてしかるべきものもあればそうでないものもあった。そして我々が考える``セキュリティ''の概念も変わってきた。インターネットが始まった頃のユーザー数はたかだか数千人程度で、その大半は学術研究に関わる人たちだった。古き良き時代。いろんな意味で、今のインターネットよりも親切で紳士的だった。ネットワークの設計は情報の共有を推奨する作りになっていたし、ファイヤウォールを構築するなどという考えはなかった(そんな概念は、そもそも初期のインターネットには存在しなかった)。今やネット上には危険がいっぱい。悪意に満ちた場所となり、スパマーやクラッカーがそこらじゅうにあふれている。インターネットが紛争地帯にたとえられることも増えてきた。紛争地帯には、民間人の犠牲者もつきものだ。
 
-It's hard to write network servers securely, especially when the
-protocol is anything beyond the most simple. Nearly all programs have
-had at least minor problems; even common TCP/IP implementations have
-been successfully attacked. Higher-level implementation languages have
-proved no panacea, and have even created vulnerabilities of their
-own. The necessary watch phrase is ``distrust all input,'' no matter
-where it comes from. Distrusting input includes secondary input, for
-example, from DNS servers and milters. Like most early network
-software, sendmail was far too trusting in its early versions.
+%% It's hard to write network servers securely, especially when the
+%% protocol is anything beyond the most simple. Nearly all programs have
+%% had at least minor problems; even common TCP/IP implementations have
+%% been successfully attacked. Higher-level implementation languages have
+%% proved no panacea, and have even created vulnerabilities of their
+%% own. The necessary watch phrase is ``distrust all input,'' no matter
+%% where it comes from. Distrusting input includes secondary input, for
+%% example, from DNS servers and milters. Like most early network
+%% software, sendmail was far too trusting in its early versions.
+ネットワークサーバーをセキュアに書くのはとても難しい。プロトコルがほんの少しでも複雑になってくると、なおさらだ。どんなプログラムだって、少なくとも些細な問題は抱えている。一般的なTCP/IPの実装でさえ、外部からのアタックを受けてしまった。より上位レベルの実装言語になると、万能薬は存在しない。そしてその言語自身が脆弱性を作ることもある。必ずといっていいほど見るフレーズが、どこから来たものかにかかわらず``すべての入力は疑ってかかれ''というものだ。疑うべき入力には、二次的な入力も含まれる。たとえばDNSサーバーやmilterからの入力もそうだ。初期のネットワークソフトウェアの大半がそうだったのだが、sendmailの初期のバージョンでは入力を信頼しすぎていた。
 
-But the biggest problem with sendmail was that early versions ran with
-root permissions. Root permission is needed in order to open the SMTP
-listening socket, to read individual users' forwarding information,
-and to deliver to individual users' mailboxes and home
-directories. However, on most systems today the concept of a mailbox
-name has been divorced from the concept of a system user, which
-effectively eliminates the need for root access except to open the
-SMTP listening socket. Today sendmail has the ability to give up root
-permissions before it processes a connection, eliminating this concern
-for environments that can support it. It's worth noting that on those
-systems that do not deliver directly to users' mailboxes, sendmail can
-also run in a chrooted environment, allowing further permission
-isolation.
+%% But the biggest problem with sendmail was that early versions ran with
+%% root permissions. Root permission is needed in order to open the SMTP
+%% listening socket, to read individual users' forwarding information,
+%% and to deliver to individual users' mailboxes and home
+%% directories. However, on most systems today the concept of a mailbox
+%% name has been divorced from the concept of a system user, which
+%% effectively eliminates the need for root access except to open the
+%% SMTP listening socket. Today sendmail has the ability to give up root
+%% permissions before it processes a connection, eliminating this concern
+%% for environments that can support it. It's worth noting that on those
+%% systems that do not deliver directly to users' mailboxes, sendmail can
+%% also run in a chrooted environment, allowing further permission
+%% isolation.
+しかし、sendmailで最大の問題だったのは、初期のバージョンがroot権限で動作していたという点だ。root権限を要した理由は、SMTPをリスンするソケットを開いたり各ユーザーの転送する情報を読んだり、各ユーザーのメールボックスやホームディレクトリにメッセージを配送したりするためだった。しかし、今どきのシステムの大半では、メールボックスの名前とシステム上のユーザーの概念とが切り離されている。そのため、SMTPをリスンするソケットを開く以外の操作ではroot権限は事実上不要となった。現在のsendmailでは、接続を処理する前にroot権限を放棄できるようになっている。これをサポートしている環境なら、root権限に関する問題は気にしなくてもよくなった。さらに、ユーザーのメールボックスへの直接の配送をしないシステム上では、sendmailをchroot環境で動かすこともできる。そうすれば、さらに権限を隔離できる。
 
-Unfortunately, as sendmail gained a reputation for poor security, it
-started to be blamed for problems that had nothing to do with
-sendmail.  For example, one system administrator made his \code{/etc}
-directory world writable and then blamed sendmail when someone
-replaced the \code{/etc/passwd} file. It was incidents like this that
-caused us to tighten security substantially, including explicitly
-checking the ownerships and modes on files and directories that
-sendmail accesses. These were so draconian that we were obliged to
-include the \code{DontBlameSendmail} option to (selectively) turn off
-these checks.
+%% Unfortunately, as sendmail gained a reputation for poor security, it
+%% started to be blamed for problems that had nothing to do with
+%% sendmail.  For example, one system administrator made his \code{/etc}
+%% directory world writable and then blamed sendmail when someone
+%% replaced the \code{/etc/passwd} file. It was incidents like this that
+%% caused us to tighten security substantially, including explicitly
+%% checking the ownerships and modes on files and directories that
+%% sendmail accesses. These were so draconian that we were obliged to
+%% include the \code{DontBlameSendmail} option to (selectively) turn off
+%% these checks.
+不幸にも、sendmailのセキュリティが貧弱だという評判が広まるにつれて、まったく関係のない問題までもsendmailのせいにされることが出てきた。たとえば、あるシステム管理者は、自分が\code{/etc}ディレクトリに書き込み権限を与えておきながら、誰かが\code{/etc/passwd}ファイルを書き換えたときにそれをsendmailのせいにしたりした。そうした事件を経て、我々もセキュリティについてより真剣に考えるようになった。そして、sendmailがアクセスするファイルやディレクトリの所有者やモードを、明示的にチェックするようにした。このチェックは非常に厳しいものだったので、\code{DontBlameSendmail}オプションを用意してこのチェックを無効化できるようにもした。
 
-There are other aspects of security that are not related to protecting
-the address space of the program itself. For example, the rise of spam
-also caused a rise in address harvesting. The \code{VRFY} and \code{EXPN} commands
-in SMTP were designed specifically to validate individual addresses
-and expand the contents of mailing lists respectively. These have been
-so badly abused by spammers that most sites now turn them off
-entirely. This is unfortunate, at least with \code{VRFY}, as this command was
-sometimes used by some anti-spam agents to validate the purported
-sending address.
+%% There are other aspects of security that are not related to protecting
+%% the address space of the program itself. For example, the rise of spam
+%% also caused a rise in address harvesting. The \code{VRFY} and \code{EXPN} commands
+%% in SMTP were designed specifically to validate individual addresses
+%% and expand the contents of mailing lists respectively. These have been
+%% so badly abused by spammers that most sites now turn them off
+%% entirely. This is unfortunate, at least with \code{VRFY}, as this command was
+%% sometimes used by some anti-spam agents to validate the purported
+%% sending address.
+それ以外の観点からのセキュリティ問題もあった。プログラム自身のアドレス空間を守るのとは直接関係しないものだ。たとえば、spamが増加するにつれて出てきた、メールアドレス収集に関する問題がこれにあたる。SMTPの\code{VRFY}コマンドや\code{EXPN}コマンドはそれぞれ、個別のアドレスを検証したりメーリングリストのメンバーを展開したりするために用意されたコマンドである。スパマーたちに悪用されることがあまりにも多発したので、ほとんどのサイトでは今やこのコマンドは無効化されている。少なくとも\code{VRFY}に関しては、これは残念なことだ。このコマンドは、アンチスパムエージェントが送信者のアドレスを検証するときに使うこともあるからである。
 
-Similarly, anti-virus protection was once seen as a desktop problem,
-but rose in importance to the point where any commercial-grade MTA had
-to have anti-virus checking available.
-Other security-related requirements in modern settings
-include mandatory encryption of sensitive data,
-data loss protection,
-and enforcement of regulatory requirements,
-for example, for HIPPA.
+%% Similarly, anti-virus protection was once seen as a desktop problem,
+%% but rose in importance to the point where any commercial-grade MTA had
+%% to have anti-virus checking available.
+%% Other security-related requirements in modern settings
+%% include mandatory encryption of sensitive data,
+%% data loss protection,
+%% and enforcement of regulatory requirements,
+%% for example, for HIPPA.
+同様に、ウィルス対策の保護もかつてはデスクトップ側の問題とみられていた。しかし、その重要性が増すにつれて、商用レベルのMTAではウィルス対策のチェックをできることが当然になってきた。その他、最近の設定でセキュリティ関連の必須要件となったものとしては、重要なデータを強制的に暗号化させることやデータの喪失に対する保護、HIPPAなどの法的規制への対応などがある。
 
-One of the principles that sendmail took to heart early on was
-reliability---every message should either be delivered or reported
-back to the sender. But the problem of joe-jobs (attackers forging
-the return address on a message, viewed by many as a security issue)
-has caused many sites to turn off the
-creation of bounce messages. If a failure can be determined while
-the SMTP connection is still open, the server can report the problem
-by failing the command, but after the SMTP connection is closed an
-incorrectly addressed message will silently disappear. To be fair,
-most legitimate mail today is single hop, so problems will be
-reported, but at least in principle the world has decided that
-security wins over reliability.
+%% One of the principles that sendmail took to heart early on was
+%% reliability---every message should either be delivered or reported
+%% back to the sender. But the problem of joe-jobs (attackers forging
+%% the return address on a message, viewed by many as a security issue)
+%% has caused many sites to turn off the
+%% creation of bounce messages. If a failure can be determined while
+%% the SMTP connection is still open, the server can report the problem
+%% by failing the command, but after the SMTP connection is closed an
+%% incorrectly addressed message will silently disappear. To be fair,
+%% most legitimate mail today is single hop, so problems will be
+%% reported, but at least in principle the world has decided that
+%% security wins over reliability.
+初期のsendmailが最重要視していたのは信頼性だった。つまり、あらゆるメッセージをきちんと配送する(あるいは送信者に差し戻す)ということだ。しかしジョージョブ問題(発信元アドレスを偽装したメールによる攻撃。多くの人はセキュリティの問題ととらえている)のせいで、多くのサイトがバウンスメッセージの作成を無効にしてしまった。もしSMTP接続が開いている間に失敗を検出できれば、サーバー側でSMTPコマンドを失敗させることで何か問題が起こったことを伝えられる。しかし、SMTP接続が閉じてしまった後だと、アドレスが間違っていたメッセージはただ黙って消えてしまうだけになってしまう。最近のメールの大半は1ホップで届くので、何か問題があればわかるだろう。しかし、少なくとも理屈上は、この世界では信頼性よりセキュリティを重視するようになったということだ。
 
 \end{aosasect1}
 
