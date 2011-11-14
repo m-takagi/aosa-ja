@@ -1220,132 +1220,147 @@ sendmailのこれまでの生き様は、セキュリティの面では波乱に
 \begin{aosasect1}{Sendmailの進化}
 \label{sec.sendmail.evo}
 
-Software doesn't survive in a rapidly changing environment without
-evolving to fit the changing environment. New hardware technologies
-appear, which push changes in the operating system, which push changes
-in libraries and frameworks, which push changes in applications. If an
-application succeeds, it gets used in ever more problematic
-environments.  Change is inevitable; to succeed you have to accept and
-embrace change.  This section describes some of the more important
-changes that have occurred as sendmail evolved.
+%% Software doesn't survive in a rapidly changing environment without
+%% evolving to fit the changing environment. New hardware technologies
+%% appear, which push changes in the operating system, which push changes
+%% in libraries and frameworks, which push changes in applications. If an
+%% application succeeds, it gets used in ever more problematic
+%% environments.  Change is inevitable; to succeed you have to accept and
+%% embrace change.  This section describes some of the more important
+%% changes that have occurred as sendmail evolved.
+激動の環境でソフトウェアが生き残り続けるには、環境の変化にあわせて自らを進化させなければならない。新たなハードウェア技術が登場すればそれにあわせてOSも変化するし、OSが変わればライブラリやフレームワークも変わる。つまりそれはアプリケーションにも変化を促すことになる。アプリケーションが存続すればするほど、問題のある環境で使われることも多くなる。変更は避けられない。生き延びるためには変更を受け入れてそれを取り込まねばならない。このセクションでは、これまでsendmailに起こった変化の中で重要なものをいくつか取り上げる。
 
 %% \begin{aosasect2}{Configuration Became More Verbose}
 \begin{aosasect2}{設定はより冗長に}
 
-The original configuration of sendmail was quite terse. For example,
-the names of options and macros were all single characters. There were
-three reasons for this. First, it made parsing very simple (important in
-a 16-bit environment). Second, there weren't very many options, so it
-wasn't hard to come up with mnemonic names.
-Third,
-the single character convention was already established
-with command-line flags.
+%% The original configuration of sendmail was quite terse. For example,
+%% the names of options and macros were all single characters. There were
+%% three reasons for this. First, it made parsing very simple (important in
+%% a 16-bit environment). Second, there weren't very many options, so it
+%% wasn't hard to come up with mnemonic names.
+%% Third,
+%% the single character convention was already established
+%% with command-line flags.
+当初のsendmailの設定は、極めて簡潔だった。たとえば、オプションやマクロの名前はすべて一文字だった。その理由は次の三つである。まず第一に、そうすればパース処理をシンプルにできるということ(16ビット環境ではこれが重要だった)。第二に、オプションの数がそれほど多くなかったこと。一文字のオプションを考えるのにそれほど苦労しなかった。第三に、単一文字の規約が既にコマンドラインのフラグで確立されていたこと。
 
-Similarly, rewriting rulesets were originally numbered instead of
-named. This was perhaps tolerable with a small number of rulesets, but
-as their number grew it became important that they have more mnemonic
-names.
+%% Similarly, rewriting rulesets were originally numbered instead of
+%% named. This was perhaps tolerable with a small number of rulesets, but
+%% as their number grew it became important that they have more mnemonic
+%% names.
+同様に、書き換えルールセットも、当初は名前ではなく番号で指定していた。ルールセットの数が少ないうちは、これでもまだ耐えられた。しかし、その数が増えてくると、よりわかりやすい名前をつけることが大切になった。
 
-As the environment in which sendmail operated became more complex, and
-as the 16-bit environment faded away, the need for a richer
-configuration language became evident. Fortunately, it was possible to
-make these changes in a backward compatible way. These changes
-dramatically improved the understandability of the configuration file.
+%% As the environment in which sendmail operated became more complex, and
+%% as the 16-bit environment faded away, the need for a richer
+%% configuration language became evident. Fortunately, it was possible to
+%% make these changes in a backward compatible way. These changes
+%% dramatically improved the understandability of the configuration file.
+sendmailの稼働環境が複雑になるにつれ、また同時に16ビット環境が去りゆくにつれ、よりリッチな設定方法の必要性が明らかになってきた。幸いにも、後方互換性を維持したままでの変更が可能だった。この変更によって、設定ファイルのわかりやすさが劇的に向上した。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{More Connections with Other Subsystems: Greater Integration}
 \begin{aosasect2}{他のサブシステムとの接続: さらなる統合}
 
-When sendmail was written the mail system was largely isolated from
-the rest of the operating system.  There were a few services that
-required integration, e.g., the \code{/etc/passwd} and
-\code{/etc/hosts} files.  Service switches had not been invented,
-directory services were nonexistent, and configuration was small and
-hand-maintained.
+%% When sendmail was written the mail system was largely isolated from
+%% the rest of the operating system.  There were a few services that
+%% required integration, e.g., the \code{/etc/passwd} and
+%% \code{/etc/hosts} files.  Service switches had not been invented,
+%% directory services were nonexistent, and configuration was small and
+%% hand-maintained.
+sendmailが書かれたころは、メールシステムといえば大抵はOSの他の部分から隔離されているものだった。統合を要するサービスはごく一部で、たとえば\code{/etc/passwd}や\code{/etc/hosts}といったファイルくらいだった。サービスを斬り合える機能はまだ発明されていなかったし、ディレクトリサービスも存在しなかった。そして設定ファイルはまだ小さく、手で書けるレベルだった。
 
-That quickly changed. One of the first additions was DNS\@. Although the
-system host lookup abstraction (\code{gethostbyname}) worked for
-looking up IP addresses, email had to use other queries such as
-MX\@. Later, IDA sendmail included an external database lookup
-functionality using dbm(3) files.  Sendmail 8 updated that to a
-general mapping service that allowed other database types, including
-external databases and internal transformations that could not be done
-using rewriting (e.g., dequoting an address).
+%% That quickly changed. One of the first additions was DNS\@. Although the
+%% system host lookup abstraction (\code{gethostbyname}) worked for
+%% looking up IP addresses, email had to use other queries such as
+%% MX\@. Later, IDA sendmail included an external database lookup
+%% functionality using dbm(3) files.  Sendmail 8 updated that to a
+%% general mapping service that allowed other database types, including
+%% external databases and internal transformations that could not be done
+%% using rewriting (e.g., dequoting an address).
+状況はすぐに変わった。最初に追加した中のひとつがDNSだ。システムが持つホストルックアップの抽象化機能(\code{gethostbyname})は、IPアドレスを探すには充分だったが、メールでは、それ以外にもMXなどを問い合わせる必要があったのだ。後に、IDA sendmailでは外部データベースを使ったルックアップ機能を組み込んだ。このデータベースにはdbm(3)ファイルを使った。sendmail 8ではそれをさらに拡張し、汎用的なマッピングサービスを用意して他の形式のデータベースも使えるようにした。外部のデータベースも使えるし、内部での変換も使える。内部での変換は、書き換え機能(アドレスのクォート解除など)なしには実現できなかっただろう。
 
-Today, the email system relies on many external services that are, in
-general, not designed specifically for the exclusive use of email.
-This has moved sendmail toward more abstractions in the code. It has
-also made maintaining the mail system more difficult as more ``moving
-parts'' are added.
+%% Today, the email system relies on many external services that are, in
+%% general, not designed specifically for the exclusive use of email.
+%% This has moved sendmail toward more abstractions in the code. It has
+%% also made maintaining the mail system more difficult as more ``moving
+%% parts'' are added.
+今やメールシステムは多数の外部サービスに依存しており、一般的に、電子メール専用として設計されることはなくなった。そのため、sendmailのコードもより抽象化する方向に進んだ。そのおかげで、メールシステムの開発や保守はより難しいものとなった。``可動部品''がいろいろ増えたからである。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Adaptation to a Hostile World}
-\begin{aosasect2}{敵対勢力との順応}
+\begin{aosasect2}{ギスギスした世界}
 
-Sendmail was developed in a world that seems completely foreign by
-today's standards. The user population on the early network were
-mostly researchers who were relatively benign, despite the sometimes
-vicious academic politics.  Sendmail reflected the world in which it
-was created, putting a lot of emphasis on getting the mail through as
-reliably as possible, even in the face of user errors.
+%% Sendmail was developed in a world that seems completely foreign by
+%% today's standards. The user population on the early network were
+%% mostly researchers who were relatively benign, despite the sometimes
+%% vicious academic politics.  Sendmail reflected the world in which it
+%% was created, putting a lot of emphasis on getting the mail through as
+%% reliably as possible, even in the face of user errors.
+sendmailの開発が始まったころの世界は、現在の常識からするとまったく異質の世界に見えることだろう。初期のネットワークにかかわっていた人の大半は研究者で、比較的温和な人が多かった。学術思想についての争いでたちの悪い振る舞いが起こることもあったが、すぐに収まった。sendmailは当時の世情を反映して作られており、メール配送の信頼性を上げることを最重要視していた。たとえユーザー側で間違いがあったとしても、可能な限りメールを配送できるように心がけた。
 
-Today's world is much more hostile. The vast majority of email is
-malicious. The goal of an MTA has transitioned from getting the mail
-through to keeping the bad mail out. Filtering is probably the first
-priority for any MTA today.  This required a number of changes in
-sendmail.
+%% Today's world is much more hostile. The vast majority of email is
+%% malicious. The goal of an MTA has transitioned from getting the mail
+%% through to keeping the bad mail out. Filtering is probably the first
+%% priority for any MTA today.  This required a number of changes in
+%% sendmail.
+今の世の中は、当時に比べてはるかにギスギスしている。飛び交う電子メールの大半は、悪意のあるものだ。MTAが目指すゴールは、メールをきちんと配送することから悪意のあるメールを排除することに変わった。いまどきのMTAで最重要視されるのは、きっとフィルタリング機能だろう。それに対応するため、sendmailにも数多くの変更が必要となった。
 
-For example, many rulesets have been added to allow checking of
-parameters on incoming SMTP commands in order to catch problems as
-early as possible. It is much cheaper to reject a message when reading
-the envelope than after you have committed to reading the entire
-message, and even more expensive after you have accepted the message
-for delivery. In the early days filtering was generally done by
-accepting the message, passing it to a filter program, and then
-sending it to another instance of sendmail if the message passed (the
-so-called ``sandwich'' configuration). This is just far too expensive
-in today's world.
+%% For example, many rulesets have been added to allow checking of
+%% parameters on incoming SMTP commands in order to catch problems as
+%% early as possible. It is much cheaper to reject a message when reading
+%% the envelope than after you have committed to reading the entire
+%% message, and even more expensive after you have accepted the message
+%% for delivery. In the early days filtering was generally done by
+%% accepting the message, passing it to a filter program, and then
+%% sending it to another instance of sendmail if the message passed (the
+%% so-called ``sandwich'' configuration). This is just far too expensive
+%% in today's world.
+一例として、数多くのルールセットが追加された。これらを使ってSMTPコマンドのパラメータをチェックし、問題を早期に発見できるようになった。エンベロープを読んだ段階でメッセージを拒否するほうが、メッセージ全体を読んでから拒否するよりもはるかにコストが低くなる。ましてや、メッセージの配送を受け入れた後で拒否するようにするとずっと高くついてしまう。初期のフィルタリングは、メッセージをいったん受け入れた後でフィルタプログラムに渡し、フィルタを通過したものだけを別のsendmailインスタンスに送るという仕組みだった(いわゆる``サンドウィッチ''構成である)。いま同じようなことをすれば、非常にコストがかかることだろう。
 
-Similarly, sendmail has gone from being a quite vanilla consumer of
-TCP/IP connections to being much more sophisticated, doing things like
-``peeking'' at network input to see if the sender is transmitting
-commands before the previous command has been acknowledged. This
-breaks down some of the previous abstractions that were designed to
-make sendmail adaptable to multiple network types.  Today, it would
-involve considerable work to connect sendmail to an XNS or DECnet
-network, for example, since the knowledge of TCP/IP has been built
-into so much of the code.
+%% Similarly, sendmail has gone from being a quite vanilla consumer of
+%% TCP/IP connections to being much more sophisticated, doing things like
+%% ``peeking'' at network input to see if the sender is transmitting
+%% commands before the previous command has been acknowledged. This
+%% breaks down some of the previous abstractions that were designed to
+%% make sendmail adaptable to multiple network types.  Today, it would
+%% involve considerable work to connect sendmail to an XNS or DECnet
+%% network, for example, since the knowledge of TCP/IP has been built
+%% into so much of the code.
+また、sendmailでのTCP/IP接続の使い方も変わった。もともとはごく標準的に使っているだけだったが、最近はより洗練されている。ネットワーク入力を``のぞき見''して、前のコマンドが受理されていないのに送信者が次のコマンドを送信していないかどうかを調べたりもする。このため、sendmailが複数のネットワークを扱えるように作られた抽象化の中にはうまく動かないものも出てきた。今でも、sendmailがたとえばXNSやDECnetのネットワークにも接続できるようにかなりの作業をしている。しかし、TCP/IPに固有の知見が多くのコードに取り込まれてしまっている。
 
-Many configuration features were added to address the hostile world,
-such as support for access tables, Realtime Blackhole Lists, address
-harvesting mitigation, denial-of-service protection, and spam
-filtering.  This has dramatically complicated the task of configuring
-a mail system, but was absolutely necessary to adapt to today's world.
+%% Many configuration features were added to address the hostile world,
+%% such as support for access tables, Realtime Blackhole Lists, address
+%% harvesting mitigation, denial-of-service protection, and spam
+%% filtering.  This has dramatically complicated the task of configuring
+%% a mail system, but was absolutely necessary to adapt to today's world.
+ギスギスした世界に立ち向かうために、さまざまな設定項目が追加された。アクセステーブルへの対応やリアルタイムブラックリストへの対応、アドレス収集対策、DoS対策、そしてspamのフィルタリングなどだ。そのおかげでメールシステムの設定はかなり複雑な作業になってしまったが、今の世の中で生きていくためにはそうするしかなかった。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Incorporation of New Technologies}
 \begin{aosasect2}{新技術の採用}
 
-Many new standards have come along over the years that required
-significant changes to sendmail. For example, the addition of TLS
-(encryption) required significant changes through much of the
-code. SMTP pipelining required peering into the low-level TCP/IP
-stream to avoid deadlocks. The addition of the submission port (587)
-required the ability to listen to multiple incoming ports, including
-having different behaviors depending on the arrival port.
+%% Many new standards have come along over the years that required
+%% significant changes to sendmail. For example, the addition of TLS
+%% (encryption) required significant changes through much of the
+%% code. SMTP pipelining required peering into the low-level TCP/IP
+%% stream to avoid deadlocks. The addition of the submission port (587)
+%% required the ability to listen to multiple incoming ports, including
+%% having different behaviors depending on the arrival port.
+新たな標準規格が続々と誕生し、それらもまたsendmailに大きく手を加える要因となった。たとえばTLS(暗号化)を追加するときには、大半のコードを変更しなければならなかった。SMTPのパイプラインを実現するには、ローレベルのTCP/IPストリームを注視してデッドロックを回避する必要があった。サブミッションポート(587)をサポートするには、複数の入力ポートを待ち受ける機能が必要となった。そして、ポートによって挙動を変えなければならなかった。
 
-Other pressures were forced by circumstances rather than standards.
-For example, the addition of the milter interface was a direct
-response to spam. Although milter was not a published standard, it was
-a major new technology.
+%% Other pressures were forced by circumstances rather than standards.
+%% For example, the addition of the milter interface was a direct
+%% response to spam. Although milter was not a published standard, it was
+%% a major new technology.
+それ以外にも、標準規格ではなくその場の状況に押されて追加した機能もある。たとえば、milterインターフェイスを追加したのはspamに耐えられなくなったからだ。milterは標準規格として確立されたものではなかったが、大きな新技術だった。
 
-In all cases, these changes enhanced the mail system in some way, be
-it increased security, better performance, or new
-functionality. However, they all came with costs, in nearly all cases
-complicating both the code base and the configuration file.
+%% In all cases, these changes enhanced the mail system in some way, be
+%% it increased security, better performance, or new
+%% functionality. However, they all came with costs, in nearly all cases
+%% complicating both the code base and the configuration file.
+どの場合についても、これらの変更によって何らかの面でメールシステムは強化された。セキュリティの向上やパフォーマンスの向上、あるいは新機能の追加などによってである。しかし、どの場合についてもそれなりのコストがかかっており、ほぼすべての変更がコードや設定ファイルを複雑化させている。
 
 \end{aosasect2}
 
