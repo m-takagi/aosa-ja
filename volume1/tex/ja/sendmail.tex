@@ -1369,137 +1369,148 @@ sendmailの開発が始まったころの世界は、現在の常識からする
 %% \begin{aosasect1}{What If I Did It Today?}
 \begin{aosasect1}{もし今やりなおせるとしたら?}
 
-Hindsight is 20/20. There are many things I would do differently
-today.  Some were unforeseeable at the time (e.g., how spam would
-change our perception of e-mail, what modern toolsets would look like,
-etc.), and some were eminently predictable. Some were just that in the
-process of writing sendmail I learned a lot about e-mail, about TCP/IP,
-and about programming itself---everyone grows as they code.
+%% Hindsight is 20/20. There are many things I would do differently
+%% today.  Some were unforeseeable at the time (e.g., how spam would
+%% change our perception of e-mail, what modern toolsets would look like,
+%% etc.), and some were eminently predictable. Some were just that in the
+%% process of writing sendmail I learned a lot about e-mail, about TCP/IP,
+%% and about programming itself---everyone grows as they code.
+後からなら何とでも言える。というわけで、今だったら違うやりかたにしただろうということもたくさんある。当時としては予測不能だったこと(spamのせいでメールに対する視点がどれほど変わるかや、最新のツール軍がどんなものになるかなど)もあれば、どう見ても予測できたはずだろうということもある。また、sendmailを書いている間に私自身さまざまなことを学んだ。電子メールのことやTCP/IPのこと、そしてプログラミング自体のことなど。誰もがコードとともに成長するということだ。
 
-But there are also many things I would do the same, some in
-contradiction to the standard wisdom.
+%% But there are also many things I would do the same, some in
+%% contradiction to the standard wisdom.
+しかし、今でも同じようにするだろうということもたくさんあって、その中には一般的な常識に反するものもある。
 
 %% \begin{aosasect2}{Things I Would Do Differently}
 \begin{aosasect2}{違うやりかたにしたいところ}
 
-Perhaps my biggest mistake with sendmail was to not recognize early
-enough how important it was going to be. I had several opportunities
-to nudge the world in the correct direction but didn't take them; in
-fact, in some cases I did damage, e.g., by not making sendmail
-stricter about bad input when it became appropriate to do
-so. Similarly, I recognized that the configuration file syntax needed
-to be improved fairly early on, when there were perhaps a few hundred
-sendmail instances deployed, but decided not to change things because
-I didn't want to cause the installed user base undue pain. In
-retrospect it would have been better to improve things early and
-cause temporary pain in order to produce a better long-term result.
+%% Perhaps my biggest mistake with sendmail was to not recognize early
+%% enough how important it was going to be. I had several opportunities
+%% to nudge the world in the correct direction but didn't take them; in
+%% fact, in some cases I did damage, e.g., by not making sendmail
+%% stricter about bad input when it became appropriate to do
+%% so. Similarly, I recognized that the configuration file syntax needed
+%% to be improved fairly early on, when there were perhaps a few hundred
+%% sendmail instances deployed, but decided not to change things because
+%% I didn't want to cause the installed user base undue pain. In
+%% retrospect it would have been better to improve things early and
+%% cause temporary pain in order to produce a better long-term result.
+おそらくsendmail史上最大の過ちは、後に自身がどれだけ重要な存在になるのかを早期に気付けなかったことだろう。世界が正しい方向に向かうようにほんの少し突っつける機会が何度かあったはずなのに、そうしなかった。実際、たとえばsendmailの入力チェックを厳しくして不正な入力を拒否するようにもできたはずだが、そうすべきときに実際は何もしなかった。同じく、設定ファイルの構文に改善の余地があることもわかっていた。まだ世界中で数百インスタンス程度しかsendmailが動いていなかったころの話だ。わかってはいたのだが、結局そのときは変更しなかった。その時点での既存ユーザーに負担を強いることになるからである。今思えば、何かを改善するなら早めにしておくべきだった。一時的につらいこともあるが、長い目で見ればよりよい結果になっただろう。
 
 %% \begin{aosasect3}{Version 7 Mailbox Syntax}
 \begin{aosasect3}{バージョン7のMailboxの構文}
 
-One example of this was the way version 7 mailboxes separated
-messages.  They used a line beginning ``From\textvisiblespace'' (where
-``\textvisiblespace'' represents the ASCII space character, 0x20) to separate
-messages. If a message came in containing the word ``From\textvisiblespace''
-at the
-beginning of the line, local mailbox software converted it to
-``{\textgreater}From\textvisiblespace''.
-One refinement on some but not all systems was
-to require a preceding blank line, but this could not be relied
-upon. To this day, ``{\textgreater}From'' appears in extremely
-unexpected places that aren't obviously related to email (but clearly
-were processed by email at one time or another). In retrospect I
-probably could have converted the BSD mail system to use a new syntax.
-I would have been roundly cursed at the time, but I would have saved
-the world a heap of trouble.
+%% One example of this was the way version 7 mailboxes separated
+%% messages.  They used a line beginning ``From\textvisiblespace'' (where
+%% ``\textvisiblespace'' represents the ASCII space character, 0x20) to separate
+%% messages. If a message came in containing the word ``From\textvisiblespace''
+%% at the
+%% beginning of the line, local mailbox software converted it to
+%% ``{\textgreater}From\textvisiblespace''.
+%% One refinement on some but not all systems was
+%% to require a preceding blank line, but this could not be relied
+%% upon. To this day, ``{\textgreater}From'' appears in extremely
+%% unexpected places that aren't obviously related to email (but clearly
+%% were processed by email at one time or another). In retrospect I
+%% probably could have converted the BSD mail system to use a new syntax.
+%% I would have been roundly cursed at the time, but I would have saved
+%% the world a heap of trouble.
+その一例が、バージョン7のメールボックスでのメッセージの分割方法である。当時は``From\textvisiblespace'' (``\textvisiblespace''はASCIIの空白文字、つまり0x20)で始まる行でメッセージを分割していた。もしメッセージ本文の中に``From\textvisiblespace''で始まる行があれば、ローカルのメールボックスソフトウェアはそれを``{\textgreater}From\textvisiblespace''に変換していた。いくつかのシステムでは「その前に空行を含むこと」を要件とできたが、すべてではなかったのでそれに依存はできなかった。今日に至るまで、``{\textgreater}From''はありとあらゆる箇所で予期せず登場している。それはメールとは直接関係のない(しかし、いつだったかそれがメールで処理されたことがあった)場面も含む。今思えば、BSDメールシステムから別の形式の構文に変換したほうがよかった。変更した直後には多くの人から恨まれるだろうが、そうしておけばさまざまな問題からこの世界を救えたはずだ。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Syntax and Contents of Configuration File}
 \begin{aosasect3}{設定ファイルの構文とその中身}
 
-Perhaps my biggest mistake in the syntax of the configuration file was
-the use of tab (HT, 0x09) in rewriting rules
-to separate the pattern from the
-replacement.  At the time I was emulating make, only to learn years
-later that Stuart Feldman, the author of make, thought that was one of
-his biggest mistakes. Besides being non-obvious when looking at the
-configuration on a screen, the tab character doesn't survive
-cut-and-paste in most window systems.
+%% Perhaps my biggest mistake in the syntax of the configuration file was
+%% the use of tab (HT, 0x09) in rewriting rules
+%% to separate the pattern from the
+%% replacement.  At the time I was emulating make, only to learn years
+%% later that Stuart Feldman, the author of make, thought that was one of
+%% his biggest mistakes. Besides being non-obvious when looking at the
+%% configuration on a screen, the tab character doesn't survive
+%% cut-and-paste in most window systems.
+おそらく、設定ファイルの構文における最大のミスは、書き換えルールの記述でパターンと置換内容の区切りにタブ(HT, 0x09)を採用したことだろう。その当時は、makeの流儀をまねたのだった。しかしその数年後にmakeの作者であるStuart Feldmanに聞いた話によると、彼もまたタブを採用したことをいちばん後悔しているとのことだった。設定ファイルを画面上で見たときにタブがあるかどうかがわかりにくいというだけでなく、大半のウィンドウシステムではカットアンドペーストでタブが消えてしまうという問題もあった。
 
-Although I believe that rewriting rules were the correct idea (see
-below), I would change the general structure of the configuration
-file.  For example, I did not anticipate the need for hierarchies in
-the configuration (e.g., options that would be set differently for
-different SMTP listener ports). At the time the configuration file was
-designed there were no ``standard'' formats. Today, I would be inclined
-to use an Apache-style configuration---it's clean, neat, and has
-adequate expressive power---or perhaps even embed a language such as Lua.
+%% Although I believe that rewriting rules were the correct idea (see
+%% below), I would change the general structure of the configuration
+%% file.  For example, I did not anticipate the need for hierarchies in
+%% the configuration (e.g., options that would be set differently for
+%% different SMTP listener ports). At the time the configuration file was
+%% designed there were no ``standard'' formats. Today, I would be inclined
+%% to use an Apache-style configuration---it's clean, neat, and has
+%% adequate expressive power---or perhaps even embed a language such as Lua.
+書き換えルールという考え方自体は間違っていなかったと思っている(以下を参照)。しかし、設定ファイルの全体構造はもう少しなんとかできただろう。たとえば、設定ファイルで階層構造が必要になることを想定できていなかった(SMTPリスナーのポートごとに異なるオプションを設定したりなど)。当時、設定ファイルを設計するにあたっては、``標準''フォーマットなど存在しなかった。今ならApache形式の設定構文を採用するだろう。すっきりしているし、充分な表現力もある。あるいは、Luaなどの組み込み言語を使ったかもしれない。
 
-When sendmail was developed the address spaces were small and the
-protocols were still in flux. Putting as much as possible into the
-configuration file seemed like a good idea. Today, that looks like a
-mistake: we have plenty of address space (for an MTA) and the
-standards are fairly static.
-Furthermore, part of the ``configuration file'' is really code
-that needs to be updated in new releases.
-The \code{.mc} configuration file fixes that,
-but having to rebuild your configuration every time you update the software
-is a pain.
-A simple solution to this would simply be
-to have two configuration files that sendmail would read, one hidden
-and installed with each new software release and the other exposed and
-used for local configuration.
+%% When sendmail was developed the address spaces were small and the
+%% protocols were still in flux. Putting as much as possible into the
+%% configuration file seemed like a good idea. Today, that looks like a
+%% mistake: we have plenty of address space (for an MTA) and the
+%% standards are fairly static.
+%% Furthermore, part of the ``configuration file'' is really code
+%% that needs to be updated in new releases.
+%% The \code{.mc} configuration file fixes that,
+%% but having to rebuild your configuration every time you update the software
+%% is a pain.
+%% A simple solution to this would simply be
+%% to have two configuration files that sendmail would read, one hidden
+%% and installed with each new software release and the other exposed and
+%% used for local configuration.
+sendmailの開発が進んでいたころは、アドレス空間も小さいしプロトコルもまだ流動的だった。可能な限り設定ファイル側に押し出しておくのが無難だったのだ。今の状況では、これは間違いだろう。今やMTAは広大なアドレス空間を使えるし、標準規格もきちんと固まっている。さらに、``設定ファイル''の一部は実際のところプログラムのコードのようになってしまっており、新しいリリースが出るたびに更新が必要になるほどだ。\code{.mc}設定ファイルを使えばこの問題は解決できるが、ソフトウェアを更新するたびに設定ファイルをビルドしなおす必要があるというのもつらいことだ。この問題に対するシンプルな対策は、sendmailが読む設定ファイルを二つに分割することだろう。一方は利用者から見えないようにしてソフトウェアの更新時に自動的にインストールされるようにし、もう一方を公開してローカル設定用に使わせるという方法だ。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Use of Tools}
-\begin{aosasect3}{使うツール}
+\begin{aosasect3}{ツールの活用}
 
-There are many new tools available today---for example, for
-configuring and building the software. Tools can be good leverage if
-you need them, but they can also be overkill, making it harder than
-necessary to understand the system. For example, you should never use
-a yacc(1) grammar when all you need is strtok(3). But reinventing the
-wheel isn't a good idea either.  In particular, despite some
-reservations I would almost certainly use autoconf today.
+%% There are many new tools available today---for example, for
+%% configuring and building the software. Tools can be good leverage if
+%% you need them, but they can also be overkill, making it harder than
+%% necessary to understand the system. For example, you should never use
+%% a yacc(1) grammar when all you need is strtok(3). But reinventing the
+%% wheel isn't a good idea either.  In particular, despite some
+%% reservations I would almost certainly use autoconf today.
+今ではさまざまな新しいツールが登場している。たとえばソフトウェアの構成やビルドひとつとってもそうである。必要に応じてツールを活用すればその力を生かせるだろうが、時にやり過ぎてしまうこともある。そうなれば、システムを理解するのが必要以上に困難になってしまう。たとえば、単にstrtok(3)があれば充分なときにわざわざyacc(1)の構文を使うのはばかげている。しかし、車輪の再発明をするのもあまりよい考えではない。例を挙げると、私はよっぽどの場合を除いてautoconfを使うようにしている。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Backward Compatibility}
 \begin{aosasect3}{後方互換性}
 
-With the benefit of hindsight, and knowing how ubiquitous sendmail
-became, I would not worry so much about breaking existing
-installations in the early days of development.  When existing
-practice is seriously broken it should be fixed, not accommodated
-for. That said, I would still not do strict checking of all message
-formats; some problems can be easily and safely ignored or
-patched. For example, I would probably still insert a \code{Message-Id:}
-header field into messages that did not have one, but I would be more
-inclined to reject messages without a \code{From:} header field rather than
-try to create one from the information in the envelope.
+%% With the benefit of hindsight, and knowing how ubiquitous sendmail
+%% became, I would not worry so much about breaking existing
+%% installations in the early days of development.  When existing
+%% practice is seriously broken it should be fixed, not accommodated
+%% for. That said, I would still not do strict checking of all message
+%% formats; some problems can be easily and safely ignored or
+%% patched. For example, I would probably still insert a \code{Message-Id:}
+%% header field into messages that did not have one, but I would be more
+%% inclined to reject messages without a \code{From:} header field rather than
+%% try to create one from the information in the envelope.
+もし将来の姿が見えていて、sendmailがいかに普及するかがわかっていたなら、開発初期の段階で既存の環境との互換性を崩してしまうことを躊躇しなかっただろう。もし既存の習慣がうまくいかなくなってしまうのならそれを修正すべきであって、なんとか対応させるというのではいけない。とはいえ、私はまだメッセージフォーマットの厳格なチェックをしていない。単に無視できたり簡単に手直しできたりするような問題もあるからである。たとえば、\code{Message-Id:}ヘッダーがないメッセージには今でもきっとヘッダーを追加するだろう。しかし、\code{From:}ヘッダーがないメッセージについては、わざわざエンベロープの情報からヘッダーを作るよりもそのメッセージを拒否してしまいたい。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Internal Abstractions}
 \begin{aosasect3}{内部的な抽象化}
 
-There are certain internal abstractions that I would not attempt
-again, and others that I would add. For example, I would not use
-null-terminated strings, opting instead for a length/value pair,
-despite the fact that this means that much of the Standard C Library
-becomes difficult to use. The security implications of this alone make
-it worthwhile. Conversely, I would not attempt to build exception
-handling in C, but I would create a consistent status code system that
-would be used throughout the code rather than having routines return
-\code{null}, \code{false}, or negative numbers to represent errors.
+%% There are certain internal abstractions that I would not attempt
+%% again, and others that I would add. For example, I would not use
+%% null-terminated strings, opting instead for a length/value pair,
+%% despite the fact that this means that much of the Standard C Library
+%% becomes difficult to use. The security implications of this alone make
+%% it worthwhile. Conversely, I would not attempt to build exception
+%% handling in C, but I would create a consistent status code system that
+%% would be used throughout the code rather than having routines return
+%% \code{null}, \code{false}, or negative numbers to represent errors.
+内部的な抽象化の中には、今ならそんなことはしないだろうというものもある。また、当時はそうしなかったが、今なら抽象化するだろうというものもある。たとえば、null終端文字列を長さ/値のペアのかわりに使うことはしないだろう。そうしたほうが標準Cライブラリで使いやすくなることはわかっていても、である。セキュリティに関する問題ひとつとっても、null終端文字列を使わない意味がある。逆に言うと、例外処理をCで書こうとは思わない。しかし、一貫性のあるステータスコード体系は作って、それを使うようにするだろう。ルーチンの返り値が\code{null}や\code{false}あるいは負の数だったらエラーを意味するなどということはしない。
 
-I would certainly abstract the concept of mailbox names from Unix user
-ids. At the time I wrote sendmail the model was that you only sent
-messages to Unix users. Today, that is almost never the case; even on
-systems that do use that model, there are system accounts that should
-never receive e-mail.
+%% I would certainly abstract the concept of mailbox names from Unix user
+%% ids. At the time I wrote sendmail the model was that you only sent
+%% messages to Unix users. Today, that is almost never the case; even on
+%% systems that do use that model, there are system accounts that should
+%% never receive e-mail.
+メールボックスの名前をUnixのユーザーidから切り離すという抽象化は、今ならきっと行うだろう。sendmailを書いていた当時は、Unixのユーザーにメールを送ることしか想定していなかった。今やそんな前提は成立しない。仮にUnixのユーザー管理と同じモデルのシステムであっても、決してメールを受け取ることのないシステムアカウントが存在する。
 
 \end{aosasect3}
 
@@ -1508,65 +1519,70 @@ never receive e-mail.
 %% \begin{aosasect2}{Things I Would Do The Same}
 \begin{aosasect2}{同じようにしたいところ}
 
-Of course, some things \emph{did} work well\ldots
+%% Of course, some things \emph{did} work well\ldots
+もちろん、\emph{うまくいってた}ことだってあったんだよ\ldots
 
 %% \begin{aosasect3}{Syslog}
 \begin{aosasect3}{Syslog}
 
-One of the successful side projects from sendmail was syslog. At the
-time sendmail was written, programs that needed to log had a specific
-file that they would write. These were scattered around the
-filesystem.  Syslog was difficult to write at the time (UDP didn't
-exist yet, so I used something called mpx files), but well worth
-it. However, I would make one specific change: I would pay more
-attention to making the syntax
-of logged messages
-machine parseable---essentially, I
-failed to predict the existence of log monitoring.
+%% One of the successful side projects from sendmail was syslog. At the
+%% time sendmail was written, programs that needed to log had a specific
+%% file that they would write. These were scattered around the
+%% filesystem.  Syslog was difficult to write at the time (UDP didn't
+%% exist yet, so I used something called mpx files), but well worth
+%% it. However, I would make one specific change: I would pay more
+%% attention to making the syntax
+%% of logged messages
+%% machine parseable---essentially, I
+%% failed to predict the existence of log monitoring.
+sendmailの派生プロジェクトの中でも成功したうちのひとつが、syslogである。sendmailが書かれた当時は、プログラムからログを出力しようとすれば、何かファイルを作ってそこに書き込むしかなかった。その手のログファイルがファイルシステム上に散乱していたのだ。当時はsyslogに書き込むのはなかなか難しかった(まだUDPは存在しなかったので、mpxファイルとかいうものを使っていた)が、よくやってくれた。しかし、一カ所だけ変更したいところがある。ログに記録されるメッセージの構文にもっと注意を払い、機械可読性を向上させたい。当時の私には、ログ監視ツールの登場を予見できなかったのだ。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Rewriting Rules}
-\begin{aosasect3}{リライトルール}
+\begin{aosasect3}{書き換えルール}
 
-Rewriting rules have been much maligned, but I would use them again
-(although probably not for as many things as they are used for now).
-Using the tab character was a clear mistake, but given the limitations
-of ASCII and the syntax of e-mail addresses, some escape character is
-probably required\footnote{Somehow I suspect that using Unicode for
-configuration would not prove popular.}. In general, the concept of
-using a pattern-replace paradigm worked well and was very flexible.
+%% Rewriting rules have been much maligned, but I would use them again
+%% (although probably not for as many things as they are used for now).
+%% Using the tab character was a clear mistake, but given the limitations
+%% of ASCII and the syntax of e-mail addresses, some escape character is
+%% probably required\footnote{Somehow I suspect that using Unicode for
+%% configuration would not prove popular.}. In general, the concept of
+%% using a pattern-replace paradigm worked well and was very flexible.
+書き換えルールにはいろいろ問題もあるが、今でもきっと採用するだろう(今使われているほど多くはならないだろうが)。タブ文字を使ったことは大きな間違いだった。しかし、ASCIIの制約やメールアドレスの構文を考慮すると、何らかのエスケープ文字は必要となる\footnote{設定ファイルでUnicodeを使うことはあまり広まらないだろうと思っている。}。一般に、パターン置換のパラダイムはうまく機能するし、非常に柔軟である。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Avoid Unnecessary Tools}
-\begin{aosasect3}{不要なツールは使わない}
+\begin{aosasect3}{ツールに頼りすぎない}
 
-Despite my comment above that I would use more existing tools, I am
-reluctant to use many of the run-time libraries available today. In my
-opinion far too many of them are so bloated as to be dangerous.
-Libraries should be chosen with care, balancing the merits of reuse
-against the problems of using an overly powerful tool to solve a
-simple problem. One particular tool I would avoid is XML, at least as
-a configuration language. I believe that the syntax is too baroque for
-much of what it is used for. XML has its place, but it is overused
-today.
+%% Despite my comment above that I would use more existing tools, I am
+%% reluctant to use many of the run-time libraries available today. In my
+%% opinion far too many of them are so bloated as to be dangerous.
+%% Libraries should be chosen with care, balancing the merits of reuse
+%% against the problems of using an overly powerful tool to solve a
+%% simple problem. One particular tool I would avoid is XML, at least as
+%% a configuration language. I believe that the syntax is too baroque for
+%% much of what it is used for. XML has its place, but it is overused
+%% today.
+先ほどは「もっと既存のツールを活用する」と書いたが、いまどきのランタイムライブラリの多くは、あまり使いたいとは思わない。私見だが、多くのライブラリは肥大化しすぎて危険になっているように感じる。ライブラリの選択は慎重に行うべきだ。再利用することにメリットと、必要以上に高機能なツールを使うことによる問題とのトレードオフになる。これだけは避けようと思っているツールのひとつがXMLで、少なくとも設定ファイルをXMLにしようとは思わない。XMLファイルの構文は、設定の記述に使うにはごてごてしすぎている。もちろんXMLが役立つ場面もあるのだろうが、現状は必要以上に使われすぎている。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Code in C}
-\begin{aosasect3}{コードをCで書く}
+\begin{aosasect3}{コードはCで書く}
 
-Some people have suggested that a more natural implementation language
-would be Java or C++. Despite the well-known problems with C, I would
-still use it as my implementation language. In part this is personal:
-I know C much better than I know Java or C++. But I'm also
-disappointed by the cavalier attitude that most object-oriented
-languages take toward memory allocation. Allocating memory has many
-performance concerns that can be difficult to characterize.  Sendmail
-uses object-oriented concepts internally where appropriate (for
-example, the implementation of map classes), but in my opinion going
-completely object-oriented is wasteful and overly restrictive.
+%% Some people have suggested that a more natural implementation language
+%% would be Java or C++. Despite the well-known problems with C, I would
+%% still use it as my implementation language. In part this is personal:
+%% I know C much better than I know Java or C++. But I'm also
+%% disappointed by the cavalier attitude that most object-oriented
+%% languages take toward memory allocation. Allocating memory has many
+%% performance concerns that can be difficult to characterize.  Sendmail
+%% uses object-oriented concepts internally where appropriate (for
+%% example, the implementation of map classes), but in my opinion going
+%% completely object-oriented is wasteful and overly restrictive.
+もっと自然に書ける言語、たとえばJavaとかC++を使えばいいのではないかと助言してくれる人もいる。C言語にはいろいろ問題もあるが、それでも私は実装言語にCを使うだろう。まあ個人的な理由もある。Cのほうが、JavaやC++よりもよく知っているからだ。しかしそれだけではない。いまどきのオブジェクト指向言語にはがっかりさせられているのだ。その多くはメモリ管理に無頓着すぎて、無尽蔵にメモリを使いすぎている。メモリを確保するときにはパフォーマンス上の問題もいろいろ考慮しなければならないのだが、それはここでは書ききれない。sendmailは、内部的にはオブジェクト指向の概念を採用しているところもある(たとえば、マップクラスなど)が、個人的な意見としては、すべてオブジェクト指向化してしまうのは無駄が多く、制約をかけすぎだと思っている。
 
 \end{aosasect3}
 
