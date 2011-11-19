@@ -8,7 +8,8 @@ chapter, I will discuss some of the decisions involved in designing
 Mercurial's algorithms and data structures. First, allow me to go into
 a short history of version control systems, to add necessary context.
 
-\begin{aosasect1}{ A Short History of Version Control}
+%% \begin{aosasect1}{ A Short History of Version Control}
+\begin{aosasect1}{バージョン管理システムの簡単な歴史}
 
 While this chapter is primarily about Mercurial's software
 architecture, many of the concepts are shared with other version
@@ -48,7 +49,8 @@ check the local (unpublished) changes in your working copy. Changes
 are published by issuing a \emph{commit} command, which will save the
 changes from the working directory to the repository.
 
-\begin{aosasect2}{Centralized Version Control}
+%% \begin{aosasect2}{Centralized Version Control}
+\begin{aosasect2}{中央集中型バージョン管理}
 
 The first version control system was the Source Code Control System,
 SCCS, first described in 1975. It was mostly a way of saving deltas to
@@ -102,7 +104,8 @@ computer that has a working directory of that repository.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Distributed Version Control}
+%% \begin{aosasect2}{Distributed Version Control}
+\begin{aosasect2}{分散型バージョン管理}
 
 While Subversion was a clear improvement over CVS, there are still a
 number of shortcomings. For one thing, in all centralized systems,
@@ -206,7 +209,8 @@ operations.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Data Structures}
+%% \begin{aosasect1}{Data Structures}
+\begin{aosasect1}{データ構造}
 
 Now that the concept of a DAG should be somewhat clear, let's try
 and see how DAGs are stored in Mercurial. The DAG model is central to
@@ -215,7 +219,8 @@ DAGs in the repository storage on disk (as well as the in-memory
 structure of the code). This section explains what they are and how
 they fit together.
 
-\begin{aosasect2}{Challenges}
+%% \begin{aosasect2}{Challenges}
+\begin{aosasect2}{課題}
 
 Before we dive into actual data structures, I'd like to provide some
 context about the environment in which Mercurial evolved. The first
@@ -283,7 +288,8 @@ version control needs).
 
 \end{aosasect2}
 
-\begin{aosasect2}{Fast Revision Storage: Revlogs}
+%% \begin{aosasect2}{Fast Revision Storage: Revlogs}
+\begin{aosasect2}{高速リビジョンストレージ: Revlog}
 
 The solution Matt came up with for Mercurial is called the \emph{revlog}
 (short for revision log). The revlog is a way of efficiently storing
@@ -342,7 +348,8 @@ SHA1 in order to allow future expansion.
 
 \end{aosasect2}
 
-\begin{aosasect2}{The Three Revlogs}
+%% \begin{aosasect2}{The Three Revlogs}
+\begin{aosasect2}{三つのRevlog}
 
 With the revlog providing a generic structure for historic data, we
 can layer the data model for our file tree on top of that. It consists
@@ -432,7 +439,8 @@ appending to the revlogs in parallel.
 
 \end{aosasect2}
 
-\begin{aosasect2}{The Working Directory}
+%% \begin{aosasect2}{The Working Directory}
+\begin{aosasect2}{作業ディレクトリ}
 
 A final important data structure is what we call the
 \emph{dirstate}. The dirstate is a representation of what's in the
@@ -458,14 +466,16 @@ time.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Versioning Mechanics}
+%% \begin{aosasect1}{Versioning Mechanics}
+\begin{aosasect1}{バージョン管理の仕組み}
 
 Now that you are familiar with the underlying data model and the
 structure of the code at the lower levels of Mercurial, let's move up
 a little bit and consider how Mercurial implements version control
 concepts on top of the foundation described in the previous section.
 
-\begin{aosasect2}{Branches}
+%% \begin{aosasect2}{Branches}
+\begin{aosasect2}{ブランチ}
 
 Branches are commonly used to separate different lines of development
 that will be integrated later. This might be because someone is
@@ -521,7 +531,8 @@ bookmarks, making it possible to push them around.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Tags}
+%% \begin{aosasect2}{Tags}
+\begin{aosasect2}{タグ}
 
 At first sight, the way Mercurial implements tags can be a bit
 confusing. The first time you add a tag (using the \code{tag}
@@ -562,7 +573,8 @@ to determine precedence among them.
 
 \end{aosasect1}
 
-\begin{aosasect1}{General Structure}
+%% \begin{aosasect1}{General Structure}
+\begin{aosasect1}{構造の概要}
 
 Mercurial is almost completely written in Python, with only a few bits
 and pieces in C because they are critical to the performance of the
@@ -642,7 +654,8 @@ function. Almost every function also gets the \code{ui} object and the
 
 \end{aosasect1}
 
-\begin{aosasect1}{Extensibility}
+%% \begin{aosasect1}{Extensibility}
+\begin{aosasect1}{拡張性}
 
 One of the things that makes Mercurial powerful is the ability to
 write extensions for it. Since Python is a relatively easy language to
@@ -650,7 +663,8 @@ get started with, and Mercurial's API is mostly quite well-designed
 (although certainly under-documented in places), a number of people
 actually first learned Python because they wanted to extend Mercurial.
 
-\begin{aosasect2}{Writing Extensions}
+%% \begin{aosasect2}{Writing Extensions}
+\begin{aosasect2}{拡張機能の作成}
 
 Extensions must be enabled by adding a line to one of the
 configuration files read by Mercurial on startup; a key is provided
@@ -715,7 +729,8 @@ commands using nothing but shell scripting.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Hooks}
+%% \begin{aosasect2}{Hooks}
+\begin{aosasect2}{フック}
 
 Version control systems have long provided hooks as a way for VCS
 events to interact with the outside world. Common usage includes
@@ -757,7 +772,8 @@ a kind of audit trail for the repository.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons Learned}
+%% \begin{aosasect1}{Lessons Learned}
+\begin{aosasect1}{学んだこと}
 
 One of the first decisions Matt made when he started to develop
 Mercurial was to develop it in Python. Python has been great for the
