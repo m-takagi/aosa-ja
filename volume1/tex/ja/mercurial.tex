@@ -2,52 +2,60 @@
 \begin{aosachapter}{Mercurial}{s:mercurial}{Dirkjan Ochtman}
 %% Based on EN-Revision r229
 
-Mercurial is a modern distributed version control system (VCS), written
-mostly in Python with bits and pieces in C for performance. In this
-chapter, I will discuss some of the decisions involved in designing
-Mercurial's algorithms and data structures. First, allow me to go into
-a short history of version control systems, to add necessary context.
+%% Mercurial is a modern distributed version control system (VCS), written
+%% mostly in Python with bits and pieces in C for performance. In this
+%% chapter, I will discuss some of the decisions involved in designing
+%% Mercurial's algorithms and data structures. First, allow me to go into
+%% a short history of version control systems, to add necessary context.
+Mercurialはモダンな分散型バージョン管理システム(VCS)で、大半はPythonで書かれている。ただ、ごく一部、パフォーマンスのためにCで書いているところもある。本章では、Mercurialのアルゴリズムやデータ構造を設計したときのいくつかの判断について説明する。まず最初に、バージョン管理システムの歴史を簡単に振り返っておこう。これが、本章を読み進めるための前提知識となる。
 
 %% \begin{aosasect1}{ A Short History of Version Control}
 \begin{aosasect1}{バージョン管理システムの簡単な歴史}
 
-While this chapter is primarily about Mercurial's software
-architecture, many of the concepts are shared with other version
-control systems. In order to fruitfully discuss Mercurial, I'd like to
-start off by naming some of the concepts and actions in different
-version control systems. To put all of this in perspective, I will
-also provide a short history of the field.
+%% While this chapter is primarily about Mercurial's software
+%% architecture, many of the concepts are shared with other version
+%% control systems. In order to fruitfully discuss Mercurial, I'd like to
+%% start off by naming some of the concepts and actions in different
+%% version control systems. To put all of this in perspective, I will
+%% also provide a short history of the field.
+本章で主に扱うのはMercurialのアーキテクチャについてである。しかし、その概念の多くは他のバージョン管理システムと共通している。Mercurialについての議論を実のあるものにするために、まずはさまざまなバージョン管理システムの概念や動作に名前をつけるところからはじめよう。さらに、それらすべてを見渡すために、この世界の歴史についても簡単に説明する。
 
-Version control systems were invented to help developers work on
-software systems simultaneously, without passing around full copies
-and keeping track of file changes themselves. Let's generalize from
-software source code to any tree of files. One of the primary
-functions of version control is to pass around changes to the
-tree. The basic cycle is something like this:
+%% Version control systems were invented to help developers work on
+%% software systems simultaneously, without passing around full copies
+%% and keeping track of file changes themselves. Let's generalize from
+%% software source code to any tree of files. One of the primary
+%% functions of version control is to pass around changes to the
+%% tree. The basic cycle is something like this:
+バージョン管理システムが作られたのは、複数人によるソフトウェアシステムの開発作業を支援するためだった。ソースの完全なコピーをやりとりして変更履歴を各自で管理させるなどということをしなくて済むように、と作られたのだ。ここで、単なるソフトウェアのソースコードだけではなく、任意のファイルツリーに一般化して考えよう。バージョン管理システムの主要機能のひとつは、変更をツリーに渡すことだ。基本的な流れは、このようになる。
 
 \begin{aosaenumerate}
 
-  \item Get the latest tree of files from someone else
+  %% \item Get the latest tree of files from someone else
+  \item 最新のファイルツリーを、どこか別の場所から取得する
 
-  \item Work on a set of changes to this version of the tree
+  %% \item Work on a set of changes to this version of the tree
+  \item このバージョンのツリー上で、何らかの変更を加える
 
-  \item Publish the changes so that others can retrieve them
+  %% \item Publish the changes so that others can retrieve them
+  \item 変更内容をどこかに公開し、他の人がそれを取得できるようにする
 
 \end{aosaenumerate}
 
+%% \noindent
+%% The first action, to get a local tree of files, is called a
+%% \emph{checkout}. The store where we retrieve and publish our changes
+%% is called a \emph{repository}, while the result of the checkout is
+%% called a \emph{working directory}, \emph{working tree}, or
+%% \emph{working copy}. Updating a working copy with the latest files
+%% from the repository is simply called \emph{update}; sometimes this
+%% requires \emph{merging}, i.e., combining changes from different users
+%% in a single file. A diff command allows us to review changes between
+%% two revisions of a tree or file, where the most common mode is to
+%% check the local (unpublished) changes in your working copy. Changes
+%% are published by issuing a \emph{commit} command, which will save the
+%% changes from the working directory to the repository.
 \noindent
-The first action, to get a local tree of files, is called a
-\emph{checkout}. The store where we retrieve and publish our changes
-is called a \emph{repository}, while the result of the checkout is
-called a \emph{working directory}, \emph{working tree}, or
-\emph{working copy}. Updating a working copy with the latest files
-from the repository is simply called \emph{update}; sometimes this
-requires \emph{merging}, i.e., combining changes from different users
-in a single file. A diff command allows us to review changes between
-two revisions of a tree or file, where the most common mode is to
-check the local (unpublished) changes in your working copy. Changes
-are published by issuing a \emph{commit} command, which will save the
-changes from the working directory to the repository.
+最初の操作、つまりファイルツリーをローカルに取得する作業のことを\emph{チェックアウト}と呼ぶ。データの取得元であり、かつ変更点の公開先でもある格納場所のことは\emph{リポジトリ}と呼び、チェックアウトしたもののことは\emph{作業ディレクトリ}あるいは\emph{作業ツリー}、\emph{作業コピー}などと呼ぶ。作業コピーの内容をリポジトリ上の最新の状態に更新することは、単に\emph{更新}と呼ぶ。このとき、場合によっては\emph{マージ}が必要になることもある。マージとは、同一ファイル上での別のユーザーによる変更をとりまとめることだ。diffコマンドを使うと、ツリーあるいはファイルについて複数のリビジョン間での変更点を確認できる。最もよくある使いかたは、作業コピー上にあるローカルの(まだ公開していない)変更を確認することだ。変更を公開するには\emph{commit}コマンドを実行する。これは、作業ディレクトリ上での変更をリポジトリに記録する。
 
 %% \begin{aosasect2}{Centralized Version Control}
 \begin{aosasect2}{中央集中型バージョン管理}
