@@ -60,158 +60,173 @@ Mercurialはモダンな分散型バージョン管理システム(VCS)で、大
 %% \begin{aosasect2}{Centralized Version Control}
 \begin{aosasect2}{中央集中型バージョン管理}
 
-The first version control system was the Source Code Control System,
-SCCS, first described in 1975. It was mostly a way of saving deltas to
-single files that was more efficient than just keeping around copies,
-and didn't help with publishing these changes to others. It was
-followed in 1982 by the Revision Control System, RCS, which was a more
-evolved and free alternative to SCCS (and which is still being
-maintained by the GNU project).
+%% The first version control system was the Source Code Control System,
+%% SCCS, first described in 1975. It was mostly a way of saving deltas to
+%% single files that was more efficient than just keeping around copies,
+%% and didn't help with publishing these changes to others. It was
+%% followed in 1982 by the Revision Control System, RCS, which was a more
+%% evolved and free alternative to SCCS (and which is still being
+%% maintained by the GNU project).
+バージョン管理システムの元祖はSource Code Control Systemだ。略してSCCSと呼ばれるこのシステムが最初に登場したのは1975年のことだった。差分をひとつのファイルに記録するという方式でバージョンを管理しており、各バージョンのコピーを取っておくよりも効率的だった。その変更を他人に公開する仕組みは用意されていなかった。その後1982年に登場したRevision Control System(略してRCS)は、さらに進化しており、SCCSの代替として使えるフリーソフトウェアだった(RCSは、今でもGNUプロジェクトが保守を続けている)。
 
-After RCS came CVS, the Concurrent Versioning System, first released
-in 1986 as a set of scripts to manipulate RCS revision files in
-groups. The big innovation in CVS is the notion that multiple users can
-edit simultaneously, with merges being done after the fact
-(concurrent edits). This also required the notion of edit conflicts.
-Developers may only commit a new version of some file if it's based
-on the latest version available in the repository. If there are changes
-in the repository and in my working directory, I have to resolve any
-conflicts resulting from those changes (edits changing the same lines).
+%% After RCS came CVS, the Concurrent Versioning System, first released
+%% in 1986 as a set of scripts to manipulate RCS revision files in
+%% groups. The big innovation in CVS is the notion that multiple users can
+%% edit simultaneously, with merges being done after the fact
+%% (concurrent edits). This also required the notion of edit conflicts.
+%% Developers may only commit a new version of some file if it's based
+%% on the latest version available in the repository. If there are changes
+%% in the repository and in my working directory, I have to resolve any
+%% conflicts resulting from those changes (edits changing the same lines).
+RCSに続いて登場したのがCVS。これはConcurrent Versioning Systemの略で、1986年にリリースされた。当初は、RCSのリビジョンファイルを操作するためのスクリプト群という形式だった。CVSにおける大きなイノベーションは、複数のユーザーによる同時編集と、その後での編集のマージという概念だった。ここで、編集時の衝突という概念も登場する。開発者が何らかのファイルの新しいバージョンをコミットするためには、手元のファイルをリポジトリ内の最新版に基づいたものにしておく必要があった。リポジトリ内のファイルと作業ディレクトリ上のファイルの両方で(同じ行の)変更があった場合は、両者の変更の衝突を解消しなければならなかった。
 
-CVS also pioneered the notions of \emph{branches}, which allow
-developers to work on different things in parallel, and \emph{tags},
-which enable naming a consistent snapshot for easy reference. While
-CVS deltas were initially communicated via the repository on a shared
-filesystem, at some point CVS also implemented a client-server
-architecture for use across large networks (such as the Internet).
+%% CVS also pioneered the notions of \emph{branches}, which allow
+%% developers to work on different things in parallel, and \emph{tags},
+%% which enable naming a consistent snapshot for easy reference. While
+%% CVS deltas were initially communicated via the repository on a shared
+%% filesystem, at some point CVS also implemented a client-server
+%% architecture for use across large networks (such as the Internet).
+CVSは、\emph{ブランチ}や\emph{タグ}という概念を初めて取り入れたシステムでもある。ブランチのおかげで別々の作業を並行して行えるようになり、タグのおかげでスナップショットに名前をつけて容易に参照できるようになった。CVSの差分のやりとりは、当初は共有ファイルシステム上のリポジトリを使って行っていた。その後、CVSもクライアントサーバー型のアーキテクチャを採用し、(インターネットのような)大規模ネットワーク上でも使えるようになった。
 
-In 2000, three developers got together to build a new VCS, christened
-Subversion, with the intention of fixing some of the larger
-warts in CVS\@. Most importantly, Subversion works on whole trees at a
-time, meaning changes in a revisions should be atomic, consistent,
-isolated, and durable. Subversion working copies also retain a
-pristine version of the checked out revision in the working directory,
-so that the common diff operation (comparing the local tree against
-a checked-out changeset) is local and thus fast.
+%% In 2000, three developers got together to build a new VCS, christened
+%% Subversion, with the intention of fixing some of the larger
+%% warts in CVS\@. Most importantly, Subversion works on whole trees at a
+%% time, meaning changes in a revisions should be atomic, consistent,
+%% isolated, and durable. Subversion working copies also retain a
+%% pristine version of the checked out revision in the working directory,
+%% so that the common diff operation (comparing the local tree against
+%% a checked-out changeset) is local and thus fast.
+2000年に、3人の開発者が新しいVCSの開発をはじめた。それはSubversionと名付けられ、CVSの大きな問題点を修正することを目標として開発を進めた。最も重要だったのは、Subversionがツリー全体を一括して扱うことだった。つまり、リビジョン間での変更はアトミックであり、一貫性があってそれぞれ隔離されており、永続するということだ。Subversionの作業コピーには、作業ディレクトリのリビジョンをチェックアウトした当初の状態が残っている。つまり、よくあるdiff操作(ローカルのツリーをチェックアウトしたときの状態と比べる作業)がローカルで高速に実行できるということだ。
 
-One of the interesting concepts in Subversion is that tags and
-branches are part of a project tree. A Subversion project is usually
-divided into three areas: \code{tags}, \code{branches}, and
-\code{trunk}. This design has proved very intuitive to users who were
-unfamiliar with version control systems, although the flexibility
-inherent in this design has caused
-numerous problems for conversion tools, mostly because \code{tags} and
-\code{branches} have more structural representation in other systems.
+%% One of the interesting concepts in Subversion is that tags and
+%% branches are part of a project tree. A Subversion project is usually
+%% divided into three areas: \code{tags}, \code{branches}, and
+%% \code{trunk}. This design has proved very intuitive to users who were
+%% unfamiliar with version control systems, although the flexibility
+%% inherent in this design has caused
+%% numerous problems for conversion tools, mostly because \code{tags} and
+%% \code{branches} have more structural representation in other systems.
+Subversionの興味深い概念のひとつが、タグやブランチもプロジェクトのツリーの一部とみなしたことである。Subversionのプロジェクトは、\code{tags}、\code{branches}そして\code{trunk}の三つのエリアに分かれていることが多い。この設計は、バージョン管理システムに不慣れなユーザーにとっては非常にわかりやすかった。しかし、この設計による柔軟性は、変換ツールを作る側にとってはさまざまな問題のもととなった。他のシステムでは、\code{タグ}や\code{ブランチ}はそれ専用の構造で表すことが多かったからである。
 
-All of the aforementioned systems are said to be \emph{centralized};
-to the extent that they even know how to exchange changes (starting
-with CVS), they rely on some other computer to keep track of the
-history of the repository. \emph{Distributed} version control systems
-instead keep a copy of all or most of the repository history on each
-computer that has a working directory of that repository.
+%% All of the aforementioned systems are said to be \emph{centralized};
+%% to the extent that they even know how to exchange changes (starting
+%% with CVS), they rely on some other computer to keep track of the
+%% history of the repository. \emph{Distributed} version control systems
+%% instead keep a copy of all or most of the repository history on each
+%% computer that has a working directory of that repository.
+ここまで取り上げたすべてのシステムは、いわゆる\emph{中央集中型}である。CVS以降のツールでは変更点をやりとりする方法を知っているが、それは他のコンピュータが変更の履歴を保持しているということに依存している。\emph{分散型}のバージョン管理システムは、リポジトリの履歴のすべて(あるいは大半)を各コンピュータに保持しており、そのリポジトリの作業ディレクトリも保持している。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Distributed Version Control}
 \begin{aosasect2}{分散型バージョン管理}
 
-While Subversion was a clear improvement over CVS, there are still a
-number of shortcomings. For one thing, in all centralized systems,
-committing a changeset and publishing it are effectively the same
-thing, since repository history is centralized in one place. This
-means that committing changes without network access is
-impossible. Secondly, repository access in centralized systems always
-needs one or more network round trips, making it relatively slow compared
-to the local accesses needed with distributed systems. Third, the systems
-discussed above were not very good at tracking merges (some have since
-grown better at it). In large groups working concurrently, it's
-important that the version control system records what changes have
-been included in some new revision, so that nothing gets lost and
-subsequent merges can make use of this information. Fourth, the
-centralization required by traditional VCSes sometimes seems
-artificial, and promotes a single place for integration. Advocates of
-distributed VCSes argue that a more distributed system allows for a
-more organic organization, where developers can push around and
-integrate changes as the project requires at each point in time.
+%% While Subversion was a clear improvement over CVS, there are still a
+%% number of shortcomings. For one thing, in all centralized systems,
+%% committing a changeset and publishing it are effectively the same
+%% thing, since repository history is centralized in one place. This
+%% means that committing changes without network access is
+%% impossible. Secondly, repository access in centralized systems always
+%% needs one or more network round trips, making it relatively slow compared
+%% to the local accesses needed with distributed systems. Third, the systems
+%% discussed above were not very good at tracking merges (some have since
+%% grown better at it). In large groups working concurrently, it's
+%% important that the version control system records what changes have
+%% been included in some new revision, so that nothing gets lost and
+%% subsequent merges can make use of this information. Fourth, the
+%% centralization required by traditional VCSes sometimes seems
+%% artificial, and promotes a single place for integration. Advocates of
+%% distributed VCSes argue that a more distributed system allows for a
+%% more organic organization, where developers can push around and
+%% integrate changes as the project requires at each point in time.
+SubversionはCVSよりもずっときれいな実装だったが、それでも弱点はいくつか残っていた。たとえば、これは中央集中型のバージョン管理システムに共通する問題だが、変更をコミットすると同時に事実上その変更が公開されてしまうという点もそのひとつだ。リポジトリの履歴が中央で一元管理されている以上、どうしてもそうなってしまう。これはつまり、ネットワークに接続できない環境ではコミットが不可能であるということを意味する。第二に、中央集中型のシステムでリポジトリにアクセスする際には、最低一度はネットワーク上のやりとりが発生する。そのため、分散型システムの場合のローカルアクセスに比べて、比較的動作が遅くなってしまう。第三に、これまで取り上げたシステムは、どれもマージが下手である(中にはいくらかましになったものもあるが)。大規模なグループで並行作業をしていると、新しいバージョンがバージョン管理システムのどの変更を含むものかを把握することが重要となる。とりこぼしがないかを確認し、その後のマージをうまく行うためにこの情報を使うことが必要となる。第四に、昔ながらのVCSが求める中央管理は、時に人工的に見えることもある。統合のための場所を一カ所用意することになる。分散型のVCSを支持する人たちは、分散型のシステムのほうがより有機的な組織に対応できると言う。各開発者による変更のプッシュや統合を、必要に応じてその場で行えるというわけだ。
 
-A number of new tools have been developed to address these needs. From
-where I sit (the open source world), the most notable three of these
-in 2011 are Git, Mercurial and Bazaar. Both Git and Mercurial were
-started in 2005 when the Linux kernel developers decided to no longer
-use the proprietary BitKeeper system. Both were started by Linux
-kernel developers (Linus Torvalds and Matt Mackall, respectively) to
-address the need for a version control system that could handle
-hundreds of thousands of changesets in tens of thousands of files (for
-example, the kernel). Both Matt and Linus were also heavily influenced
-by the Monotone VCS\@. Bazaar was developed separately but gained
-widespread usage around the same time, when it was adopted by
-Canonical for use with all of their projects.
+%% A number of new tools have been developed to address these needs. From
+%% where I sit (the open source world), the most notable three of these
+%% in 2011 are Git, Mercurial and Bazaar. Both Git and Mercurial were
+%% started in 2005 when the Linux kernel developers decided to no longer
+%% use the proprietary BitKeeper system. Both were started by Linux
+%% kernel developers (Linus Torvalds and Matt Mackall, respectively) to
+%% address the need for a version control system that could handle
+%% hundreds of thousands of changesets in tens of thousands of files (for
+%% example, the kernel). Both Matt and Linus were also heavily influenced
+%% by the Monotone VCS\@. Bazaar was developed separately but gained
+%% widespread usage around the same time, when it was adopted by
+%% Canonical for use with all of their projects.
+これらの問題を解決しようと、新たなツールがいろいろ登場した。私の周囲の世界(オープンソースの世界)を見る限り、2011年の時点での三大巨頭はGitとMercurialそしてBazaarである。GitとMercurialは、どちらも2005年に開発が始まった。Linuxカーネルの開発者が、プロプライエタリなBitKeeperを使わないようにすると決断したころである。どちらのツールもLinuxカーネルの開発者が最初に作り始めた(GitはLinus Torvalds、そしてMercurialはMatt Mackallだ)。何万ものファイル上で繰り広げられる何十万ものチェンジセット(そう、たとえばLinuxカーネルみたいなもの)もきちんと扱えるように作られている。MattもLinusも、Monotone VCSの影響を強く受けていた。Bazaarの開発はそれとは別に進んでいたが、GitやMercurialと同時期に広く使われるようになった。CanonicalがすべてのプロジェクトをBazaarに移行したのがちょうどこの時期である。
 
-Building a distributed version control system obviously comes with
-some challenges, many of which are inherent in any distributed
-system. For one thing, while the source control server in centralized
-systems always provided a canonical view of history, there is no such
-thing in a distributed VCS\@. Changesets can be committed in parallel,
-making it impossible to temporally order revisions in any given
-repository.
+%% Building a distributed version control system obviously comes with
+%% some challenges, many of which are inherent in any distributed
+%% system. For one thing, while the source control server in centralized
+%% systems always provided a canonical view of history, there is no such
+%% thing in a distributed VCS\@. Changesets can be committed in parallel,
+%% making it impossible to temporally order revisions in any given
+%% repository.
+分散型バージョン管理システムの構築にはいろいろ困難もあった。その多くは、分散型システムという性質によるものだった。一例を挙げよう。中央集中型のシステムにおけるソース管理サーバーは常に本流の履歴を提供できるが、分散型のVCSにはそもそも「本流の」履歴など存在しない。チェンジセットは各地で並行にコミットできるので、特定のリポジトリ上で一時的にリビジョンを並べることは不可能だ。
 
-The solution that has been almost universally adopted is to use a
-directed acyclic graph (DAG) of changesets instead of a linear
-ordering (\aosafigref{fig.hg.dag}). That is, a newly committed
-changeset is the child revision of the revision it was based on, and
-no revision can depend on itself or its descendant revisions. In this
-scheme, we have three special types of revisions: \emph{root
-revisions} which have no parents (a repository can have multiple
-roots), \emph{merge revisions} which have more than one parent, and
-\emph{head revisions} which have no children. Each repository starts
-from an empty root revision and proceeds from there along a line of
-changesets, ending up in one or more heads. When two users have
-committed independently and one of them wants to pull in the changes
-from the other, he or she will have to explicitly merge the other's
-changes into a new revision, which he subsequently commits as a merge
-revision.
+%% The solution that has been almost universally adopted is to use a
+%% directed acyclic graph (DAG) of changesets instead of a linear
+%% ordering (\aosafigref{fig.hg.dag}). That is, a newly committed
+%% changeset is the child revision of the revision it was based on, and
+%% no revision can depend on itself or its descendant revisions. In this
+%% scheme, we have three special types of revisions: \emph{root
+%% revisions} which have no parents (a repository can have multiple
+%% roots), \emph{merge revisions} which have more than one parent, and
+%% \emph{head revisions} which have no children. Each repository starts
+%% from an empty root revision and proceeds from there along a line of
+%% changesets, ending up in one or more heads. When two users have
+%% committed independently and one of them wants to pull in the changes
+%% from the other, he or she will have to explicitly merge the other's
+%% changes into a new revision, which he subsequently commits as a merge
+%% revision.
+この問題に対して一般的に広く受け入れられている解決策は、チェンジセットを一列に並べるのではなくチェンジセットの無閉路有向グラフ(directed acyclic graph: DAG)を使うという方法だ(\aosafigref{fig.hg.dag})。つまり、新たにコミットしたチェンジセットは別のリビジョンの子リビジョンとなり、自分自身あるいは自分の子孫の子リビジョンになることはできないという構造である。この考え方を採用するために、三種類の特殊なリビジョンを用意した。親を持たないリビジョンである\emph{rootリビジョン}(ひとつのリポジトリに複数のルートがあってもかまわない)、複数の親を持つ\emph{マージリビジョン}、そして子を持たない\emph{headリビジョン}である。各リポジトリは、まず空のrootリビジョンがひとつだけある状態から始まる。それを起点としてチェンジセットが連なり、最終的にひとつあるいは複数のheadを持つことになる。二人のユーザーがそれぞれ別のコミットをしたときに、一方がもう一方のコミットを取り込みたくなったとしよう。そんな場合は、別のユーザーの変更を新しいリビジョンに明示的にマージしなければならない。この新しいリビジョンを、マージリビジョンとしてコミットする。
 
-\aosafigure[275pt]{../images/mercurial/dag.eps}{Directed Acyclic Graph of Revisions}{fig.hg.dag}
+%% \aosafigure[275pt]{../images/mercurial/dag.eps}{Directed Acyclic Graph of Revisions}{fig.hg.dag}
+\aosafigure[275pt]{../images/mercurial/dag.eps}{各リビジョンの無閉路有向グラフ}{fig.hg.dag}
 
-Note that the DAG model helps solve some of the problems that are hard
-to solve in centralized version control systems: merge revisions are used to
-record information about newly merged branches of the DAG. The
-resulting graph can also usefully represent a large group of parallel
-branches, merging into smaller groups, finally merging into one
-special branch that's considered canonical.
+%% Note that the DAG model helps solve some of the problems that are hard
+%% to solve in centralized version control systems: merge revisions are used to
+%% record information about newly merged branches of the DAG. The
+%% resulting graph can also usefully represent a large group of parallel
+%% branches, merging into smaller groups, finally merging into one
+%% special branch that's considered canonical.
+DAGモデルを使うと、中央集中型のバージョン管理システムでは解決が困難な問題を解決する手助けになる。つまり、マージリビジョンを使えば、新たにDAGにマージされたブランチの情報を記録できるということだ。その結果としてできあがるグラフは並行するブランチ全体の大きなまとまりもうまく表せており、それをより小さなグループにマージしたり、最終的に「本流」ブランチにまとめたりもできる。
 
-This approach requires that the system keep track of the ancestry
-relations between changesets; to facilitate exchange of changeset data,
-this is usually done by having changesets keep track of their
-parents. To do this, changesets obviously also need some kind of
-identifier. While some systems use a UUID or a similar kind of scheme,
-both Git and Mercurial have opted to use SHA1 hashes of the contents
-of the changesets. This has the additional useful property that the
-changeset ID can be used to verify the changeset contents. In fact,
-because the parents are included in the hashed data, all history
-leading up to any revision can be verified using its hash. Author
-names, commit messages, timestamps and other changeset metadata is
-hashed just like the actual file contents of a new revision, so that
-they can also be verified. And since timestamps are recorded at commit
-time, they too do not necessarily progress linearly in any given
-repository.
+%% This approach requires that the system keep track of the ancestry
+%% relations between changesets; to facilitate exchange of changeset data,
+%% this is usually done by having changesets keep track of their
+%% parents. To do this, changesets obviously also need some kind of
+%% identifier. While some systems use a UUID or a similar kind of scheme,
+%% both Git and Mercurial have opted to use SHA1 hashes of the contents
+%% of the changesets. This has the additional useful property that the
+%% changeset ID can be used to verify the changeset contents. In fact,
+%% because the parents are included in the hashed data, all history
+%% leading up to any revision can be verified using its hash. Author
+%% names, commit messages, timestamps and other changeset metadata is
+%% hashed just like the actual file contents of a new revision, so that
+%% they can also be verified. And since timestamps are recorded at commit
+%% time, they too do not necessarily progress linearly in any given
+%% repository.
+この手法を使うには、バージョン管理システムがチェンジセット間の親子関係を保持している必要がある。これを実現するため、チェンジセットのデータをやりとりする際には自分の親のチェンジセットを知っている状態にしておくことになる。当然、そのためにはチェンジセットに何らかの識別子が必要となる。システムによってはUUIDやそれに類する仕組みを使った識別子を用意しているものもあるが、GitやMercurialの場合はチェンジセットの内容のSHA1ハッシュを使っている。この方式を使うと、チェンジセットのIDを使ってチェンジセットの中身が改ざんされていないことを検証できるという利点もある。実際、親の情報もハッシュされたデータに含んでいるので、どのリビジョンからであってもそのハッシュだけで履歴の正当性を検証できる。コミットの作者名やコミットメッセージ、タイムスタンプ、その他のメタデータは、新しいリビジョンの実際の内容をハッシュするのと同様にハッシュされる。つまり、メタデータも同様に検証できるということだ。また、タイムスタンプはコミット時に記録されるので、任意のリポジトリ内でリニアに進む必要もない。
 
-All of this can be hard for people who have previously only used
-centralized VCSes to get used to: there is no nice integer to globally
-name a revision, just a 40-character hexadecimal string. Moreover,
-there's no longer any global ordering, just a local ordering; the only
-global ``ordering'' is a DAG instead of a line. Accidentally starting
-a new head of development by committing against a parent revision that
-already had another child changeset can be confusing when you're used
-to a warning from the VCS when this kind of thing happens.
+%% All of this can be hard for people who have previously only used
+%% centralized VCSes to get used to: there is no nice integer to globally
+%% name a revision, just a 40-character hexadecimal string. Moreover,
+%% there's no longer any global ordering, just a local ordering; the only
+%% global ``ordering'' is a DAG instead of a line. Accidentally starting
+%% a new head of development by committing against a parent revision that
+%% already had another child changeset can be confusing when you're used
+%% to a warning from the VCS when this kind of thing happens.
+これまでに中央集中型のVCSしか使ってこなかった人たちにとっては、こういった考え方はなかなかなじめないものだ。わかりやすい番号でリビジョンを表すのでなく、単なる40文字の16進文字列を使うだって? さらに、リビジョンの並び順など存在しない。単に個々のローカルリビジョン内での並び順があるだけで、全体的な``並び順''は一直線ではなくDAGで表している。既に別の子チェンジセットを持つリビジョンに対して、新しいheadをコミットして開発を続けることもできる。慣れ親しんだ中央集中型のVCSなら、そんなことをすれば警告が出ていたことだろう。
 
-Luckily, there are tools to help visualize the tree ordering, and
-Mercurial provides an unambiguous short version of the changeset hash
-\emph{and} a local-only linear number to aid identification. The
-latter is a monotonically climbing integer that indicates the order in
-which changesets have entered the clone. Since this order can be
-different from clone to clone, it cannot be relied on for non-local
-operations.
+%% Luckily, there are tools to help visualize the tree ordering, and
+%% Mercurial provides an unambiguous short version of the changeset hash
+%% \emph{and} a local-only linear number to aid identification. The
+%% latter is a monotonically climbing integer that indicates the order in
+%% which changesets have entered the clone. Since this order can be
+%% different from clone to clone, it cannot be relied on for non-local
+%% operations.
+幸いにも、ツリーの並び順を可視化してくれるツールも存在する。またMercurialでは、チェンジセットのハッシュの(曖昧さのない)短縮版も使えるし、\emph{さらに}、ローカル限定ではあるが一連の番号でチェンジセットを識別することもできる。この一連の番号は単調増加する整数値で、クローンに投入されたチェンジセットの順番を表す。この順番はクローンごとに異なるので、リモートリポジトリに対する操作ではこの番号は使えない。
 
 \end{aosasect2}
 
