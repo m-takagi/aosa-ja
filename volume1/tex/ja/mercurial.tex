@@ -235,79 +235,92 @@ DAGモデルを使うと、中央集中型のバージョン管理システム�
 %% \begin{aosasect1}{Data Structures}
 \begin{aosasect1}{データ構造}
 
-Now that the concept of a DAG should be somewhat clear, let's try
-and see how DAGs are stored in Mercurial. The DAG model is central to
-the inner workings of Mercurial, and we actually use several different
-DAGs in the repository storage on disk (as well as the in-memory
-structure of the code). This section explains what they are and how
-they fit together.
+%% Now that the concept of a DAG should be somewhat clear, let's try
+%% and see how DAGs are stored in Mercurial. The DAG model is central to
+%% the inner workings of Mercurial, and we actually use several different
+%% DAGs in the repository storage on disk (as well as the in-memory
+%% structure of the code). This section explains what they are and how
+%% they fit together.
+DAGの概念がわかってきたところで、それが実際どのようにMercurialに格納されているのかを見ていこう。DAGモデルはMercurialの内部動作の中核であり、いくつかの異なるDAGを使ってリポジトリをディスク上に格納している(コードのメモリ内での構造も同じだ)。このセクションではそれぞれのDAGについて説明し、さらにそれらがどのように連携するかも説明する。
 
 %% \begin{aosasect2}{Challenges}
 \begin{aosasect2}{課題}
 
-Before we dive into actual data structures, I'd like to provide some
-context about the environment in which Mercurial evolved. The first
-notion of Mercurial can be found in an email Matt Mackall sent to the
-Linux Kernel Mailing List on April 20, 2005. This happened shortly
-after it was decided that BitKeeper could no longer be used for the
-development of the kernel. Matt started his mail by outlining some
-goals: to be simple, scalable, and efficient.
+%% Before we dive into actual data structures, I'd like to provide some
+%% context about the environment in which Mercurial evolved. The first
+%% notion of Mercurial can be found in an email Matt Mackall sent to the
+%% Linux Kernel Mailing List on April 20, 2005. This happened shortly
+%% after it was decided that BitKeeper could no longer be used for the
+%% development of the kernel. Matt started his mail by outlining some
+%% goals: to be simple, scalable, and efficient.
+実際のデータ構造に関する話題の前に、Mercurialの成長の歴史について簡単にまとめておく。Mercurialのそもそもの始まりは、Matt Mackallが2005年4月20日にLinux Kernelメーリングリストに投稿した一通のメールだった。その何日か前に、カーネルの開発でBitKeeperを使わないようにするという決断があったころの話である。Mattはそのメールで、いくつかの目標を示した。シンプルであること、スケーラブルであること、そして効率的であること。
 
-In~\cite{bib:mackall:better}, Matt claimed that a modern VCS must deal
-with trees containing millions of files, handle millions of
-changesets, and scale across many thousands of users creating new
-revisions in parallel over a span of decades. Having set the goals,
-he reviewed the limiting technology factors:
-
-\begin{aosaitemize}
-
-  \item speed: CPU
-
-  \item capacity: disk and memory
-
-  \item bandwidth: memory, LAN, disk, and WAN
-
-  \item disk seek rate
-
-\end{aosaitemize}
-
-Disk seek rate and WAN bandwidth are the limiting factors today, and
-should thus be optimized for. The paper goes on to review common
-scenarios or criteria for evaluating the performance of such a system
-at the file level:
+%% In~\cite{bib:mackall:better}, Matt claimed that a modern VCS must deal
+%% with trees containing millions of files, handle millions of
+%% changesets, and scale across many thousands of users creating new
+%% revisions in parallel over a span of decades. Having set the goals,
+%% he reviewed the limiting technology factors:
+\cite{bib:mackall:better}においてMattが指摘したのは次のようなことである。今時のVCSは何百万ものファイルを含むツリーを扱う必要がある。チェンジセットの数もそれと同じくらいだろうし、何千ものユーザーが並行して新しいリビジョンを作ったりという作業を何十年ものスパンで行うことになるだろう。Mercurialが目指す目標を設定するにあたって、彼は現在の技術的な制約についてもまとめた。
 
 \begin{aosaitemize}
 
-  \item Storage compression: what kind of compression is best suited
-  to save the file history on disk? Effectively, what algorithm makes
-  the most out of the I/O performance while preventing CPU time
-  from becoming a bottleneck?
+  %% \item speed: CPU
+  \item 速度: CPU
 
-  \item Retrieving arbitrary file revisions: a number of version control
-  systems will store a given revision in such a way that a large
-  number of older revisions must be read to reconstruct the newer one
-  (using deltas). We want to control this to make sure that retrieving
-  old revisions is still fast.
+  %% \item capacity: disk and memory
+  \item 容量: ディスクやメモリ
 
-  \item Adding file revisions: we regularly add new revisions. We don't
-  want to rewrite old revisions every time we add a new one, because
-  that would become too slow when there are many revisions.
+  %% \item bandwidth: memory, LAN, disk, and WAN
+  \item 帯域: メモリ、LAN、ディスクそしてWAN
 
-  \item Showing file history: we want to be able to review a history of
-  all changesets that touched a certain file. This also allows us to
-  do annotations (which used to be called \code{blame} in CVS but was
-  renamed to \code{annotate} in some later systems to remove the
-  negative connotation): reviewing the originating changeset for each
-  line currently in a file.
+  %% \item disk seek rate
+  \item ディスクのシーク率
 
 \end{aosaitemize}
 
-The paper goes on to review similar scenarios at the project level.
-Basic operations at this level are checking out a revision, committing
-a new revision, and finding differences in the working directory. The
-latter, in particular, can be slow for large trees (like those of the
-Mozilla or NetBeans projects, both of which use Mercurial for their
-version control needs).
+%% Disk seek rate and WAN bandwidth are the limiting factors today, and
+%% should thus be optimized for. The paper goes on to review common
+%% scenarios or criteria for evaluating the performance of such a system
+%% at the file level:
+ディスクのシーク率やWANの帯域は今でも制約となっており、最適化を要する。この論文ではさらに、この手のシステムのパフォーマンスをファイルレベルで評価する際の一般的なシナリオや制約についての考察が続く。
+
+\begin{aosaitemize}
+
+  %% \item Storage compression: what kind of compression is best suited
+  %% to save the file history on disk? Effectively, what algorithm makes
+  %% the most out of the I/O performance while preventing CPU time
+  %% from becoming a bottleneck?
+  \item ストレージの圧縮: ファイルの履歴をディスク上に保存するのに最適の圧縮方法は何か? どんなアルゴリズムを使えば、CPU時間をボトルネックにしない範囲でI/Oのパフォーマンスを最大化できるか?
+
+  %% \item Retrieving arbitrary file revisions: a number of version control
+  %% systems will store a given revision in such a way that a large
+  %% number of older revisions must be read to reconstruct the newer one
+  %% (using deltas). We want to control this to make sure that retrieving
+  %% old revisions is still fast.
+  \item 任意のリビジョンのファイルの取得: 多くのバージョン管理システムが採用している格納方法だと、過去のリビジョンのファイルを大量に読み込まないと新しいリビジョンを再現できない(差分を格納している)。我々としては、それを改善しつつ過去のリビジョンも高速に取得できるようにしたい。
+
+  %% \item Adding file revisions: we regularly add new revisions. We don't
+  %% want to rewrite old revisions every time we add a new one, because
+  %% that would become too slow when there are many revisions.
+  \item ファイルのリビジョンの追加: 新たなリビジョンの追加は頻発する。新しいリビジョンを追加するたびに古いリビジョンを上書きするようなことは避けたい。そんなことをすれば、リビジョンが増えるにつれて速度が低下するからである。
+
+  %% \item Showing file history: we want to be able to review a history of
+  %% all changesets that touched a certain file. This also allows us to
+  %% do annotations (which used to be called \code{blame} in CVS but was
+  %% renamed to \code{annotate} in some later systems to remove the
+  %% negative connotation): reviewing the originating changeset for each
+  %% line currently in a file.
+  \item ファイルの履歴の表示: ある特定のファイルを変更したすべてのチェンジセットの歴史を見直せるようにしたい。そうすれば、アノテーション(あるファイルの個々の行が、どのチェンジセットで変更されたものかを確認すること)を行えるようになる(これはCVSの時代には\code{blame}と呼ばれていたが、その言葉の否定的な意味を排除するために、後のシステムでは\code{annotate}という名前に変わったものもある)。
+
+\end{aosaitemize}
+
+%% The paper goes on to review similar scenarios at the project level.
+%% Basic operations at this level are checking out a revision, committing
+%% a new revision, and finding differences in the working directory. The
+%% latter, in particular, can be slow for large trees (like those of the
+%% Mozilla or NetBeans projects, both of which use Mercurial for their
+%% version control needs).
+この論文ではさらに、同様のシナリオについてプロジェクトレベルでの考察を続ける。プロジェクトレベルでの基本的な操作といえば、あるリビジョンのチェックアウトや新たなリビジョンのコミット、そして作業ディレクトリとの差分の検出などである。差分の検出などは特に、ツリーが大きくなると速度が低下しがちだ(MozillaやNetBeansプロジェクトを見るとよい。どちらも必要に迫られたバージョン管理にMercurialを採用している)。
 
 \end{aosasect2}
 
