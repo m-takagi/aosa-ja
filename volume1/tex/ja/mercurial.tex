@@ -327,60 +327,74 @@ DAGの概念がわかってきたところで、それが実際どのようにMe
 %% \begin{aosasect2}{Fast Revision Storage: Revlogs}
 \begin{aosasect2}{高速リビジョンストレージ: Revlog}
 
-The solution Matt came up with for Mercurial is called the \emph{revlog}
-(short for revision log). The revlog is a way of efficiently storing
-revisions of file contents (each with some amount of changes compared
-to the previous version). It needs to be efficient in both access time
-(thus optimizing for disk seeks) and storage space, guided by the common
-scenarios outlined in the previous section. To do this, a revlog is
-really two files on disk: an index and the data file.
+%% The solution Matt came up with for Mercurial is called the \emph{revlog}
+%% (short for revision log). The revlog is a way of efficiently storing
+%% revisions of file contents (each with some amount of changes compared
+%% to the previous version). It needs to be efficient in both access time
+%% (thus optimizing for disk seeks) and storage space, guided by the common
+%% scenarios outlined in the previous section. To do this, a revlog is
+%% really two files on disk: an index and the data file.
+MattがMercurialで用いた解決策が\emph{revlog} (revision logを縮めたもの)だ。revlog方式を使えば、各リビジョンのファイルの中身(そして、前のバージョンからの差分)を効率的に管理できる。アクセス時間を効率化(ディスクのシークを最適化)し、ストレージのスペースも効率的に使い、先に述べた一般的なシナリオをうまく扱えなければならない。そのために、revlogはディスク上ではふたつのファイルに分かれている。インデックスファイルとデータファイルだ。
 
 \begin{table}[h!]
   \centering
   \begin{tabular}{|rl|}
     \hline
-    6 bytes & hunk offset \\
-    2 bytes & flags \\
-    4 bytes & hunk length \\
-    4 bytes & uncompressed length \\
-    4 bytes & base revision \\
-    4 bytes & link revision \\
-    4 bytes & parent 1 revision \\
-    4 bytes & parent 2 revision \\
-    32 bytes & hash \\
+    %% 6 bytes & hunk offset \\
+    6バイト & ハンクオフセット \\
+    %% 2 bytes & flags \\
+    2バイト & フラグ \\
+    %% 4 bytes & hunk length \\
+    4バイト & ハンク長 \\
+    %% 4 bytes & uncompressed length \\
+    4バイト & 非圧縮時の長さ \\
+    %% 4 bytes & base revision \\
+    4バイト & ベースリビジョン \\
+    %% 4 bytes & link revision \\
+    4バイト & リンクリビジョン \\
+    %% 4 bytes & parent 1 revision \\
+    4バイト & 親リビジョン1 \\
+    %% 4 bytes & parent 2 revision \\
+    4バイト & 親リビジョン2 \\
+    %% 32 bytes & hash \\
+    32バイト & ハッシュ値 \\
     \hline
   \end{tabular}
-  \caption{Mercurial Record Format}
+  %% \caption{Mercurial Record Format}
+  \caption{Mercurialのレコードフォーマット}
   \label{tbl.hg.records}
 \end{table}
 
-The index consists of fixed-length records, whose contents are
-detailed in \aosatblref{tbl.hg.records}. Having fixed-length records
-is nice, because it means that having the local revision number allows
-direct (i.e., constant-time) access to the revision: we can simply
-read to the position (index-length~$\times$~revision) in the index
-file, to locate the data. Separating the index from the data also
-means we can quickly read the index data without having to seek the
-disk through all the file data.
+%% The index consists of fixed-length records, whose contents are
+%% detailed in \aosatblref{tbl.hg.records}. Having fixed-length records
+%% is nice, because it means that having the local revision number allows
+%% direct (i.e., constant-time) access to the revision: we can simply
+%% read to the position (index-length~$\times$~revision) in the index
+%% file, to locate the data. Separating the index from the data also
+%% means we can quickly read the index data without having to seek the
+%% disk through all the file data.
+インデックスは固定長のレコードで構成されており、その詳細は\aosatblref{tbl.hg.records}のとおりである。固定長のレコードを使う利点は、ローカルのリビジョン番号がわかればそのリビジョンにダイレクトアクセスできる(常に一定の時間でアクセスできる)ということだ。つまり、インデックスファイルの所定の位置(インデックス長~$\times$~リビジョン)を読めば、データの場所がわかる。インデックスをデータから分離したことで、インデックスデータの読み込みが高速化した。インデックスを読む際にファイルのデータをすべてシークする必要がなくなる。
 
-The hunk offset and hunk length specify a chunk of the data file to
-read in order to get the compressed data for that revision. To get the
-original data we have to start by reading the base revision, and apply
-deltas through to this revision. The trick here is the decision on
-when to store a new base revision. This decision is based on the
-cumulative size of the deltas compared to the uncompressed length of
-the revision (data is compressed using zlib to use even less space on
-disk). By limiting the length of the delta chain in this way, we make
-sure that reconstruction of the data in a given revision does not
-require reading and applying lots of deltas.
+%% The hunk offset and hunk length specify a chunk of the data file to
+%% read in order to get the compressed data for that revision. To get the
+%% original data we have to start by reading the base revision, and apply
+%% deltas through to this revision. The trick here is the decision on
+%% when to store a new base revision. This decision is based on the
+%% cumulative size of the deltas compared to the uncompressed length of
+%% the revision (data is compressed using zlib to use even less space on
+%% disk). By limiting the length of the delta chain in this way, we make
+%% sure that reconstruction of the data in a given revision does not
+%% require reading and applying lots of deltas.
+ハンクオフセットとハンク長で指定するのは、読む込むデータファイルの量である。これを読めば、そのリビジョンの圧縮データを取得できる。元データを取得するには、まず最初にベースリビジョンを読み込んでから当該リビジョンまでの差分を適用していけばよい。ベースリビジョンをどのタイミングで更新するかについてはちょっと考慮した。このタイミングを決める基準は、累積した差分のサイズとそのリビジョンの非圧縮時のサイズの比較である(データの圧縮にはzlibを使い、ディスクスペースを節約している)。差分群のサイズをこの方式で一定に制限することで、特定のリビジョンを再構築するときの手間をできるだけ軽減している。そのおかげで、大量の差分を適用するはめになることを回避しているのだ。
 
-Link revisions are used to have dependent revlogs point back to the
-highest-level revlog (we'll talk more about this in a little bit), and
-the parent revisions are stored using the local integer revision
-number. Again, this makes it easy to look up their data in the
-relevant revlog. The hash is used to save the unique identifier for
-this changeset. We have 32 bytes instead of the 20 bytes required for
-SHA1 in order to allow future expansion.
+%% Link revisions are used to have dependent revlogs point back to the
+%% highest-level revlog (we'll talk more about this in a little bit), and
+%% the parent revisions are stored using the local integer revision
+%% number. Again, this makes it easy to look up their data in the
+%% relevant revlog. The hash is used to save the unique identifier for
+%% this changeset. We have 32 bytes instead of the 20 bytes required for
+%% SHA1 in order to allow future expansion.
+リンクリビジョンは、そのリビジョンが依存するrevlogを最高レベルまでたどるために利用する(あとでもう少し詳しく説明する)。そして親リビジョンには、ローカルのリビジョン番号(整数値)が格納されている。これを使えば、関連するrevlogのデータを見つけるのも容易になる。ハッシュに保存するのは、このチェンジセットを指す一意な識別子だ。SHA1ハッシュに必要なのは20バイトだが、ここでは32バイトを確保している。これは、将来の拡張性を考慮したものである。
 
 \end{aosasect2}
 
