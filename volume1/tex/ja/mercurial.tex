@@ -399,22 +399,25 @@ MattがMercurialで用いた解決策が\emph{revlog} (revision logを縮めた�
 \end{aosasect2}
 
 %% \begin{aosasect2}{The Three Revlogs}
-\begin{aosasect2}{三つのRevlog}
+\begin{aosasect2}{三種類のrevlog}
 
-With the revlog providing a generic structure for historic data, we
-can layer the data model for our file tree on top of that. It consists
-of three types of revlogs: the \emph{changelog}, \emph{manifests}, and
-\emph{filelogs}. The changelog contains metadata for each revision,
-with a pointer into the manifest revlog (that is, a node id for one
-revision in the manifest revlog). In turn, the manifest is a file that
-has a list of filenames plus the node id for each file, pointing to a
-revision in that file's filelog. In the code, we have classes for
-changelog, manifest, and filelog that are subclasses of the generic
-revlog class, providing a clean layering of both concepts.
+%% With the revlog providing a generic structure for historic data, we
+%% can layer the data model for our file tree on top of that. It consists
+%% of three types of revlogs: the \emph{changelog}, \emph{manifests}, and
+%% \emph{filelogs}. The changelog contains metadata for each revision,
+%% with a pointer into the manifest revlog (that is, a node id for one
+%% revision in the manifest revlog). In turn, the manifest is a file that
+%% has a list of filenames plus the node id for each file, pointing to a
+%% revision in that file's filelog. In the code, we have classes for
+%% changelog, manifest, and filelog that are subclasses of the generic
+%% revlog class, providing a clean layering of both concepts.
+revlogが履歴データに関する汎用的な構造を提供しているので、その上位レイヤーとしてファイルツリーを表すデータモデルを作成できる。このデータモデルは次の三種類のrevlogで構成されている。\emph{changelog}、\emph{manifests}そして\emph{filelogs}だ。changelogには各リビジョンのメタデータが含まれ、さらにmanifest revlogへのポインタ(つまり、manifest revlog内のあるリビジョンのノードid)も含まれている。また、manifestファイルにはファイル名の一覧が記録されており、さらに各ファイルのノードidも含まれている。このノードidは、各ファイルのfilelog内のリビジョンを指すものである。Mercurialのコード内では、changelogやmanifestそしてfilelogを表すクラスがそれぞれ用意されている。これらはどれも汎用のrevlogクラスを継承したものであり、個々の概念をきれいに層化している。
 
-\aosafigure[275pt]{../images/mercurial/revlogs.eps}{Log Structure}{fig.hg.revlog}
+%% \aosafigure[275pt]{../images/mercurial/revlogs.eps}{Log Structure}{fig.hg.revlog}
+\aosafigure[275pt]{../images/mercurial/revlogs.eps}{ログの構造}{fig.hg.revlog}
 
-A changelog revision looks like this:
+%% A changelog revision looks like this:
+changelogのリビジョンは、このようになる。
 
 \begin{verbatim}
 0a773e3480fe58d62dcc67bd9f7380d6403e26fa
@@ -424,15 +427,17 @@ mercurial/discovery.py
 discovery: fix description line
 \end{verbatim}
 
-\noindent This is the value you get from the revlog layer; the changelog layer
-turns it into a simple list of values. The initial line provides the
-manifest hash, then we get author name, date and time (in the form of
-a Unix timestamp and a timezone offset), a list of affected files, and
-the description message. One thing is hidden here: we allow arbitrary
-metadata in the changelog, and to stay backwards compatible we added
-those bits to go after the timestamp.
+%% \noindent This is the value you get from the revlog layer; the changelog layer
+%% turns it into a simple list of values. The initial line provides the
+%% manifest hash, then we get author name, date and time (in the form of
+%% a Unix timestamp and a timezone offset), a list of affected files, and
+%% the description message. One thing is hidden here: we allow arbitrary
+%% metadata in the changelog, and to stay backwards compatible we added
+%% those bits to go after the timestamp.
+\noindent これこそが、revlogを層化したおかげで得られる価値である。changelog層がこのようにシンプルな値のリストで表せるようになった。最初の行はmanifestのハッシュである。それに続くのは作者名、そして日付と時刻(Unixタイムスタンプとタイムゾーンオフセットをあわせた形式)、変更されたファイルの一覧、そして最後が内容を表すメッセージとなる。さらにもうひとつ隠し機能がある。実は任意のメタデータをchangelogに含めることができるのだ。過去との互換性を維持するために、メタデータはタイムスタンプの後に追加することになる。
 
-Next comes the manifest:
+%% Next comes the manifest:
+次はmanifestだ。
 
 \begin{verbatim}
 .hgignore\x006d2dc16e96ab48b2fcca44f7e9f4b8c3289cb701
@@ -443,74 +448,80 @@ COPYING\x005ac863e17c7035f1d11828d848fb2ca450d89794
 ...
 \end{verbatim}
 
-\noindent This is the manifest revision that changeset 0a773e points to
-(Mercurial's UI allows us to shorten the identifier to any unambiguous
-prefix). It is a simple list of all files in the tree, one per line,
-where the filename is followed by a NULL byte, followed by the
-hex-encoded node id that points into the file's filelog. Directories
-in the tree are not represented separately, but simply inferred from
-including slashes in the file paths. Remember that the manifest is
-diffed in storage just like every revlog, so this structure should
-make it easy for the revlog layer to store only changed files and
-their new hashes in any given revision. The manifest is usually
-represented as a hashtable-like structure in Mercurial's Python code,
-with filenames as keys and nodes as values.
+%% \noindent This is the manifest revision that changeset 0a773e points to
+%% (Mercurial's UI allows us to shorten the identifier to any unambiguous
+%% prefix). It is a simple list of all files in the tree, one per line,
+%% where the filename is followed by a NULL byte, followed by the
+%% hex-encoded node id that points into the file's filelog. Directories
+%% in the tree are not represented separately, but simply inferred from
+%% including slashes in the file paths. Remember that the manifest is
+%% diffed in storage just like every revlog, so this structure should
+%% make it easy for the revlog layer to store only changed files and
+%% their new hashes in any given revision. The manifest is usually
+%% represented as a hashtable-like structure in Mercurial's Python code,
+%% with filenames as keys and nodes as values.
+\noindent このmanifestリビジョンは、changeset 0a773eが指している先である(MercurialのUIは、曖昧にならない範囲で後半を省略できるようになっている)。これはツリーないのすべてのファイルを単純にならべた一覧であり、一行がひとつのファイルを表す。各行は、先頭にファイル名があってその後にNULLバイトを置き、さらに16進エンコードしたノードidが続く。このノードidが各ファイルのfilelogを指している。ツリーに含まれるディレクトリを特別に区別することはない。しかし、ファイルのパスにスラッシュが含まれていれば、それがディレクトリであろうと判断できる。manifestはその他のrevlogと同様に差分を格納していたことを思い出そう。つまり、manifestはrevlog層から容易にアクセスできる構造でなければならない。任意のリビジョンに対して、そのリビジョンで変更があったファイルとその新しいハッシュだけを格納することになる。manifestは、通常はMercurialのPythonコードの中ではハッシュテーブル風のデータ構造で表される。ファイル名がキー、そしてノードが値である。
 
-The third type of revlog is the filelog. Filelogs are stored in Mercurial's internal \code{store} directory,
-where they're named almost exactly like the file they're tracking. The
-names are encoded a little bit to make sure things work across all
-major operating systems. For example, we have to deal with casefolding
-filesystems on Windows and Mac~OS~X, specific disallowed filenames on
-Windows, and different character encodings as used by the various
-filesystems. As you can imagine, doing this reliably across operating
-systems can be fairly painful. The contents of a filelog revision, on
-the other hand, aren't nearly as interesting: just the file contents,
-except with some optional metadata prefix (which we use for tracking
-file copies and renames, among other minor things).
+%% The third type of revlog is the filelog. Filelogs are stored in Mercurial's internal \code{store} directory,
+%% where they're named almost exactly like the file they're tracking. The
+%% names are encoded a little bit to make sure things work across all
+%% major operating systems. For example, we have to deal with casefolding
+%% filesystems on Windows and Mac~OS~X, specific disallowed filenames on
+%% Windows, and different character encodings as used by the various
+%% filesystems. As you can imagine, doing this reliably across operating
+%% systems can be fairly painful. The contents of a filelog revision, on
+%% the other hand, aren't nearly as interesting: just the file contents,
+%% except with some optional metadata prefix (which we use for tracking
+%% file copies and renames, among other minor things).
+三種類めのrevlogが、filelogだ。filelogは、Mercurialの内部的な\code{store}ディレクトリに格納されている。その名前は、追跡対象のファイルとほぼ同じである。ただし完全に同じではなく、ちょっとしたエンコードを行っている。主要なOSすべてできちんと動作させるようにするためである。たとえば、WindowsやMac~OS~Xのように大文字小文字を区別しないファイルシステムも扱う必要があるし、Windowsではファイル名に使えない文字もある。また、ファイルシステムによってさまざまな文字エンコーディングが使われている。ご想像の通り、すべてのOSで確実に動作させようとするとかなり大変なことになる。一方、filelogリビジョンの中身自体は、何の変哲もないものである。単にファイルの中身をそのまま保持しており、その先頭にちょっとしたオプションのメタデータが付属しているだけである(このメタデータを使って、ファイルのコピーやリネームなどの操作を追跡する)。
 
-This data model gives us complete access to the data store in a
-Mercurial repository, but it's not always very convenient. While the
-actual underlying model is vertically oriented (one filelog per file),
-Mercurial developers often found themselves wanting to deal with all
-details from a single revision, where they start from a changeset from
-the changelog and want easy access to the manifest and filelogs from
-that revision.  They later invented another set of classes, layered
-cleanly on top of the revlogs, which do exactly that. These are
-called \code{contexts}.
+%% This data model gives us complete access to the data store in a
+%% Mercurial repository, but it's not always very convenient. While the
+%% actual underlying model is vertically oriented (one filelog per file),
+%% Mercurial developers often found themselves wanting to deal with all
+%% details from a single revision, where they start from a changeset from
+%% the changelog and want easy access to the manifest and filelogs from
+%% that revision.  They later invented another set of classes, layered
+%% cleanly on top of the revlogs, which do exactly that. These are
+%% called \code{contexts}.
+このデータモデルを使えばMercurialリポジトリ内に格納されているどのデータにもアクセスできるようになる。しかし、このモデルがいつでも便利だとは限らない。実際の内部モデルは垂直指向(すなわち、ファイルごとにひとつのfilelogが存在する)である。だが、Mercurialの開発者がよくやりたくなる作業は、特定のリビジョンに関してすべてのファイルの詳細を扱うというものだった。そんな場合は、まずchangelogから特定のchangesetを探し、そのリビジョンに関連するmanifestやfilelogに簡単にアクセスできるようにしたい。そんな要望に応えるため、別のクラス群が用意された。これはrevlogの上位層に位置するもので、まさに期待通りに役割を果たす。その名は\code{contexts}だ。
 
-One nice thing about the way the separate revlogs are set up is the
-ordering. By ordering appends so that filelogs get appended to first,
-then the manifest, and finally the changelog, the repository is always
-in a consistent state. Any process that starts reading the changelog
-can be sure all pointers into the other revlogs are valid, which takes
-care of a number of issues in this department. Nevertheless, Mercurial
-also has some explicit locks to make sure there are no two processes
-appending to the revlogs in parallel.
+%% One nice thing about the way the separate revlogs are set up is the
+%% ordering. By ordering appends so that filelogs get appended to first,
+%% then the manifest, and finally the changelog, the repository is always
+%% in a consistent state. Any process that starts reading the changelog
+%% can be sure all pointers into the other revlogs are valid, which takes
+%% care of a number of issues in this department. Nevertheless, Mercurial
+%% also has some explicit locks to make sure there are no two processes
+%% appending to the revlogs in parallel.
+revlogの設定が分割されている利点のひとつが、順序づけをするときにあらわれる。順序づけをするには、まず最初にfilelogを追加し、その後にmanifestを続け、最後にchangelogを追加する。その間リポジトリは常に一貫した状態となる。changelogを読み込むあらゆるプロセスは、その他のrevlogへのすべてのポインタが有効であることを保証されていることになり、そのおかげでさまざまな問題に対応できるようになる。それでもなお、Mercurialには明示的なロックも存在する。このロックで、複数のプロセスが同時に並行してrevlogに追記できないようにしている。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{The Working Directory}
 \begin{aosasect2}{作業ディレクトリ}
 
-A final important data structure is what we call the
-\emph{dirstate}. The dirstate is a representation of what's in the
-working directory at any given point. Most importantly, it keeps track
-of what revision has been checked out: this is the baseline for all
-comparisons from the \code{status} or \code{diff} commands, and also
-determines the parent(s) for the next changeset to be committed. The
-dirstate will have two parents set whenever the \code{merge} command
-has been issued, trying to merge one set of changes into the other.
+%% A final important data structure is what we call the
+%% \emph{dirstate}. The dirstate is a representation of what's in the
+%% working directory at any given point. Most importantly, it keeps track
+%% of what revision has been checked out: this is the baseline for all
+%% comparisons from the \code{status} or \code{diff} commands, and also
+%% determines the parent(s) for the next changeset to be committed. The
+%% dirstate will have two parents set whenever the \code{merge} command
+%% has been issued, trying to merge one set of changes into the other.
+最後にもうひとつ、重要なデータ構造が残っている。その名は\emph{dirstate}だ。dirstateとは、ある特定の時点で作業ディレクトリ内に何があるのかを表したものである。最も重要なこととして、dirstateはどのリビジョンがチェックアウトされているのかを保持している。これが\code{status}や\code{diff}といったコマンドでのすべての比較の基準となり、さらに次にチェックインするコミットの親を決めることになる。dirstateは、\code{merge}コマンドを発行したときには二つの親を持つことになる。そして、一方の変更群を他方にマージしようと試みる。
 
-Because \code{status} and \code{diff} are very common operations (they
-help you check the progress of what you've currently got against the
-last changeset), the dirstate also contains a cache of the state of
-the working directory the last time it was traversed by Mercurial.
-Keeping track of last modified timestamps and file sizes makes it
-possible to speed up tree traversal. We also need to keep track of the
-state of the file: whether it's been added, removed, or merged in the
-working directory. This will again help speed up traversing the
-working directory, and makes it easy to get this information at commit
-time.
+%% Because \code{status} and \code{diff} are very common operations (they
+%% help you check the progress of what you've currently got against the
+%% last changeset), the dirstate also contains a cache of the state of
+%% the working directory the last time it was traversed by Mercurial.
+%% Keeping track of last modified timestamps and file sizes makes it
+%% possible to speed up tree traversal. We also need to keep track of the
+%% state of the file: whether it's been added, removed, or merged in the
+%% working directory. This will again help speed up traversing the
+%% working directory, and makes it easy to get this information at commit
+%% time.
+\code{status}や\code{diff}はとても頻繁に使う操作なので(直近のチェンジセットから現時点でどれくらい進んでいるのかを確かめられる)、dirstateにはMercurialが最後に作業ディレクトリを走査したときの状態のキャッシュも残している。最終更新時刻とファイルサイズを追跡することで、ツリーの走査を高速化しているのだ。また、ファイルの状態も同時に追跡しなければならない。つまり、そのファイルが作業ディレクトリに追加されたのかあるいはそこから削除されたのか、変更が加わったのかといったことだ。これも作業ディレクトリの走査を高速化させ、コミット時にこれらの情報を取得しやすくしている。
 
 \end{aosasect2}
 
