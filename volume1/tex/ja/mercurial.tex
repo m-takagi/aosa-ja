@@ -530,105 +530,115 @@ revlogの設定が分割されている利点のひとつが、順序づけを�
 %% \begin{aosasect1}{Versioning Mechanics}
 \begin{aosasect1}{バージョン管理の仕組み}
 
-Now that you are familiar with the underlying data model and the
-structure of the code at the lower levels of Mercurial, let's move up
-a little bit and consider how Mercurial implements version control
-concepts on top of the foundation described in the previous section.
+%% Now that you are familiar with the underlying data model and the
+%% structure of the code at the lower levels of Mercurial, let's move up
+%% a little bit and consider how Mercurial implements version control
+%% concepts on top of the foundation described in the previous section.
+ここまでで、Mercurialの内部的なデータモデルや低レベルでのコードの構造についてなじみが出てきたことだろう。さらにもう一歩進んでみよう。ここでは、これまでに説明した基盤の上でMercurialがどのようにバージョン管理の概念を実装しているのかを考えていく。
 
 %% \begin{aosasect2}{Branches}
 \begin{aosasect2}{ブランチ}
 
-Branches are commonly used to separate different lines of development
-that will be integrated later. This might be because someone is
-experimenting with a new approach, just to be able to always keep the
-main line of development in a shippable state (feature branches), or
-to be able to quickly release fixes for an old release (maintenance
-branches). Both approaches are commonly used, and are supported by all
-modern version control systems. While implicit branches are common in
-DAG-based version control named branches (where the branch name is
-saved in the changeset metadata) are not as common.
+%% Branches are commonly used to separate different lines of development
+%% that will be integrated later. This might be because someone is
+%% experimenting with a new approach, just to be able to always keep the
+%% main line of development in a shippable state (feature branches), or
+%% to be able to quickly release fixes for an old release (maintenance
+%% branches). Both approaches are commonly used, and are supported by all
+%% modern version control systems. While implicit branches are common in
+%% DAG-based version control named branches (where the branch name is
+%% saved in the changeset metadata) are not as common.
+ブランチの一般的な利用法は、開発のラインを別々に分割して進めて後で統合するというものだ。その理由として考えられるのは、たとえば誰かが新しい手法を試すときに開発のメインラインは常に出荷可能な状態にしておくこと(フィーチャブランチ)、あるいは旧バージョン用のバグフィックスを素早くリリースできるようにしておくこと(保守ブランチ)などである。どちらの手法もよく使われるものであり、今時のバージョン管理システムならすべてこれらの手法に対応している。暗黙のブランチはDAGベースのバージョン管理では一般的なものだが、名前付きブランチ(ブランチ名をチェンジセットのメタデータに記録する方式)はそれほど一般的ではない。
 
-Originally, Mercurial had no way to explicitly name branches. Branches
-were instead handled by making different clones and publishing them
-separately. This is effective, easy to understand, and especially
-useful for feature branches, because there is little
-overhead. However, in large projects, clones can still be quite
-expensive: while the repository store will be hardlinked on most
-filesystems, creating a separate working tree is slow and may require
-a lot of disk space.
+%% Originally, Mercurial had no way to explicitly name branches. Branches
+%% were instead handled by making different clones and publishing them
+%% separately. This is effective, easy to understand, and especially
+%% useful for feature branches, because there is little
+%% overhead. However, in large projects, clones can still be quite
+%% expensive: while the repository store will be hardlinked on most
+%% filesystems, creating a separate working tree is slow and may require
+%% a lot of disk space.
+当初は、Mercurialではブランチの名前を明示することができなかった。ブランチの処理は、単に別々のクローンを作ってそれを個別に公開するというだけのことだった。これは効率的だし理解しやすく、特にフィーチャブランチに関しては非常に便利だった。というのも、ブランチを作るオーバーヘッドがほとんどなかったからである。しかし大規模なプロジェクトでは、クローンであってもかなり重たい作業となった。大半のファイルシステム上にリポジトリのハードリンクが格納されていてもなお、個別の作業ツリーを作るのには時間がかかるし大量のディスク容量を必要とする。
 
-Because of these downsides, Mercurial added a second way to do
-branches: including a branch name in the changeset metadata. A
-\code{branch} command was added that can set the branch name for the
-current working directory, such that that branch name will be used for
-the next commit. The normal \code{update} command can be used to
-update to a branch name, and a changeset committed on a branch will
-always be related to that branch. This approach is called \emph{named
-branches}. However, it took a few more Mercurial releases before
-Mercurial started including a way to close these branches up
-again (closing a branch will hide the branch from view in a list of
-branches). Branch closing is implemented by adding an extra field in the changeset
-metadata, stating that this changeset closes the branch. If the branch
-has more than one head, all of them have to be closed before the
-branch disappears from the list of branches in the repository.
+%% Because of these downsides, Mercurial added a second way to do
+%% branches: including a branch name in the changeset metadata. A
+%% \code{branch} command was added that can set the branch name for the
+%% current working directory, such that that branch name will be used for
+%% the next commit. The normal \code{update} command can be used to
+%% update to a branch name, and a changeset committed on a branch will
+%% always be related to that branch. This approach is called \emph{named
+%% branches}. However, it took a few more Mercurial releases before
+%% Mercurial started including a way to close these branches up
+%% again (closing a branch will hide the branch from view in a list of
+%% branches). Branch closing is implemented by adding an extra field in the changeset
+%% metadata, stating that this changeset closes the branch. If the branch
+%% has more than one head, all of them have to be closed before the
+%% branch disappears from the list of branches in the repository.
+これらの弱点に対応するため、Mercurialには第二のブランチ方式が追加された。チェンジセットのメタデータにブランチ名を含める方式である。\code{branch}コマンドが追加され、現在の作業ディレクトリにブランチ名を設定できるようになった。このブランチ名は、次のコミットのときに用いられる。通常の\code{update}コマンドを使ってある特定の名前のブランチにアップデートすることもできるし、ブランチ上でコミットしたチェンジセットは常にそのブランチに関連するコミットとなる。この手法は\emph{名前付きブランチ(named branches)}と呼ばれる。しかし当初はブランチを作るだけでそれを閉じる(ブランチ一覧からそのブランチを見えなくする)ことはできなかった。ブランチを閉じられるようになったのは、それから数リリース後のことだった。ブランチを閉じる機能の実装は、チェンジセットのメタデータにフィールドを追加することで行った。追加フィールドに、このチェンジセットがブランチを閉じるという情報を記録したのだ。あるブランチが複数のヘッドを持つ場合は、それらをすべて閉じてからでないとブランチ一覧からそのブランチを消すことはできない。
 
-Of course, there's more than one way to do it.
-Git has a different way of naming branches, using
-references. References are names pointing to another object in the
-Git history, usually a changeset. This means that Git's branches are
-ephemeral: once you remove the reference, there is no trace of the
-branch ever having existed, similar to what you would get when using a
-separate Mercurial clone and merging it back into another clone. This
-makes it very easy and lightweight to manipulate branches locally, and
-prevents cluttering of the list of branches.
+%% Of course, there's more than one way to do it.
+%% Git has a different way of naming branches, using
+%% references. References are names pointing to another object in the
+%% Git history, usually a changeset. This means that Git's branches are
+%% ephemeral: once you remove the reference, there is no trace of the
+%% branch ever having existed, similar to what you would get when using a
+%% separate Mercurial clone and merging it back into another clone. This
+%% makes it very easy and lightweight to manipulate branches locally, and
+%% prevents cluttering of the list of branches.
+もちろん、何かを成し遂げる方法はたったひとつではない(there's more than one way to do it)。Gitにおける名前付きブランチの実装はMercurialとは異なり、参照を使っている。参照とはGitの歴史上で別のオブジェクト(通常はチェンジセット)を指す名前のことである。これは、Gitのブランチがその場限りの短期的なものであることを意味する。つまり、いったん参照を削除してしまえば、そこにブランチが存在した形跡は一切なくなってしまう。これはちょうど、別々のMercurialのクローンを作って、一方のクローンをもう一方にマージしたのと同じ状態だ。この方式だとローカルでのブランチの操作が非常に簡単かつ軽量になり、ブランチ一覧がごちゃごちゃすることも避けられる。
 
-This way of branching turned out to be very popular, much more popular
-than either named branches or branch clones in Mercurial. This has
-resulted in the \code{bookmarks}q extension, which will probably be
-folded into Mercurial in the future. It uses a simple unversioned file
-to keep track of references. The wire protocol used to exchange
-Mercurial data has been extended to enable communicating about
-bookmarks, making it possible to push them around.
+%% This way of branching turned out to be very popular, much more popular
+%% than either named branches or branch clones in Mercurial. This has
+%% resulted in the \code{bookmarks}q extension, which will probably be
+%% folded into Mercurial in the future. It uses a simple unversioned file
+%% to keep track of references. The wire protocol used to exchange
+%% Mercurial data has been extended to enable communicating about
+%% bookmarks, making it possible to push them around.
+この方式でのブランチ管理はどんどん広まり、今や名前付きブランチ方式やMercurial風のクローンによるブランチよりもずっと幅広く使われている。その流れを受けて、Mercurialにも\code{bookmarks}エクステンションが用意された。将来のバージョンでおそらくMercurialに組み込まれることだろう。このエクステンションは、バージョン管理対象外のシンプルなファイルを使って参照を追跡する。Mercurialのデータ交換に使っているwireプロトコルを拡張してブックマークも通信できるようにし、ブックマークもプッシュできるようにした。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Tags}
 \begin{aosasect2}{タグ}
 
-At first sight, the way Mercurial implements tags can be a bit
-confusing. The first time you add a tag (using the \code{tag}
-command), a file called \code{.hgtags} gets added to the repository and
-committed. Each line in that file will contain a changeset node id and
-the tag name for that changeset node. Thus, the tags file is treated
-the same way as any other file in the repository.
+%% At first sight, the way Mercurial implements tags can be a bit
+%% confusing. The first time you add a tag (using the \code{tag}
+%% command), a file called \code{.hgtags} gets added to the repository and
+%% committed. Each line in that file will contain a changeset node id and
+%% the tag name for that changeset node. Thus, the tags file is treated
+%% the same way as any other file in the repository.
+ちょっと見た限りだと、Mercurialにおけるタグの実装は奇妙に感じることだろう。\code{tag}コマンドを使って最初にタグを追加するときに、\code{.hgtags}というファイルがリポジトリに追加され、それをコミットする。このファイルの各行には、チェンジセットのノードidとそのチェンジセットノードに対応するタグ名が記録される。このようにして、タグ情報ファイルはリポジトリ内の他のファイルとまったく同様の扱いとなるのである。
 
-There are three important reasons for this. First, it must be possible
-to change tags; mistakes do happen, and it should be possible to fix
-them or delete the mistake. Second, tags should be part of changeset
-history: it's valuable to see when a tag was made, by whom, and for
-what reason, or even if a tag was changed. Third, it should be
-possible to tag a changeset retroactively. For example, some projects
-extensively test drive a release artifact exported from the version
-control system before releasing it.
+%% There are three important reasons for this. First, it must be possible
+%% to change tags; mistakes do happen, and it should be possible to fix
+%% them or delete the mistake. Second, tags should be part of changeset
+%% history: it's valuable to see when a tag was made, by whom, and for
+%% what reason, or even if a tag was changed. Third, it should be
+%% possible to tag a changeset retroactively. For example, some projects
+%% extensively test drive a release artifact exported from the version
+%% control system before releasing it.
+このようにした重要な理由が次の三つだ。まず最初に、タグは変更できなければならない。間違いは必ず発生するものだし、間違ったタグの修正や削除ができなければならない。次に、タグ自体もチェンジセットの履歴の一部でなければならない。そのタグがいつ誰によってどういう理由で作られたのか、あるいは変更されたのかといった情報を見られれば有用だ。最後に、過去のチェンジセットにさかのぼってタグを設定できなければならない。たとえば、バージョン管理システムからエクスポートしたリリース用の成果物に対して大規模なテストをしてから初めてリリースするというプロジェクトも存在する。
 
-These properties all fall easily out of the \code{.hgtags} design. While some
-users are confused by the presence of the \code{.hgtags} file in their
-working directories, it makes integration of the tagging mechanism
-with other parts of Mercurial (for example, synchronization with other
-repository clones) very simple. If tags existed outside the source
-tree (as they do in Git, for example), separate mechanisms would have
-to exist to audit the origin of tags and to deal with conflicts from
-(parallel) duplicate tags. Even if the latter is rare, it's nice to
-have a design where these things are not even an issue.
+%% These properties all fall easily out of the \code{.hgtags} design. While some
+%% users are confused by the presence of the \code{.hgtags} file in their
+%% working directories, it makes integration of the tagging mechanism
+%% with other parts of Mercurial (for example, synchronization with other
+%% repository clones) very simple. If tags existed outside the source
+%% tree (as they do in Git, for example), separate mechanisms would have
+%% to exist to audit the origin of tags and to deal with conflicts from
+%% (parallel) duplicate tags. Even if the latter is rare, it's nice to
+%% have a design where these things are not even an issue.
+これらの特性はすべて、\code{.hgtags}の設計から容易に得られる。人によっては作業ディレクトリ内に\code{.hgtags}ファイルが存在するのを見て困惑するかもしれない。しかし、そのおかげでタグ付けの仕組みとMercurialのその他の部分との統合(同じリポジトリの別のクローンとの同期など)が非常にシンプルに行えるのだ。もしタグがソースツリーとは別になっているのなら(Gitなどがそうだ)、そのタグの出自を調べたり重複したタグの衝突を解決したりするための仕組みが別途必要になる。後者の状況はめったにないかもしれないが、そもそもそんな状況が問題になりすらしない設計があるのならそっちのほうがよいだろう。
 
-To get all of this right, Mercurial only ever appends new lines to the
-\code{.hgtags} file. This also facilitates merging the file if the
-tags were created in parallel in different clones. The newest node id
-for any given tag always takes precedence, and adding the null node id
-(representing the empty root revision all repositories have in common)
-will have the effect of deleting the tag. Mercurial will also consider
-tags from all branches in the repository, using recency calculations
-to determine precedence among them.
+%% To get all of this right, Mercurial only ever appends new lines to the
+%% \code{.hgtags} file. This also facilitates merging the file if the
+%% tags were created in parallel in different clones. The newest node id
+%% for any given tag always takes precedence, and adding the null node id
+%% (representing the empty root revision all repositories have in common)
+%% will have the effect of deleting the tag. Mercurial will also consider
+%% tags from all branches in the repository, using recency calculations
+%% to determine precedence among them.
+これらすべてをうまく機能させるために、Mercurialは\code{.hgtags}ファイルに新しい行を追加することしかしない。これは、別々のクローンでタグが並行して作られたときのマージにも役立つ。任意のタグに対して最新のノードidが優先され、空のノードidを追加すると(空のノードidは空のルートリビジョンを表し、すべてのリポジトリに共通して存在する)、それはタグを削除するのと同じ意味になる。Mercurialはリポジトリ内のすべてのブランチのタグの関係についても考慮し、新しいタグのほうを優先する。
 
 \end{aosasect2}
 
