@@ -645,83 +645,94 @@ revlogの設定が分割されている利点のひとつが、順序づけを�
 \end{aosasect1}
 
 %% \begin{aosasect1}{General Structure}
-\begin{aosasect1}{構造の概要}
+\begin{aosasect1}{全体的な構造}
 
-Mercurial is almost completely written in Python, with only a few bits
-and pieces in C because they are critical to the performance of the
-whole application. Python was deemed a more suitable choice for most
-of the code because it is much easier to express high-level concepts
-in a dynamic language like Python. Since much of the code is not
-really critical to performance, we don't mind taking the hit in
-exchange for making the coding easier for ourselves in most parts.
+%% Mercurial is almost completely written in Python, with only a few bits
+%% and pieces in C because they are critical to the performance of the
+%% whole application. Python was deemed a more suitable choice for most
+%% of the code because it is much easier to express high-level concepts
+%% in a dynamic language like Python. Since much of the code is not
+%% really critical to performance, we don't mind taking the hit in
+%% exchange for making the coding easier for ourselves in most parts.
+Mercurialの大半はPythonで書かれている。ごく一部でCが使われているところもあるが、これはアプリケーション全体としてのパフォーマンスを考慮したものである。そのごく一部を除いた部分では、Pythonで書くほうが適していると考えた。なぜなら、上位レベルの概念を表現するにはPythonのような動的言語のほうがずっと容易だったからである。コードの多くは特にパフォーマンスを最優先に考えたものではないが、そんなことはあまり気にしていない。それと引き替えに、大半の部分のコーディングが簡単になっているのだから。
 
-A Python module corresponds to a single file of code. Modules can
-contain as much code as needed, and are thus an important way to
-organize code. Modules may use types or call functions from other
-modules by explicitly importing the other modules. A directory
-containing an \code{\_\_init\_\_.py} module is said to be a package,
-and will expose all contained modules and packages to the Python
-importer.
+%% A Python module corresponds to a single file of code. Modules can
+%% contain as much code as needed, and are thus an important way to
+%% organize code. Modules may use types or call functions from other
+%% modules by explicitly importing the other modules. A directory
+%% containing an \code{\_\_init\_\_.py} module is said to be a package,
+%% and will expose all contained modules and packages to the Python
+%% importer.
+Pythonのモジュールは、各モジュールがひとつのファイルに対応している。モジュールの中には必要に応じていくらでもコードを書くことができ、このモジュールがコードの構造をまとめる鍵となる。モジュールの中で型を使ったり他のモジュールの関数を呼び出したりするときには、他のモジュールを明示的にインポートすることがある。\code{\_\_init\_\_.py}モジュールを含むディレクトリはパッケージと呼ばれ、そこに含まれるすべてのモジュールやパッケージがPythonのインポーターに公開される。
 
-Mercurial by default installs two packages into the Python path:
-\code{mercurial} and \code{hgext}. The \code{mercurial} package
-contains the core code required to run Mercurial, while \code{hgext}
-contains a number of extensions that were deemed useful enough to be
-delivered alongside the core. However, they must still be enabled by
-hand in a configuration file if desired (which we will discuss later.)
+%% Mercurial by default installs two packages into the Python path:
+%% \code{mercurial} and \code{hgext}. The \code{mercurial} package
+%% contains the core code required to run Mercurial, while \code{hgext}
+%% contains a number of extensions that were deemed useful enough to be
+%% delivered alongside the core. However, they must still be enabled by
+%% hand in a configuration file if desired (which we will discuss later.)
+MercurialがデフォルトでインストールするPythonのパッケージは\code{mercurial}と\code{hgext}の二つである。\code{mercurial}パッケージにはMercurialを実行するために必要なコアコードが含まれており、もう一方の\code{hgext}にはさまざまな拡張機能が含まれている。コアと一緒に配布すると有用だろうと思われるものである。しかし、これらの拡張を使いたい場合は、設定ファイルを自分で編集して拡張を有効化させなければならない(詳細は後述する)。
 
-To be clear, Mercurial is a command-line application. This means that
-we have a simple interface: the user calls the \code{hg} script with a
-command. This command (like \code{log}, \code{diff} or \code{commit})
-may take a number of options and arguments; there are also some
-options that are valid for all commands. Next, there are three
-different things that can happen to the interface.
+%% To be clear, Mercurial is a command-line application. This means that
+%% we have a simple interface: the user calls the \code{hg} script with a
+%% command. This command (like \code{log}, \code{diff} or \code{commit})
+%% may take a number of options and arguments; there are also some
+%% options that are valid for all commands. Next, there are three
+%% different things that can happen to the interface.
+念のために言うが、Mercurialはコマンドラインアプリケーションである。つまり、インターフェイスはシンプルなものだということである。ユーザーは、\code{hg}スクリプトにコマンドを指定して呼び出すことになる。各種コマンド(\code{log}や\code{diff}、あるいは\code{commit}など)にはいくつかのオプションや引数を受け取るものもある。また、すべてのコマンドに共通するオプションもある。次に、このインターフェイスを通して起こることは次の三つに分類できる。
 
 \begin{aosaitemize}
 
-  \item \code{hg} will often output something the user asked for or show
-  status messages
+  %% \item \code{hg} will often output something the user asked for or show
+  %% status messages
+  \item \code{hg}は、ユーザーに何かを問いかけたり状態を示したりするメッセージを出力する。
 
-  \item \code{hg} can ask for further input through command-line prompts
+  %% \item \code{hg} can ask for further input through command-line prompts
+  \item \code{hg}は、コマンドラインプロンプトでさらに入力を待ち受けることもできる。
 
-  \item \code{hg} may launch an external program (such as an editor for the
-  commit message or a program to help merging code conflicts)
+  %% \item \code{hg} may launch an external program (such as an editor for the
+  %% commit message or a program to help merging code conflicts)
+  \item \code{hg}は、別のプログラム(コミットメッセージ用のエディタやコードの衝突を解消するためのマージを支援するプログラムなど)を起動することもある。
 
 \end{aosaitemize}
 
-\aosafigure{../images/mercurial/modules.eps}{Import Graph}{fig.hg.importgraph}
+%% \aosafigure{../images/mercurial/modules.eps}{Import Graph}{fig.hg.importgraph}
+\aosafigure{../images/mercurial/modules.eps}{インポートグラフ}{fig.hg.importgraph}
 
-The start of this process can neatly be observed from the import graph
-in \aosafigref{fig.hg.importgraph}. All command-line arguments are
-passed to a function in the dispatch module. The first thing that
-happens is that a \code{ui} object is instantiated. The \code{ui}
-class will first try to find configuration files in a number of
-well-known places (such as your home directory), and save the
-configuration options in the \code{ui} object. The configuration files
-may also contain paths to extensions, which must also be loaded at
-this point. Any global options passed on the command-line are also
-saved to the \code{ui} object at this point.
+%% The start of this process can neatly be observed from the import graph
+%% in \aosafigref{fig.hg.importgraph}. All command-line arguments are
+%% passed to a function in the dispatch module. The first thing that
+%% happens is that a \code{ui} object is instantiated. The \code{ui}
+%% class will first try to find configuration files in a number of
+%% well-known places (such as your home directory), and save the
+%% configuration options in the \code{ui} object. The configuration files
+%% may also contain paths to extensions, which must also be loaded at
+%% this point. Any global options passed on the command-line are also
+%% saved to the \code{ui} object at this point.
+このプロセスのはじまりは、\aosafigref{fig.hg.importgraph}のインポートグラフから読み取れる。すべてのコマンドライン引数は、まずdispatchモジュールの関数に渡される。最初に行うのは\code{ui}オブジェクトのインスタンスを作ることである。\code{ui}クラスは、まず最初にいろいろな既知の場所(ホームディレクトリなど)から設定ファイルを探し、設定オプションを\code{ui}オブジェクト内に保存する。設定ファイルには拡張機能へのパスが含まれていることもある。その場合は、この時点で拡張を読み込まねばならない。コマンドラインオプションで渡されたグローバルオプションもすべて、ここで\code{ui}オブジェクトに保存される。
 
-After this is done, we have to decide whether to create a repository
-object. While most commands require a local repository (represented
-by the \code{localrepo} class from the \code{localrepo} module), some
-commands may work on remote repositories (either HTTP, SSH, or some
-other registered form), while some commands can do their work without
-referring to any repository. The latter category includes the
-\code{init} command, for example, which is used to initialize a new
-repository.
+%% After this is done, we have to decide whether to create a repository
+%% object. While most commands require a local repository (represented
+%% by the \code{localrepo} class from the \code{localrepo} module), some
+%% commands may work on remote repositories (either HTTP, SSH, or some
+%% other registered form), while some commands can do their work without
+%% referring to any repository. The latter category includes the
+%% \code{init} command, for example, which is used to initialize a new
+%% repository.
+これが終わると、次にリポジトリオブジェクトを作るかどうかを判断しなければならない。ほとんどのコマンドはローカルリポジトリ(\code{localrepo}モジュールの\code{localrepo}クラスで表されるもの)が必要だが、なかにはリモートリポジトリ(HTTPやSSH、あるいはその他登録済みの形式でアクセスするもの)でも動作するコマンドもある。また、リポジトリを参照しなくても動作するコマンドもある。リポジトリを参照しないコマンドの例としては\code{init}があり、これは新しいリポジトリを初期化するときに使う。
 
-All core commands are represented by a single function in the
-\code{commands} module; this makes it really easy to find the code for
-any given command. The commands module also contains a hashtable that
-maps the command name to the function and describes the options that
-it takes. The way this is done also allows for sharing common sets of
-options (for example, many commands have options that look like the
-ones the \code{log} command uses). The options description allows the
-dispatch module to check the given options for any command, and to
-convert any values passed in to the type expected by the command
-function. Almost every function also gets the \code{ui} object and the
-\code{repository} object to work with.
+%% All core commands are represented by a single function in the
+%% \code{commands} module; this makes it really easy to find the code for
+%% any given command. The commands module also contains a hashtable that
+%% maps the command name to the function and describes the options that
+%% it takes. The way this is done also allows for sharing common sets of
+%% options (for example, many commands have options that look like the
+%% ones the \code{log} command uses). The options description allows the
+%% dispatch module to check the given options for any command, and to
+%% convert any values passed in to the type expected by the command
+%% function. Almost every function also gets the \code{ui} object and the
+%% \code{repository} object to work with.
+すべてのコアコマンドは、\code{commands}モジュール内のひとつの関数で表される。そのため、何か特定のコマンドのソースコードを探すのも容易である。commandsモジュールにはハッシュテーブルも含まれており、このハッシュテーブルではコマンド名とそれに対応する関数そしてそのオプションに関する説明を対応させている。こうすることで、一般的なオプション群(たとえば、たいていのコマンドは\code{log}コマンドのオプションと同じようなオプションを使えるようになっている)を共有できるようになる。オプションに関する説明は、dispatchモジュールがそのコマンドのオプションをチェックするときに使う。そして、渡された値をそのコマンドの関数が期待する型に変換する。ほとんどすべての関数は、\code{ui}オブジェクトと操作対象の\code{repository}オブジェクトを受け取る。
 
 \end{aosasect1}
 
