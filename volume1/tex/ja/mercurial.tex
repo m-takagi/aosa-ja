@@ -179,7 +179,7 @@ SubversionはCVSよりもずっときれいな実装だったが、それでも�
 %% from the other, he or she will have to explicitly merge the other's
 %% changes into a new revision, which he subsequently commits as a merge
 %% revision.
-この問題に対して一般的に広く受け入れられている解決策は、チェンジセットを一列に並べるのではなくチェンジセットの無閉路有向グラフ(directed acyclic graph: DAG)を使うという方法だ(\aosafigref{fig.hg.dag})。つまり、新たにコミットしたチェンジセットは別のリビジョンの子リビジョンとなり、自分自身あるいは自分の子孫の子リビジョンになることはできないという構造である。この考え方を採用するために、三種類の特殊なリビジョンを用意した。親を持たないリビジョンである\emph{rootリビジョン}(ひとつのリポジトリに複数のルートがあってもかまわない)、複数の親を持つ\emph{マージリビジョン}、そして子を持たない\emph{headリビジョン}である。各リポジトリは、まず空のrootリビジョンがひとつだけある状態から始まる。それを起点としてチェンジセットが連なり、最終的にひとつあるいは複数のheadを持つことになる。二人のユーザーがそれぞれ別のコミットをしたときに、一方がもう一方のコミットを取り込みたくなったとしよう。そんな場合は、別のユーザーの変更を新しいリビジョンに明示的にマージしなければならない。この新しいリビジョンを、マージリビジョンとしてコミットする。
+この問題に対して一般的に広く受け入れられている解決策は、チェンジセットを一列に並べるのではなくチェンジセットの無閉路有向グラフ(directed acyclic graph: DAG)を使うという方法だ(\aosafigref{fig.hg.dag})。つまり、新たにコミットしたチェンジセットは別のリビジョンの子リビジョンとなり、自分自身あるいは自分の子孫の子リビジョンになることはできないという構造である。この考え方を採用するために、三種類の特殊なリビジョンを用意した。親を持たないリビジョンである\emph{rootリビジョン}(ひとつのリポジトリに複数のrootがあってもかまわない)、複数の親を持つ\emph{マージリビジョン}、そして子を持たない\emph{headリビジョン}である。各リポジトリは、まず空のrootリビジョンがひとつだけある状態から始まる。それを起点としてチェンジセットが連なり、最終的にひとつあるいは複数のheadを持つことになる。二人のユーザーがそれぞれ別のコミットをしたときに、一方がもう一方のコミットを取り込みたくなったとしよう。そんな場合は、別のユーザーの変更を新しいリビジョンに明示的にマージしなければならない。この新しいリビジョンを、マージリビジョンとしてコミットする。
 
 %% \aosafigure[275pt]{../images/mercurial/dag.eps}{Directed Acyclic Graph of Revisions}{fig.hg.dag}
 \aosafigure[275pt]{../images/mercurial/dag.eps}{各リビジョンの無閉路有向グラフ}{fig.hg.dag}
@@ -574,7 +574,7 @@ revlogの設定が分割されている利点のひとつが、順序づけを�
 %% metadata, stating that this changeset closes the branch. If the branch
 %% has more than one head, all of them have to be closed before the
 %% branch disappears from the list of branches in the repository.
-これらの弱点に対応するため、Mercurialには第二のブランチ方式が追加された。チェンジセットのメタデータにブランチ名を含める方式である。\code{branch}コマンドが追加され、現在の作業ディレクトリにブランチ名を設定できるようになった。このブランチ名は、次のコミットのときに用いられる。通常の\code{update}コマンドを使ってある特定の名前のブランチにアップデートすることもできるし、ブランチ上でコミットしたチェンジセットは常にそのブランチに関連するコミットとなる。この手法は\emph{名前付きブランチ(named branches)}と呼ばれる。しかし当初はブランチを作るだけでそれを閉じる(ブランチ一覧からそのブランチを見えなくする)ことはできなかった。ブランチを閉じられるようになったのは、それから数リリース後のことだった。ブランチを閉じる機能の実装は、チェンジセットのメタデータにフィールドを追加することで行った。追加フィールドに、このチェンジセットがブランチを閉じるという情報を記録したのだ。あるブランチが複数のヘッドを持つ場合は、それらをすべて閉じてからでないとブランチ一覧からそのブランチを消すことはできない。
+これらの弱点に対応するため、Mercurialには第二のブランチ方式が追加された。チェンジセットのメタデータにブランチ名を含める方式である。\code{branch}コマンドが追加され、現在の作業ディレクトリにブランチ名を設定できるようになった。このブランチ名は、次のコミットのときに用いられる。通常の\code{update}コマンドを使ってある特定の名前のブランチにアップデートすることもできるし、ブランチ上でコミットしたチェンジセットは常にそのブランチに関連するコミットとなる。この手法は\emph{名前付きブランチ(named branches)}と呼ばれる。しかし当初はブランチを作るだけでそれを閉じる(ブランチ一覧からそのブランチを見えなくする)ことはできなかった。ブランチを閉じられるようになったのは、それから数リリース後のことだった。ブランチを閉じる機能の実装は、チェンジセットのメタデータにフィールドを追加することで行った。追加フィールドに、このチェンジセットがブランチを閉じるという情報を記録したのだ。あるブランチが複数のheadを持つ場合は、それらをすべて閉じてからでないとブランチ一覧からそのブランチを消すことはできない。
 
 %% Of course, there's more than one way to do it.
 %% Git has a different way of naming branches, using
@@ -594,7 +594,7 @@ revlogの設定が分割されている利点のひとつが、順序づけを�
 %% to keep track of references. The wire protocol used to exchange
 %% Mercurial data has been extended to enable communicating about
 %% bookmarks, making it possible to push them around.
-この方式でのブランチ管理はどんどん広まり、今や名前付きブランチ方式やMercurial風のクローンによるブランチよりもずっと幅広く使われている。その流れを受けて、Mercurialにも\code{bookmarks}エクステンションが用意された。将来のバージョンでおそらくMercurialに組み込まれることだろう。このエクステンションは、バージョン管理対象外のシンプルなファイルを使って参照を追跡する。Mercurialのデータ交換に使っているwireプロトコルを拡張してブックマークも通信できるようにし、ブックマークもプッシュできるようにした。
+この方式でのブランチ管理はどんどん広まり、今や名前付きブランチ方式やMercurial風のクローンによるブランチよりもずっと幅広く使われている。その流れを受けて、Mercurialにも\code{bookmarks}拡張が用意された。将来のバージョンでおそらくMercurialに組み込まれることだろう。この拡張は、バージョン管理対象外のシンプルなファイルを使って参照を追跡する。Mercurialのデータ交換に使っているwireプロトコルを拡張してブックマークも通信できるようにし、ブックマークもプッシュできるようにした。
 
 \end{aosasect2}
 
@@ -638,7 +638,7 @@ revlogの設定が分割されている利点のひとつが、順序づけを�
 %% will have the effect of deleting the tag. Mercurial will also consider
 %% tags from all branches in the repository, using recency calculations
 %% to determine precedence among them.
-これらすべてをうまく機能させるために、Mercurialは\code{.hgtags}ファイルに新しい行を追加することしかしない。これは、別々のクローンでタグが並行して作られたときのマージにも役立つ。任意のタグに対して最新のノードidが優先され、空のノードidを追加すると(空のノードidは空のルートリビジョンを表し、すべてのリポジトリに共通して存在する)、それはタグを削除するのと同じ意味になる。Mercurialはリポジトリ内のすべてのブランチのタグの関係についても考慮し、新しいタグのほうを優先する。
+これらすべてをうまく機能させるために、Mercurialは\code{.hgtags}ファイルに新しい行を追加することしかしない。これは、別々のクローンでタグが並行して作られたときのマージにも役立つ。任意のタグに対して最新のノードidが優先され、空のノードidを追加すると(空のノードidは空のrootリビジョンを表し、すべてのリポジトリに共通して存在する)、それはタグを削除するのと同じ意味になる。Mercurialはリポジトリ内のすべてのブランチのタグの関係についても考慮し、新しいタグのほうを優先する。
 
 \end{aosasect2}
 
@@ -867,69 +867,75 @@ Mercurialのフックはpre-command、post-command、controllingそしてmiscell
 %% \begin{aosasect1}{Lessons Learned}
 \begin{aosasect1}{学んだこと}
 
-One of the first decisions Matt made when he started to develop
-Mercurial was to develop it in Python. Python has been great for the
-extensibility (through extensions and hooks) and is very easy to code
-in. It also takes a lot of the work out of being compatible across
-different platforms, making it relatively easy for Mercurial to work
-well across the three major OSes. On the other hand, Python is slow
-compared to many other (compiled) languages; in particular,
-interpreter startup is relatively slow, which is particularly bad for
-tools that have many shorter invocations (such as a VCS) rather than
-longer running processes.
+%% One of the first decisions Matt made when he started to develop
+%% Mercurial was to develop it in Python. Python has been great for the
+%% extensibility (through extensions and hooks) and is very easy to code
+%% in. It also takes a lot of the work out of being compatible across
+%% different platforms, making it relatively easy for Mercurial to work
+%% well across the three major OSes. On the other hand, Python is slow
+%% compared to many other (compiled) languages; in particular,
+%% interpreter startup is relatively slow, which is particularly bad for
+%% tools that have many shorter invocations (such as a VCS) rather than
+%% longer running processes.
+MattがMercurialの開発を始めるにあたって最初に決めたことのひとつが、Pythonで開発するということだった。Pythonは拡張性に優れており、非常にお手軽にコードを書ける。また、さまざまなプラットフォームでの互換性もきちんと考慮されているので、Mercurialを主要三大OSで動くようにするのも比較的容易だった。その一方で、Pythonは他の(コンパイル型の)言語に比べて実行速度が遅い。特にインタプリタの起動には時間がかかる。長期間実行しつつけるプロセスならこれは気にならないが、バージョン管理システムのように短期間に何度も起動するツールにとっては問題だ。
 
-An early choice was made to make it hard to modify changesets after
-committing. Because it's impossible to change a revision without
-modifying its identity hash, ``recalling'' changesets after having
-published them on the public Internet is a pain, and Mercurial makes
-it hard to do so. However, changing unpublished revisions should
-usually be fine, and the community has been trying to make this easier
-since soon after the release. There are extensions that try to solve
-the problem, but they require learning steps that are not very
-intuitive to users who have previously used basic Mercurial.
+%% An early choice was made to make it hard to modify changesets after
+%% committing. Because it's impossible to change a revision without
+%% modifying its identity hash, ``recalling'' changesets after having
+%% published them on the public Internet is a pain, and Mercurial makes
+%% it hard to do so. However, changing unpublished revisions should
+%% usually be fine, and the community has been trying to make this easier
+%% since soon after the release. There are extensions that try to solve
+%% the problem, but they require learning steps that are not very
+%% intuitive to users who have previously used basic Mercurial.
+開発初期の方針として、いったんコミットした後でのチェンジセットの変更をしにくいようにした。あるリビジョンを変更するにはそのidハッシュの変更が必須になるので、いったんインターネット上に公開したチェンジセットの``取り消し''は面倒な作業となる。そこでMercurialでは、その作業が難しくなるようにしたのだ。しかし、まだ公開していないリビジョンを変更するぶんには特に問題はない。そこで、Mercurialがリリースされて間もなく、未公開のリビジョンの変更をしやすくするようコミュニティが動き出した。この問題を解決しようとする拡張も存在するが、利用方法を身につけるのが難しく、それまでふつうにMercurialを使ってきたユーザーにとってはあまり直感的ではないものだった。
 
-Revlogs are good at reducing disk seeks, and the layered architecture
-of changelog, manifest and filelogs has worked very well. Committing
-is fast and relatively little disk space is used for revisions.
-However, some cases like file renames aren't very efficient due to
-the separate storage of revisions for each file; this will eventually
-be fixed, but it will require a somewhat hacky layering violation.
-Similarly, the per-file DAG used to help guide filelog storage isn't
-used a lot in practice, such that some code used to administrate
-that data could be considered to be overhead.
+%% Revlogs are good at reducing disk seeks, and the layered architecture
+%% of changelog, manifest and filelogs has worked very well. Committing
+%% is fast and relatively little disk space is used for revisions.
+%% However, some cases like file renames aren't very efficient due to
+%% the separate storage of revisions for each file; this will eventually
+%% be fixed, but it will require a somewhat hacky layering violation.
+%% Similarly, the per-file DAG used to help guide filelog storage isn't
+%% used a lot in practice, such that some code used to administrate
+%% that data could be considered to be overhead.
+revlogはディスクのシーク処理を減らすのに役立ったし、changelogやmanifestそしてfilelogsのレイヤー化アーキテクチャはうまく機能した。コミットは高速に行え、各リビジョンが利用するディスク領域は比較的少なめになる。しかし、ファイルのリネームのような一部の作業は、各ファイルのリビジョンを別々に格納しているせいで効率的に行えない。最終的にはこの問題も修正されるだろうが、レイヤー構造に反するちょっとしたハックが必要になるだろう。同じく、ファイル単位のDAGを使ってfilelogストレージを管理していることから、あまり大量のファイルを扱うのは現実的ではない。大量のファイルを管理するコードの一部がオーバーヘッドになってしまっている。
 
-Another core focus of Mercurial has been to make it easy to learn.  We
-try to provide most of the required functionality in a small set of
-core commands, with options consistent across commands. The intention
-is that Mercurial can mostly be learned progressively, especially for
-those users who have used another VCS before; this philosophy extends
-to the idea that extensions can be used to customize Mercurial even
-more for a particular use case. For this reason, the developers also
-tried to keep the UI in line with other VCSs, Subversion in
-particular.  Similarly, the team has tried to provide good
-documentation, available from the application itself, with
-cross-references to other help topics and commands. We try hard to
-provide useful error messages, including hints of what to try instead
-of the operation that failed.
+%% Another core focus of Mercurial has been to make it easy to learn.  We
+%% try to provide most of the required functionality in a small set of
+%% core commands, with options consistent across commands. The intention
+%% is that Mercurial can mostly be learned progressively, especially for
+%% those users who have used another VCS before; this philosophy extends
+%% to the idea that extensions can be used to customize Mercurial even
+%% more for a particular use case. For this reason, the developers also
+%% tried to keep the UI in line with other VCSs, Subversion in
+%% particular.  Similarly, the team has tried to provide good
+%% documentation, available from the application itself, with
+%% cross-references to other help topics and commands. We try hard to
+%% provide useful error messages, including hints of what to try instead
+%% of the operation that failed.
+Mercurialが重視しているもう一つのことは、使い方を簡単に身につけられるようにすることだ。必須機能の大半を少数のコアコマンド群にまとめ、各コマンドで一貫性のあるオプションを用意している。その狙いは、特に他のVCSを使ったことがあるユーザーがMercurialを段階的に学べるようにすることである。この思想の一環として、拡張機能でMercurialをカスタマイズできるようにした。単に特定の使い道にあわせて拡張するだけではなく、それ以外にも使えるようにしたのだ。この狙いがあるため、Mercurialの開発者はそのUIをできるだけ他のVCS(特にSubversion)と合わせようとしている。同様に、開発チームではドキュメントも重視している。Mercurial自身に付属するドキュメントでは、他のトピックやコマンドへのクロスリファレンスも提供されている。また、エラーメッセージも有用なものになるよう心がけており、単に「操作が失敗しました」ではなく、何をすればいいのかというヒントを提供できるようにしている。
 
-Some smaller choices made can be surprising to new users. For example,
-handling tags (as discussed in a previous section) by putting them in
-a separate file inside the working directory is something many users
-dislike at first, but the mechanism has some very desirable properties
-(though it certainly has its shortcomings as well). Similarly, other
-VCSs have opted to send only the checked out changeset and any
-ancestors to a remote host by default, whereas Mercurial sends every
-committed changeset the remote doesn't have. Both approaches make some
-amount of sense, and it depends on the style of development which one
-is the best for you.
+%% Some smaller choices made can be surprising to new users. For example,
+%% handling tags (as discussed in a previous section) by putting them in
+%% a separate file inside the working directory is something many users
+%% dislike at first, but the mechanism has some very desirable properties
+%% (though it certainly has its shortcomings as well). Similarly, other
+%% VCSs have opted to send only the checked out changeset and any
+%% ancestors to a remote host by default, whereas Mercurial sends every
+%% committed changeset the remote doesn't have. Both approaches make some
+%% amount of sense, and it depends on the style of development which one
+%% is the best for you.
+もう少し小さめの選択の中には、新しいユーザーにとっては少しびっくりするかもしれないものもある。たとえば、タグの処理を(先のセクションで述べたように)作業ディレクトリ内の個別のファイルで扱うという方式を好まない人も多いだろう。しかしこの方式には好ましい特性もあるのだ(もちろん欠点もあるが)。また、他のVCSではチェックアウトしたチェンジセットとその先祖だけをリモートホストに送るのがデフォルトだが、Mercurialではリモートに存在しないすべてのチェンジセットを送信することを選んだ。どちらの方式にもそれなりの理由があり、あなたにとってどちらが最適かは、その開発スタイルに依存する。
 
-As in any software project, there are a lot of trade-offs to be made.
-I think Mercurial made good choices, though of course with the benefit
-of 20/20 hindsight some other choices might have been more appropriate.
-Historically, Mercurial seems to be part of a first generation of
-distributed version control systems mature enough to be ready for
-general use. I, for one, am looking forward to seeing what the next
-generation will look like.
+%% As in any software project, there are a lot of trade-offs to be made.
+%% I think Mercurial made good choices, though of course with the benefit
+%% of 20/20 hindsight some other choices might have been more appropriate.
+%% Historically, Mercurial seems to be part of a first generation of
+%% distributed version control systems mature enough to be ready for
+%% general use. I, for one, am looking forward to seeing what the next
+%% generation will look like.
+他のソフトウェア開発プロジェクトと同様、Mercurialの開発でもさまざまなトレードオフが発生した。Mercurialは今までもよい選択をしてきたと思っているが、今になって考えると「もっと適切な選択肢があった」と思えるものもある。歴史的には、Mercurialは一般向けに使えるようになった第一世代の分散型バージョン管理システムである。個人的には、次の世代のシステムがどのようなものになるのかを楽しみにしている。
 
 \end{aosasect1}
 
