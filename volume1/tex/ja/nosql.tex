@@ -2,38 +2,42 @@
 \begin{aosachapter}{NoSQLを取り巻く世界}{s:nosql}{Adam Marcus}
 %% Based on EN-Revision r229
 
-Unlike most of the other projects in this book, NoSQL is not a tool, but
-an ecosystem composed of several complimentary and competing tools.
-The tools branded with the NoSQL monicker provide an alternative to
-SQL-based relational database systems for storing data. To understand
-NoSQL, we have to understand the space of available tools, and see how
-the design of each one explores the space of data storage possibilities.
+%% Unlike most of the other projects in this book, NoSQL is not a tool, but
+%% an ecosystem composed of several complimentary and competing tools.
+%% The tools branded with the NoSQL monicker provide an alternative to
+%% SQL-based relational database systems for storing data. To understand
+%% NoSQL, we have to understand the space of available tools, and see how
+%% the design of each one explores the space of data storage possibilities.
+他の大半の章とは異なり、NoSQLは単体のツールを表す言葉ではない。時には補完しあったり時には競合したりするさまざまなツール群からなる生態系を指す用語である。NoSQLと名付けられたツール群は、SQLベースのリレーショナルデータベースとは異なる方式でデータを格納する仕組みを提供する。NoSQLを理解するには、まずどんなツールが存在するのかを理解し、そしてそれぞれのツールがどのようにデータを格納するのかという設計を知る必要がある。
 
-If you are considering using a NoSQL storage system, you should first
-understand the wide space of options that NoSQL systems span.  NoSQL
-systems do away with many of the traditional comforts of relational
-database systems, and operations which were typically encapsulated
-behind the system boundary of a database are now left to application
-designers.  This requires you to take on the hat of a systems
-architect, which requires a more in-depth understanding of how such
-systems are built.
+%% If you are considering using a NoSQL storage system, you should first
+%% understand the wide space of options that NoSQL systems span.  NoSQL
+%% systems do away with many of the traditional comforts of relational
+%% database systems, and operations which were typically encapsulated
+%% behind the system boundary of a database are now left to application
+%% designers.  This requires you to take on the hat of a systems
+%% architect, which requires a more in-depth understanding of how such
+%% systems are built.
+NoSQLをストレージシステムとして使おうと検討するときにまず理解すべきことは、NoSQLの中にもさまざまなシステムが存在するということである。NoSQLシステムは、伝統的なリレーショナルデータベースシステムが持つ快適な機能の多くを廃止した。そして、これまでデータベース側に隠蔽されていた操作をアプリケーションの設計側に押し出したのだ。つまり、システムアーキテクトの立場で考えると、これらのシステムの仕組みをより深く知っておく必要があるということだ。
 
 %% \begin{aosasect1}{What's in a Name?}
 \begin{aosasect1}{その名の由来は?}
 
-In defining the space of NoSQL, let's first take a stab at defining
-the name.  Taken literally, a NoSQL system presents a query interface
-to the user that is not SQL\@.  The NoSQL community generally takes a
-more inclusive view, suggesting that NoSQL systems provide
-alternatives to traditional relational databases, and allow developers
-to design projects which use \emph{Not Only} a SQL interface. In some
-cases, you might replace a relational database with a NoSQL
-alternative, and in others you will employ a mix-and-match approach to
-different problems you encounter in application development.
+%% In defining the space of NoSQL, let's first take a stab at defining
+%% the name.  Taken literally, a NoSQL system presents a query interface
+%% to the user that is not SQL\@.  The NoSQL community generally takes a
+%% more inclusive view, suggesting that NoSQL systems provide
+%% alternatives to traditional relational databases, and allow developers
+%% to design projects which use \emph{Not Only} a SQL interface. In some
+%% cases, you might replace a relational database with a NoSQL
+%% alternative, and in others you will employ a mix-and-match approach to
+%% different problems you encounter in application development.
+NoSQLの世界を語る前に、まずはその名前をきちんと定義してみよう。文字通りにとらえると、NoSQLシステムとはSQL以外の問い合わせインターフェイスを持つシステムのことである。ただ、NoSQLコミュニティではもう少し包括的にとらえている。NoSQLシステムとは今までのリレーショナルデータベースの代替となるものであり、開発者がシステムを設計するときにSQL以外のインターフェイス(\emph{Not Only} SQL)も使えるようにするものだという考え方である。リレーショナルデータベースをその代替となるNoSQLで完全に置き換えることがあるかもしれないし、両者を組み合わせてアプリケーション開発時のさまざまな問題に対応していくこともあるかもしれない。
 
-Before diving into the world of NoSQL, let's explore the cases where
-SQL and the relational model suit your needs, and others where a NoSQL
-system might be a better fit.
+%% Before diving into the world of NoSQL, let's explore the cases where
+%% SQL and the relational model suit your needs, and others where a NoSQL
+%% system might be a better fit.
+NoSQLの世界に飛び込む前に少し考えてみよう。SQLや関係モデルが適するのはどのような場面だろうか。そしてNoSQLシステムのほうがより適しているのはどんな場合だろうか。
 
 %% \begin{aosasect2}{SQL and the Relational Model}
 \begin{aosasect2}{SQLと関係モデル}
