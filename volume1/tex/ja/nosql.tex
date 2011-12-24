@@ -1,4 +1,5 @@
-\begin{aosachapter}{The NoSQL Ecosystem}{s:nosql}{Adam Marcus}
+%% \begin{aosachapter}{The NoSQL Ecosystem}{s:nosql}{Adam Marcus}
+\begin{aosachapter}{NoSQLを取り巻く世界}{s:nosql}{Adam Marcus}
 %% Based on EN-Revision r229
 
 Unlike most of the other projects in this book, NoSQL is not a tool, but
@@ -17,7 +18,8 @@ designers.  This requires you to take on the hat of a systems
 architect, which requires a more in-depth understanding of how such
 systems are built.
 
-\begin{aosasect1}{What's in a Name?}
+%% \begin{aosasect1}{What's in a Name?}
+\begin{aosasect1}{その名の由来は?}
 
 In defining the space of NoSQL, let's first take a stab at defining
 the name.  Taken literally, a NoSQL system presents a query interface
@@ -33,7 +35,8 @@ Before diving into the world of NoSQL, let's explore the cases where
 SQL and the relational model suit your needs, and others where a NoSQL
 system might be a better fit.
 
-\begin{aosasect2}{SQL and the Relational Model}
+%% \begin{aosasect2}{SQL and the Relational Model}
+\begin{aosasect2}{SQLと関係モデル}
 
 SQL is a declarative language for querying data.  A declarative
 language is one in which a programmer specifies \emph{what} they want
@@ -119,7 +122,8 @@ optimized.
 
 \end{aosasect2}
 
-\begin{aosasect2}{NoSQL Inspirations}
+%% \begin{aosasect2}{NoSQL Inspirations}
+\begin{aosasect2}{NoSQLのひらめき}
 
 The NoSQL movement finds much of its inspiration in papers from the
 research community.  While many papers are at the core of design
@@ -148,7 +152,8 @@ Dynamo (its partitioning and consistency schemes).
 
 \end{aosasect2}
 
-\begin{aosasect2}{Characteristics and Considerations}
+%% \begin{aosasect2}{Characteristics and Considerations}
+\begin{aosasect2}{特徴と検討事項}
 
 NoSQL systems part ways with the hefty SQL standard and offer simpler
 but piecemeal solutions for architecting storage solutions.  These
@@ -238,7 +243,8 @@ While we will touch on all of these consideration, the last three, while equally
 
 \end{aosasect1}
 
-\begin{aosasect1}{NoSQL Data and Query Models}
+%% \begin{aosasect1}{NoSQL Data and Query Models}
+\begin{aosasect1}{NoSQLのデータモデルおよびクエリモデル}
 
 The \emph{data model} of a database specifies how data is logically
 organized.  Its \emph{query model} dictates how the data can be
@@ -248,7 +254,8 @@ you might have heard of include SQL, key lookups, and MapReduce.
 NoSQL systems combine different data and query models, resulting in
 different architectural considerations.
 
-\begin{aosasect2}{Key-based NoSQL Data Models}
+%% \begin{aosasect2}{Key-based NoSQL Data Models}
+\begin{aosasect2}{キーベースのNoSQLデータモデル}
 
 NoSQL systems often part with the relational model and the full
 expressivity of SQL by restricting lookups on a dataset to a single
@@ -282,7 +289,8 @@ intertwined, which muddles abstraction.
 Let's quickly touch on the data associated with each key.  Various
 NoSQL systems offer different solutions in this space.
 
-\begin{aosasect3}{Key-Value Stores}
+%% \begin{aosasect3}{Key-Value Stores}
+\begin{aosasect3}{キー・バリュー ストア}
 
 The simplest form of NoSQL store is a \emph{key-value} store.  Each
 key is mapped to a value containing arbitrary data.  The NoSQL store
@@ -308,7 +316,8 @@ persistence library that has a key-value interface.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Key-Data Structure Stores}
+%% \begin{aosasect3}{Key-Data Structure Stores}
+\begin{aosasect3}{キー・データ構造 ストア}
 
 Key-data structure stores, made popular by Redis\footnote{\url{http://redis.io/}}, assign each value a
 type.  In Redis, the available types a value can take on are integer,
@@ -322,7 +331,8 @@ aggregation or joins, Redis balances functionality and performance.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Key-Document Stores}
+%% \begin{aosasect3}{Key-Document Stores}
+\begin{aosasect3}{キー・ドキュメント ストア}
 
 Key-document stores, such as CouchDB\footnote{\url{http://couchdb.apache.org/}}, MongoDB\footnote{\url{http://www.mongodb.org/}}, and Riak\footnote{\url{http://www.basho.com/products_riak_overview.php}}, map a key to
 some document that contains structured information.  These systems
@@ -338,7 +348,8 @@ application-based query logic can become exceedingly complex.
 
 \end{aosasect3}
 
-\begin{aosasect3}{BigTable Column Family Stores}
+%% \begin{aosasect3}{BigTable Column Family Stores}
+\begin{aosasect3}{BigTableカラムファミリー ストア}
 
 HBase and Cassandra base their data model on the one used by Google's
 BigTable.  In this model, a key identifies a row, which contains data
@@ -369,7 +380,8 @@ column families together for performance reasons.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Graph Storage}
+%% \begin{aosasect2}{Graph Storage}
+\begin{aosasect2}{グラフストレージ}
 
 One class of NoSQL stores are graph stores.  Not all data is created
 equal, and the relational and key-oriented data models of storing and
@@ -386,7 +398,8 @@ be better stored and queried as a graph.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Complex Queries}
+%% \begin{aosasect2}{Complex Queries}
+\begin{aosasect2}{複雑な問い合わせ}
 
 There are notable exceptions to key-only lookups in NoSQL systems.
 MongoDB allows you to index your data based on any number of
@@ -401,7 +414,8 @@ analytical queries.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Transactions}
+%% \begin{aosasect2}{Transactions}
+\begin{aosasect2}{トランザクション}
 
 NoSQL systems generally prioritize performance over
 \emph{transactional semantics}.  Other SQL-based systems allow any set
@@ -446,7 +460,8 @@ guarantees.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Schema-free Storage }
+%% \begin{aosasect2}{Schema-free Storage }
+\begin{aosasect2}{スキーマフリー ストレージ}
 
 A cross-cutting property of many NoSQL systems is the lack of schema
 enforcement in the database.  Even in document stores and column
@@ -466,7 +481,8 @@ systems.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Data Durability}
+%% \begin{aosasect1}{Data Durability}
+\begin{aosasect1}{データの永続性}
 
 Ideally, all data modifications on a storage system would immediately
 be safely persisted and replicated to multiple locations to avoid data
@@ -488,7 +504,8 @@ several hurricane widths apart. Writing to hard drives and copying
 data to multiple servers or data centers is expensive, so different
 NoSQL systems trade off durability guarantees for performance.
 
-\begin{aosasect2}{Single-server Durability}
+%% \begin{aosasect2}{Single-server Durability}
+\begin{aosasect2}{単一サーバーの永続性}
 
 The simplest form of durability is a \emph{single-server durability},
 which ensures that any data modification will survive a server restart
@@ -512,7 +529,8 @@ their data has been successfully written to disk until that write has
 been \code{fsync}ed.  Let's cover a few techniques for improving
 performance of single-server durability guarantees.
 
-\begin{aosasect3}{Control \code{fsync} Frequency}
+%% \begin{aosasect3}{Control \code{fsync} Frequency}
+\begin{aosasect3}{\code{fsync}の頻度の制御}
 
 Memcached\footnote{\url{http://memcached.org/}} is an example of a system which offers no on-disk durability
 in exchange for extremely fast in-memory operations.  When a server
@@ -532,7 +550,8 @@ but without guarantees of when this will happen.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Increase Sequential Writes by Logging}
+%% \begin{aosasect3}{Increase Sequential Writes by Logging}
+\begin{aosasect3}{ログ出力によるシーケンシャル書き込みの向上}
 
 Several data structures, such as B+Trees, help NoSQL systems quickly
 retrieve data from disk.  Updates to those structures result in
@@ -559,7 +578,8 @@ growing unbounded.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Increase Throughput by Grouping Writes}
+%% \begin{aosasect3}{Increase Throughput by Grouping Writes}
+\begin{aosasect3}{グルーピング書き込みによるスループットの向上}
 
 Cassandra groups multiple concurrent updates within a short window
 into a single \code{fsync} call.  This design, called \emph{group
@@ -577,7 +597,8 @@ recently seen patches to allow support of appends that respect
 
 \end{aosasect2}
 
-\begin{aosasect2}{Multi-server Durability}
+%% \begin{aosasect2}{Multi-server Durability}
+\begin{aosasect2}{複数サーバーの永続性}
 
 Because hard drives and machines often irreparably fail, copying
 important data across machines is necessary.  Many NoSQL systems offer
@@ -624,7 +645,8 @@ backup data centers.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Scaling for Performance}
+%% \begin{aosasect1}{Scaling for Performance}
+\begin{aosasect1}{パフォーマンス向上のためのスケーリング}
 
 Having just spoken about handling failure, let's imagine a rosier
 situation: success!  If the system you build reaches success, your
@@ -666,13 +688,15 @@ of the key determines the machine on which a key-value pair is
 stored.  We'll cover two methods of defining the key-machine mapping:
 hash partitioning and range partitioning.
 
-\begin{aosasect2}{Do Not Shard Until You Have To}
+%% \begin{aosasect2}{Do Not Shard Until You Have To}
+\begin{aosasect2}{必要になるまでシャーディングを避ける}
 
 Sharding adds system complexity, and where possible, you should avoid
 it.  Let's cover two ways to scale without sharding: read replicas and
 caching.
 
-\begin{aosasect3}{Read Replicas}
+%% \begin{aosasect3}{Read Replicas}
+\begin{aosasect3}{リードレプリカ}
 
 Many storage systems see more read requests than write requests.  A
 simple solution in these cases is to make copies of the data on
@@ -691,7 +715,8 @@ slaves to improve read-only query performance.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Caching}
+%% \begin{aosasect3}{Caching}
+\begin{aosasect3}{キャッシュ}
 
 Caching the most popular content in your system often works
 surprisingly well.  Memcached dedicates blocks of memory on multiple
@@ -718,7 +743,8 @@ workload across multiple servers.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Sharding Through Coordinators}
+%% \begin{aosasect2}{Sharding Through Coordinators}
+\begin{aosasect2}{Coordinatorによるシャーディング}
 
 The CouchDB project focuses on the single-server experience.  Two
 projects, Lounge and BigCouch, facilitate sharding CouchDB workloads
@@ -737,7 +763,8 @@ multiple physical machines for the same key range.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Consistent Hash Rings}
+%% \begin{aosasect2}{Consistent Hash Rings}
+\begin{aosasect2}{コンシステントハッシュリング}
 
 Good hash functions distribute a set of keys in a uniform manner.
 This makes them a powerful tool for distributing key-value pairs
@@ -748,9 +775,11 @@ applications of the technique to data stores was in systems called
 around the principles of Amazon's Dynamo adopted this distribution
 technique, and it appears in Cassandra, Voldemort, and Riak.
 
-\begin{aosasect3}{Hash Rings by Example}
+%% \begin{aosasect3}{Hash Rings by Example}
+\begin{aosasect3}{ハッシュリングの実例}
 
-\aosafigureTop[150pt]{../images/nosql/hashring.eps}{A Distributed Hash Table Ring}{fig.nosql.hashring}
+%% \aosafigureTop[150pt]{../images/nosql/hashring.eps}{A Distributed Hash Table Ring}{fig.nosql.hashring}
+\aosafigureTop[150pt]{../images/nosql/hashring.eps}{分散ハッシュテーブルリング}{fig.nosql.hashring}
 
 Consistent hash rings work as follows.  Say we have a hash function
 \code{H} that maps keys to uniformly distributed large integer values.  We
@@ -776,7 +805,8 @@ stored on server \code{B}.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Replicating Data}
+%% \begin{aosasect3}{Replicating Data}
+\begin{aosasect3}{データのレプリケーション}
 
 Replication for multi-server durability is achieved by passing the
 keys and values in one server's assigned range to the servers
@@ -789,7 +819,8 @@ since its range would expand to include \code{A}'s.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Achieving Better Distribution}
+%% \begin{aosasect3}{Achieving Better Distribution}
+\begin{aosasect3}{よりよい分散化}
 
 While hashing is statistically effective at uniformly distributing a
 keyspace, it usually requires many servers before it distributes
@@ -821,7 +852,8 @@ the location of servers on the ring depending on their historic load.
 \end{aosasect2}
 
 \vspace{-0.2cm} % remove some space to rescue orphan from next page
-\begin{aosasect2}{Range Partitioning}
+%% \begin{aosasect2}{Range Partitioning}
+\begin{aosasect2}{レンジパーティショニング}
 \vspace{-0.1cm} % remove some space to rescue orphan from next page
 
 In the range partitioning approach to sharding, some machines in your
@@ -845,7 +877,8 @@ at the expense of extra architectural components which monitor and
 route shards.
 
 \vspace{-0.1cm} % remove some space to rescue orphan from next page
-\begin{aosasect3}{The BigTable Way}
+%% \begin{aosasect3}{The BigTable Way}
+\begin{aosasect3}{BigTableの手法}
 
 Google's BigTable paper describes a range-partitioning hierarchical
 technique for sharding data into tablets.  A tablet stores a range of
@@ -860,7 +893,8 @@ split in two.  A master server analyzes tablet size,
 load, and tablet server availability.  The master adjusts which tablet
 server serves which tablets at any time.
 
-\aosafigure[300pt]{../images/nosql/bigtable.eps}{BigTable-based Range Partitioning}{fig.nosql.bigtable}
+%% \aosafigure[300pt]{../images/nosql/bigtable.eps}{BigTable-based Range Partitioning}{fig.nosql.bigtable}
+\aosafigure[300pt]{../images/nosql/bigtable.eps}{BigTableベースのレンジ・パーティショニング}{fig.nosql.bigtable}
 
 The master server maintains the tablet assignment in a metadata table.
 Because this metadata can get large, the metadata table is also
@@ -885,7 +919,8 @@ using 128MB tablets.
 \end{aosasect3}
 
 \vspace{-0.1cm} % remove some space to rescue orphan from next page
-\begin{aosasect3}{Handling Failures}
+%% \begin{aosasect3}{Handling Failures}
+\begin{aosasect3}{失敗の処理}
 
 The master is a single point of failure in the BigTable design, but
 can go down temporarily without affecting requests to tablet servers.
@@ -903,7 +938,8 @@ server reassignment.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Range Partitioning-based NoSQL Projects}
+%% \begin{aosasect3}{Range Partitioning-based NoSQL Projects}
+\begin{aosasect3}{レンジパーティショニングベースのNoSQLプロジェクト}
 
 HBase employs BigTable's hierarchical approach to range-partitioning.
 Underlying tablet data is stored in Hadoop's distributed filesystem
@@ -949,7 +985,8 @@ confirmed.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Which Partitioning Scheme to Use}
+%% \begin{aosasect2}{Which Partitioning Scheme to Use}
+\begin{aosasect2}{どのパーティショニング方式を採用するか}
 
 Given the hash- and range-based approaches to sharding, which is
 preferable?  It depends.  Range partitioning is the obvious choice to
@@ -979,7 +1016,8 @@ immediate neighbors during downtime.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Consistency}
+%% \begin{aosasect1}{Consistency}
+\begin{aosasect1}{一貫性}
 \label{sec.nosql.consistency}
 
 Having spoken about the virtues of replicating data to multiple
@@ -996,7 +1034,8 @@ Let's first get into why the second option is an appropriate
 consideration by understanding a fundamental property of distributed
 computing.  After that, we'll jump into the details of each approach.
 
-\begin{aosasect2}{A Little Bit About CAP}
+%% \begin{aosasect2}{A Little Bit About CAP}
+\begin{aosasect2}{CAPについて}
 
 Why are we considering anything short of strong consistency guarantees
 over our data?  It all comes down to a property of distributed systems
@@ -1056,7 +1095,8 @@ so we will not discuss it further.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Strong Consistency}
+%% \begin{aosasect2}{Strong Consistency}
+\begin{aosasect2}{厳密な整合性}
 
 Systems which promote strong consistency ensure that the replicas of a
 data item will always be able to come to consensus on the value of a
@@ -1135,7 +1175,8 @@ atomically and consistently across all replicas.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Eventual Consistency}
+%% \begin{aosasect2}{Eventual Consistency}
+\begin{aosasect2}{結果整合性}
 
 Dynamo-based systems, which include Voldemort, Cassandra, and Riak,
 allow the user to specify \code{N}, \code{R}, and \code{W} to their
@@ -1150,7 +1191,8 @@ systems determine that data has gotten out of sync, then discuss how
 they synchronize replicas, and finally bring in a few dynamo-inspired
 methods for speeding up the synchronization process.
 
-\begin{aosasect3}{Versioning and Conflicts}
+%% \begin{aosasect3}{Versioning and Conflicts}
+\begin{aosasect3}{バージョニングと衝突}
 
 Because two replicas might see two different versions of a value for
 some key, data versioning and conflict detection is important.  The
@@ -1176,7 +1218,8 @@ time, and identify a conflict.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Conflict Resolution}
+%% \begin{aosasect3}{Conflict Resolution}
+\begin{aosasect3}{衝突の解決}
 
 Conflict resolution varies across the different systems.  The Dynamo
 paper leaves conflict resolution to the application using the
@@ -1199,7 +1242,8 @@ picks a version to return to users until conflicts are repaired.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Read Repair}
+%% \begin{aosasect3}{Read Repair}
+\begin{aosasect3}{リードリペア}
 
 If R replicas return non-conflicting data to a coordinator, the
 coordinator can safely return the non-conflicting data to the
@@ -1216,6 +1260,7 @@ divergence in the system.
 
 \end{aosasect3}
 
+%% \begin{aosasect3}{Hinted Handoff}
 \begin{aosasect3}{Hinted Handoff}
 
 Cassandra, Riak, and Voldemort all employ a technique called
@@ -1235,6 +1280,7 @@ systems, as it speeds up recovery when an unavailable node returns.
 
 \end{aosasect3}
 
+%% \begin{aosasect3}{Anti-Entropy}
 \begin{aosasect3}{Anti-Entropy}
 
 When a replica is down for an extended period of time, or the machine
@@ -1252,6 +1298,7 @@ contain mostly similar data.
 
 \end{aosasect3}
 
+%% \begin{aosasect3}{Gossip}
 \begin{aosasect3}{Gossip}
 
 Finally, as distributed systems grow, it is hard to keep track of how
@@ -1269,7 +1316,8 @@ route clients in search of a key.
 
 \end{aosasect1}
 
-\begin{aosasect1}{A Final Word}
+%% \begin{aosasect1}{A Final Word}
+\begin{aosasect1}{最後に}
 
 The NoSQL ecosystem is still in its infancy, and many of the
 systems we've discussed will change architectures, designs, and
@@ -1283,7 +1331,8 @@ you to use current versions responsibly.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Acknowledgments}
+%% \begin{aosasect1}{Acknowledgments}
+\begin{aosasect1}{謝辞}
 
 I am grateful to Jackie Carter, Mihir Kedia, and the anonymous
 reviewers for their comments and suggestions to improve the chapter.
