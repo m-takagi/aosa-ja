@@ -739,116 +739,126 @@ MercurialがデフォルトでインストールするPythonのパッケージ�
 %% \begin{aosasect1}{Extensibility}
 \begin{aosasect1}{拡張性}
 
-One of the things that makes Mercurial powerful is the ability to
-write extensions for it. Since Python is a relatively easy language to
-get started with, and Mercurial's API is mostly quite well-designed
-(although certainly under-documented in places), a number of people
-actually first learned Python because they wanted to extend Mercurial.
+Mercurialをさらに強化できるように用意されたのが、拡張を書く機能である。Pythonは比較的身につけやすい言語であり、MercurialのAPIはとてもうまく作られている(きちんとドキュメントも用意されている)。そんなこともあって「Mercurialの拡張を書きたいからPythonを勉強しはじめました」という人も多い。
 
 %% \begin{aosasect2}{Writing Extensions}
 \begin{aosasect2}{拡張機能の作成}
 
-Extensions must be enabled by adding a line to one of the
-configuration files read by Mercurial on startup; a key is provided
-along with the path to any Python module. There are several ways to
-add functionality:
+%% Extensions must be enabled by adding a line to one of the
+%% configuration files read by Mercurial on startup; a key is provided
+%% along with the path to any Python module. There are several ways to
+%% add functionality:
+拡張を有効にするには、Mercurialが起動時に読み込む設定ファイルの中に一行追加する必要がある。拡張を表すキーと、Pythonモジュールへのパスをそこに記述する。機能を追加するには次のようにいくつかの方法がある。
 
 \begin{aosaitemize}
 
-  \item adding new commands;
+  %% \item adding new commands;
+  \item 新しいコマンドの追加
 
-  \item wrapping existing commands;
+  %% \item wrapping existing commands;
+  \item 既存のコマンドのラッピング
 
-  \item wrapping the repository used;
+  %% \item wrapping the repository used;
+  \item 使用するリポジトリのラッピング
 
-  \item wrap any function in Mercurial; and
+  %% \item wrap any function in Mercurial; and
+  \item Mercurialの関数のラッピング
 
-  \item add new repository types.
+  %% \item add new repository types.
+  \item 新しいリポジトリ型の追加
 
 \end{aosaitemize}
 
-Adding new commands can be done simply by adding a hashtable called
-\code{cmdtable} to the extension module. This will get picked up by
-the extension loader, which will add it to the commands table
-considered when a command is dispatched. Similarly, extensions can
-define functions called \code{uisetup} and \code{reposetup} which are
-called by the dispatching code after the UI and repository have been
-instantiated. One common behavior is to use a \code{reposetup}
-function to wrap the repository in a repository subclass provided by
-the extension. This allows the extension to modify all kinds of basic
-behavior. For example, one extension I have written hooks into the
-uisetup and sets the \code{ui.username} configuration property based on the
-SSH authentication details available from the environment.
+%% Adding new commands can be done simply by adding a hashtable called
+%% \code{cmdtable} to the extension module. This will get picked up by
+%% the extension loader, which will add it to the commands table
+%% considered when a command is dispatched. Similarly, extensions can
+%% define functions called \code{uisetup} and \code{reposetup} which are
+%% called by the dispatching code after the UI and repository have been
+%% instantiated. One common behavior is to use a \code{reposetup}
+%% function to wrap the repository in a repository subclass provided by
+%% the extension. This allows the extension to modify all kinds of basic
+%% behavior. For example, one extension I have written hooks into the
+%% uisetup and sets the \code{ui.username} configuration property based on the
+%% SSH authentication details available from the environment.
+新しいコマンドを追加するには、単に\code{cmdtable}という名前のハッシュテーブルを拡張モジュールに追加するだけである。このハッシュテーブルを拡張ローダーが読み込んで、コマンドテーブルに追加する。コマンドのディスパッチ時に、このコマンドテーブルを用いる。同じく、拡張内で\code{uisetup}および\code{reposetup}関数を定義することもできる。これらはそれぞれ、UIやリポジトリのインスタンスを生成した後にディスパッチのコードから呼び出される。共通のふるまいが一つある。それは、\code{reposetup}関数を使い、拡張が提供するrepositoryのサブクラスにリポジトリをラップすることだ。こうすることで、拡張側ですべての基本的なふるまいを変更できるようになる。たとえば、私がかつて書いたある拡張では、uisetupをフックして\code{ui.username}の内容を書き換えていた。環境から取得できるSSH認証情報に基づいたユーザー名を設定していたのだ。
 
-More extreme extensions can be written to add repository types. For
-example, the \code{hgsubversion} project (not included as part of
-Mercurial) registers a repository type for Subversion
-repositories. This makes it possible to clone from a Subversion
-repository almost as if it were a Mercurial repository. It's even
-possible to push back to a Subversion repository, although there are a
-number of edge cases because of the impedance mismatch between the two
-systems. The user interface, on the other hand, is completely
-transparent.
+%% More extreme extensions can be written to add repository types. For
+%% example, the \code{hgsubversion} project (not included as part of
+%% Mercurial) registers a repository type for Subversion
+%% repositories. This makes it possible to clone from a Subversion
+%% repository almost as if it were a Mercurial repository. It's even
+%% possible to push back to a Subversion repository, although there are a
+%% number of edge cases because of the impedance mismatch between the two
+%% systems. The user interface, on the other hand, is completely
+%% transparent.
+新しいリポジトリ型を追加するといった、さらに思い切った拡張を書くこともできる。たとえば\code{hgsubversion}プロジェクト(Mercurial本体には組み込まれていない)は、Subversionのリポジトリを扱うためのリポジトリ型を登録する。これを使えばSubversionのリポジトリもクローンでき、まるでMercurialのリポジトリであるかのように扱えるようになる。変更をSubversionのリポジトリにプッシュすることも可能だ。しかし両者のシステムの間にはインピーダンスミスマッチがあるため、かなりのエッジケースが存在する。一方、ユーザーインターフェイスに関しては完全に透過的になっている。
 
-For those who want to fundamentally change Mercurial, there is
-something commonly called ``monkeypatching'' in the world of dynamic
-languages. Because extension code runs in the same address space as
-Mercurial, and Python is a fairly flexible language with extensive
-reflection capabilities, it's possible (and even quite easy) to modify
-any function or class defined in Mercurial. While this can result in
-kind of ugly hacks, it's also a very powerful mechanism. For example,
-the \code{highlight} extension that lives in \code{hgext} modifies the
-built-in webserver to add syntax highlighting to pages in the
-repository browser that allow you to inspect file contents.
+%% For those who want to fundamentally change Mercurial, there is
+%% something commonly called ``monkeypatching'' in the world of dynamic
+%% languages. Because extension code runs in the same address space as
+%% Mercurial, and Python is a fairly flexible language with extensive
+%% reflection capabilities, it's possible (and even quite easy) to modify
+%% any function or class defined in Mercurial. While this can result in
+%% kind of ugly hacks, it's also a very powerful mechanism. For example,
+%% the \code{highlight} extension that lives in \code{hgext} modifies the
+%% built-in webserver to add syntax highlighting to pages in the
+%% repository browser that allow you to inspect file contents.
+Mercurialを根本的に書き換えたい人には``モンキーパッチ''という手段がある。動的言語の世界ではおなじみの方法だ。拡張のコードはMercurialと同じアドレス空間で実行され、またPythonはリフレクション機能を持つ極めて柔軟な言語なので、Mercurial内部で定義されている関数やクラスの書き換えだって容易に行える。見苦しいハックになってしまう可能性もあるが、非常に強力な仕組みでもある。たとえば、\code{hgext}にある\code{highlight}拡張は、組み込みのウェブサーバーを書き換えてリポジトリブラウザにシンタックスハイライト機能を追加し、ファイルの中身を読みやすくしている。
 
-There's one more way to extend Mercurial, which is much simpler:
-\emph{aliases}. Any configuration file can define an alias as a new
-name for an existing command with a specific group of options already
-set. This also makes it possible to give shorter names to any
-commands. Recent versions of Mercurial also include the ability to
-call a shell command as an alias, so that you can design complicated
-commands using nothing but shell scripting.
+%% There's one more way to extend Mercurial, which is much simpler:
+%% \emph{aliases}. Any configuration file can define an alias as a new
+%% name for an existing command with a specific group of options already
+%% set. This also makes it possible to give shorter names to any
+%% commands. Recent versions of Mercurial also include the ability to
+%% call a shell command as an alias, so that you can design complicated
+%% commands using nothing but shell scripting.
+Mercurialを拡張する方法は、もう一つ存在する。よりシンプルな方法である\emph{エイリアス}だ。すべての設定ファイルでエイリアスを定義できる。エイリアスを使えば、既存のコマンドと設定済みのオプション群をあわせたものに新しい名前をつけることができる。これを使えば、既存のコマンドの短縮形を定義することもできる。最近のバージョンのMercurialでは、シェルのコマンドもエイリアスとして呼べるようになった。これを使えば、シェルスクリプトを使ってより複雑なコマンドを作ることもできる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Hooks}
 \begin{aosasect2}{フック}
 
-Version control systems have long provided hooks as a way for VCS
-events to interact with the outside world. Common usage includes
-sending off a notification to a continuous integration
-system\footnote{See \aosachapref{s:integration}.} or updating the
-working directory on a web server so that changes become
-world-visible. Of course, Mercurial also includes a subsystem to
-invoke hooks like this.
+%% Version control systems have long provided hooks as a way for VCS
+%% events to interact with the outside world. Common usage includes
+%% sending off a notification to a continuous integration
+%% system\footnote{See \aosachapref{s:integration}.} or updating the
+%% working directory on a web server so that changes become
+%% world-visible. Of course, Mercurial also includes a subsystem to
+%% invoke hooks like this.
+各種バージョン管理システムは、これまでもずっとフック機構を提供してきた。この仕組みを使ってVCS上でのイベントとその他の世界とのやりとりをできるようにしていたのだ。よくある使い道としては、継続的インテグレーションシステム\footnote{\aosachapref{s:integration}を参照。}に通知を送ったり、ウェブサーバー上の作業ディレクトリを更新して最新版を一般公開したりといったものがある。もちろんMercurialにも同様に、フックを起動するサブシステムが組み込まれている。
 
-In fact, it again contains two variants. One is more like traditional
-hooks in other version control systems, in that it invokes scripts in
-the shell. The other is more interesting, because it allows users to
-invoke Python hooks by specifying a Python module and a function name
-to call from that module. Not only is this faster because it runs in
-the same process, but it also hands off \code{repo} and \code{ui} objects, meaning
-you can easily initiate more complex interactions inside the VCS.
+%% In fact, it again contains two variants. One is more like traditional
+%% hooks in other version control systems, in that it invokes scripts in
+%% the shell. The other is more interesting, because it allows users to
+%% invoke Python hooks by specifying a Python module and a function name
+%% to call from that module. Not only is this faster because it runs in
+%% the same process, but it also hands off \code{repo} and \code{ui} objects, meaning
+%% you can easily initiate more complex interactions inside the VCS.
+実際のところ、フックにもまた二通りの仕組みが用意されている。一つは昔ながらの仕組みで他のバージョン管理システムにもよくあるもの、つまり、シェル内でスクリプトを実行するという仕組みだ。もう一方はもう少し興味深い仕組みである。というのも、ユーザー側でPythonのフックを起動させる仕組みとして、Pythonのモジュール名とそのモジュールから呼び出す関数名を指定させているのだ。Mercurialと同じプロセス内で動くためにより高速になるというだけでなく、この方式では\code{repo}オブジェクトや\code{ui}オブジェクトも渡せるのでVCSないでより複雑な操作を容易に行えるということになる。
 
-Hooks in Mercurial can be divided in to pre-command, post-command,
-controlling, and miscellaneous hooks. The first two are trivially
-defined for any command by specifying a pre-\emph{command} or
-post-\emph{command} key in the hooks section of a configuration
-file. For the other two types, there's a predefined set of events. The
-difference in controlling hooks is that they are run right before
-something happens, and may not allow that event to progress further.
-This is commonly used to validate changesets in some way on a central
-server; because of Mercurial's distributed nature, no such checks can
-be enforced at commit time. For example, the Python project uses a
-hook to make sure some aspects of coding style are enforced throughout
-the code base---if a changeset adds code in a style that is not
-allowed, it will be rejected by the central repository.
+%% Hooks in Mercurial can be divided in to pre-command, post-command,
+%% controlling, and miscellaneous hooks. The first two are trivially
+%% defined for any command by specifying a pre-\emph{command} or
+%% post-\emph{command} key in the hooks section of a configuration
+%% file. For the other two types, there's a predefined set of events. The
+%% difference in controlling hooks is that they are run right before
+%% something happens, and may not allow that event to progress further.
+%% This is commonly used to validate changesets in some way on a central
+%% server; because of Mercurial's distributed nature, no such checks can
+%% be enforced at commit time. For example, the Python project uses a
+%% hook to make sure some aspects of coding style are enforced throughout
+%% the code base---if a changeset adds code in a style that is not
+%% allowed, it will be rejected by the central repository.
+Mercurialのフックはpre-command、post-command、controllingそしてmiscellaneousの四種類に分類できる。最初の二つは単純なもので、設定ファイルのhooksセクションにpre-\emph{command}あるいはpost-\emph{command}というキーを設定してそこに任意のコマンドを定義するだけである。残りの二つについては、定義済みのイベントが用意されているのでそれを利用する。controllingフックがその他と異なる点は、何かが起こる直前にそのフックが実行され、場合によってはそのイベントの発生を中断させることもできるというところだ。よくある利用法は、中央サーバー上で何らかの方法でチェンジセットを検証するというものだ。Mercurialは分散型のシステムなので、コミット時にはこの手のチェックをすることができない。たとえばPythonプロジェクトでは、フックを使ってコーディング規約のチェックを行っている。あるチェンジセットで追加しようとしているコードが所定のスタイルを満たしていない場合には、中央リポジトリがそれを却下するという仕組みだ。
 
-Another interesting use of hooks is a pushlog, which is used by
-Mozilla and a number of corporate organizations. A pushlog
-records each push (since a push may contain any number of
-changesets) and records who initiated that push and when, providing
-a kind of audit trail for the repository.
+%% Another interesting use of hooks is a pushlog, which is used by
+%% Mozilla and a number of corporate organizations. A pushlog
+%% records each push (since a push may contain any number of
+%% changesets) and records who initiated that push and when, providing
+%% a kind of audit trail for the repository.
+それ以外のフックの使い道としては、プッシュログがある。これはMozillaやその他多数の企業組織で使われている。プッシュログは個々のプッシュを記録し(ひとつのプッシュには複数のチェンジセットが含まれることもある)、さらにそのプッシュを誰がいつ行ったのかも記録する。これを、そのリポジトリの監査証跡とするのだ。
 
 \end{aosasect2}
 
