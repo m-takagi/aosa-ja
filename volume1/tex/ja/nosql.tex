@@ -42,92 +42,101 @@ NoSQLの世界に飛び込む前に少し考えてみよう。SQLや関係モデ
 %% \begin{aosasect2}{SQL and the Relational Model}
 \begin{aosasect2}{SQLと関係モデル}
 
-SQL is a declarative language for querying data.  A declarative
-language is one in which a programmer specifies \emph{what} they want
-the system to do, rather than procedurally defining \emph{how} the
-system should do it.  A few examples include: find the record for
-employee 39, project out only the employee name and phone number from
-their entire record, filter employee records to those that work in
-accounting, count the employees in each department, or join the data
-from the employees table with the managers table.
+%% SQL is a declarative language for querying data.  A declarative
+%% language is one in which a programmer specifies \emph{what} they want
+%% the system to do, rather than procedurally defining \emph{how} the
+%% system should do it.  A few examples include: find the record for
+%% employee 39, project out only the employee name and phone number from
+%% their entire record, filter employee records to those that work in
+%% accounting, count the employees in each department, or join the data
+%% from the employees table with the managers table.
+SQLは、データを問い合わせるための宣言型の言語である。宣言型の言語とは、そのシステムに\emph{何を}させたいのかをプログラマーが指定する言語のことである。そのシステムが\emph{どのように}動くべきなのかを手続き的に定義するのではない。いくつか例を示そう。39番の社員を探したり、レコード全体から社員名と電話番号だけを取り出したり、経理部門に属する社員のレコードだけに絞り込んだり、部署ごとの社員数を調べたり、社員テーブルのデータを管理職テーブルと連結させたりといった操作だ。
 
-To a first approximation, SQL allows you to ask these questions without
-thinking about how the data is laid out on disk, which indices to use
-to access the data, or what algorithms to use to process the data.  A
-significant architectural component of most relational databases is a
-\emph{query optimizer}, which decides which of the many logically
-equivalent query plans to execute to most quickly answer a query.
-These optimizers are often better than the average database user, but
-sometimes they do not have enough information or have too simple a
-model of the system in order to generate the most efficient execution.
+%% To a first approximation, SQL allows you to ask these questions without
+%% thinking about how the data is laid out on disk, which indices to use
+%% to access the data, or what algorithms to use to process the data.  A
+%% significant architectural component of most relational databases is a
+%% \emph{query optimizer}, which decides which of the many logically
+%% equivalent query plans to execute to most quickly answer a query.
+%% These optimizers are often better than the average database user, but
+%% sometimes they do not have enough information or have too simple a
+%% model of the system in order to generate the most efficient execution.
+おおざっぱに言うと、SQLを使えば、データのディスク上での配置や使うインデックスそしてデータを処理するアルゴリズムを知らなくてもこれらの問いに答えられるということである。多くのリレーショナルデータベースのアーキテクチャ上で重要となるパーツが\emph{クエリオプティマイザ}だ。これは、論理的に等価であるいろいろな問い合わせプランの中から最も効率的な問い合わせができるものを見つける。このオプティマイザは、たいていの場合はふつうのデータベースユーザーよりも賢い。しかし時には、必要な情報が不足していたりデータモデルがあまりにもシンプルすぎたりといった理由で最適な実行計画を生成できないこともある。
 
-Relational databases, which are the most common databases used in
-practice, follow the \emph{relational data model}.  In this model, different
-real-world entities are stored in different tables.  For example, all
-employees might be stored in an Employees table, and all departments
-might be stored in a Departments table.  Each row of a table has
-various properties stored in columns.  For example, employees might
-have an employee id, salary, birth date, and first/last names.  Each of these properties
-will be stored in a column of the Employees table.
+%% Relational databases, which are the most common databases used in
+%% practice, follow the \emph{relational data model}.  In this model, different
+%% real-world entities are stored in different tables.  For example, all
+%% employees might be stored in an Employees table, and all departments
+%% might be stored in a Departments table.  Each row of a table has
+%% various properties stored in columns.  For example, employees might
+%% have an employee id, salary, birth date, and first/last names.  Each of these properties
+%% will be stored in a column of the Employees table.
+現在もっとも一般的に使われているデータベースがリレーショナルデータベースで、これは\emph{関係データモデル}に従っている。このモデルは、現実世界のさまざまなエンティティをそれぞれ別のテーブルに格納する。たとえば、社員の情報はEmployeesテーブルに格納し、部署の情報はDepartmentsテーブルに格納するといったものだ。テーブルの各行は、さまざな項目を保持している。たとえば社員の持つ情報としては社員IDや給与、生年月日、そして姓名などである。これらの項目が、Employeesテーブルの各カラムに格納される。
 
-The relational model goes hand-in-hand with SQL\@.  Simple SQL queries,
-such as filters, retrieve all records whose field matches some test
-(e.g., employeeid = 3, or salary > \$20000).  More complex constructs
-cause the database to do some extra work, such as joining data from
-multiple tables (e.g., what is the name of the department in which
-employee 3 works?).  Other complex constructs such as aggregates
-(e.g., what is the average salary of my employees?) can lead to
-full-table scans.
+%% The relational model goes hand-in-hand with SQL\@.  Simple SQL queries,
+%% such as filters, retrieve all records whose field matches some test
+%% (e.g., employeeid = 3, or salary > \$20000).  More complex constructs
+%% cause the database to do some extra work, such as joining data from
+%% multiple tables (e.g., what is the name of the department in which
+%% employee 3 works?).  Other complex constructs such as aggregates
+%% (e.g., what is the average salary of my employees?) can lead to
+%% full-table scans.
+関係モデルはSQLと密接に関連している。フィルタのような単純なSQL問い合わせは、あるフィールドが何らかの条件(例: employeeid = 3、salary > \$20000)にマッチするレコードをすべて取得する。層少し複雑な構造を使って、データベースに他の作業をさせることもできる。複数のテーブルからのデータの結合(例: 社員番号3番の社員が所属する部署の部署名は?)などである。それ以外にも、集約(例: 従業員の給与の平均額は?)などの操作もでき、この場合はテーブル全体のスキャンが発生する。
 
-The relational data model defines highly structured entities with
-strict relationships between them.  Querying this model with SQL
-allows complex data traversals without too much custom development.
-The complexity of such modeling and querying has its limits, though:
+%% The relational data model defines highly structured entities with
+%% strict relationships between them.  Querying this model with SQL
+%% allows complex data traversals without too much custom development.
+%% The complexity of such modeling and querying has its limits, though:
+関係モデルでは高度に構造化されたエンティティを定義し、さらにそれらの間に厳格なリレーションシップも定義する。このようなモデルに対してSQLで問い合わせをすれば、カスタム開発なしで複雑なデータの取得もできるようになる。しかし、このように複雑なモデルや問い合わせにも制限はある。
 
 \begin{aosaitemize}
 
-  \item Complexity leads to unpredictability.  SQL's expressiveness
-  makes it challenging to reason about the cost of each query, and thus the
-  cost of a workload.  While simpler query languages might complicate
-  application logic, they make it easier to provision data storage
-  systems, which only respond to simple requests.
+  %% \item Complexity leads to unpredictability.  SQL's expressiveness
+  %% makes it challenging to reason about the cost of each query, and thus the
+  %% cost of a workload.  While simpler query languages might complicate
+  %% application logic, they make it easier to provision data storage
+  %% systems, which only respond to simple requests.
+  \item 複雑さは予測不可能性につながる。SQLは表現力がありすぎるので、個々のクエリのコスト、つまりその作業量に関するコストをきちんと考えないといけなくなる。問い合わせ言語をシンプルにするとアプリケーションのロジックが複雑になってしまうが、データストレージシステムを用意するのは簡単になる。単にシンプルなリクエストに応答できればそれで済むのだから。
 
-  \item There are many ways to model a problem.  The relational data
-  model is strict: the schema assigned to each table specifies the
-  data in each row.  If we are storing less structured data, or rows
-  with more variance in the columns they store, the relational model
-  may be needlessly restrictive.  Similarly, application developers
-  might not find the relational model perfect for modeling every kind
-  of data.  For example, a lot of application logic is written in
-  object-oriented languages and includes high-level concepts such as
-  lists, queues, and sets, and some programmers would like their
-  persistence layer to model this.
+  %% \item There are many ways to model a problem.  The relational data
+  %% model is strict: the schema assigned to each table specifies the
+  %% data in each row.  If we are storing less structured data, or rows
+  %% with more variance in the columns they store, the relational model
+  %% may be needlessly restrictive.  Similarly, application developers
+  %% might not find the relational model perfect for modeling every kind
+  %% of data.  For example, a lot of application logic is written in
+  %% object-oriented languages and includes high-level concepts such as
+  %% lists, queues, and sets, and some programmers would like their
+  %% persistence layer to model this.
+  \item 問題をモデル化する方法は一つではない。関係データモデルは厳格なモデルであり、各テーブルに設定されたスキーマが個々の行のデータを規定する。あまり構造化されていないデータを格納する場合や行によって格納するカラムにばらつきがある場合などは、関係モデルだと制約が大きすぎることになる。アプリケーションの開発者の視点で考えても、関係モデルがあらゆる種類のデータを完璧にモデリングできるとは言えない。たとえば、アプリケーションのロジックの多くはオブジェクト指向の言語で書かれており、より高レベルの概念であるリストやキュー、セットなどを使っている。プログラマーの中には、永続層でこれらをモデリングしたいという人もいるだろう。
 
-  \item If the data grows past the capacity of one server, then the
-  tables in the database will have to be partitioned across computers.
-  To avoid JOINs having to cross the network in order to get data in
-  different tables, we will have to denormalize it.  Denormalization
-  stores all of the data from different tables that one might want to
-  look up at once in a single place.  This makes our database look
-  like a key-lookup storage system, leaving us wondering what other
-  data models might better suit the data.
+  %% \item If the data grows past the capacity of one server, then the
+  %% tables in the database will have to be partitioned across computers.
+  %% To avoid JOINs having to cross the network in order to get data in
+  %% different tables, we will have to denormalize it.  Denormalization
+  %% stores all of the data from different tables that one might want to
+  %% look up at once in a single place.  This makes our database look
+  %% like a key-lookup storage system, leaving us wondering what other
+  %% data models might better suit the data.
+  \item データの量が増加して一つのサーバーでは保持しきれなくなると、データベース内のテーブルをパーティションに区切って複数のコンピューターで管理する必要がある。別のテーブルにあるデータを取得するためにネットワークをまたがるJOINをするなどということは回避するには、テーブルを非正規化しなければならない。非正規化とは、さまざまなテーブルにあるデータの中で一度に使いたいものをすべて一か所にまとめて格納するということである。これにより、データベースはまるでキーで検索する方式のストレージシステムのようになるが、他にもっと適したデータモデルがないのかという思いは残る。
 
 \end{aosaitemize}
 
-It's generally not wise to discard many years of design considerations
-arbitrarily.  When you consider storing your data in a database,
-consider SQL and the relational model, which are backed by decades of
-research and development, offer rich modeling capabilities, and
-provide easy-to-understand guarantees about complex operations.  NoSQL
-is a good option when you have a specific problem, such as large
-amounts of data, a massive workload, or a difficult data modeling
-decision for which SQL and relational databases might not have been
-optimized.
+%% It's generally not wise to discard many years of design considerations
+%% arbitrarily.  When you consider storing your data in a database,
+%% consider SQL and the relational model, which are backed by decades of
+%% research and development, offer rich modeling capabilities, and
+%% provide easy-to-understand guarantees about complex operations.  NoSQL
+%% is a good option when you have a specific problem, such as large
+%% amounts of data, a massive workload, or a difficult data modeling
+%% decision for which SQL and relational databases might not have been
+%% optimized.
+長年にわたって検討されてきた設計を独断で切り捨ててしまうのは、あまりよい考えではない。データをデータベースに格納するときにはSQLと関係モデルを検討しよう。これは何十年にもわたる研究と開発のたまものであり、高度なモデリングができる。また、複雑な操作も容易に理解できることは請け合う。NoSQLが選択肢にあがるのは、何か特有の問題がある場合だ。たとえば大量のデータを扱う必要があったり作業量が膨大になったり、SQLとリレーショナルデータベースではうまく最適化できないようなデータモデリングを採用した場合などである。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{NoSQL Inspirations}
-\begin{aosasect2}{NoSQLのひらめき}
+\begin{aosasect2}{NoSQLのはじまり}
 
 The NoSQL movement finds much of its inspiration in papers from the
 research community.  While many papers are at the core of design
