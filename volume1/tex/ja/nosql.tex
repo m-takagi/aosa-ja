@@ -138,119 +138,137 @@ SQLは、データを問い合わせるための宣言型の言語である。�
 %% \begin{aosasect2}{NoSQL Inspirations}
 \begin{aosasect2}{NoSQLのはじまり}
 
-The NoSQL movement finds much of its inspiration in papers from the
-research community.  While many papers are at the core of design
-decisions in NoSQL systems, two stand out in particular.
+%% The NoSQL movement finds much of its inspiration in papers from the
+%% research community.  While many papers are at the core of design
+%% decisions in NoSQL systems, two stand out in particular.
+NoSQLムーブメントの起源をたどれば、その大半は研究コミュニティの論文に行き着く。NoSQLシステムの設計に関する決断には多くの論文が絡んでいるが、中でも特筆すべきなのが次の二つである。
 
-Google's BigTable~\cite{bib:bigtable} presents an interesting data model,
-which facilitates sorted storage of multi-column historical data.
-Data is distributed to multiple servers using a hierarchical
-range-based partitioning scheme, and data is updated with strict
-consistency (a concept that we will eventually define in
-\aosasecref{sec.nosql.consistency}).
+%% Google's BigTable~\cite{bib:bigtable} presents an interesting data model,
+%% which facilitates sorted storage of multi-column historical data.
+%% Data is distributed to multiple servers using a hierarchical
+%% range-based partitioning scheme, and data is updated with strict
+%% consistency (a concept that we will eventually define in
+%% \aosasecref{sec.nosql.consistency}).
+GoogleのBigTable~\cite{bib:bigtable}は興味深いデータモデルを提示した。このモデルでは、複数列からなる履歴データを分類して格納する。データを複数のサーバーに分散させるために階層型のレンジベースパーティショニング方式を用い、データは厳密な整合性(この概念については\aosasecref{sec.nosql.consistency}で定義する)のもとで更新される。
 
-Amazon's Dynamo~\cite{bib:amazon:dynamo} uses a different key-oriented distributed datastore.
-Dynamo's data model is simpler, mapping keys to application-specific
-blobs of data.  The partitioning model is more resilient to failure,
-but accomplishes that goal through a looser data consistency approach
-called eventual consistency.
+%% Amazon's Dynamo~\cite{bib:amazon:dynamo} uses a different key-oriented distributed datastore.
+%% Dynamo's data model is simpler, mapping keys to application-specific
+%% blobs of data.  The partitioning model is more resilient to failure,
+%% but accomplishes that goal through a looser data consistency approach
+%% called eventual consistency.
+AmazonのDynamo~\cite{bib:amazon:dynamo}は、キー指向の分散型データストアを用いる。Dynamoのデータモデルはシンプルで、アプリケーション固有のデータのblobにキーをマッピングする。パーティショニング方式は障害からの回復機能を持つが、それを実現するためにデータの整合性はより緩やかな手法(結果整合性)で管理している。
 
-We will dig into each of these concepts in more detail, but it is
-important to understand that many of them can be mixed and matched.
-Some NoSQL systems such as HBase\footnote{\url{http://hbase.apache.org/}} sticks closely to the BigTable
-design. Another NoSQL system named Voldemort\footnote{\url{http://project-voldemort.com/}} replicates many of
-Dynamo's features.  Still other NoSQL projects such as Cassandra\footnote{\url{http://cassandra.apache.org/}} have
-taken some features from BigTable (its data model) and others from
-Dynamo (its partitioning and consistency schemes).
+%% We will dig into each of these concepts in more detail, but it is
+%% important to understand that many of them can be mixed and matched.
+%% Some NoSQL systems such as HBase\footnote{\url{http://hbase.apache.org/}} sticks closely to the BigTable
+%% design. Another NoSQL system named Voldemort\footnote{\url{http://project-voldemort.com/}} replicates many of
+%% Dynamo's features.  Still other NoSQL projects such as Cassandra\footnote{\url{http://cassandra.apache.org/}} have
+%% taken some features from BigTable (its data model) and others from
+%% Dynamo (its partitioning and consistency schemes).
+これら二つの概念についてこれから詳細を説明するが、その概念の多くは互いに組み合わせて使えるものだと理解しておくことが大切だ。たとえば、NoSQLシステムのひとつであるHBase\footnote{\url{http://hbase.apache.org/}}は、BigTableの設計に忠実な作りになっている。別のNoSQLシステムであるVoldemort\footnote{\url{http://project-voldemort.com/}}は、Dynamoの機能の多くを再現している。さらに別のNoSQLシステムであるCassandra\footnote{\url{http://cassandra.apache.org/}}の場合は、BigTableから引き継いだ機能(データモデル)もあればDynamoから引き継いだ機能(パーティショニングや整合性管理の方式)もある。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Characteristics and Considerations}
 \begin{aosasect2}{特徴と検討事項}
 
-NoSQL systems part ways with the hefty SQL standard and offer simpler
-but piecemeal solutions for architecting storage solutions.  These
-systems were built with the belief that in simplifying how a database
-operates over data, an architect can better predict the performance of
-a query.  In many NoSQL systems, complex query logic is left to the
-application, resulting in a data store with more predictable query
-performance because of the lack of variability in queries
+%% NoSQL systems part ways with the hefty SQL standard and offer simpler
+%% but piecemeal solutions for architecting storage solutions.  These
+%% systems were built with the belief that in simplifying how a database
+%% operates over data, an architect can better predict the performance of
+%% a query.  In many NoSQL systems, complex query logic is left to the
+%% application, resulting in a data store with more predictable query
+%% performance because of the lack of variability in queries
+NoSQLシステムは、大掛かりなSQL標準規格と決別して、ストレージの設計に関してシンプルながらも段階的なソリューションを提供する。その思想は、「データベースがデータを操作する方法を単純化すればするほど、アーキテクトは問い合わせのパフォーマンスを予測しやすくなる」というものだ。NoSQLシステムの多くは、複雑な問い合わせロジックをアプリケーション側に任せている。その結果、データストア側では問い合わせのパフォーマンスを予測しやすくなる。問い合わせの種類が限られてくるからである。
 
-NoSQL systems part with more than just declarative queries over the
-relational data.  Transactional semantics, consistency, and durability
-are guarantees that organizations such as banks demand of databases.
-\emph{Transactions} provide an all-or-nothing guarantee when combining
-several potentially complex operations into one, such as deducting
-money from one account and adding the money to another.  \emph{Consistency}
-ensures that when a value is updated, subsequent queries will see the
-updated value.  \emph{Durability} guarantees that once a value is updated, it
-will be written to stable storage (such as a hard drive) and
-recoverable if the database crashes.
+%% NoSQL systems part with more than just declarative queries over the
+%% relational data.  Transactional semantics, consistency, and durability
+%% are guarantees that organizations such as banks demand of databases.
+%% \emph{Transactions} provide an all-or-nothing guarantee when combining
+%% several potentially complex operations into one, such as deducting
+%% money from one account and adding the money to another.  \emph{Consistency}
+%% ensures that when a value is updated, subsequent queries will see the
+%% updated value.  \emph{Durability} guarantees that once a value is updated, it
+%% will be written to stable storage (such as a hard drive) and
+%% recoverable if the database crashes.
+NoSQLシステムは、リレーショナルデータに単に宣言型の問い合わせ機能を追加するものとは一線を画する。トランザクション特性や整合性、永続性といった機能は、銀行などの組織のデータベースに求められる要件を満たすことを保証するものだ。\emph{トランザクション}は、複数の込み入った操作をひとまとめにして「すべて成功」か「すべて失敗」かのいずれかになることを保証する。たとえば、ある口座から引き落とした資金を別の口座に入金するなどといった操作がトランザクションの対象となる。\emph{整合性}は、ある値が更新されたときにそれ以降の問い合わせが更新後の値を見られることを保証する。\emph{永続性}は、ある値が更新されたときにそれが安定したストレージ(ハードディスクドライブなど)に書き込まれ、データベースがクラッシュしても復旧可能であることを保証する。
 
-NoSQL systems relax some of these guarantees, a decision which, for
-many non-banking applications, can provide acceptable and predictable
-behavior in exchange for improved performance.  These relaxations,
-combined with data model and query language changes, often make it
-easier to safely partition a database across multiple machines when
-the data grows beyond a single machine's capability.
+%% NoSQL systems relax some of these guarantees, a decision which, for
+%% many non-banking applications, can provide acceptable and predictable
+%% behavior in exchange for improved performance.  These relaxations,
+%% combined with data model and query language changes, often make it
+%% easier to safely partition a database across multiple machines when
+%% the data grows beyond a single machine's capability.
+NoSQLシステムでは、これらの保証のうちのいくつかをより緩やかにした。金融関連のアプリケーションを除く多くのアプリケーションではそれでも受け入れ可能なレベルであり、保証を緩める引き替えにパフォーマンスを向上させている。このように保証を緩め、そしてデータモデルと問い合わせ言語を変更したことで、データベースをパーティショニングして複数サーバーに分散させることも簡単になった。データの量が増えて一つのマシンではさばききれなくなってもだいじょうぶである。
 
-NoSQL systems are still very much in their infancy.  The architectural
-decisions that go into the systems described in this chapter are a
-testament to the requirements of various users.  The biggest
-challenge in summarizing the architectural features of several open
-source projects is that each one is a moving target.  Keep in mind
-that the details of individual systems will change. When you pick
-between NoSQL systems, you can use this chapter to guide your thought
-process, but not your feature-by-feature product selection.
+%% NoSQL systems are still very much in their infancy.  The architectural
+%% decisions that go into the systems described in this chapter are a
+%% testament to the requirements of various users.  The biggest
+%% challenge in summarizing the architectural features of several open
+%% source projects is that each one is a moving target.  Keep in mind
+%% that the details of individual systems will change. When you pick
+%% between NoSQL systems, you can use this chapter to guide your thought
+%% process, but not your feature-by-feature product selection.
+NoSQLシステムは、まだ生まれたばかりの幼年期にある。本章で取り上げるシステムにおけるアーキテクチャ上の判断は、さまざまなユーザーの要求をとりまとめたものである。さまざまなオープンソースプロジェクトのアーキテクチャをまとめようとしたときに最も大変だったのは、どのシステムも変わりつつあるというところだった。個々のシステムの詳細は変わるものだということを頭に入れておこう。何かのNoSQLシステムを使うことになったときに、本章はどう考えればいいかの指針にはなるだろう。しかし、その製品にどんな機能があるかを知るといった目的には使えない。
 
 \pagebreak
 
-\noindent As you think about NoSQL systems, here is a roadmap of considerations:
+%% \noindent As you think about NoSQL systems, here is a roadmap of considerations:
+\noindent NoSQLシステムについて考えるにあたって、検討すべき点を次にまとめる。
 
 \begin{aosadescription}
 
-  \item{Data and query model}: Is your data represented as rows,
-  objects, data structures, or documents? Can you ask the database to
-  calculate aggregates over multiple records?
+  %% \item{Data and query model}: Is your data represented as rows,
+  %% objects, data structures, or documents? Can you ask the database to
+  %% calculate aggregates over multiple records?
+  \item{データモデルとクエリモデル}: データの表現方法は? 行? それともオブジェクト? あるいはデータ構造とかドキュメントとか? データベースに対する問い合わせで複数のレコードを集約できる?
 
-  \item{Durability}: When you change a value, does it immediately
-  go to stable storage?  Does it get stored on multiple machines in
-  case one crashes?
+  %% \item{Durability}: When you change a value, does it immediately
+  %% go to stable storage?  Does it get stored on multiple machines in
+  %% case one crashes?
+  \item{永続性}: 値を変更したときに、それはすぐにストレージ上に反映される? ひとつのマシンがクラッシュした場合に備えて複数のマシンに格納する?
 
-  \item{Scalability}: Does your data fit on a single server?  Do
-  the amount of reads and writes require multiple disks to handle the
-  workload?
+  %% \item{Scalability}: Does your data fit on a single server?  Do
+  %% the amount of reads and writes require multiple disks to handle the
+  %% workload?
+  \item{スケーラビリティ}: データは単一のサーバー上に置く? データの読み書きをさばくために複数のディスクを扱う必要がある?
 
-  \item{Partitioning}: For scalability, availability, or
-  durability reasons, does the data need to live on multiple servers?
-  How do you know which record is on which server?
+  %% \item{Partitioning}: For scalability, availability, or
+  %% durability reasons, does the data need to live on multiple servers?
+  %% How do you know which record is on which server?
+  \item{パーティショニング}: スケーラビリティや可用性、永続性の観点から、データを複数のサーバーに置く必要がある? どのレコードがどのサーバーにあるのかということをどうやって知る?
 
-  \item{Consistency}: If you've partitioned and replicated your
-  records across multiple servers, how do the servers coordinate when
-  a record changes?
+  %% \item{Consistency}: If you've partitioned and replicated your
+  %% records across multiple servers, how do the servers coordinate when
+  %% a record changes?
+  \item{整合性}: 複数のサーバーにまたがってデータのパーティショニングや複製を行ったときに、レコードの変更に対して各サーバーはどのように協調する?
 
-  \item{Transactional semantics}: When you run a series of
-  operations, some databases allow you to wrap them in a transaction,
-  which provides some subset of ACID (Atomicity, Consistency,
-  Isolation, and Durability) guarantees on the transaction and all
-  others currently running.  Does your business logic require these
-  guarantees, which often come with performance tradeoffs?
+  %% \item{Transactional semantics}: When you run a series of
+  %% operations, some databases allow you to wrap them in a transaction,
+  %% which provides some subset of ACID (Atomicity, Consistency,
+  %% Isolation, and Durability) guarantees on the transaction and all
+  %% others currently running.  Does your business logic require these
+  %% guarantees, which often come with performance tradeoffs?
+  \item{トランザクションの特性}: 一連の操作を実行するときに、それをトランザクションとしてまとめることのできるデータベースもある。トランザクションは、実行中の他の操作との間のACID (Atomicity: 原子性、Consistency: 整合性、Isolation: 独立性、Durability: 永続性)の一部あるいはすべてを保証する。これらの保証は一般的にパフォーマンスとのトレードオフとなるが、あなたが扱う業務ロジックはこれらの保証を要するものか?
 
-  \item{Single-server performance}: If you want to safely store
-  data on disk, what on-disk data structures are best-geared toward
-  read-heavy or write-heavy workloads? Is writing to disk your
-  bottleneck?
+  %% \item{Single-server performance}: If you want to safely store
+  %% data on disk, what on-disk data structures are best-geared toward
+  %% read-heavy or write-heavy workloads? Is writing to disk your
+  %% bottleneck?
+  \item{単一サーバーでのパフォーマンス}: データを安全にディスク上に格納したい場合に、ディスク上でのデータ構造として最適なものは? 読み込みが多い場合と書き込みが多い場合とではどうなる? ディスクへの書き込みがボトルネックになっている?
 
-  \item{Analytical workloads}: We're going to pay a lot of
-  attention to lookup-heavy workloads of the kind you need to run a
-  responsive user-focused web application.  In many cases, you will
-  want to build dataset-sized reports, aggregating statistics across
-  multiple users for example.  Does your use-case and toolchain
-  require such functionality?
+  %% \item{Analytical workloads}: We're going to pay a lot of
+  %% attention to lookup-heavy workloads of the kind you need to run a
+  %% responsive user-focused web application.  In many cases, you will
+  %% want to build dataset-sized reports, aggregating statistics across
+  %% multiple users for example.  Does your use-case and toolchain
+  %% require such functionality?
+  \item{作業量の分析}: ユーザーにとって使いやすいウェブアプリケーションを作るときには、作業量のチェックに細心の注意を払うことになる。多くの場合、欲しいのはデータセットサイズのレポートで、たとえば複数のユーザーの統計情報を集約したものだろう。あなたの利用法や使うツールは、その手の機能を必要としている?
 
 \end{aosadescription}
 
-While we will touch on all of these consideration, the last three, while equally important, see the least attention in this chapter.
+%% While we will touch on all of these consideration, the last three, while equally important, see the least attention in this chapter.
+これらすべての検討事項について取り上げる予定だが、後半の三点については(どれも同様に重要ではあるけれども)本章ではあまり詳しく扱わない。
 
 \end{aosasect2}
 
