@@ -289,124 +289,136 @@ NoSQLシステムについて考えるにあたって、検討すべき点を次
 %% \begin{aosasect2}{Key-based NoSQL Data Models}
 \begin{aosasect2}{キーベースのNoSQLデータモデル}
 
-NoSQL systems often part with the relational model and the full
-expressivity of SQL by restricting lookups on a dataset to a single
-field.  For example, even if an employee has many properties, you
-might only be able to retrieve an employee by her ID\@.  As a result,
-most queries in NoSQL systems are key lookup-based.  The programmer
-selects a key to identify each data item, and can, for the most part,
-only retrieve items by performing a lookup for their key in the
-database.
+%% NoSQL systems often part with the relational model and the full
+%% expressivity of SQL by restricting lookups on a dataset to a single
+%% field.  For example, even if an employee has many properties, you
+%% might only be able to retrieve an employee by her ID\@.  As a result,
+%% most queries in NoSQL systems are key lookup-based.  The programmer
+%% selects a key to identify each data item, and can, for the most part,
+%% only retrieve items by performing a lookup for their key in the
+%% database.
+NoSQLシステムの多くは、関係モデルやSQLの機能性とは一線を画して、データセットの検索を単一フィールドによるものだけに制限している。たとえば、社員情報にはさまざまな項目があるにもかかわらず、IDによる検索しかできないといった具合だ。その結果として、NoSQLシステムにおける問い合わせの大半は、キーによる検索をベースにしたものとなる。プログラマーは、各データを識別するためのキーを選択する。そしてたいていの場合、できることといえばデータベース内でそのキーによる検索をしてアイテムを取得することくらいなのだ。
 
-In key lookup-based systems, complex join operations or multiple-key
-retrieval of the same data might require creative uses of key names.
-A programmer wishing to look up an employee by his
-employee ID and to look up all employees in a department might create
-two key types.  For example, the key \code{employee:30} would point to an employee
-record for employee ID 30, and \code{employee\_departments:20} might
-contain a list of all employees in department 20.  A join operation
-gets pushed into application logic: to retrieve employees in
-department 20, an application first retrieves a list of employee IDs
-from key \code{employee\_departments:20}, and then loops over key
-lookups for each \code{employee:ID} in the employee list.
+%% In key lookup-based systems, complex join operations or multiple-key
+%% retrieval of the same data might require creative uses of key names.
+%% A programmer wishing to look up an employee by his
+%% employee ID and to look up all employees in a department might create
+%% two key types.  For example, the key \code{employee:30} would point to an employee
+%% record for employee ID 30, and \code{employee\_departments:20} might
+%% contain a list of all employees in department 20.  A join operation
+%% gets pushed into application logic: to retrieve employees in
+%% department 20, an application first retrieves a list of employee IDs
+%% from key \code{employee\_departments:20}, and then loops over key
+%% lookups for each \code{employee:ID} in the employee list.
+キールックアップ方式のシステムでは、複雑な結合操作や複数キーによる同一データの取得などを実現しようとすると、キーの名前にちょっとした工夫を要する。社員を検索する際に「社員IDでの検索」「ある部署に所属する全社員の検索」の二通りを行いたい場合は、二種類のキーを作成することになる。たとえば、キー\code{employee:30}は社員IDが30の社員レコードを指し、キー\code{employee\_departments:20}は部署番号20に属する全社員のリストを含むといった具合だ。結合操作はアプリケーションのロジック側に追い出される。部署番号20に属する全社員を取得するには、アプリケーション側でまず\code{employee\_departments:20}を使って社員IDのリストを取得し、そのリストをループさせて各IDに対して\code{employee:ID}による検索を行う。
 
-The key lookup model is beneficial because it means that the database
-has a consistent query pattern---the entire workload consists of key
-lookups whose performance is relatively uniform and predictable.
-Profiling to find the slow parts of an application is simpler, since
-all complex operations reside in the application code.  On the flip
-side, the data model logic and business logic are now more closely
-intertwined, which muddles abstraction.
+%% The key lookup model is beneficial because it means that the database
+%% has a consistent query pattern---the entire workload consists of key
+%% lookups whose performance is relatively uniform and predictable.
+%% Profiling to find the slow parts of an application is simpler, since
+%% all complex operations reside in the application code.  On the flip
+%% side, the data model logic and business logic are now more closely
+%% intertwined, which muddles abstraction.
+キールックアップモデルの利点は、データベースへの問い合わせのパターンが一貫したものになるというところである。データベースで行う作業はキールックアップだけであり、これは比較的一様で予測しやすいものである。アプリケーションのボトルネックを探すプロファイリングもシンプルになる。というのも、複雑な操作はアプリケーションのコード側に押し出されているからである。その反面、データモデルのロジックと業務ロジックが密結合してしまい、抽象化は崩れてしまう。
 
-Let's quickly touch on the data associated with each key.  Various
-NoSQL systems offer different solutions in this space.
+%% Let's quickly touch on the data associated with each key.  Various
+%% NoSQL systems offer different solutions in this space.
+各キーに関連づけられたデータについて見ていこう。各種NoSQLシステムは、さまざまなソリューションを使っている。
 
 %% \begin{aosasect3}{Key-Value Stores}
 \begin{aosasect3}{キー・バリュー ストア}
 
-The simplest form of NoSQL store is a \emph{key-value} store.  Each
-key is mapped to a value containing arbitrary data.  The NoSQL store
-has no knowledge of the contents of its payload, and simply delivers
-the data to the application.  In our Employee database example, one
-might map the key \code{employee:30} to a blob containing JSON or a
-binary format such as Protocol
-Buffers\footnote{\url{http://code.google.com/p/protobuf/}},
-Thrift\footnote{\url{http://thrift.apache.org/}}, or
-Avro\footnote{\url{http://avro.apache.org/}} in order to encapsulate
-the information about employee 30.
+%% The simplest form of NoSQL store is a \emph{key-value} store.  Each
+%% key is mapped to a value containing arbitrary data.  The NoSQL store
+%% has no knowledge of the contents of its payload, and simply delivers
+%% the data to the application.  In our Employee database example, one
+%% might map the key \code{employee:30} to a blob containing JSON or a
+%% binary format such as Protocol
+%% Buffers\footnote{\url{http://code.google.com/p/protobuf/}},
+%% Thrift\footnote{\url{http://thrift.apache.org/}}, or
+%% Avro\footnote{\url{http://avro.apache.org/}} in order to encapsulate
+%% the information about employee 30.
+NoSQLのデータ格納方式の中で最もシンプルなのが\emph{キー・バリュー}ストアだ。個々のキーを、任意のデータを含む値に対応させる。NoSQLシステム自体はその値の中身については何も知らず、単にデータをアプリケーションに渡すだけとなる。先ほどの社員データベースの例で考えると、キー\code{employee:30}をblobに対応させることになる。その中身はJSONかもしれないし、Protocol Buffers\footnote{\url{http://code.google.com/p/protobuf/}}やThrift\footnote{\url{http://thrift.apache.org/}}あるいはAvro\footnote{\url{http://avro.apache.org/}}のようなバイナリフォーマットかもしれない。何らかの形式で、社員IDが30の社員の情報をカプセル化したものとなる。
 
-If a developer uses structured formats to store complex data for a
-key, she must operate against the data in application space: a
-key-value data store generally offers no mechanisms for querying for
-keys based on some property of their values.  Key-value stores shine
-in the simplicity of their query model, usually consisting of
-\code{set}, \code{get}, and \code{delete} primitives, but discard the
-ability to add simple in-database filtering capabilities due to the
-opacity of their values.  Voldemort, which is based on Amazon's
-Dynamo, provides a distributed key-value store.  BDB\footnote{\url{http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html}} offers a
-persistence library that has a key-value interface.
+%% If a developer uses structured formats to store complex data for a
+%% key, she must operate against the data in application space: a
+%% key-value data store generally offers no mechanisms for querying for
+%% keys based on some property of their values.  Key-value stores shine
+%% in the simplicity of their query model, usually consisting of
+%% \code{set}, \code{get}, and \code{delete} primitives, but discard the
+%% ability to add simple in-database filtering capabilities due to the
+%% opacity of their values.  Voldemort, which is based on Amazon's
+%% Dynamo, provides a distributed key-value store.  BDB\footnote{\url{http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html}} offers a
+%% persistence library that has a key-value interface.
+構造化されたフォーマットで複雑なデータを表してそれをキーに関連づけた場合は、取り出したデータの処理はアプリケーション側で行う必要がある。キー・バリュー形式のデータストアでは、キーを指定して取り出した価の中の特定の項目を取り出すような仕組みは用意されていない。キー・バリューストアの強みは、そのシンプルなクエリモデルにある。通常は\code{set}、\code{get}そして\code{delete}といったプリミティブで構成されている。一方、データベース内でのシンプルな絞り込み機能を追加する仕組みは持っていない。これは、扱うデータの中身が把握できないからである。VoldemortはAmazonのDynamoをベースにしたシステムであり、分散型キー・バリューストアを提供する。BDB\footnote{\url{http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html}}は、キー・バリュー型のインターフェイスを持つ永続化ライブラリを提供する。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Key-Data Structure Stores}
 \begin{aosasect3}{キー・データ構造 ストア}
 
-Key-data structure stores, made popular by Redis\footnote{\url{http://redis.io/}}, assign each value a
-type.  In Redis, the available types a value can take on are integer,
-string, list, set, and sorted set.  In addition to
-\code{set}/\code{get}/\code{delete}, type-specific commands, such as
-increment/decrement for integers, or push/pop for lists, add
-functionality to the query model without drastically affecting
-performance characteristics of requests.  By providing simple
-type-specific functionality while avoiding multi-key operations such as
-aggregation or joins, Redis balances functionality and performance.
+%% Key-data structure stores, made popular by Redis\footnote{\url{http://redis.io/}}, assign each value a
+%% type.  In Redis, the available types a value can take on are integer,
+%% string, list, set, and sorted set.  In addition to
+%% \code{set}/\code{get}/\code{delete}, type-specific commands, such as
+%% increment/decrement for integers, or push/pop for lists, add
+%% functionality to the query model without drastically affecting
+%% performance characteristics of requests.  By providing simple
+%% type-specific functionality while avoiding multi-key operations such as
+%% aggregation or joins, Redis balances functionality and performance.
+キー・データ構造 ストアはRedis\footnote{\url{http://redis.io/}}によって有名になった方式で、値として型を割り当てる。Redisでは、値として使える型はinteger、string、list、setそしてsorted setである。\code{set}/\code{get}/\code{delete}に加えて型ごとに固有のコマンドも用意されている。たとえば整数型ならインクリメントやデクリメント、リストならプッシュやポップなどだ。さらに、クエリモデルにも機能が追加されている。リクエストの種類によってパフォーマンスが劇的に落ちるなどということはない。シンプルな、型ごとの機能を提供する一方で、集約や結合といった複数キーの操作はできない。このようにして、Redisは機能とパフォーマンスのバランスをとっている。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Key-Document Stores}
 \begin{aosasect3}{キー・ドキュメント ストア}
 
-Key-document stores, such as CouchDB\footnote{\url{http://couchdb.apache.org/}}, MongoDB\footnote{\url{http://www.mongodb.org/}}, and Riak\footnote{\url{http://www.basho.com/products_riak_overview.php}}, map a key to
-some document that contains structured information.  These systems
-store documents in a JSON or JSON-like format.  They store lists and
-dictionaries, which can be embedded recursively inside one-another.
+%% Key-document stores, such as CouchDB\footnote{\url{http://couchdb.apache.org/}}, MongoDB\footnote{\url{http://www.mongodb.org/}}, and Riak\footnote{\url{http://www.basho.com/products_riak_overview.php}}, map a key to
+%% some document that contains structured information.  These systems
+%% store documents in a JSON or JSON-like format.  They store lists and
+%% dictionaries, which can be embedded recursively inside one-another.
+キー・ドキュメント ストアにはCouchDB\footnote{\url{http://couchdb.apache.org/}}、MongoDB\footnote{\url{http://www.mongodb.org/}}そしてRiak\footnote{\url{http://www.basho.com/products_riak_overview.php}}などがある。これらは、構造化された情報を含むドキュメントをキーにマップする。これらのシステムは、ドキュメントをJSON形式(あるいはその類似形式)で格納する。リストや辞書も格納し、あるドキュメントの中に別のドキュメントを再帰的に埋め込むこともできる。
 
-MongoDB separates the keyspace into collections, so that keys for
-Employees and Department, for example, do not collide.  CouchDB and
-Riak leave type-tracking to the developer.  The freedom and complexity
-of document stores is a double-edged sword: application developers
-have a lot of freedom in modeling their documents, but
-application-based query logic can become exceedingly complex.
+%% MongoDB separates the keyspace into collections, so that keys for
+%% Employees and Department, for example, do not collide.  CouchDB and
+%% Riak leave type-tracking to the developer.  The freedom and complexity
+%% of document stores is a double-edged sword: application developers
+%% have a lot of freedom in modeling their documents, but
+%% application-based query logic can become exceedingly complex.
+MongoDBはキー空間をコレクション内で分離しているので、たとえばEmployeesのキーとDepartmentのキーが衝突することはない。CouchDBやRiakは、型の追跡を開発者側に任せている。ドキュメントの格納方法の自由さと複雑さは諸刃の剣である。アプリケーションの開発者はドキュメントのモデリングに関してかなりの自由を与えられているが、アプリケーション側での問い合わせのロジックは著しく複雑化する。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{BigTable Column Family Stores}
 \begin{aosasect3}{BigTableカラムファミリー ストア}
 
-HBase and Cassandra base their data model on the one used by Google's
-BigTable.  In this model, a key identifies a row, which contains data
-stored in one or more Column Families (CFs).  Within a CF, each row
-can contain multiple columns.  The values within each column are
-timestamped, so that several versions of a row-column mapping can live
-within a CF.
+%% HBase and Cassandra base their data model on the one used by Google's
+%% BigTable.  In this model, a key identifies a row, which contains data
+%% stored in one or more Column Families (CFs).  Within a CF, each row
+%% can contain multiple columns.  The values within each column are
+%% timestamped, so that several versions of a row-column mapping can live
+%% within a CF.
+HBaseやCassandraは、GoogleのBigTableが使っているモデルをベースにしたデータモデルを採用している。このモデルでは、キーがひとつの行を指し示す。その行に含まれるデータは、ひとつあるいは複数のカラムファミリー(CF)に格納されている。CFの中で、各行は複数の列を保持できる。列内の値にはタイムスタンプがついており、複数のバージョンの行・列マッピングを一つのCFに保持することができる。
 
-Conceptually, one can think of Column Families as storing complex keys
-of the form (row~ID, CF, column, timestamp), mapping to values which
-are sorted by their keys.  This design results in data modeling
-decisions which push a lot of functionality into the keyspace.  It is
-particularly good at modeling historical data with timestamps.  The
-model naturally supports sparse column placement since row~IDs that do
-not have certain columns do not need an explicit NULL value for those
-columns.  On the flip side, columns which have few or no NULL values
-must still store the column identifier with each row, which leads to
-greater space consumption.
+%% Conceptually, one can think of Column Families as storing complex keys
+%% of the form (row~ID, CF, column, timestamp), mapping to values which
+%% are sorted by their keys.  This design results in data modeling
+%% decisions which push a lot of functionality into the keyspace.  It is
+%% particularly good at modeling historical data with timestamps.  The
+%% model naturally supports sparse column placement since row~IDs that do
+%% not have certain columns do not need an explicit NULL value for those
+%% columns.  On the flip side, columns which have few or no NULL values
+%% must still store the column identifier with each row, which leads to
+%% greater space consumption.
+概念的には、カラムファミリーを次のようにとらえることができる。つまり、ある形式(行ID、CF、列、タイムスタンプ)の複合キーを格納し、それをキーで並べ替えた複数の値にマップするというものだ。この設計が、多くの機能をキー空間に持たせるというデータモデリングにつながる。この方式は、タイムスタンプを持つヒストリカルなデータのモデリングに適している。もちろん、このモデルはスパース列に対応している。というのも、何も列を持たない行IDが、必ずしも各列にNULL値を持つ必要がないからである。その反面、NULL値をほとんど(あるいはまったく)持たない列でも各行に列IDが必要となる。そのため、要する領域は多くなる。
 
-Each project data model differs from the original BigTable model in
-various ways, but Cassandra's changes are most notable.  Cassandra
-introduces the notion of a supercolumn within each CF to allow for
-another level of mapping, modeling, and indexing.  It also does away
-with a notion of locality groups, which can physically store multiple
-column families together for performance reasons.
+%% Each project data model differs from the original BigTable model in
+%% various ways, but Cassandra's changes are most notable.  Cassandra
+%% introduces the notion of a supercolumn within each CF to allow for
+%% another level of mapping, modeling, and indexing.  It also does away
+%% with a notion of locality groups, which can physically store multiple
+%% column families together for performance reasons.
+どのプロジェクトのデータモデルもオリジナルのBigTableのモデルとはいろいろな面で異なるが、中でも特筆すべきなのがCassandraにおける変更だろう。Cassandraは、各CFの中にスーパーカラムという概念を導入した。スーパーカラムを使って、違ったレベルでのマッピングやモデリングそしてインデキシングを行えるようにしたのである。また、複数のカラムファミリーをひとまとめに格納してパフォーマンスを稼ぐ仕組みであるローカルグループという概念を廃止した。
 
 \end{aosasect3}
 
