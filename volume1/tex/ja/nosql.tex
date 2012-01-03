@@ -427,99 +427,107 @@ HBaseやCassandraは、GoogleのBigTableが使っているモデルをベース�
 %% \begin{aosasect2}{Graph Storage}
 \begin{aosasect2}{グラフストレージ}
 
-One class of NoSQL stores are graph stores.  Not all data is created
-equal, and the relational and key-oriented data models of storing and
-querying data are not the best for all data.  Graphs are a fundamental
-data structure in computer science, and systems such as HyperGraphDB\footnote{\url{http://www.hypergraphdb.org/index}}
-and Neo4J\footnote{\url{http://neo4j.org/}} are two popular NoSQL storage systems for storing
-graph-structured data.  Graph stores differ from the other stores we
-have discussed thus far in almost every way: data models, data
-traversal and querying patterns, physical layout of data on disk,
-distribution to multiple machines, and the transactional semantics of
-queries.  We can not do these stark differences justice given space
-limitations, but you should be aware that certain classes of data may
-be better stored and queried as a graph.
+%% One class of NoSQL stores are graph stores.  Not all data is created
+%% equal, and the relational and key-oriented data models of storing and
+%% querying data are not the best for all data.  Graphs are a fundamental
+%% data structure in computer science, and systems such as HyperGraphDB\footnote{\url{http://www.hypergraphdb.org/index}}
+%% and Neo4J\footnote{\url{http://neo4j.org/}} are two popular NoSQL storage systems for storing
+%% graph-structured data.  Graph stores differ from the other stores we
+%% have discussed thus far in almost every way: data models, data
+%% traversal and querying patterns, physical layout of data on disk,
+%% distribution to multiple machines, and the transactional semantics of
+%% queries.  We can not do these stark differences justice given space
+%% limitations, but you should be aware that certain classes of data may
+%% be better stored and queried as a graph.
+NoSQLのデータ格納方式のひとつに、グラフストレージがある。データを作る方法はただ一つとは限らないし、リレーショナルモデルやキー指向のモデルがデータの格納や問い合わせに対して常に最適であるとは限らない。グラフは計算機科学では基本的なデータ構造であり、HyperGraphDB\footnote{\url{http://www.hypergraphdb.org/index}}やNeo4J\footnote{\url{http://neo4j.org/}}はグラフ構造のデータを格納するNoSQLストレージシステムとしてよく知られている。グラフストレージは、これまで取り上げた他のストレージとはあらゆる点で異なる。データモデル、データの走査や問い合わせのパターン、ディスク上での物理的なデータ配置、複数マシンへの分散、クエリのトランザクション特性などがすべて異なるのだ。このように全く異なるものを公正に評価するにはページが足りない。しかし、これだけは意識しておこう。ある種のデータに関しては、グラフとして格納したほうがずっとうまく扱えるということを。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Complex Queries}
 \begin{aosasect2}{複雑な問い合わせ}
 
-There are notable exceptions to key-only lookups in NoSQL systems.
-MongoDB allows you to index your data based on any number of
-properties and has a relatively high-level language for specifying
-which data you want to retrieve.  BigTable-based systems support
-scanners to iterate over a column family and select particular items by a
-filter on a column.  CouchDB allows you to create different views of
-the data, and to run MapReduce tasks across your table to facilitate
-more complex lookups and updates.  Most of the systems have bindings
-to Hadoop or another MapReduce framework to perform dataset-scale
-analytical queries.
+%% There are notable exceptions to key-only lookups in NoSQL systems.
+%% MongoDB allows you to index your data based on any number of
+%% properties and has a relatively high-level language for specifying
+%% which data you want to retrieve.  BigTable-based systems support
+%% scanners to iterate over a column family and select particular items by a
+%% filter on a column.  CouchDB allows you to create different views of
+%% the data, and to run MapReduce tasks across your table to facilitate
+%% more complex lookups and updates.  Most of the systems have bindings
+%% to Hadoop or another MapReduce framework to perform dataset-scale
+%% analytical queries.
+NoSQLシステムにおけるキーだけを使ったルックアップには、特筆すべき例外がある。MongoDBでは任意の数のプロパティを使った索引付けができるようになっており、比較的高レベルの問い合わせ言語を使って取得したいデータを指定することもできる。BigTableベースのシステムでは、スキャナーを使ったカラムファミリーの反復処理に対応しており、特定のアイテムを洗濯する際に、カラム上での絞り込みができる。CouchDBではデータに対してさまざまなビューを作ることができ、テーブルに対してMapReduceタスクを実行させ、より複雑なルックアップや更新もできるようにしている。ほとんどのシステムにはHadoopあるいはその他のMapReduceフレームワークへのバインディングがあり、データセットに対して解析的な問い合わせを実行できる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Transactions}
 \begin{aosasect2}{トランザクション}
 
-NoSQL systems generally prioritize performance over
-\emph{transactional semantics}.  Other SQL-based systems allow any set
-of statements---from a simple primary key row retrieval, to a
-complicated join between several tables which is then subsequently
-averaged across several fields---to be placed in a transaction.
+%% NoSQL systems generally prioritize performance over
+%% \emph{transactional semantics}.  Other SQL-based systems allow any set
+%% of statements---from a simple primary key row retrieval, to a
+%% complicated join between several tables which is then subsequently
+%% averaged across several fields---to be placed in a transaction.
+NoSQLシステムは全般的に、\emph{トランザクションの特性}よりもパフォーマンスを重視している。SQLベースのシステムでは、複数の文の組み合わせ---主キーを指定して行を取得するといった単純な処理から、複数のテーブルを連結していくつかのフィールドの平均を算出するなどの複雑な処理まで---をひとつのトランザクションにまとめられるようになっている。
 
-These SQL databases will offer ACID guarantees between transactions.
-Running multiple operations in a transaction is Atomic (the A in
-ACID), meaning all or none of the operations happen.  Consistency (the
-C) ensures that the transaction leaves the database in a consistent,
-uncorrupted state.  Isolation (the I) makes sure that if two
-transactions touch the same record, they will do without stepping on
-each other's feet.  Durability (the D, covered extensively in the next
-section), ensures that once a transaction is committed, it's stored in
-a safe place.
+%% These SQL databases will offer ACID guarantees between transactions.
+%% Running multiple operations in a transaction is Atomic (the A in
+%% ACID), meaning all or none of the operations happen.  Consistency (the
+%% C) ensures that the transaction leaves the database in a consistent,
+%% uncorrupted state.  Isolation (the I) makes sure that if two
+%% transactions touch the same record, they will do without stepping on
+%% each other's feet.  Durability (the D, covered extensively in the next
+%% section), ensures that once a transaction is committed, it's stored in
+%% a safe place.
+SQLデータベースは、トランザクション間でのACIDを保証している。複数の操作をひとまとめにして実行するトランザクションは原子性(Atomic: ACIDのA)がある。つまり、すべての操作が行われるか、なにも行われないかのいずれかになる。整合性(Consistency: ACIDのC)が保証するのは、そのトランザクションがデータベースの一貫性を保ち、状態を破壊しないということだ。独立性(Isolation: ACIDのI)とは、二つのトランザクションが同時に同じレコードを操作したとしてもお互い相手側に影響を及ぼさないということである。永続性(Durability: ACIDのD、次の節で詳述する)が保証するのは、トランザクションが確定したらそれが安全な場所に格納されるということだ。
 
-ACID-compliant transactions keep developers sane by making it easy to
-reason about the state of their data.  Imagine multiple
-transactions, each of which has multiple steps (e.g., first check the
-value of a bank account, then subtract \$60, then update the
-value). ACID-compliant databases often are limited in how they can
-interleave these steps while still providing a correct result across
-all transactions.  This push for correctness results in
-often-unexpected performance characteristics, where a slow transaction
-might cause an otherwise quick one to wait in line.
+%% ACID-compliant transactions keep developers sane by making it easy to
+%% reason about the state of their data.  Imagine multiple
+%% transactions, each of which has multiple steps (e.g., first check the
+%% value of a bank account, then subtract \$60, then update the
+%% value). ACID-compliant databases often are limited in how they can
+%% interleave these steps while still providing a correct result across
+%% all transactions.  This push for correctness results in
+%% often-unexpected performance characteristics, where a slow transaction
+%% might cause an otherwise quick one to wait in line.
+ACID準拠のトランザクションは、開発者に安心を与えてくれる。データの状態の確認が容易になるからだ。こんな場面を想像してみよう。複数のトランザクションが並行稼働しており、それぞれが複数のステップからなる処理をしている(たとえば、まず銀行口座の残高を確認してその次に\$60を引き落とし、最後に値を更新するなど)。ACID準拠のデータベースはこれらの処理順序に関して何らかの制限がかかることが多いが、すべてのトランザクションで正しい結果が得られる。正確さを重視した結果、パフォーマンス特性に予期せぬ影響が出ることが多い。処理が遅いトランザクションが一つあるせいで、他のトランザクションもそれにあわせて処理を待つ羽目になるといったものだ。
 
-Most NoSQL systems pick performance over full ACID guarantees, but do
-provide guarantees at the key level: two operations on the same key
-will be serialized, avoiding serious corruption to key-value pairs.
-For many applications, this decision will not pose noticeable
-correctness issues, and will allow quick operations to execute with
-more regularity.  It does, however, leave more considerations for
-application design and correctness in the hands of the developer.
+%% Most NoSQL systems pick performance over full ACID guarantees, but do
+%% provide guarantees at the key level: two operations on the same key
+%% will be serialized, avoiding serious corruption to key-value pairs.
+%% For many applications, this decision will not pose noticeable
+%% correctness issues, and will allow quick operations to execute with
+%% more regularity.  It does, however, leave more considerations for
+%% application design and correctness in the hands of the developer.
+大半のNoSQLシステムは、ACIDに完全に準拠することよりもパフォーマンスを向上させることを優先している。しかし、キーのレベルではACIDを保証しており、同じキーに対する二つの操作があればそれは直列化され、キーと値のペアに深刻な被害が及ばないようにしている。多くのアプリケーションではこのレベルで十分で、データの正確性に目立った問題が発生することもない。また、より規則性のある操作を素早く実行できるようになる。しかしこの方針のおかげで、アプリケーションの設計やデータの正確性に関して開発者側で考慮しなければならない点はより多くなる。
 
-Redis is the notable exception to the no-transaction trend.  On a
-single server, it provides a \code{MULTI} command to combine multiple
-operations atomically and consistently, and a \code{WATCH} command to
-allow isolation.  Other systems provide lower-level
-\emph{test-and-set} functionality which provides some isolation
-guarantees.
+%% Redis is the notable exception to the no-transaction trend.  On a
+%% single server, it provides a \code{MULTI} command to combine multiple
+%% operations atomically and consistently, and a \code{WATCH} command to
+%% allow isolation.  Other systems provide lower-level
+%% \emph{test-and-set} functionality which provides some isolation
+%% guarantees.
+トランザクションを軽視する傾向に反する例外として特筆すべきなのがRedisだ。単一サーバー上で、Redisは\code{MULTI}コマンドを提供する。これは、原子性と整合性を保証した状態で複数の操作を組み合わせて実行するものだ。また\code{WATCH}コマンドは独立性を保証する。それ以外のシステムでは、より低レベルな\emph{test-and-set}\footnote{[訳注]「更新前に確かめる」}機能を提供しており、これで同様の独立性を保証している。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Schema-free Storage }
 \begin{aosasect2}{スキーマフリー ストレージ}
 
-A cross-cutting property of many NoSQL systems is the lack of schema
-enforcement in the database.  Even in document stores and column
-family-oriented stores, properties across similar entities are not
-required to be the same.  This has the benefit of supporting less
-structured data requirements and requiring less performance expense
-when modifying schemas on-the-fly.  The decision leaves more
-responsibility to the application developer, who now has to program
-more defensively.  For example, is the lack of a \code{lastname}
-property on an employee record an error to be rectified, or a schema
-update which is currently propagating through the system?  Data and
-schema versioning is common in application-level code after a few
-iterations of a project which relies on \emph{sloppy-schema} NoSQL
-systems.
+%% A cross-cutting property of many NoSQL systems is the lack of schema
+%% enforcement in the database.  Even in document stores and column
+%% family-oriented stores, properties across similar entities are not
+%% required to be the same.  This has the benefit of supporting less
+%% structured data requirements and requiring less performance expense
+%% when modifying schemas on-the-fly.  The decision leaves more
+%% responsibility to the application developer, who now has to program
+%% more defensively.  For example, is the lack of a \code{lastname}
+%% property on an employee record an error to be rectified, or a schema
+%% update which is currently propagating through the system?  Data and
+%% schema versioning is common in application-level code after a few
+%% iterations of a project which relies on \emph{sloppy-schema} NoSQL
+%% systems.
+多くのNoSQLシステムに共通する特徴が、データベース内でスキーマを強要しないということである。ドキュメントやカラムファミリーを格納する方式であっても、各エンティティのプロパティが同じである必要はない。その利点は、構造化されたデータに関してサポートすべき要件が減るということ。そして、スキーマをオンザフライで修正するときにもパフォーマンスの劣化はあまり起こらないということである。そのぶん、アプリケーションの開発者側にはより多くの責務が課せられる。より身構えたプログラムが必要になるのだ。たとえば、社員レコードに\code{lastname}プロパティがなかったとして、それは修正すべきエラーなのだろうか。それとも、スキーマの更新がシステムを通じて伝搬している最中なのだろうか。\emph{sloppy-schema}なNoSQLシステムを使うプロジェクトの場合、数回のイテレーションを終えた後のデータやスキーマのバージョン管理は、アプリケーションレベルのコードで行うことになる。
 
 \end{aosasect2}
 
