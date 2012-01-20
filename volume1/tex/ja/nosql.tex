@@ -536,162 +536,176 @@ ACID準拠のトランザクションは、開発者に安心を与えてくれ�
 %% \begin{aosasect1}{Data Durability}
 \begin{aosasect1}{データの永続性}
 
-Ideally, all data modifications on a storage system would immediately
-be safely persisted and replicated to multiple locations to avoid data
-loss.  However, ensuring data safety is in tension with performance,
-and different NoSQL systems make different \emph{data durability}
-guarantees in order to improve performance.  Failure scenarios are
-varied and numerous, and not all NoSQL systems protect you against
-these issues.
+%% Ideally, all data modifications on a storage system would immediately
+%% be safely persisted and replicated to multiple locations to avoid data
+%% loss.  However, ensuring data safety is in tension with performance,
+%% and different NoSQL systems make different \emph{data durability}
+%% guarantees in order to improve performance.  Failure scenarios are
+%% varied and numerous, and not all NoSQL systems protect you against
+%% these issues.
+理想を言えば、データに何か変更があったときにはそれをすぐに安全な場所に永続化させたいし、複数の場所にレプリカを作るなどしてデータのロスを防ぎたい。しかし、データの安全性を保証しようとするとパフォーマンスに影響が及ぶ。そこで、各種NoSQLシステムはそれとは異なる手法で\emph{データの永続性}を保証しつつパフォーマンスを向上させている。データを失う場面にはさまざまなものがあるし、すべてのNoSQLシステムがこういった問題からあなたを守ってくれるというわけでもない。
 
-A simple and common failure scenario is a server restart or power
-loss.  Data durability in this case involves having moved the data
-from memory to a hard disk, which does not require power to store
-data.  Hard disk failure is handled by copying the data to secondary
-devices, be they other hard drives in the same machine (RAID
-mirroring) or other machines on the network.  However, a data center
-might not survive an event which causes correlated failure (a tornado, for example), and some
-organizations go so far as to copy data to backups in data centers
-several hurricane widths apart. Writing to hard drives and copying
-data to multiple servers or data centers is expensive, so different
-NoSQL systems trade off durability guarantees for performance.
+%% A simple and common failure scenario is a server restart or power
+%% loss.  Data durability in this case involves having moved the data
+%% from memory to a hard disk, which does not require power to store
+%% data.  Hard disk failure is handled by copying the data to secondary
+%% devices, be they other hard drives in the same machine (RAID
+%% mirroring) or other machines on the network.  However, a data center
+%% might not survive an event which causes correlated failure (a tornado, for example), and some
+%% organizations go so far as to copy data to backups in data centers
+%% several hurricane widths apart. Writing to hard drives and copying
+%% data to multiple servers or data centers is expensive, so different
+%% NoSQL systems trade off durability guarantees for performance.
+いちばんシンプルかつありがちなシナリオは、サーバーの再起動や停電などだ。このような場合を想定してデータの永続性を確保するには、データをメモリからハードディスクに移すことになる。ハードディスクは、電源を落としてもデータを失わない。ハードディスク障害に対応するには、データを別のデバイスにコピーする。コピー先は、同一マシン上の別のハードディスク(RAIDミラー)だったりネットワーク上の別のマシンだったりする。しかし、データセンターも、ハリケーンなどの自然災害にあえば使えなくなる可能性がある。そこで、ひとつのハリケーンで同時に被害にあうことのない程度に離れた場所にあるデータセンターにバックアップを取るという組織も存在する。データをハードディスクに書き込んで複数のサーバーやデータセンターにコピーするという作業は高くつく。そこで、さまざまなNoSQLシステムはデータの永続性の保証とパフォーマンスを天秤にかけてバランスを取っている。
 
 %% \begin{aosasect2}{Single-server Durability}
-\begin{aosasect2}{単一サーバーの永続性}
+\begin{aosasect2}{単一サーバーの永続化}
 
-The simplest form of durability is a \emph{single-server durability},
-which ensures that any data modification will survive a server restart
-or power loss.  This usually means writing the changed data to disk,
-which often bottlenecks your workload.  Even if you order your
-operating system to write data to an on-disk file, the operating
-system may buffer the write, avoiding an immediate modification on
-disk so that it can group several writes together into a single
-operation.  Only when the \code{fsync} system call is issued does the
-operating system make a best-effort attempt to ensure that buffered
-updates are persisted to disk.
+%% The simplest form of durability is a \emph{single-server durability},
+%% which ensures that any data modification will survive a server restart
+%% or power loss.  This usually means writing the changed data to disk,
+%% which often bottlenecks your workload.  Even if you order your
+%% operating system to write data to an on-disk file, the operating
+%% system may buffer the write, avoiding an immediate modification on
+%% disk so that it can group several writes together into a single
+%% operation.  Only when the \code{fsync} system call is issued does the
+%% operating system make a best-effort attempt to ensure that buffered
+%% updates are persisted to disk.
+永続化の型として最もシンプルなのが\emph{単一サーバーの永続化}で、サーバーを再起動したり電源を落としたりしても変更したデータが生き残ることを保証する。通常これは、変更したデータをディスクに書き込むことを意味する。そしてこの処理がボトルネックになることが多い。ディスク上のファイルにデータを書き込むようOSに指示を出したとしても、OSは書き込みをバッファリングしてすぐには書き込まないことがある。複数の書き込み操作を一括処理するためである。\code{fsync}システムコールを実行すれば、バッファにたまった更新をOSディスクに永続化させようと試みる。
 
-Typical hard drives can perform 100-200 random accesses (seeks) per
-second, and are limited to 30-100 MB/sec of sequential writes.  Memory can be orders of magnitudes faster in both scenarios.  Ensuring
-efficient single-server durability means limiting the number of random
-writes your system incurs, and increasing the number of sequential
-writes per hard drive. Ideally, you want a system to minimize the
-number of writes between \code{fsync} calls, maximizing the number of
-those writes that are sequential, all the while never telling the user
-their data has been successfully written to disk until that write has
-been \code{fsync}ed.  Let's cover a few techniques for improving
-performance of single-server durability guarantees.
+%% Typical hard drives can perform 100-200 random accesses (seeks) per
+%% second, and are limited to 30-100 MB/sec of sequential writes.  Memory can be orders of magnitudes faster in both scenarios.  Ensuring
+%% efficient single-server durability means limiting the number of random
+%% writes your system incurs, and increasing the number of sequential
+%% writes per hard drive. Ideally, you want a system to minimize the
+%% number of writes between \code{fsync} calls, maximizing the number of
+%% those writes that are sequential, all the while never telling the user
+%% their data has been successfully written to disk until that write has
+%% been \code{fsync}ed.  Let's cover a few techniques for improving
+%% performance of single-server durability guarantees.
+一般的なハードディスクドライブの性能は、一秒あたり100から200のランダムアクセス(シーク)といったものであり、シーケンシャルライトもたかだか30-100 MB/sec程度である。どちらについても、メモリのほうが桁違いに高速である。単一サーバーでの永続化を保証する効率を上げるには、あなたのシステムによるランダムライトの回数を減らし、ハードディスクごとのシーケンシャルライトの回数を増やすようにすればよい。理想的には、一回の\code{fsync}コールあたりの書き込み回数を最小化してシーケンシャルライトの回数を最大化したいものだ。そして、書き込みを\code{fsync}させるまではユーザーに対して書き込み成功を伝えないようにしておきたい。単一サーバーでの永続化を保証するときにパフォーマンスを改善するためのテクニックを、いくつか紹介する。
 
 %% \begin{aosasect3}{Control \code{fsync} Frequency}
 \begin{aosasect3}{\code{fsync}の頻度の制御}
 
-Memcached\footnote{\url{http://memcached.org/}} is an example of a system which offers no on-disk durability
-in exchange for extremely fast in-memory operations.  When a server
-restarts, the data on that server is gone: this makes for a good cache
-and a poor durable data store.
+%% Memcached\footnote{\url{http://memcached.org/}} is an example of a system which offers no on-disk durability
+%% in exchange for extremely fast in-memory operations.  When a server
+%% restarts, the data on that server is gone: this makes for a good cache
+%% and a poor durable data store.
+Memcached\footnote{\url{http://memcached.org/}}は、ディスク上での永続化の保障を放棄する引き換えとして、極めて高速なインメモリでの操作を提供するシステムのひとつである。サーバーを再起動すると、memcached上のデータは消えてしまう。つまり、キャッシュとしてはよくできているが永続化には難があるデータストアとなる。
 
-Redis offers developers several options for when to call
-\code{fsync}. Developers can force an \code{fsync} call after every
-update, which is the slow and safe choice.  For better performance,
-Redis can \code{fsync} its writes every N seconds.  In a worst-case
-scenario, the you will lose last N seconds worth of operations, which
-may be acceptable for certain uses.  Finally, for use cases where
-durability is not important (maintaining coarse-grained statistics, or
-using Redis as a cache), the developer can turn off \code{fsync} calls
-entirely: the operating system will eventually flush the data to disk,
-but without guarantees of when this will happen.
+%% Redis offers developers several options for when to call
+%% \code{fsync}. Developers can force an \code{fsync} call after every
+%% update, which is the slow and safe choice.  For better performance,
+%% Redis can \code{fsync} its writes every N seconds.  In a worst-case
+%% scenario, the you will lose last N seconds worth of operations, which
+%% may be acceptable for certain uses.  Finally, for use cases where
+%% durability is not important (maintaining coarse-grained statistics, or
+%% using Redis as a cache), the developer can turn off \code{fsync} calls
+%% entirely: the operating system will eventually flush the data to disk,
+%% but without guarantees of when this will happen.
+Redisの場合は、どのタイミングで\code{fsync}をコールするかについていくつかのオプションを選べるようになっている。更新のたびに\code{fsync}をコールするような設定もできる。これは、低速だが安全な選択肢となる。よりパフォーマンスを稼ぐために、N秒おきに書き込みを\code{fsync}させることも可能だ。この場合、最悪でN秒ぶんの操作をロストしてしまうことになるが、その程度なら受け入れられるという使い方もあるだろう。最後に、永続化を重視しないような場面(おおざっぱな統計情報の保守や、Redisをキャッシュとして使うといった場面)では、\code{fsync}をまったくコールしないようにもできる。適当なタイミングでOSがデータをディスクに書き込むだろうが、それがいつ発生するかはまったく保証しないという選択肢だ。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Increase Sequential Writes by Logging}
-\begin{aosasect3}{ログ出力によるシーケンシャル書き込みの向上}
+\begin{aosasect3}{ログ出力によるシーケンシャルライトの増加}
 
-Several data structures, such as B+Trees, help NoSQL systems quickly
-retrieve data from disk.  Updates to those structures result in
-updates in random locations in the data structures' files, resulting
-in several random writes per update if you \code{fsync} after each
-update.  To reduce random writes, systems such as Cassandra, HBase,
-Redis, and Riak append update operations to a sequentially-written
-file called a \emph{log}.  While other data structures used by the
-system are only periodically \code{fsync}ed, the log is frequently
-\code{fsync}ed.  By treating the log as the ground-truth state of the
-database after a crash, these storage engines are able to turn random
-updates into sequential ones.
+%% Several data structures, such as B+Trees, help NoSQL systems quickly
+%% retrieve data from disk.  Updates to those structures result in
+%% updates in random locations in the data structures' files, resulting
+%% in several random writes per update if you \code{fsync} after each
+%% update.  To reduce random writes, systems such as Cassandra, HBase,
+%% Redis, and Riak append update operations to a sequentially-written
+%% file called a \emph{log}.  While other data structures used by the
+%% system are only periodically \code{fsync}ed, the log is frequently
+%% \code{fsync}ed.  By treating the log as the ground-truth state of the
+%% database after a crash, these storage engines are able to turn random
+%% updates into sequential ones.
+NoSQLシステムがディスクから高速にデータを取得するために、B+木などのデータ構造が使われている。こういったデータ構造のデータを更新するときには、ファイル内のランダムな場所を更新する。更新のたびに\code{fsync}しようとすると、一回の更新に対して複数のランダムライトが発生することになる。ランダムライトを減らすために、CassandraやHBase、Redis、そしてRiakといったシステムは、更新操作を\emph{log}というファイルにシーケンシャルに書き込んでいる。システムで使っている他のデータ構造は言っての期間ごとに\code{fsync}するのに対して、ログだけは頻繁に\code{fsync}を行う。データベースがクラッシュしたときにはログを正式な状態として扱うことで、ランダムな更新をシーケンシャルライトにまとめている。
 
-While NoSQL systems such as MongoDB perform writes in-place in their
-data structures, others take logging even further.  Cassandra and
-HBase use a technique borrowed from BigTable of combining their logs
-and lookup data structures into one \emph{log-structured merge tree}.
-Riak provides similar functionality with a \emph{log-structured hash
-table}.  CouchDB has modified the traditional B+Tree so that all
-changes to the data structure are appended to the structure on
-physical storage.  These techniques result in improved write
-throughput, but require a periodic log compaction to keep the log from
-growing unbounded.
+%% While NoSQL systems such as MongoDB perform writes in-place in their
+%% data structures, others take logging even further.  Cassandra and
+%% HBase use a technique borrowed from BigTable of combining their logs
+%% and lookup data structures into one \emph{log-structured merge tree}.
+%% Riak provides similar functionality with a \emph{log-structured hash
+%% table}.  CouchDB has modified the traditional B+Tree so that all
+%% changes to the data structure are appended to the structure on
+%% physical storage.  These techniques result in improved write
+%% throughput, but require a periodic log compaction to keep the log from
+%% growing unbounded.
+NoSQLシステムの中には、MongoDBのようにその場でデータ構造に書き込みを行うものもあれば、さらにロギングを行うものもある。CassandraやHBaseが使っているテクニックはBigTableを参考にしたもので、ログとルックアップデータ構造をひとつの\emph{log-structured merge tree}にまとめている。Riakは、同党の機能を\emph{log-structured hash table}で提供する。CouchDBは伝統的なB+木に手を加えたものを使っており、すべての変更を物理ストレージ上の構造に追記する。これらのテクニックによって書き込みのスループットは向上するが、定期的にログの最適化をしないとログのサイズがどんどん膨れ上がってしまう。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Increase Throughput by Grouping Writes}
-\begin{aosasect3}{グルーピング書き込みによるスループットの向上}
+\begin{aosasect3}{書き込みのグルーピングによるスループットの向上}
 
-Cassandra groups multiple concurrent updates within a short window
-into a single \code{fsync} call.  This design, called \emph{group
-commit}, results in higher latency per update, as users have to wait
-on several concurrent updates to have their own update be
-acknowledged.  The latency bump comes at an increase in throughput, as
-multiple log appends can happen with a single \code{fsync}.  As of
-this writing, every HBase update is persisted to the underlying
-storage provided by the Hadoop Distributed File System
-(HDFS)\footnote{\url{http://hadoop.apache.org/hdfs/}}, which has
-recently seen patches to allow support of appends that respect
-\code{fsync} and group commit.
+%% Cassandra groups multiple concurrent updates within a short window
+%% into a single \code{fsync} call.  This design, called \emph{group
+%% commit}, results in higher latency per update, as users have to wait
+%% on several concurrent updates to have their own update be
+%% acknowledged.  The latency bump comes at an increase in throughput, as
+%% multiple log appends can happen with a single \code{fsync}.  As of
+%% this writing, every HBase update is persisted to the underlying
+%% storage provided by the Hadoop Distributed File System
+%% (HDFS)\footnote{\url{http://hadoop.apache.org/hdfs/}}, which has
+%% recently seen patches to allow support of appends that respect
+%% \code{fsync} and group commit.
+Cassandraは、複数の更新を並行してまとめ、一回の\code{fsync}コールの間に実行する。このような設計は\emph{グループコミット}と呼ばれており、更新あたりの待ち時間が長くなってしまう。ユーザーによる更新が受け付けられたかどうかを知るには、並行するいくつかの更新が完了するまで待たなければならない。待ち時間が増える一方で、これはスループットの向上につながる。複数のログ追記処理が一回の\code{fsync}で処理されるからだ。本章の執筆時点では、HBaseの更新はHadoop Distributed File System (HDFS)\footnote{\url{http://hadoop.apache.org/hdfs/}}が提供するストレージに永続化される。最近適用されたパッチで、\code{fsync}やグループコミットを尊重する追記もサポートするようになった。
 
 \end{aosasect3}
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Multi-server Durability}
-\begin{aosasect2}{複数サーバーの永続性}
+\begin{aosasect2}{複数サーバーの永続化}
 
-Because hard drives and machines often irreparably fail, copying
-important data across machines is necessary.  Many NoSQL systems offer
-multi-server durability for data.
+%% Because hard drives and machines often irreparably fail, copying
+%% important data across machines is necessary.  Many NoSQL systems offer
+%% multi-server durability for data.
+ハードディスクドライブだってマシンだって、壊れてしまって復旧不能になることがある。重要なデータは別のマシンにもコピーしておくことが必須である。多くのNoSQLシステムには、複数のサーバーを使ってデータを永続化する仕組みが存在する。
 
-Redis takes a traditional master-slave approach to replicating data.
-All operations executed against a master are communicated in a
-log-like fashion to slave machines, which replicate the operations on
-their own hardware.  If a master fails, a slave can step in and serve
-the data from the state of the operation log that it received from the
-master.  This configuration might result in some data loss, as the
-master does not confirm that the slave has persisted an operation in
-its log before acknowledging the operation to the user.  CouchDB
-facilitates a similar form of directional replication, where servers
-can be configured to replicate changes to documents on other stores.
+%% Redis takes a traditional master-slave approach to replicating data.
+%% All operations executed against a master are communicated in a
+%% log-like fashion to slave machines, which replicate the operations on
+%% their own hardware.  If a master fails, a slave can step in and serve
+%% the data from the state of the operation log that it received from the
+%% master.  This configuration might result in some data loss, as the
+%% master does not confirm that the slave has persisted an operation in
+%% its log before acknowledging the operation to the user.  CouchDB
+%% facilitates a similar form of directional replication, where servers
+%% can be configured to replicate changes to documents on other stores.
+Redisは、伝統的なマスター/スレーブ型の手法でデータを複製する。マスターに対してなされたすべての操作がログ風の仕組みでスレーブ機に送られ、スレーブ機の上で同じ操作を再現させる。マスター上で障害が発生したら、マスターから受け取ったオペレーションログの状態に基づいてスレーブがデータを提供することになる。この構成では、何らかのデータロスが発生する可能性がある。マスターへの更新の結果をユーザーに返す前に、スレーブ上へのログの永続化が完了したかどうかを確認しないからである。CouchDBは、同様の形式で双方向のレプリケーションを行う。ドキュメントに対する変更を他のマシンに複製するよう、サーバーを設定するのだ。
 
-MongoDB provides the notion of replica sets, where some number of
-servers are responsible for storing each document.  MongoDB gives
-developers the option of ensuring that all replicas have received
-updates, or to proceed without ensuring that replicas have the most
-recent data.  Many of the other distributed NoSQL storage systems
-support multi-server replication of data.  HBase, which is built on
-top of HDFS, receives multi-server durability through HDFS\@.  All
-writes are replicated to two or more HDFS nodes before returning
-control to the user, ensuring multi-server durability.
+%% MongoDB provides the notion of replica sets, where some number of
+%% servers are responsible for storing each document.  MongoDB gives
+%% developers the option of ensuring that all replicas have received
+%% updates, or to proceed without ensuring that replicas have the most
+%% recent data.  Many of the other distributed NoSQL storage systems
+%% support multi-server replication of data.  HBase, which is built on
+%% top of HDFS, receives multi-server durability through HDFS\@.  All
+%% writes are replicated to two or more HDFS nodes before returning
+%% control to the user, ensuring multi-server durability.
+MongoDBにはレプリカセットという仕組みがあり、何台かのサーバーで各ドキュメントの格納にかかわる。MongoDBのオプションで、すべてのレプリカが更新を受け取ったことを保証させることもできる。一方、最新のデータがすべてのレプリカに行きわたるのを確認せずに処理を進めることもできる。その他多くの分散型NoSQLストレージシステムは、データのマルチサーバーレプリケーションに対応している。HDFS上に構築されるHBaseは、複数サーバーの永続化をHDFS経由で実現する。すべての書き込みは、ふたつ以上のHDFSノードに複製されるまでユーザーに制御を返さない。これによって、複数サーバーでの永続化を保証している。
 
-Riak, Cassandra, and Voldemort support more configurable forms of
-replication.  With subtle differences, all three systems allow the
-user to specify \code{N}, the number of machines which should
-ultimately have a copy of the data, and \code{W}{\textless}\code{N},
-the number of machines that should confirm the data has been written
-before returning control to the user.
+%% Riak, Cassandra, and Voldemort support more configurable forms of
+%% replication.  With subtle differences, all three systems allow the
+%% user to specify \code{N}, the number of machines which should
+%% ultimately have a copy of the data, and \code{W}{\textless}\code{N},
+%% the number of machines that should confirm the data has been written
+%% before returning control to the user.
+RiakやCassandraそしてVoldemortでは、より細やかにレプリケーションを設定できる。それぞれ微妙な違いはあるが、これらのシステムでは\code{N}と\code{W}のふたつの値を設定できる。\code{N}は最終的にデータのコピーを保持することになるマシンの台数、そして\code{W}は\code{W}{\textless}\code{N}を満たす数で、少なくともこれだけの台数のマシンにデータが書き込まれた時点でユーザーに制御を戻す。
 
-To handle cases where an entire data center goes out of service,
-multi-server replication across data centers is required.  Cassandra,
-HBase, and Voldemort have \emph{rack-aware} configurations, which
-specify the rack or data center in which various machines are located.
-In general, blocking the user's request until a remote server has
-acknowledged an update incurs too much latency. Updates are streamed
-without confirmation when performed across wide area networks to
-backup data centers.
+%% To handle cases where an entire data center goes out of service,
+%% multi-server replication across data centers is required.  Cassandra,
+%% HBase, and Voldemort have \emph{rack-aware} configurations, which
+%% specify the rack or data center in which various machines are located.
+%% In general, blocking the user's request until a remote server has
+%% acknowledged an update incurs too much latency. Updates are streamed
+%% without confirmation when performed across wide area networks to
+%% backup data centers.
+データセンター全体のサービスが停止してしまう事態に対応するには、複数のデータセンターにまたがるマルチサーバーのレプリケーションが必要になる。CassandraやHBaseそしてVoldemortには\emph{rack-aware}な設定があり、さまざまなマシンがどのラック(あるいはどのデータセンター)に配置されているのかを指定することができる。一般に、リモートサーバーでの処理が完了するまでユーザーのリクエストをブロックすると、待ち時間が長くなってしまう。そこで、WANによる別のデータセンターへのバックアップのときは、処理の完了を確認せずに更新処理を終える。
 
 \end{aosasect2}
 
@@ -1148,7 +1162,7 @@ so we will not discuss it further.
 \end{aosasect2}
 
 %% \begin{aosasect2}{Strong Consistency}
-\begin{aosasect2}{厳密な整合性}
+\begin{aosasect2}{強整合性}
 
 Systems which promote strong consistency ensure that the replicas of a
 data item will always be able to come to consensus on the value of a
