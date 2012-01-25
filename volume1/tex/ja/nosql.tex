@@ -714,45 +714,49 @@ RiakやCassandraそしてVoldemortでは、より細やかにレプリケーシ�
 %% \begin{aosasect1}{Scaling for Performance}
 \begin{aosasect1}{パフォーマンス向上のためのスケーリング}
 
-Having just spoken about handling failure, let's imagine a rosier
-situation: success!  If the system you build reaches success, your
-data store will be one of the components to feel stress under load.  A
-cheap and dirty solution to such problems is to \emph{scale up} your
-existing machinery: invest in more RAM and disks to handle the
-workload on one machine.  With more success, pouring money into more
-expensive hardware will become infeasible.  At this point, you will
-have to replicate data and spread requests across multiple machines to
-distribute load.  This approach is called \emph{scale out}, and is
-measured by the \emph{horizontal scalability} of your system.
+%% Having just spoken about handling failure, let's imagine a rosier
+%% situation: success!  If the system you build reaches success, your
+%% data store will be one of the components to feel stress under load.  A
+%% cheap and dirty solution to such problems is to \emph{scale up} your
+%% existing machinery: invest in more RAM and disks to handle the
+%% workload on one machine.  With more success, pouring money into more
+%% expensive hardware will become infeasible.  At this point, you will
+%% have to replicate data and spread requests across multiple machines to
+%% distribute load.  This approach is called \emph{scale out}, and is
+%% measured by the \emph{horizontal scalability} of your system.
+エラー処理について語る前に、もっと楽観的な状況を考えてみよう。やった!大成功!という場面だ。あなたが構築したシステムがうまく動き出すと、データストアはそのコンポーネントのひとつとなり、それなりの負荷にさらされることになる。お手軽だがあまり美しくない解決策は、既存の機器を\emph{スケールアップ}することだ。RAMとディスクをさらに調達して、ひとつのマシンでさばける量を増やせばよい。あなたのシステムがさらに成功を収めると、ハードウェアをよいものにして高価なメモリをどんどん投入することにも限界が出てくる。ここまでくると、データをレプリケートして複数マシンで負荷分散をさせるしか方法がなくなる。これは\emph{スケールアウト}とよばれる手法で、システムの\emph{水平スケーラビリティ}の指標となる。
 
-The ideal horizontal scalability goal is \emph{linear scalability}, in
-which doubling the number of machines in your storage system doubles
-the query capacity of the system.  The key to such scalability is in
-how the data is spread across machines.  Sharding is the act of
-splitting your read and write workload across multiple machines to
-scale out your storage system.  Sharding is fundamental to the design
-of many systems, namely Cassandra, HBase, Voldemort, and Riak, and
-more recently MongoDB and Redis.  Some projects such as CouchDB focus
-on single-server performance and do not provide an in-system solution
-to sharding, but secondary projects provide coordinators to partition
-the workload across independent installations on multiple machines.
+%% The ideal horizontal scalability goal is \emph{linear scalability}, in
+%% which doubling the number of machines in your storage system doubles
+%% the query capacity of the system.  The key to such scalability is in
+%% how the data is spread across machines.  Sharding is the act of
+%% splitting your read and write workload across multiple machines to
+%% scale out your storage system.  Sharding is fundamental to the design
+%% of many systems, namely Cassandra, HBase, Voldemort, and Riak, and
+%% more recently MongoDB and Redis.  Some projects such as CouchDB focus
+%% on single-server performance and do not provide an in-system solution
+%% to sharding, but secondary projects provide coordinators to partition
+%% the workload across independent installations on multiple machines.
+水平スケーラビリティの理想的な目標は\emph{リニアなスケーラビリティ}、つまり、ストレージシステムのマシン数を二倍にすればそのシステムのクエリ処理性能も二倍になるというものだ。これを実現するためのポイントは、データを複数マシンにどのように振り分けるかということになる。シャーディングという手法は、読み込みと書き込みを複数のマシンに分散させてストレージシステムをスケールアウトさせるものである。シャーディングは多くのシステムで設計の基本となっている。具体的にはCassandraやHBase、Voldemort、Riak、そして最近ではMongoDBやRedisもそうだ。中には、CouchDBのように単一サーバーでのパフォーマンスを重視してシステムではシャーディング機能を提供しないというプロジェクトもある。しかし、セカンダリプロジェクトがコーディネーターとなって、複数のマシンにそれぞれ独立にインストールした環境に処理を振り分けることもできる。
 
-Let's cover a few interchangeable terms you might encounter.  We will
-use the terms \emph{sharding} and \emph{partitioning} interchangeably.
-The terms \emph{machine}, \emph{server}, or \emph{node} refer to some
-physical computer which stores part of the partitioned data.  Finally,
-a \emph{cluster} or \emph{ring} refers to the set of machines which
-participate in your storage system.
+%% Let's cover a few interchangeable terms you might encounter.  We will
+%% use the terms \emph{sharding} and \emph{partitioning} interchangeably.
+%% The terms \emph{machine}, \emph{server}, or \emph{node} refer to some
+%% physical computer which stores part of the partitioned data.  Finally,
+%% a \emph{cluster} or \emph{ring} refers to the set of machines which
+%% participate in your storage system.
+ここで、いくつかの用語についてまとめておこう。ここでは、\emph{シャーディング}と\emph{パーティショニング}を同じ意味で使う。また、\emph{マシン}や\emph{サーバー}そして\emph{ノード}は、分割されたデータを格納する物理的な計算機を指すものとする。最後に、\emph{クラスタ}あるいは\emph{リング}という用語は、ストレージシステムを構成するマシン群を指すものとする。
 
-Sharding means that no one machine has to handle the write workload on
-the entire dataset, but no one machine can answer queries about the
-entire dataset.  Most NoSQL systems are key-oriented in both their
-data and query models, and few queries touch the entire dataset
-anyway.  Because the primary access method for data in these systems
-is key-based, sharding is typically key-based as well: some function
-of the key determines the machine on which a key-value pair is
-stored.  We'll cover two methods of defining the key-machine mapping:
-hash partitioning and range partitioning.
+%% Sharding means that no one machine has to handle the write workload on
+%% the entire dataset, but no one machine can answer queries about the
+%% entire dataset.  Most NoSQL systems are key-oriented in both their
+%% data and query models, and few queries touch the entire dataset
+%% anyway.  Because the primary access method for data in these systems
+%% is key-based, sharding is typically key-based as well: some function
+%% of the key determines the machine on which a key-value pair is
+%% stored.  We'll cover two methods of defining the key-machine mapping:
+%% hash partitioning and range partitioning.
+シャーディングするということは、どのマシンもそれ単体ではデータセット上のすべての書き込みを処理する必要がなくなるということだ。しかしそれと同時に、どのマシンもそれ単体ではデータセットへのすべての問い合わせには対応しきれないということでもある。多くのNoSQLシステムではキー指向のデータモデルやクエリモデルを採用しているので、いずれにせよデータセット全体にまたがるような問い合わせはほとんどない。これらのシステムではデータにアクセスする主要な方法がキーに基づいているので、シャーディングもまたキーに基づいて行うのがよい。キーに対する何らかの関数が、そのキー・バリューペアをどのマシンに格納するのかを決定する。キーとマシンのマッピング方法を二通り紹介しよう。ハッシュパーティショニングとレンジパーティショニングだ。
 
 %% \begin{aosasect2}{Do Not Shard Until You Have To}
 \begin{aosasect2}{必要になるまでシャーディングを避ける}
