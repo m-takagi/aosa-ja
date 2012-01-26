@@ -761,55 +761,61 @@ RiakやCassandraそしてVoldemortでは、より細やかにレプリケーシ�
 %% \begin{aosasect2}{Do Not Shard Until You Have To}
 \begin{aosasect2}{必要になるまでシャーディングを避ける}
 
-Sharding adds system complexity, and where possible, you should avoid
-it.  Let's cover two ways to scale without sharding: read replicas and
-caching.
+%% Sharding adds system complexity, and where possible, you should avoid
+%% it.  Let's cover two ways to scale without sharding: read replicas and
+%% caching.
+シャーディングはシステムを複雑化させるものであり、可能な限り避けるべきである。ここでは、シャーディングを使わずにスケールさせる方法を二通り取り上げる。リードレプリカとキャッシュだ。
 
 %% \begin{aosasect3}{Read Replicas}
 \begin{aosasect3}{リードレプリカ}
 
-Many storage systems see more read requests than write requests.  A
-simple solution in these cases is to make copies of the data on
-multiple machines.  All write requests still go to a master node.
-Read requests go to machines which replicate the data, and are often
-slightly stale with respect to the data on the write master.
+%% Many storage systems see more read requests than write requests.  A
+%% simple solution in these cases is to make copies of the data on
+%% multiple machines.  All write requests still go to a master node.
+%% Read requests go to machines which replicate the data, and are often
+%% slightly stale with respect to the data on the write master.
+ストレージシステムの多くは、読み込みリクエストのほうが書き込みリクエストより多くなる。そんな場合のシンプルな解決策は、データのコピーを複数のマシン上に置くことだ。書き込みリクエストはすべてマスターノードに任せる。読み込みリクエストはデータのレプリカを持つマシンにまわす。ただしこのレプリカは、書き込みサーバー上のデータよりも若干古いものになることが多い。
 
-If you are already replicating your data for multi-server durability
-in a master-slave configuration, as is common in Redis, CouchDB, or
-MongoDB, the read slaves can shed some load from the write master.
-Some queries, such as aggregate summaries of your dataset, which might
-be expensive and often do not require up-to-the-second freshness, can
-be executed against the slave replicas.  Generally, the less stringent
-your demands for freshness of content, the more you can lean on read
-slaves to improve read-only query performance.
+%% If you are already replicating your data for multi-server durability
+%% in a master-slave configuration, as is common in Redis, CouchDB, or
+%% MongoDB, the read slaves can shed some load from the write master.
+%% Some queries, such as aggregate summaries of your dataset, which might
+%% be expensive and often do not require up-to-the-second freshness, can
+%% be executed against the slave replicas.  Generally, the less stringent
+%% your demands for freshness of content, the more you can lean on read
+%% slaves to improve read-only query performance.
+もし既にマスター・スレーブ公正で複数サーバーでのデータの永続化を実現している(RedisやCouchDBそしてMongoDBではそれが一般的)のなら、読み込み用のスレーブが書き込み用のマスターの負荷を多少軽減させることができる。ある種のクエリ、たとえばデータセットのサマリーの集計などは、コストのかかる処理である一方で必ずしも最新のデータを必要とはしないことがある。そんなクエリは、スレーブのレプリカに対して実行すればよい。一般に、データが最新である必要性が少なければ少ないほど、その処理を読み込み用スレーブに任せてクエリのパフォーマンスを稼ぎやすくなる。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Caching}
 \begin{aosasect3}{キャッシュ}
 
-Caching the most popular content in your system often works
-surprisingly well.  Memcached dedicates blocks of memory on multiple
-servers to cache data from your data store.  Memcached clients take
-advantage of several horizontal scalability tricks to distribute load
-across Memcached installations on different servers.  To add memory to
-the cache pool, just add another Memcached host.
+%% Caching the most popular content in your system often works
+%% surprisingly well.  Memcached dedicates blocks of memory on multiple
+%% servers to cache data from your data store.  Memcached clients take
+%% advantage of several horizontal scalability tricks to distribute load
+%% across Memcached installations on different servers.  To add memory to
+%% the cache pool, just add another Memcached host.
+システム上でよく使われるコンテンツをキャッシュすると、たいていの場合は驚くほどうまく機能する。Memcachedは、複数サーバー上にメモリブロックを確保してデータストアのデータをキャッシュする。Memcachedクライアントは、水平スケーラビリティの技を使って別のサーバー上にあるMemcachedに負荷を分散する。キャッシュプールにメモリを追加するには、単にMemcachedが動くホストを追加するだけでよい。
 
-Because Memcached is designed for caching, it does not have as much
-architectural complexity as the persistent solutions for scaling
-workloads.  Before considering more complicated solutions, think about
-whether caching can solve your scalability woes.  Caching is not solely
-a temporary band-aid: Facebook has Memcached installations in the range
-of tens of terabytes of memory!
+%% Because Memcached is designed for caching, it does not have as much
+%% architectural complexity as the persistent solutions for scaling
+%% workloads.  Before considering more complicated solutions, think about
+%% whether caching can solve your scalability woes.  Caching is not solely
+%% a temporary band-aid: Facebook has Memcached installations in the range
+%% of tens of terabytes of memory!
+Memcachedはキャッシュ用に設計されているので、処理をスケールさせるための永続化ソリューションのアーキテクチャはそれほど複雑ではない。複雑なソリューションの前に、キャッシュでスケーラビリティの問題を解決できないかどうかを検討してみよう。キャッシュ処理は単なるその場しのぎのバンドエイドではない。FacebookではMemcachedで何と数十テラバイトものメモリを各hおしているのだってさ!
 
 \end{aosasect3}
 
-Read replicas and caching allow you to scale up your read-heavy
-workloads.  When you start to increase the frequency of writes and
-updates to your data, however, you will also increase the load on the
-master server that contains all of your up-to-date data.  For the rest
-of this section, we will cover techniques for sharding your write
-workload across multiple servers.
+%% Read replicas and caching allow you to scale up your read-heavy
+%% workloads.  When you start to increase the frequency of writes and
+%% updates to your data, however, you will also increase the load on the
+%% master server that contains all of your up-to-date data.  For the rest
+%% of this section, we will cover techniques for sharding your write
+%% workload across multiple servers.
+リードレプリカやキャッシュを使えば、読み込み処理をスケールアップさせることができる。しかし、書き込みやデータ更新の頻度が上がり始めたら、最新状態を保持するマスターサーバーへの負荷が増加することになる。このセクションの後半では、書き込み処理を複数サーバーにシャーディングする方法を扱う。
 
 \end{aosasect2}
 
