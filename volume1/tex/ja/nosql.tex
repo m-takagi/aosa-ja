@@ -844,14 +844,15 @@ Twitterは、シャーディングやレプリケーションの概念をまと�
 %% \begin{aosasect2}{Consistent Hash Rings}
 \begin{aosasect2}{コンシステントハッシュリング}
 
-Good hash functions distribute a set of keys in a uniform manner.
-This makes them a powerful tool for distributing key-value pairs
-among multiple servers.  The academic literature on a technique
-called \emph{consistent hashing} is extensive, and the first
-applications of the technique to data stores was in systems called
-\emph{distributed hash tables} (\emph{DHTs}).  NoSQL systems built
-around the principles of Amazon's Dynamo adopted this distribution
-technique, and it appears in Cassandra, Voldemort, and Riak.
+%% Good hash functions distribute a set of keys in a uniform manner.
+%% This makes them a powerful tool for distributing key-value pairs
+%% among multiple servers.  The academic literature on a technique
+%% called \emph{consistent hashing} is extensive, and the first
+%% applications of the technique to data stores was in systems called
+%% \emph{distributed hash tables} (\emph{DHTs}).  NoSQL systems built
+%% around the principles of Amazon's Dynamo adopted this distribution
+%% technique, and it appears in Cassandra, Voldemort, and Riak.
+よくできたハッシュ関数は、キーのセットを統一された形式で分散させる。これは、キー・バリューのペアを複数のサーバーに分散させるための便利なツールとして使える。学術論文上で\emph{コンシステントハッシュ}と呼ばれる技術は広範囲にわたる。このテクニックをデータストアに応用したはじめての例が\emph{分散ハッシュテーブル}(\emph{DHT: Distributed Hash Tables})というシステムだ。AmazonのDynamoの動作原理を参考にしたNoSQLシステムではこの分散テクニックを採用しており、CassandraやVoldemortそしてRiakなどにそれが見られる。
 
 %% \begin{aosasect3}{Hash Rings by Example}
 \begin{aosasect3}{ハッシュリングの実例}
@@ -859,71 +860,77 @@ technique, and it appears in Cassandra, Voldemort, and Riak.
 %% \aosafigureTop[150pt]{../images/nosql/hashring.eps}{A Distributed Hash Table Ring}{fig.nosql.hashring}
 \aosafigureTop[150pt]{../images/nosql/hashring.eps}{分散ハッシュテーブルリング}{fig.nosql.hashring}
 
-Consistent hash rings work as follows.  Say we have a hash function
-\code{H} that maps keys to uniformly distributed large integer values.  We
-can form a ring of numbers in the range [1, L] that wraps around
-itself with these values by taking H(key) mod L for some relatively
-large integer L\@.  This will map each key into the range [1,L].  A
-consistent hash ring of servers is formed by taking each server's
-unique identifier (say its IP address), and applying H to it.  You can
-get an intuition for how this works by looking at the hash ring formed
-by five servers (\code{A}-\code{E}) in \aosafigref{fig.nosql.hashring}.
+%% Consistent hash rings work as follows.  Say we have a hash function
+%% \code{H} that maps keys to uniformly distributed large integer values.  We
+%% can form a ring of numbers in the range [1, L] that wraps around
+%% itself with these values by taking H(key) mod L for some relatively
+%% large integer L\@.  This will map each key into the range [1,L].  A
+%% consistent hash ring of servers is formed by taking each server's
+%% unique identifier (say its IP address), and applying H to it.  You can
+%% get an intuition for how this works by looking at the hash ring formed
+%% by five servers (\code{A}-\code{E}) in \aosafigref{fig.nosql.hashring}.
+コンシステントハッシュリングは、次のように動作する。まず、ハッシュ関数\code{H}があるとしよう。この関数は、キーを均等に分布する大きな整数値にマップする。比較的大きな整数値Lをとって範囲[1, L]の数のリングを作れば、H(key) mod Lをそのリングに含めることができる。これで、各キーが[1, L]の範囲に収まることになる。サーバーのコンシステントハッシュリングは、各サーバーの固有な識別子(そのIPアドレスなど)にHを適用したものを使って構成される。この動作原理を理解しやすくするために、5台のサーバー(\code{A}-\code{E})からなるハッシュリングの例を\aosafigref{fig.nosql.hashring}に示す。
 
-There, we picked \code{L = 1000}.  Let's say that \code{H(A) mod
-L = 7}, \code{H(B) mod L = 234}, \code{H(C) mod L = 447}, \code{H(D)
-mod L = 660}, and \code{H(E) mod L = 875}.  We can now tell which
-server a key should live on.  To do this, we map all keys to a server
-by seeing if it falls in the range between that server and the next
-one in the ring.  For example, \code{A} is responsible for keys whose
-hash value falls in the range [7,233], and \code{E} is responsible for
-keys in the range [875, 6] (this range wraps around on itself at
-1000).  So if \code{H('employee30') mod L = 899}, it will be stored by
-server \code{E}, and if \code{H('employee31') mod L = 234}, it will be
-stored on server \code{B}.
+%% There, we picked \code{L = 1000}.  Let's say that \code{H(A) mod
+%% L = 7}, \code{H(B) mod L = 234}, \code{H(C) mod L = 447}, \code{H(D)
+%% mod L = 660}, and \code{H(E) mod L = 875}.  We can now tell which
+%% server a key should live on.  To do this, we map all keys to a server
+%% by seeing if it falls in the range between that server and the next
+%% one in the ring.  For example, \code{A} is responsible for keys whose
+%% hash value falls in the range [7,233], and \code{E} is responsible for
+%% keys in the range [875, 6] (this range wraps around on itself at
+%% 1000).  So if \code{H('employee30') mod L = 899}, it will be stored by
+%% server \code{E}, and if \code{H('employee31') mod L = 234}, it will be
+%% stored on server \code{B}.
+ここでは、\code{L = 1000}とした。\code{H(A) mod L = 7}、\code{H(B) mod L = 234}、\code{H(C) mod L = 447}、\code{H(D) mod L = 660}、そして\code{H(E) mod L = 875}であるとしよう。これで、キーがどのサーバーに配置されるかがわかるようになった。リング内で、あるサーバーとその次のサーバーの間にキーが収まる場合に、そのサーバーにキーを格納することになる。たとえば、\code{A}が受け持つキーはそのハッシュが[7, 233]の範囲になるものであり、\code{E}が受け持つキーはそのハッシュが[875, 6]の範囲(これは、値が1000の部分をまたがっている)になるものである。つまり、もし\code{H('employee30') mod L = 899}になるのならこのデータはサーバー\code{E}に格納されるし、\code{H('employee31') mod L = 234}になるとしたらこのデータはサーバー\code{B}に格納される。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Replicating Data}
 \begin{aosasect3}{データのレプリケーション}
 
-Replication for multi-server durability is achieved by passing the
-keys and values in one server's assigned range to the servers
-following it in the ring.  For example, with a replication factor of
-3, keys mapped to the range [7,233] will be stored on servers
-\code{A}, \code{B}, and \code{C}.  If \code{A} were to fail, its
-neighbors \code{B} and \code{C} would take over its workload.  In some designs,
-\code{E} would replicate and take over \code{A}'s workload temporarily, 
-since its range would expand to include \code{A}'s.
+%% Replication for multi-server durability is achieved by passing the
+%% keys and values in one server's assigned range to the servers
+%% following it in the ring.  For example, with a replication factor of
+%% 3, keys mapped to the range [7,233] will be stored on servers
+%% \code{A}, \code{B}, and \code{C}.  If \code{A} were to fail, its
+%% neighbors \code{B} and \code{C} would take over its workload.  In some designs,
+%% \code{E} would replicate and take over \code{A}'s workload temporarily, 
+%% since its range would expand to include \code{A}'s.
+複数サーバーでの永続化のためにレプリケーションをするには、あるサーバーの担当範囲に割り当てられたキーと値のペアをリング内でのその次のサーバーに渡せばよい。たとえば、三重のレプリケーションを行うには、範囲[7,233]にマップされたキーをサーバー\code{A}、\code{B}、そして\code{C}に格納する。仮に\code{A}がダウンしたら、隣にある\code{B}と\code{C}がその範囲を受け持つ。設計によっては、\code{E}にレプリケートして\code{A}の担当分を一時的に受け持つこともある。この場合は担当範囲を拡張して\code{A}の範囲も含めるようにする。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Achieving Better Distribution}
-\begin{aosasect3}{よりよい分散化}
+\begin{aosasect3}{よりよい振り分け}
 
-While hashing is statistically effective at uniformly distributing a
-keyspace, it usually requires many servers before it distributes
-evenly.  Unfortunately, we often start with a small number of servers
-that are not perfectly spaced apart from one-another by the hash
-function.  In our example, \code{A}'s key range is of length 227,
-whereas \code{E}'s range is 132.  This leads to uneven load on
-different servers.  It also makes it difficult for servers to take
-over for one-another when they fail, since a neighbor suddenly has to
-take control of the entire range of the failed server.
+%% While hashing is statistically effective at uniformly distributing a
+%% keyspace, it usually requires many servers before it distributes
+%% evenly.  Unfortunately, we often start with a small number of servers
+%% that are not perfectly spaced apart from one-another by the hash
+%% function.  In our example, \code{A}'s key range is of length 227,
+%% whereas \code{E}'s range is 132.  This leads to uneven load on
+%% different servers.  It also makes it difficult for servers to take
+%% over for one-another when they fail, since a neighbor suddenly has to
+%% take control of the entire range of the failed server.
+ハッシュはキー空間を均等分布させるという点では統計的に有効であるが、均等に分布させるには通常はある程度多くのサーバーを必要とする。残念ながら、たいていは少数のサーバーからスタートすることが多い。そしてその段階では、ハッシュ関数がうまくキーを分散させてはくれない。先ほどの例で見ると、\code{A}の担当範囲の長さは227であるのに対して\code{E}の担当範囲は132しかない。こんな状態だと、サーバーによって負荷が違うということになるだろう。また、どれかひとつのサーバーがダウンしたときに代わりを受け持つのも難しくなる。隣のサーバーが、ダウンしたサーバーの担当範囲全体を制御しなければならなくなるからである。
 
-To solve the problem of uneven large key ranges, many DHTs including
-Riak create several `virtual' nodes per physical machine.  For
-example, with 4 virtual nodes, server \code{A} will act as server
-\code{A\_1}, \code{A\_2}, \code{A\_3}, and \code{A\_4}.  Each virtual
-node hashes to a different value, giving it more opportunity to manage
-keys distributed to different parts of the keyspace.  Voldemort takes
-a similar approach, in which the number of partitions is manually
-configured and usually larger than the number of servers, resulting in
-each server receiving a number of smaller partitions.
+%% To solve the problem of uneven large key ranges, many DHTs including
+%% Riak create several `virtual' nodes per physical machine.  For
+%% example, with 4 virtual nodes, server \code{A} will act as server
+%% \code{A\_1}, \code{A\_2}, \code{A\_3}, and \code{A\_4}.  Each virtual
+%% node hashes to a different value, giving it more opportunity to manage
+%% keys distributed to different parts of the keyspace.  Voldemort takes
+%% a similar approach, in which the number of partitions is manually
+%% configured and usually larger than the number of servers, resulting in
+%% each server receiving a number of smaller partitions.
+担当するキーの範囲にばらつきが出てしまう問題を解決するために、Riakを含む多くのDHTは、物理マシン単位でいくつか`仮想'ノードを作成する。たとえば、4つの仮想ノードを作ったサーバー\code{A}が、サーバー\code{A\_1}、\code{A\_2}、\code{A\_3}、そして\code{A\_4}として動作するといった具合だ。各仮想ノードには異なるハッシュ値が割り当てられ、キー空間の各部分によりうまく分散させられるようにする。Voldemortも同様の手法を採用しており、パーティションの数を手動で設定できるようになっている。通常はサーバーの数よりパーティションの数を多くするので、結果的に各サーバーが複数のパーティションを受け持つことになる。
 
-Cassandra does not assign multiple small partitions to each server,
-resulting in sometimes uneven key range distributions.  For
-load-balancing, Cassandra has an asynchronous process which adjusts
-the location of servers on the ring depending on their historic load.
+%% Cassandra does not assign multiple small partitions to each server,
+%% resulting in sometimes uneven key range distributions.  For
+%% load-balancing, Cassandra has an asynchronous process which adjusts
+%% the location of servers on the ring depending on their historic load.
+Cassandraは、各サーバーで複数の小さなパーティションを担当するということはしない。そのため、時にはキーの範囲の分散が均一にならないこともある。ロードバランス用として、Cassandraには非同期プロセスが用意されている。このプロセスは、これまでの負荷の履歴に基づいてリング上でのサーバーの配置を調整する。
 
 \end{aosasect3}
 
