@@ -1085,29 +1085,32 @@ TwitterのGizzardフレームワークは、分割され、レプリケートさ
 %% \begin{aosasect2}{Which Partitioning Scheme to Use}
 \begin{aosasect2}{どのパーティショニング方式を採用するか}
 
-Given the hash- and range-based approaches to sharding, which is
-preferable?  It depends.  Range partitioning is the obvious choice to
-use when you will frequently be performing range scans over the keys
-of your data.  As you read values in order by key, you will not jump
-to random nodes in the network, which would incur heavy network
-overhead.  But if you do not require range scans, which sharding
-scheme should you use?
+%% Given the hash- and range-based approaches to sharding, which is
+%% preferable?  It depends.  Range partitioning is the obvious choice to
+%% use when you will frequently be performing range scans over the keys
+%% of your data.  As you read values in order by key, you will not jump
+%% to random nodes in the network, which would incur heavy network
+%% overhead.  But if you do not require range scans, which sharding
+%% scheme should you use?
+ハッシュ方式とレンジ方式、シャーディングの手法としてどちらが適切なのかって? それは状況による。明らかにレンジパーティショニングを選ぶべきなのは、たとえばキーによる検索よりも範囲指定による検索が多発するような場面だ。キーの順に値を読み込むことになるので、そうしておけばネットワーク上のあちこちのノードを飛び回る必要がなくなる。ノードを移るときのネットワークのオーバーヘッドは馬鹿にできない。しかし、範囲指定の検索が不要な場合には、どちらの方式を選べばよいのだろう?
 
-Hash partitioning gives reasonable distribution of data across nodes,
-and random skew can be reduced with virtual nodes.  Routing is simple
-in the hash partitioning scheme: for the most part, the hash function
-can be executed by clients to find the appropriate server.  With more
-complicated rebalancing schemes, finding the right node for a key
-becomes more difficult.
+%% Hash partitioning gives reasonable distribution of data across nodes,
+%% and random skew can be reduced with virtual nodes.  Routing is simple
+%% in the hash partitioning scheme: for the most part, the hash function
+%% can be executed by clients to find the appropriate server.  With more
+%% complicated rebalancing schemes, finding the right node for a key
+%% becomes more difficult.
+ハッシュパーティショニングを使えば、データを複数のノードに適切に分散させることができる。そして、データの非対称性も仮想ノードで軽減できる。ハッシュパーティショニング方式では、ルーティングもシンプルになる。ほとんどの場合は、クライアント側でハッシュ関数を実行すれば問い合わせ先のサーバーを確定できる。バランスを調整するための仕組みを導入している場合は、あるキーに対して適切なノードを見つけるのは少し難しくなる。
 
-Range partitioning requires the upfront cost of maintaining
-routing and configuration nodes, which can see heavy load and become
-central points of failure in the absence of relatively complex fault
-tolerance schemes.  Done well, however, range-partitioned data can be
-load-balanced in small chunks which can be reassigned in high-load
-situations.  If a server goes down, its assigned ranges can be
-distributed to many servers, rather than loading the server's
-immediate neighbors during downtime.
+%% Range partitioning requires the upfront cost of maintaining
+%% routing and configuration nodes, which can see heavy load and become
+%% central points of failure in the absence of relatively complex fault
+%% tolerance schemes.  Done well, however, range-partitioned data can be
+%% load-balanced in small chunks which can be reassigned in high-load
+%% situations.  If a server goes down, its assigned ranges can be
+%% distributed to many servers, rather than loading the server's
+%% immediate neighbors during downtime.
+レンジパーティショニングは、ノードのルーティングや構成を管理するための事前コストが必要となる。この処理の負荷は高くなりがちで、耐障害性をきちんと考慮していないと障害の主因になるだろう。しかし、うまくやれば、レンジパーティショニングで分割したデータは小さいチャンクで負荷分散できるようになり、負荷が高くなったときの調整も可能となる。かりにひとつのサーバーがダウンしたとしても、そこに割り当てられていた範囲を多数のサーバーに分散させることができ、ダウンしたサーバーの直近のサーバーだけに負荷をかけることはない。
 
 \end{aosasect2}
 
