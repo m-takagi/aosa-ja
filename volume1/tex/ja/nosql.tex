@@ -941,130 +941,142 @@ Cassandraは、各サーバーで複数の小さなパーティションを担�
 \begin{aosasect2}{レンジパーティショニング}
 \vspace{-0.1cm} % remove some space to rescue orphan from next page
 
-In the range partitioning approach to sharding, some machines in your
-system keep metadata about which servers contain which key ranges.
-This metadata is consulted to route key and range lookups to the
-appropriate servers.  Like the consistent hash ring approach, this
-range partitioning splits the keyspace into ranges, with each key
-range being managed by one machine and potentially replicated to
-others.  Unlike the consistent hashing approach, two keys that are
-next to each other in the key's sort order are likely to appear in the
-same partition.  This reduces the size of the routing metadata, as
-large ranges are compressed to [start, end] markers.
+%% In the range partitioning approach to sharding, some machines in your
+%% system keep metadata about which servers contain which key ranges.
+%% This metadata is consulted to route key and range lookups to the
+%% appropriate servers.  Like the consistent hash ring approach, this
+%% range partitioning splits the keyspace into ranges, with each key
+%% range being managed by one machine and potentially replicated to
+%% others.  Unlike the consistent hashing approach, two keys that are
+%% next to each other in the key's sort order are likely to appear in the
+%% same partition.  This reduces the size of the routing metadata, as
+%% large ranges are compressed to [start, end] markers.
+レンジパーティショニング方式によるシャーディングでは、システム内の何台かのマシンが「どのサーバーがどのキー範囲を受け持つか」というメタ情報を保持する。このメタ情報への問い合わせによって、キー範囲の検索と適切なサーバーへの振り分けを行う。コンシステントハッシュリングの手法と同様、レンジパーティショニングもキー空間をいくつかの範囲に分割する。そして各範囲をひとつのマシンが管理し、場合によっては他のマシンにレプリケートしたりする。コンシステントハッシュ方式と違うところは、キーのソート順で隣同士になるキーがほぼ同じパーティションに収まるという点だ。これにより、ルーティング用のメタデータのサイズを軽減できる。範囲を表すには単に[開始位置, 終了位置]の印があればよいだけだからである。
 
-In adding active record-keeping of the \emph{range-to-server} mapping,
-the range partitioning approach allows for more fine-grained control
-of load-shedding from heavily loaded servers.  If a specific key range
-sees higher traffic than other ranges, a load manager can reduce the
-size of the range on that server, or reduce the number of shards that
-this server serves.  The added freedom to actively manage load comes
-at the expense of extra architectural components which monitor and
-route shards.
+%% In adding active record-keeping of the \emph{range-to-server} mapping,
+%% the range partitioning approach allows for more fine-grained control
+%% of load-shedding from heavily loaded servers.  If a specific key range
+%% sees higher traffic than other ranges, a load manager can reduce the
+%% size of the range on that server, or reduce the number of shards that
+%% this server serves.  The added freedom to actively manage load comes
+%% at the expense of extra architectural components which monitor and
+%% route shards.
+\emph{キー範囲とサーバー}のマッピング情報を更新し続ける際に、レンジパーティショニング方式では高負荷なサーバーの負荷分散をよりきめ細やかに制御できるようになる。特定のキー範囲が他の範囲に比べてトラフィックが多くなるようなら、ロードマネージャーはそのサーバーが担当する範囲を狭めることもできるし、そのサーバーが担当するシャードの数を減らすこともできる。動的に負荷を調整できるという新たな自由を得るために使ったのは、シャードを監視したりルーティングしたりするための追加コンポーネントだ。
 
 \vspace{-0.1cm} % remove some space to rescue orphan from next page
 %% \begin{aosasect3}{The BigTable Way}
 \begin{aosasect3}{BigTableの手法}
 
-Google's BigTable paper describes a range-partitioning hierarchical
-technique for sharding data into tablets.  A tablet stores a range of
-row keys and values within a column family.  It maintains all
-of the necessary logs and data structures to answer queries about the
-keys in its assigned range.  Tablet servers serve multiple tablets
-depending on the load each tablet is experiencing.
+%% Google's BigTable paper describes a range-partitioning hierarchical
+%% technique for sharding data into tablets.  A tablet stores a range of
+%% row keys and values within a column family.  It maintains all
+%% of the necessary logs and data structures to answer queries about the
+%% keys in its assigned range.  Tablet servers serve multiple tablets
+%% depending on the load each tablet is experiencing.
+GoogleによるBigTableに関する論文には、階層化レンジパーティショニングでデータをタブレットにシャーディングする手法が解説されている。一つのタブレットが、一定範囲の行のキーとカラムファミリー内の値を保持する。タブレットは必要なログをすべて保持し、自分が担当する範囲のキーに関する問い合わせに答えるためのデータ構造もすべて保持する。タブレットサーバーは、各タブレットにかかる負荷に応じて複数のタブレットを担当する。
 
-Each tablet is kept at a size of 100-200 MB\@.  As tablets change in size, two 
-small tablets with adjoining key ranges might be combined, or a large tablet might be
-split in two.  A master server analyzes tablet size,
-load, and tablet server availability.  The master adjusts which tablet
-server serves which tablets at any time.
+%% Each tablet is kept at a size of 100-200 MB\@.  As tablets change in size, two 
+%% small tablets with adjoining key ranges might be combined, or a large tablet might be
+%% split in two.  A master server analyzes tablet size,
+%% load, and tablet server availability.  The master adjusts which tablet
+%% server serves which tablets at any time.
+各タブレットは、100から200MBのサイズを保つ。タブレットのサイズが変われば、隣り合うキー範囲の二つの小さなタブレットを一つにまとめたり、あるいは大きなタブレットを二つに分割したりする。マスターサーバーが、タブレットのサイズや負荷そしてタブレットサーバーの稼働状態を解析する。そして、マスターサーバーは、どのタブレットサーバーがどのタブレットを担当するのかを常時調節する。
 
 %% \aosafigure[300pt]{../images/nosql/bigtable.eps}{BigTable-based Range Partitioning}{fig.nosql.bigtable}
-\aosafigure[300pt]{../images/nosql/bigtable.eps}{BigTableベースのレンジ・パーティショニング}{fig.nosql.bigtable}
+\aosafigure[300pt]{../images/nosql/bigtable.eps}{BigTableベースのレンジパーティショニング}{fig.nosql.bigtable}
 
-The master server maintains the tablet assignment in a metadata table.
-Because this metadata can get large, the metadata table is also
-sharded into tablets that map key ranges to tablets and tablet servers
-responsible for those ranges.  This results in a three-layer hierarchy
-traversal for clients to find a key on its hosting tablet server,
-as depicted in \aosafigref{fig.nosql.bigtable}.
+%% The master server maintains the tablet assignment in a metadata table.
+%% Because this metadata can get large, the metadata table is also
+%% sharded into tablets that map key ranges to tablets and tablet servers
+%% responsible for those ranges.  This results in a three-layer hierarchy
+%% traversal for clients to find a key on its hosting tablet server,
+%% as depicted in \aosafigref{fig.nosql.bigtable}.
+マスターサーバーは、タブレットの割り当てをメタデータテーブルで管理する。このメタデータはかなり大きくなる可能性があるので、メタデータテーブル自体も複数のタブレットにシャーディングしてキー範囲とタブレットを関連づける。タブレットサーバーが、この範囲の管理を行う。その結果、クライアントは三階層の走査を経てキーの保存先のタブレットサーバーを知ることになる。その様子を\aosafigref{fig.nosql.bigtable}に示す。
 
-Let's look at an example.  A client searching for key
-\code{900} will query server \code{A}, which stores the tablet for
-metadata level 0.  This tablet identifies the metadata level 1 tablet
-on server 6 containing key ranges 500-1500.  The client sends a
-request to server \code{B} with this key, which responds that the
-tablet containing keys 850-950 is found on a tablet on server
-C\@.  Finally, the client sends the key request to server \code{C}, and
-gets the row data back for its query.  Metadata tablets at level 0 and
-1 may be cached by the client, which avoids putting undue load on
-their tablet servers from repeat queries.  The BigTable paper explains
-that this 3-level hierarchy can accommodate $2^{61}$ bytes worth of storage
-using 128MB tablets.
+%% Let's look at an example.  A client searching for key
+%% \code{900} will query server \code{A}, which stores the tablet for
+%% metadata level 0.  This tablet identifies the metadata level 1 tablet
+%% on server 6 containing key ranges 500-1500.  The client sends a
+%% request to server \code{B} with this key, which responds that the
+%% tablet containing keys 850-950 is found on a tablet on server
+%% C\@.  Finally, the client sends the key request to server \code{C}, and
+%% gets the row data back for its query.  Metadata tablets at level 0 and
+%% 1 may be cached by the client, which avoids putting undue load on
+%% their tablet servers from repeat queries.  The BigTable paper explains
+%% that this 3-level hierarchy can accommodate $2^{61}$ bytes worth of storage
+%% using 128MB tablets.
+実際の例を見てみよう。クライアントがキー\code{900}を検索しようとすると、サーバー\code{A}に問い合わせを行う。このサーバーには、レベル0のメタデータ用のタブレットが格納されている。このタブレットを見れば、レベル1のメタデータあがサーバー6上のタブレットにあることがわかる。このタブレットには500-1500の範囲のキーが含まれる。クライアントはサーバー\code{B}に対してこのキーでリクエストを送る。そして、キー850-950を含むタブレットがサーバーC上にあるという応答を得る。最終的に、クライアントはそのキーについてのリクエストをサーバー\code{C}に送り、問い合わせ結果の行を取得する。レベル0とレベル1のメタデータタブレットはクライアント側でキャッシュしてもかまわない。そうすれば、タブレットサーバーに対する同じような問い合わせの繰り返しを回避できる。BigTableの論文では、この三段階の階層によって$2^{61}$バイトのストレージを128MBのタブレットで対応できるとしている。
 
 \end{aosasect3}
 
 \vspace{-0.1cm} % remove some space to rescue orphan from next page
 %% \begin{aosasect3}{Handling Failures}
-\begin{aosasect3}{失敗の処理}
+\begin{aosasect3}{障害の処理}
 
-The master is a single point of failure in the BigTable design, but
-can go down temporarily without affecting requests to tablet servers.
-If a tablet server fails while serving tablet requests, it is up to
-the master to recognize this and re-assign its tablets while requests
-temporarily fail.
+%% The master is a single point of failure in the BigTable design, but
+%% can go down temporarily without affecting requests to tablet servers.
+%% If a tablet server fails while serving tablet requests, it is up to
+%% the master to recognize this and re-assign its tablets while requests
+%% temporarily fail.
+BigTableの設計では、マスターが単一障害点になる。しかし、タブレットサーバーへのリクエストに影響が及ばないように一時的にダウンさせることも可能だ。タブレットへのリクエストを処理するタブレットサーバーがダウンすれば、マスターがそれを認識してそのタブレットの担当を切り替えるまではリクエストが一時的に失敗するようになる。
 
-In order to recognize and handle machine failures, the BigTable paper
-describes the use of Chubby, a distributed locking system for managing
-server membership and liveness.
-ZooKeeper\footnote{\url{http://hadoop.apache.org/zookeeper/}} is the
-open source implementation of Chubby, and several Hadoop-based
-projects utilize it to manage secondary master servers and tablet
-server reassignment.
+%% In order to recognize and handle machine failures, the BigTable paper
+%% describes the use of Chubby, a distributed locking system for managing
+%% server membership and liveness.
+%% ZooKeeper\footnote{\url{http://hadoop.apache.org/zookeeper/}} is the
+%% open source implementation of Chubby, and several Hadoop-based
+%% projects utilize it to manage secondary master servers and tablet
+%% server reassignment.
+マシンの障害を認識して対応するための方法として、BigTableの論文ではChubbyを使っている。これは分散ロックシステムで、サーバーの死活監視を行うものである。ZooKeeper\footnote{\url{http://hadoop.apache.org/zookeeper/}}はChubbyのオープンソース実装で、Hadoopベースのプロジェクトの中には、これを使ってセカンダリマスターサーバーやタブレットサーバーの再配置を行うものもある。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Range Partitioning-based NoSQL Projects}
 \begin{aosasect3}{レンジパーティショニングベースのNoSQLプロジェクト}
 
-HBase employs BigTable's hierarchical approach to range-partitioning.
-Underlying tablet data is stored in Hadoop's distributed filesystem
-(HDFS).  HDFS handles data replication and consistency among replicas,
-leaving tablet servers to handle requests, update storage structures,
-and initiate tablet splits and compactions.
+%% HBase employs BigTable's hierarchical approach to range-partitioning.
+%% Underlying tablet data is stored in Hadoop's distributed filesystem
+%% (HDFS).  HDFS handles data replication and consistency among replicas,
+%% leaving tablet servers to handle requests, update storage structures,
+%% and initiate tablet splits and compactions.
+HBaseは、BigTableの階層方式を使ってレンジパーティショニングを行う。ベースとなるタブレットのデータはHadoopの分散ファイルシステム(HDFS)に格納する。HDFSがデータのレプリケーションやレプリカ間の整合性を管理する。そして、タブレットサーバー側ではリクエストの処理やストレージの更新、タブレットの分割や統合を管理する。
 
-MongoDB handles range partitioning in a manner similar to that of
-BigTable.  Several configuration nodes store and manage the routing
-tables that specify which storage node is responsible for which key
-ranges.  These configuration nodes stay in sync through a protocol
-called \emph{two-phase commit}, and serve as a hybrid of BigTable's
-master for specifying ranges and Chubby for highly available
-configuration management.  Separate routing processes, which are
-stateless, keep track of the most recent routing configuration and
-route key requests to the appropriate storage nodes.  Storage nodes
-are arranged in replica sets to handle replication.
+%% MongoDB handles range partitioning in a manner similar to that of
+%% BigTable.  Several configuration nodes store and manage the routing
+%% tables that specify which storage node is responsible for which key
+%% ranges.  These configuration nodes stay in sync through a protocol
+%% called \emph{two-phase commit}, and serve as a hybrid of BigTable's
+%% master for specifying ranges and Chubby for highly available
+%% configuration management.  Separate routing processes, which are
+%% stateless, keep track of the most recent routing configuration and
+%% route key requests to the appropriate storage nodes.  Storage nodes
+%% are arranged in replica sets to handle replication.
+MongoDBも、BigTableと同様の方法でレンジパーティショニングを処理する。いくつかの設定ノードがルーティングテーブルを管理して、このルーティングテーブルを使ってどのストレージノードがどの範囲のキーを担当するかを決定する。設定ノード間の同期は\emph{二相コミット}というプロトコルで行い、BigTableのマスターが受け持つ範囲指定機能とChubbyが受け持つ高可用性のための構成管理機能の両方を提供する。ステートレスで動くルーティングプロセスとは別に、直近のルーティング設定を追跡し続けることでキーへのリクエストを適切なストレージノードに振り分ける。ストレージノードはレプリカセット内に置かれ、レプリカセットでレプリケーションを行う。
 
-Cassandra provides an order-preserving partitioner if you wish to
-allow fast range scans over your data.  Cassandra nodes are still arranged
-in a ring using consistent hashing, but rather than hashing a
-key-value pair onto the ring to determine the server to which it
-should be assigned, the key is simply mapped onto the server which
-controls the range in which the key naturally fits.  For example, keys
-20 and 21 would both be mapped to server A in our consistent hash ring
-in \aosafigref{fig.nosql.hashring}, rather than being hashed and
-randomly distributed in the ring.
+%% Cassandra provides an order-preserving partitioner if you wish to
+%% allow fast range scans over your data.  Cassandra nodes are still arranged
+%% in a ring using consistent hashing, but rather than hashing a
+%% key-value pair onto the ring to determine the server to which it
+%% should be assigned, the key is simply mapped onto the server which
+%% controls the range in which the key naturally fits.  For example, keys
+%% 20 and 21 would both be mapped to server A in our consistent hash ring
+%% in \aosafigref{fig.nosql.hashring}, rather than being hashed and
+%% randomly distributed in the ring.
+Cassandraでは順序を保持したパーティショニング機能を提供しており、データに対するレンジスキャンを高速に行いたい場合に利用できる。Cassandraのノードもコンシステントハッシュを使ってリング内に配置される。しかし、キー・バリューのペアをハッシュして割り当て先のサーバーを決めるのではなく、キーそのものを単純にサーバーにマップする。そうすることで、キーが必然的にフィットする範囲を制御できるようになる。たとえばキー20と21は、\aosafigref{fig.nosql.hashring}のコンシステントハッシュリング上でどちらもサーバーAにマップされる。ハッシュしてリング内でランダムに分散させるわけではない。
 
-Twitter's Gizzard framework for managing partitioned and replicated
-data across many back ends uses range partitioning to shard data.
-Routing servers form hierarchies of any depth, assigning ranges of
-keys to servers below them in the hierarchy.  These servers either
-store data for keys in their assigned range, or route to yet another
-layer of routing servers.  Replication in this model is achieved by sending
-updates to multiple machines for a key range.  Gizzard routing nodes
-manage failed writes in different manner than other NoSQL systems.
-Gizzard requires that system designers make all updates idempotent
-(they can be run twice).  When a storage node fails, routing nodes
-cache and repeatedly send updates to the node until the update is
-confirmed.
+%% Twitter's Gizzard framework for managing partitioned and replicated
+%% data across many back ends uses range partitioning to shard data.
+%% Routing servers form hierarchies of any depth, assigning ranges of
+%% keys to servers below them in the hierarchy.  These servers either
+%% store data for keys in their assigned range, or route to yet another
+%% layer of routing servers.  Replication in this model is achieved by sending
+%% updates to multiple machines for a key range.  Gizzard routing nodes
+%% manage failed writes in different manner than other NoSQL systems.
+%% Gizzard requires that system designers make all updates idempotent
+%% (they can be run twice).  When a storage node fails, routing nodes
+%% cache and repeatedly send updates to the node until the update is
+%% confirmed.
+TwitterのGizzardフレームワークは、分割され、レプリケートされたデータをさまざまなバックエンドにまたがって管理するもので、レンジパーティショニングを使ってデータをシャーディングする。ルーティングサーバーは任意のレベルの階層構造を構成し、キー範囲をその階層下のサーバーに割り当てる。各サーバーは自分に割り当てられたキー範囲のデータを格納したり、別の層のルーティングサーバーに処理を振ったりする。このモデルにおけるレプリケーションは、あるキー範囲の更新を複数のマシンに送信することで実現する。Gizzardのルーティングノードは、書き込みに失敗したときの対応方法が他のNoSQLシステムとは異なる。Gizzardを使ったシステムでは、すべての更新が冪等(何度実行しても結果が変わらない)でなければならない。ストレージノードがダウンしているときは、ルーティングノードがその処理をキャッシュし、更新が確認できるまで何度もその処理を送信し続ける。
 
 \end{aosasect3}
 

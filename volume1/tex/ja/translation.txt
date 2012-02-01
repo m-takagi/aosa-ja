@@ -19,7 +19,7 @@ jitsi.tex           Arai Kunimitsu                            100
 llvm.tex            Masugata Seiji                              ?
 makingsoftware.tex  TAKAGI Masahiro <matakagi@gmail.com>      100
 mercurial.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
-nosql.tex           TAKAGI Masahiro <matakagi@gmail.com>       60
+nosql.tex           TAKAGI Masahiro <matakagi@gmail.com>       70
 packaging.tex
 riak.tex            Kazuya Sakakiahra <kazuya@violentlyhappy.org>  0
 selenium.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
