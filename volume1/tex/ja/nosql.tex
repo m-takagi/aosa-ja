@@ -1117,22 +1117,23 @@ TwitterのGizzardフレームワークは、分割され、レプリケートさ
 \end{aosasect1}
 
 %% \begin{aosasect1}{Consistency}
-\begin{aosasect1}{一貫性}
+\begin{aosasect1}{整合性}
 \label{sec.nosql.consistency}
 
-Having spoken about the virtues of replicating data to multiple
-machines for durability and spreading load, it's time to let you in on
-a secret: keeping replicas of your data on multiple machines
-consistent with one-another is hard.  In practice, replicas will crash
-and get out of sync, replicas will crash and never come back, networks
-will partition two sets of replicas, and messages between machines
-will get delayed or lost.  There are two major approaches to data
-consistency in the NoSQL ecosystem.  The first is strong consistency, where all
-replicas remain in sync.  The second is eventual consistency, where replicas are
-allowed to get out of sync, but eventually catch up with one-another.
-Let's first get into why the second option is an appropriate
-consideration by understanding a fundamental property of distributed
-computing.  After that, we'll jump into the details of each approach.
+%% Having spoken about the virtues of replicating data to multiple
+%% machines for durability and spreading load, it's time to let you in on
+%% a secret: keeping replicas of your data on multiple machines
+%% consistent with one-another is hard.  In practice, replicas will crash
+%% and get out of sync, replicas will crash and never come back, networks
+%% will partition two sets of replicas, and messages between machines
+%% will get delayed or lost.  There are two major approaches to data
+%% consistency in the NoSQL ecosystem.  The first is strong consistency, where all
+%% replicas remain in sync.  The second is eventual consistency, where replicas are
+%% allowed to get out of sync, but eventually catch up with one-another.
+%% Let's first get into why the second option is an appropriate
+%% consideration by understanding a fundamental property of distributed
+%% computing.  After that, we'll jump into the details of each approach.
+これまでは、「データを複数マシンにレプリケートすれば永続化できるし負荷分散もできる」と、その利点だけを説明してきた。このあたりでその実態も書いておこう。複数マシンにデータのレプリカを置いてお互いの整合性を保つというのは、大変な作業だ。実際のところ、レプリカが壊れて同期できなくなることもあるだろうし壊れたデータを復旧できなくなることもあるだろう。ネットワーク上で複数のレプリカセットができてしまったり、マシン間のメッセージが遅延したり途中で消えてしまったりといったこともあり得る。NoSQLの世界でデータの整合性を保つための方法としてよく使われるのは、次の二通りの手法だ。ひとつは強整合性(strong consistency)で、これはすべてのレプリカを同期させる。もうひとつが結果整合性(eventual consistency)で、こちらの方式ではレプリカが同期されていなくてもかまわないが、最終的にはお互い相手側の状態に追いつけるようにしておかなければならない。まず最初に、どんな場合に結果整合性が選択肢に入るのかを分散コンピューティングの本質から考える。その後で、それぞれの手法の詳細を見ていこう。
 
 %% \begin{aosasect2}{A Little Bit About CAP}
 \begin{aosasect2}{CAPについて}
