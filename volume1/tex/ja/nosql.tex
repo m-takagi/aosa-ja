@@ -1138,61 +1138,69 @@ TwitterのGizzardフレームワークは、分割され、レプリケートさ
 %% \begin{aosasect2}{A Little Bit About CAP}
 \begin{aosasect2}{CAPについて}
 
-Why are we considering anything short of strong consistency guarantees
-over our data?  It all comes down to a property of distributed systems
-architected for modern networking equipment.  The idea was first
-proposed by Eric Brewer as the \emph{CAP Theorem}, and later proved by
-Gilbert and Lynch~\cite{bib:captheorem}.  The theorem first presents three
-properties of distributed systems which make up the acronym CAP:
+%% Why are we considering anything short of strong consistency guarantees
+%% over our data?  It all comes down to a property of distributed systems
+%% architected for modern networking equipment.  The idea was first
+%% proposed by Eric Brewer as the \emph{CAP Theorem}, and later proved by
+%% Gilbert and Lynch~\cite{bib:captheorem}.  The theorem first presents three
+%% properties of distributed systems which make up the acronym CAP:
+データに対する強整合性を保証できなくなることについて、なぜそんなに考慮するのだろう? すべては、今どきのネットワーク機器上で構築された分散システムの特性によるものだ。Eric Brewerが初めて提唱した\emph{CAP定理}は、後にGilbertとLynch~\cite{bib:captheorem}によって証明された。この定理では、まず最初に分散システムの三つの特性を提示する。この頭文字をまとめた頭字語がCAPである。
 
 \begin{aosadescription}
 
-  \item{Consistency}: do all replicas of a piece of data always
-  logically agree on the same version of that data by the time you
-  read it?  (This concept of consistency is different than the C in ACID.)
+  %% \item{Consistency}: do all replicas of a piece of data always
+  %% logically agree on the same version of that data by the time you
+  %% read it?  (This concept of consistency is different than the C in ACID.)
+  \item{整合性(Consistency)}: あるデータのすべてのレプリカについて、どれを読んでも同じバージョンのデータを得られるか?(ここでいう整合性は、ACIDのCとは異なる)
 
-  \item{Availability}: Do replicas respond to read and write requests regardless
-  of how many replicas are inaccessible?
+  %% \item{Availability}: Do replicas respond to read and write requests regardless
+  %% of how many replicas are inaccessible?
+  \item{可用性(Availability)}: アクセス不能なレプリカがいくつあっても、読み書きのリクエストに対応できるか?
 
-  \item{Partition tolerance}: Can the system continue to operate
-  even if some replicas temporarily lose the ability to communicate
-  with each other over the network?
+  %% \item{Partition tolerance}: Can the system continue to operate
+  %% even if some replicas temporarily lose the ability to communicate
+  %% with each other over the network?
+  \item{耐分断性(Partition tolerance)}: レプリカの一部が一時的にネットワーク上で他と分断されたときに、それでもシステムを稼働させ続けられるか?
 
 \end{aosadescription}
 
-The theorem then goes on to say that a storage system which operates on
-multiple computers can only achieve two of these properties at the
-expense of a third.  Also, we are forced to implement partition-tolerant
-systems.  On current networking
-hardware using current messaging protocols, packets can be lost,
-switches can fail, and there is no way to know whether the network is
-down or the server you are trying to send a message to is unavailable.
-All NoSQL systems should be partition-tolerant.  The remaining choice
-is between consistency and availability.  No NoSQL system can provide
-both at the same time.
+%% The theorem then goes on to say that a storage system which operates on
+%% multiple computers can only achieve two of these properties at the
+%% expense of a third.  Also, we are forced to implement partition-tolerant
+%% systems.  On current networking
+%% hardware using current messaging protocols, packets can be lost,
+%% switches can fail, and there is no way to know whether the network is
+%% down or the server you are trying to send a message to is unavailable.
+%% All NoSQL systems should be partition-tolerant.  The remaining choice
+%% is between consistency and availability.  No NoSQL system can provide
+%% both at the same time.
+そして、定理はさらにこう続く。複数台のコンピュータで構成されるストレージシステムは、この三つのうちの二つまでしか達成できず、その二つを達成するためには残りの一つが犠牲になってしまうのだ、と。また我々は、耐分断性を保証するシステムを実装せざるを得ない。現状のネットワーク機器やメッセージングプロトコルでは、パケットをロストすることもあればスイッチが故障することもある。そして、ネットワークがダウンしていたりメッセージの送信先のサーバーが存在しなかったりといったことを知るすべもない。すべてのNoSQLシステムで、耐分断性が必須となる。残された選択肢は、整合性と可用性のどちらを妥協するかである。両方を保証できるようなNoSQLシステムは存在しない。
 
-Opting for consistency means that your replicated data will not be out
-of sync across replicas.  An easy way to achieve consistency is to
-require that all replicas acknowledge updates.  If a replica goes down
-and you can not confirm data updates on it, then you degrade
-availability on its keys.  This means that until all replicas recover and respond, the user can not
-receive successful acknowledgment of their update operation.  Thus, opting
-for consistency is opting for a lack of round-the-clock availability
-for each data item.
+%% Opting for consistency means that your replicated data will not be out
+%% of sync across replicas.  An easy way to achieve consistency is to
+%% require that all replicas acknowledge updates.  If a replica goes down
+%% and you can not confirm data updates on it, then you degrade
+%% availability on its keys.  This means that until all replicas recover and respond, the user can not
+%% receive successful acknowledgment of their update operation.  Thus, opting
+%% for consistency is opting for a lack of round-the-clock availability
+%% for each data item.
+整合性を保証するというのは、レプリカ間でのデータの同期をきちんと保つということだ。これを実現する簡単な方法は、すべてのレプリカに対する更新を確認することである。もしどれか一つのレプリカがダウンして更新確認を受け取れなかった場合は、そのキーの可用性を下げる。つまり、ダウンしたレプリカが復旧して確認の応答を返すまでは、その更新処理が成功したとは見なさないということだ。つまり、整合性を保証しようとすると、各データアイテムに対する24時間体制の可用性は保証できなくなる。
 
-Opting for availability means that when a user issues an operation,
-replicas should act on the
-data they have, regardless of the state of other replicas.  This may
-lead to diverging consistency of data across replicas, since they
-weren't required to acknowledge all updates, and some replicas may
-have not noted all updates.
+%% Opting for availability means that when a user issues an operation,
+%% replicas should act on the
+%% data they have, regardless of the state of other replicas.  This may
+%% lead to diverging consistency of data across replicas, since they
+%% weren't required to acknowledge all updates, and some replicas may
+%% have not noted all updates.
+可用性を保証するというのは、ユーザーが何らかの操作を実行したときには、他のレプリカの状態がどうであるかにかかわらず自身が持つデータ上で操作を受け付けなければならないということだ。これは、レプリカ間でのデータの整合性を失ってしまうことにつながる。というのも、各レプリカにすべての更新が行き渡っているかどうかの確認がないので、中には一部の更新を受け取れていないレプリカも発生しうるからである。
 
-The implications of the CAP theorem lead to the strong consistency and
-eventual consistency approaches to building NoSQL data stores.  Other
-approaches exist, such as the relaxed consistency and relaxed
-availability approach presented in Yahoo!'s PNUTS~\cite{bib:pnuts} system.  None of
-the open source NoSQL systems we discuss has adopted this technique yet,
-so we will not discuss it further.
+%% The implications of the CAP theorem lead to the strong consistency and
+%% eventual consistency approaches to building NoSQL data stores.  Other
+%% approaches exist, such as the relaxed consistency and relaxed
+%% availability approach presented in Yahoo!'s PNUTS~\cite{bib:pnuts} system.  None of
+%% the open source NoSQL systems we discuss has adopted this technique yet,
+%% so we will not discuss it further.
+CAP定理からの帰結として、強整合性あるいは結果整合性のいずれかの手法でNoSQLデータストアが作られることになった。それ以外の手法も存在して、たとえばYahoo!のPNUTS~\cite{bib:pnuts}システムでは、緩い整合性と緩い可用性(relaxed consistency and relaxed availability)という手法をとっている。しかし、本章で扱っているオープンソースのNoSQLシステムの中にはまだこの手法を採用しているものが存在しないので、本章ではこの手法は扱わない。
 
 \end{aosasect2}
 
