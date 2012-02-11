@@ -1207,80 +1207,89 @@ CAP定理からの帰結として、強整合性あるいは結果整合性の�
 %% \begin{aosasect2}{Strong Consistency}
 \begin{aosasect2}{強整合性}
 
-Systems which promote strong consistency ensure that the replicas of a
-data item will always be able to come to consensus on the value of a
-key.  Some replicas may be out of sync with one-another, but when the
-user asks for the value of \code{employee30:salary}, the machines have
-a way to consistently agree on the value the user sees.  How this
-works is best explained with numbers.
+%% Systems which promote strong consistency ensure that the replicas of a
+%% data item will always be able to come to consensus on the value of a
+%% key.  Some replicas may be out of sync with one-another, but when the
+%% user asks for the value of \code{employee30:salary}, the machines have
+%% a way to consistently agree on the value the user sees.  How this
+%% works is best explained with numbers.
+強整合性を謳うシステムが保証するのは、データ項目のレプリカが常にそのキーの値を保持しているということだ。レプリカの中には、他のレプリカとの同期がとれなくなっているものもあるかもしれない。しかしそんな場合であっても、たとえばユーザーが\code{employee30:salary}の値を問い合わせれば、ユーザーに返す値は常に一貫性のあるものとなる。その原理を、数字で説明しよう。
 
-Say we replicate a key on N machines.  Some machine, perhaps one of
-the \code{N}, serves as a coordinator for each user request.  The
-coordinator ensures that a certain number of the \code{N} machines has
-received and acknowledged each request.  When a write or update occurs
-to a key, the coordinator does not confirm with the user that the
-write occurred until \code{W} replicas confirm that they have received
-the update.  When a user wants to read the value for some key, the
-coordinator responds when at least R have responded with the same
-value.  We say that the system exemplifies strong consistency if
-\code{ R+W{\textgreater}N}.
+%% Say we replicate a key on N machines.  Some machine, perhaps one of
+%% the \code{N}, serves as a coordinator for each user request.  The
+%% coordinator ensures that a certain number of the \code{N} machines has
+%% received and acknowledged each request.  When a write or update occurs
+%% to a key, the coordinator does not confirm with the user that the
+%% write occurred until \code{W} replicas confirm that they have received
+%% the update.  When a user wants to read the value for some key, the
+%% coordinator responds when at least R have responded with the same
+%% value.  We say that the system exemplifies strong consistency if
+%% \code{ R+W{\textgreater}N}.
+ひとつのキーをN台のマシンにレプリケートしたものとする。あるマシン、おそらく\code{N}台のなかのどれかが、コーディネーターとしてユーザーからのリクエストを処理する。このコーディネーターは、\code{N}台のマシンのうちの一定台数以上が各リクエストを受け付けたことを保証する。あるキーに対する書き込みや更新があれば、少なくとも\code{W}台のマシンがその更新を処理し終えたことを確認するまでコーディネーターはユーザーに応答を返さない。ユーザーが何らかのキーの値を読もうとしたときには、少なくともR台から同じ値を受け取るまでコーディネーターは応答を返さない。このとき、\code{ R+W{\textgreater}N}であればシステムの強整合性を実証できるものとする。
 
-Putting some numbers to this idea, let's say that we're replicating
-each key across N=3 machines (call them \code{A}, \code{B}, and
-\code{C}).  Say that the key \code{employee30:salary} is initially set
-to the value \$20,000, but we want to give \code{employee30} a raise
-to \$30,000.  Let's require that at least \code{W=2} of \code{A},
-\code{B}, or \code{C} acknowledge each write request for a key.  When
-\code{A} and \code{B} confirm the write request for \code{(employee30:salary,
-  \$30,000)}, the coordinator lets the user know that
-\code{employee30:salary} is safely updated.  Let's assume that machine
-C never received the write request for \code{employee30:salary}, so it
-still has the value \$20,000.  When a coordinator gets a read request
-for key \code{employee30:salary}, it will send that request to all 3
-machines:
+%% Putting some numbers to this idea, let's say that we're replicating
+%% each key across N=3 machines (call them \code{A}, \code{B}, and
+%% \code{C}).  Say that the key \code{employee30:salary} is initially set
+%% to the value \$20,000, but we want to give \code{employee30} a raise
+%% to \$30,000.  Let's require that at least \code{W=2} of \code{A},
+%% \code{B}, or \code{C} acknowledge each write request for a key.  When
+%% \code{A} and \code{B} confirm the write request for \code{(employee30:salary,
+%%   \$30,000)}, the coordinator lets the user know that
+%% \code{employee30:salary} is safely updated.  Let's assume that machine
+%% C never received the write request for \code{employee30:salary}, so it
+%% still has the value \$20,000.  When a coordinator gets a read request
+%% for key \code{employee30:salary}, it will send that request to all 3
+%% machines:
+この考え方を、実際に数字を入れて確認しよう。各キーをN=3でレプリケートする(それぞれ\code{A}、\code{B}、\code{C}とする)。キー\code{employee30:salary}の初期値は\$20,000だったが、ここで\code{employee30}を\$30,000に昇給させることになった。要件として、\code{W=2}つまり\code{A}、\code{B}、\code{C}のうちで少なくとも2台が書き込みリクエストを受け付けることとする。このとき\code{A}と\code{B}が書き込みリクエスト\code{(employee30:salary, \$30,000)}を受け付けると、コーディネーターはユーザーに対して\code{employee30:salary}が更新できたと伝える。マシンCが仮に\code{employee30:salary}へのリクエストを受け取れなかったとしよう。つまり、マシンCの値は\$20,000のままである。ここでコーディネーターがキー\code{employee30:salary}に対する読み込みリクエストを受け取ると、そのリクエストを3台のマシンすべてに送信する。
 
 \begin{aosaitemize}
 
-  \item If we set \code{R=1}, and machine \code{C} responds first with
-  \$20,000, our employee will not be very happy.
+  %% \item If we set \code{R=1}, and machine \code{C} responds first with
+  %% \$20,000, our employee will not be very happy.
+  \item もし仮に\code{R=1}で最初に応答したのが\code{C}だったとしたら、結果は\$20,000となってこの社員はあまりうれしくないだろう。
 
-  \item However, if we set \code{R=2}, the coordinator will see the
-  value from \code{C}, wait for a second response from \code{A} or
-  \code{B}, which will conflict with \code{C}'s outdated value, and
-  finally receive a response from the third machine, which will
-  confirm that \$30,000 is the majority opinion.
+  %% \item However, if we set \code{R=2}, the coordinator will see the
+  %% value from \code{C}, wait for a second response from \code{A} or
+  %% \code{B}, which will conflict with \code{C}'s outdated value, and
+  %% finally receive a response from the third machine, which will
+  %% confirm that \$30,000 is the majority opinion.
+  \item しかし、もし\code{R=2}にしておけばコーディネーターは最初に\code{C}の値を受け取っても\code{A}あるいは\code{B}からの二番目の応答を待ち続ける。どちらが先に来ても先ほどの\code{C}の値と食い違っているのでさらに待ち続け、最終的に三番目のマシンからの応答を受け取った時点で\$30,000が多数派であることを確認できる。
 
 \end{aosaitemize}
 
-So in order to achieve strong consistency in this case, we need to set
-\code{R>=2} so that \code{R+W>3}.
+%% So in order to achieve strong consistency in this case, we need to set
+%% \code{R>=2} so that \code{R+W>3}.
+したがって、この場合に強整合性を満たすには、\code{R>=2}にして\code{R+W>3}を満たす必要がある。
 
-What happens when \code{W} replicas do not respond to a write request,
-or \code{R} replicas do not respond to a read request with a
-consistent response?  The coordinator can timeout eventually and send
-the user an error, or wait until the situation corrects itself.
-Either way, the system is considered unavailable for that request for
-at least some time.
+%% What happens when \code{W} replicas do not respond to a write request,
+%% or \code{R} replicas do not respond to a read request with a
+%% consistent response?  The coordinator can timeout eventually and send
+%% the user an error, or wait until the situation corrects itself.
+%% Either way, the system is considered unavailable for that request for
+%% at least some time.
+書き込みリクエストで\code{W}台のレプリカから応答が返ってこなかったり、読み込みリクエストで一貫性のある結果が\code{R}台以上のレプリカから得られなかったりした場合には何が起こるのだろう?コーディネーター側としては、最終的にタイムアウトを発生させてユーザーにエラーを返すこともできるし、要件を満たすまでずっと待ち続けることもできる。どちらにしても、そのリクエストについては少なくとも一定期間はアクセス不能とみなされる。
 
-Your choice of \code{R} and \code{W} affect how many machines can act
-strangely before your system becomes unavailable for different actions
-on a key.  If you force all of your replicas to acknowledge writes,
-for example, then \code{W=N}, and write operations will hang or fail
-on any replica failure.  A common choice is \code{R + W = N + 1},
-the minimum required for strong consistency while still allowing for
-temporary disagreement between replicas.  Many strong consistency
-systems opt for \code{W=N} and \code{R=1}, since they then do not have
-to design for nodes going out of sync.
+%% Your choice of \code{R} and \code{W} affect how many machines can act
+%% strangely before your system becomes unavailable for different actions
+%% on a key.  If you force all of your replicas to acknowledge writes,
+%% for example, then \code{W=N}, and write operations will hang or fail
+%% on any replica failure.  A common choice is \code{R + W = N + 1},
+%% the minimum required for strong consistency while still allowing for
+%% temporary disagreement between replicas.  Many strong consistency
+%% systems opt for \code{W=N} and \code{R=1}, since they then do not have
+%% to design for nodes going out of sync.
+\code{R}と\code{W}をどのように設定するかによって、何台のマシンが不調になってもキーに対するさまざまな操作が可能になるかが決まる。たとえば書き込み操作はすべてのレプリカにきちんと反映させたいのなら、\code{W=N}とすることになる。この場合、どれか一台でもレプリカが応答しなければ、書き込みはハングしたり失敗したりする。よくある選択肢は\code{R + W = N + 1}とするもので、こうすれば強整合性を維持するために最低限必要な稼働台数を最小に抑えられる。多くの強整合性システムは\code{W=N}そして\code{R=1}という設定を選んでいる。そうすれば、同期に失敗したノードをどうするかを考えずに済むからである。
 
-HBase bases its replicated storage on HDFS, a distributed storage layer.  HDFS provides strong consistency
-guarantees.  In HDFS, a write cannot succeed until it has been
-replicated to all \code{N} (usually 2 or 3) replicas, so \code{W = N}.
-A read will be satisfied by a single replica, so \code{R = 1}.  To
-avoid bogging down write-intensive workloads, data is transferred from
-the user to the replicas asynchronously in parallel.  Once all
-replicas acknowledge that they have received copies of the data, the
-final step of swapping the new data in to the system is performed
-atomically and consistently across all replicas.
+%% HBase bases its replicated storage on HDFS, a distributed storage layer.  HDFS provides strong consistency
+%% guarantees.  In HDFS, a write cannot succeed until it has been
+%% replicated to all \code{N} (usually 2 or 3) replicas, so \code{W = N}.
+%% A read will be satisfied by a single replica, so \code{R = 1}.  To
+%% avoid bogging down write-intensive workloads, data is transferred from
+%% the user to the replicas asynchronously in parallel.  Once all
+%% replicas acknowledge that they have received copies of the data, the
+%% final step of swapping the new data in to the system is performed
+%% atomically and consistently across all replicas.
+HBaseはHDFS上でストレージをレプリケートする。これは分散型のストレージ層だ。HDFSは強整合性を保証する。HDFSでは、全\code{N}台(通常は2あるいは3)のレプリカに書き込み終えるまで書き込みは成功しない。つまり\code{W = N}である。読み込みはひとつのレプリカだけで応答できるので、\code{R = 1}となる。大量の書き込みによるダウンを避けるため、ユーザーから各レプリカへのデータの転送は、非同期で並列処理される。すべてのレプリカがデータのコピーを受け取ったら、最後にシステム上のデータを新しいものに置き換える処理が行われる。これはアトミックな処理で、全レプリカの整合性を保ったものだ。
 
 \end{aosasect2}
 
