@@ -1296,137 +1296,146 @@ HBaseはHDFS上でストレージをレプリケートする。これは分散�
 %% \begin{aosasect2}{Eventual Consistency}
 \begin{aosasect2}{結果整合性}
 
-Dynamo-based systems, which include Voldemort, Cassandra, and Riak,
-allow the user to specify \code{N}, \code{R}, and \code{W} to their
-needs, even if \code{R + W {\textless}= N}.  This means that the user
-can achieve either strong or eventual consistency.  When a user picks
-eventual consistency, and even when the programmer opts for strong
-consistency but \code{W} is less than \code{N}, there are periods in
-which replicas might not see eye-to-eye.  To provide eventual
-consistency among replicas, these systems employ various tools to
-catch stale replicas up to speed.  Let's first cover how various
-systems determine that data has gotten out of sync, then discuss how
-they synchronize replicas, and finally bring in a few dynamo-inspired
-methods for speeding up the synchronization process.
+%% Dynamo-based systems, which include Voldemort, Cassandra, and Riak,
+%% allow the user to specify \code{N}, \code{R}, and \code{W} to their
+%% needs, even if \code{R + W {\textless}= N}.  This means that the user
+%% can achieve either strong or eventual consistency.  When a user picks
+%% eventual consistency, and even when the programmer opts for strong
+%% consistency but \code{W} is less than \code{N}, there are periods in
+%% which replicas might not see eye-to-eye.  To provide eventual
+%% consistency among replicas, these systems employ various tools to
+%% catch stale replicas up to speed.  Let's first cover how various
+%% systems determine that data has gotten out of sync, then discuss how
+%% they synchronize replicas, and finally bring in a few dynamo-inspired
+%% methods for speeding up the synchronization process.
+DynamoベースのシステムであるVoldemortやCassandraそしてRiakなどでは、ユーザーが必要に応じて\code{N}や\code{R}、\code{W}を指定できるようにしている。\code{R + W {\textless}= N}であってもかまわない。つまり、強整合性と結果整合性のどちらを達成するのかをユーザーが選択できるということだ。ユーザーが結果整合性を選択した場合、仮にプログラマーが強整合性を望んだとしても、\code{W} {\textless} \code{N}ならレプリカを安心して扱えない。レプリカ間での結果整合性を提供するには、システム側でさまざまなツールを使ってレプリカを最新状態に保つことになる。まずは、さまざまなシステムがどのようにしてデータが古くなったことを検出するのかを見ていこう。それから、レプリカを同期する方法を考える。そして最後に、同期プロセスを高速化するためのDynamoの影響を受けた方法をいくつか紹介する。
 
 %% \begin{aosasect3}{Versioning and Conflicts}
 \begin{aosasect3}{バージョニングと衝突}
 
-Because two replicas might see two different versions of a value for
-some key, data versioning and conflict detection is important.  The
-dynamo-based systems use a type of versioning called \emph{vector
-clocks}.  A vector clock is a vector assigned to each key which
-contains a counter for each replica.  For example, if
-servers \code{A}, \code{B}, and \code{C} are the three replicas of
-some key, the vector clock will have three entries, \code{(N\_A, N\_B,
-N\_C)}, initialized to \code{(0,0,0)}.
+%% Because two replicas might see two different versions of a value for
+%% some key, data versioning and conflict detection is important.  The
+%% dynamo-based systems use a type of versioning called \emph{vector
+%% clocks}.  A vector clock is a vector assigned to each key which
+%% contains a counter for each replica.  For example, if
+%% servers \code{A}, \code{B}, and \code{C} are the three replicas of
+%% some key, the vector clock will have three entries, \code{(N\_A, N\_B,
+%% N\_C)}, initialized to \code{(0,0,0)}.
+あるキーについて、二つのレプリカが違うバージョンの値を返す可能性がある以上、データのバージョン管理や衝突の検出が重要になる。Dynamoベースのシステムで使っているバージョニング方式が\emph{ベクタークロック}だ。ベクタークロックとは、各キーにベクターを割り当て、そこにレプリカのカウンタを含める方式である。たとえば、何らかのキーのレプリカを\code{A}と\code{B}そして\code{C}で扱うとする。このときベクタークロックには三つのエントリ\code{(N\_A, N\_B, N\_C)}があり、その初期値は\code{(0,0,0)}となる。
 
-Each time a replica modifies a key, it increments its counter in the
-vector.  If B modifies a key that previously had version \code{(39, 1,
-5)}, it will change the vector clock to \code{(39, 2, 5)}.  When
-another replica, say \code{C}, receives an update from B about the
-key's data, it will compare the vector clock from \code{B} to its own.
-As long as its own vector clock counters are all less than the ones
-delivered from \code{B}, then it has a stale version and can overwrite
-its own copy with \code{B}'s.  If \code{B} and \code{C} have clocks in
-which some counters are greater than others in both clocks, say
-\code{(39, 2, 5)} and \code{(39, 1, 6)}, then the servers recognize
-that they received different, potentially unreconcilable updates over
-time, and identify a conflict.
+%% Each time a replica modifies a key, it increments its counter in the
+%% vector.  If B modifies a key that previously had version \code{(39, 1,
+%% 5)}, it will change the vector clock to \code{(39, 2, 5)}.  When
+%% another replica, say \code{C}, receives an update from B about the
+%% key's data, it will compare the vector clock from \code{B} to its own.
+%% As long as its own vector clock counters are all less than the ones
+%% delivered from \code{B}, then it has a stale version and can overwrite
+%% its own copy with \code{B}'s.  If \code{B} and \code{C} have clocks in
+%% which some counters are greater than others in both clocks, say
+%% \code{(39, 2, 5)} and \code{(39, 1, 6)}, then the servers recognize
+%% that they received different, potentially unreconcilable updates over
+%% time, and identify a conflict.
+レプリカ上でキーの値が変更されるたびに、ベクター内でそれに対応するカウンタが加算される。直前のバージョンが\code{(39, 1, 5)}だったときにBがキーの値を変更すると、ベクタークロックは\code{(39, 2, 5)}に書き換わる。別のレプリカ、たとえば\code{C}がBからそのキーのデータの更新を受け取るときには、\code{B}からのベクタークロックを自分のものと比較する。自分のベクタークロックカウンタのほうが\code{B}から受け取ったものよりも小さい場合、自分のデータは古いバージョンなのであるから\code{B}の内容で上書きできる。\code{B}より\code{C}のほうが大きいカウンタとその逆のカウンタが両方ある場合、たとえば\code{(39, 2, 5)}と\code{(39, 1, 6)}などのようになった場合は、矛盾する更新があったとサーバーが判断して衝突したとみなす。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Conflict Resolution}
 \begin{aosasect3}{衝突の解決}
 
-Conflict resolution varies across the different systems.  The Dynamo
-paper leaves conflict resolution to the application using the
-storage system.  Two versions of a shopping cart can be merged into
-one without significant loss of data, but two versions of a
-collaboratively edited document might require human reviewer to
-resolve conflict.  Voldemort follows this model, returning multiple
-copies of a key to the requesting client application upon conflict.
+%% Conflict resolution varies across the different systems.  The Dynamo
+%% paper leaves conflict resolution to the application using the
+%% storage system.  Two versions of a shopping cart can be merged into
+%% one without significant loss of data, but two versions of a
+%% collaboratively edited document might require human reviewer to
+%% resolve conflict.  Voldemort follows this model, returning multiple
+%% copies of a key to the requesting client application upon conflict.
+衝突の解決方法は、システムによってさまざまである。Dynamoの論文では、衝突の解決はストレージシステムを使うアプリケーション側に任せている。二つのバージョンのショッピングカートを一つにまとめるのはそれほど面倒ではないだろうが、共同作業で編集していた文書の複数バージョンをまとめる際の衝突は人間のレビューがないと解決できないだろう。Voldemortはこのモデルを採用しており、あるキーに対して複数のコピーを返し、クライアントアプリケーション側での対応を求める。
 
-Cassandra, which stores a timestamp on each key, uses the most
-recently timestamped version of a key when two versions are in
-conflict.  This removes the need for a round-trip to the client and
-simplifies the API. This design makes it difficult to handle
-situations where conflicted data can be intelligently merged, as in
-our shopping cart example, or when implementing distributed counters.
-Riak allows both of the approaches offered by Voldemort and Cassandra.
-CouchDB provides a hybrid: it identifies a conflict and allows users
-to query for conflicted keys for manual repair, but deterministically
-picks a version to return to users until conflicts are repaired.
+%% Cassandra, which stores a timestamp on each key, uses the most
+%% recently timestamped version of a key when two versions are in
+%% conflict.  This removes the need for a round-trip to the client and
+%% simplifies the API. This design makes it difficult to handle
+%% situations where conflicted data can be intelligently merged, as in
+%% our shopping cart example, or when implementing distributed counters.
+%% Riak allows both of the approaches offered by Voldemort and Cassandra.
+%% CouchDB provides a hybrid: it identifies a conflict and allows users
+%% to query for conflicted keys for manual repair, but deterministically
+%% picks a version to return to users until conflicts are repaired.
+Cassandraは各キーのタイムスタンプを格納しており、二つのバージョンが衝突する場合は一番タイムスタンプの新しいバージョンを採用する。これによってクライアントとのやりとりの必要をなくし、APIを単純化している。この設計では、衝突したデータを先ほどのショッピングカートの例のように自動マージすることは難しいし、分散カウンタを実装するのも困難だ。Riakは、VoldemortとCassandraのどちらの手法でも使える。CouchDBはハイブリッド方式だ。衝突を検出したら、ユーザー側でそのキーを手動で修復させるよう問い合わせ、衝突が解決するまでは特定のバージョンを確定的に採用してユーザーに返すようになっている。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Read Repair}
 \begin{aosasect3}{リードリペア}
 
-If R replicas return non-conflicting data to a coordinator, the
-coordinator can safely return the non-conflicting data to the
-application.  The coordinator may still notice that some of the
-replicas are out of sync.  The Dynamo paper suggests, and Cassandra,
-Riak, and Voldemort implement, a technique called \emph{read repair}
-for handling such situations.  When a coordinator identifies a
-conflict on read, even if a consistent value has been returned to the
-user, the coordinator starts conflict-resolution protocols between
-conflicted replicas.  This proactively fixes conflicts with little
-additional work.  Replicas have already sent their version of the data to
-the coordinator, and faster conflict resolution will result in less
-divergence in the system.
+%% If R replicas return non-conflicting data to a coordinator, the
+%% coordinator can safely return the non-conflicting data to the
+%% application.  The coordinator may still notice that some of the
+%% replicas are out of sync.  The Dynamo paper suggests, and Cassandra,
+%% Riak, and Voldemort implement, a technique called \emph{read repair}
+%% for handling such situations.  When a coordinator identifies a
+%% conflict on read, even if a consistent value has been returned to the
+%% user, the coordinator starts conflict-resolution protocols between
+%% conflicted replicas.  This proactively fixes conflicts with little
+%% additional work.  Replicas have already sent their version of the data to
+%% the coordinator, and faster conflict resolution will result in less
+%% divergence in the system.
+R台のレプリカが衝突していないデータをコーディネーターに返せたら、コーディネーターはその衝突していない値を安全にアプリケーションに返せる。それでもコーディネーターは、同期ができていないレプリカがあることを検出するかもしれない。そんな場合に使えるテクニックとしてDynamoの論文で提案されており、CassandraやRiakそしてVoldemortが実装しているのが\emph{リードリペア}だ。コーディネーターが読み込み時に衝突を検出すると、たとえ整合性のある結果をユーザーに返せたとしても、コーディネーターは衝突したレプリカの衝突解決プロトコルを開始する。これで、追加作業を最小限にしながら能動的に衝突を解消できる。各レプリカは既に自分の持つデータをコーディネーターに送っているので、早期に衝突を解決すればシステム内でのデータの相違を抑えられる。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Hinted Handoff}
 \begin{aosasect3}{Hinted Handoff}
 
-Cassandra, Riak, and Voldemort all employ a technique called
-\emph{hinted handoff} to improve write performance for situations
-where a node temporarily becomes unavailable. If one of the replicas
-for a key does not respond to a write request, another node is
-selected to temporarily take over its write workload.  Writes for the
-unavailable node are kept separately, and when the backup node notices
-the previously unavailable node become available, it forwards all of
-the writes to the newly available replica.  The Dynamo paper utilizes
-a 'sloppy quorum' approach and allows the writes accomplished through
-hinted handoff to count toward the W required write acknowledgments.
-Cassandra and Voldemort will not count a hinted handoff against W, and
-will fail a write which does not have W confirmations from the
-originally assigned replicas.  Hinted handoff is still useful in these
-systems, as it speeds up recovery when an unavailable node returns.
+%% Cassandra, Riak, and Voldemort all employ a technique called
+%% \emph{hinted handoff} to improve write performance for situations
+%% where a node temporarily becomes unavailable. If one of the replicas
+%% for a key does not respond to a write request, another node is
+%% selected to temporarily take over its write workload.  Writes for the
+%% unavailable node are kept separately, and when the backup node notices
+%% the previously unavailable node become available, it forwards all of
+%% the writes to the newly available replica.  The Dynamo paper utilizes
+%% a 'sloppy quorum' approach and allows the writes accomplished through
+%% hinted handoff to count toward the W required write acknowledgments.
+%% Cassandra and Voldemort will not count a hinted handoff against W, and
+%% will fail a write which does not have W confirmations from the
+%% originally assigned replicas.  Hinted handoff is still useful in these
+%% systems, as it speeds up recovery when an unavailable node returns.
+CassandraやRiakそしてVoldemortはすべて、\emph{Hinted Handoff}というテクニックを使っている。これは、どれか一つのノードが一時的に使えなくなっている状態での書き込みのパフォーマンスを向上させるテクニックだ。あるキーに対応するレプリカの一つが書き込みリクエストに反応しなかったときに、別のノードを選択して一時的にその書き込み処理を引き継がせる。反応しなかったノードへの書き込みは個別に続けられ、反応しなかったノードが復旧したことをバックアップノードが知った時点で、そのレプリカに新しい書き込みをすべて転送する。Dynamoの論文では'sloppy quorum'という手法を利用しており、Hinted Handoffで書き込まれたノードも書き込みの成功判断基準であるWにカウントできるようにしている。CassandraやVoldemortはHinted HandoffのぶんをWにカウントせず、本来割り当てられているレプリカの中でWに満たない場合は書き込みに失敗する。それでもなおHinted Handoffは有用だ。というのも、反応しなくなったノードが復旧したときのリカバリーを高速に行えるからである。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Anti-Entropy}
 \begin{aosasect3}{Anti-Entropy}
 
-When a replica is down for an extended period of time, or the machine
-storing hinted handoffs for an unavailable replica goes down as well,
-replicas must synchronize from one-another.  In this case, Cassandra
-and Riak implement a Dynamo-inspired process called
-\emph{anti-entropy}.  In anti-entropy, replicas exchange \emph{Merkle
-Trees} to identify parts of their replicated key ranges which are
-out of sync.  A Merkle tree is a hierarchical hash verification: if
-the hash over the entire keyspace is not the same between two
-replicas, they will exchange hashes of smaller and smaller portions of
-the replicated keyspace until the out-of-sync keys are identified.
-This approach reduces unnecessary data transfer between replicas which
-contain mostly similar data.
+%% When a replica is down for an extended period of time, or the machine
+%% storing hinted handoffs for an unavailable replica goes down as well,
+%% replicas must synchronize from one-another.  In this case, Cassandra
+%% and Riak implement a Dynamo-inspired process called
+%% \emph{anti-entropy}.  In anti-entropy, replicas exchange \emph{Merkle
+%% Trees} to identify parts of their replicated key ranges which are
+%% out of sync.  A Merkle tree is a hierarchical hash verification: if
+%% the hash over the entire keyspace is not the same between two
+%% replicas, they will exchange hashes of smaller and smaller portions of
+%% the replicated keyspace until the out-of-sync keys are identified.
+%% This approach reduces unnecessary data transfer between replicas which
+%% contain mostly similar data.
+あるレプリカのダウン長期間になったり、ダウンしたレプリカをHinted Handoffで引き継いだマシン自体もまたダウンしてしまった場合、レプリカはお互いに同期しなければならない。この場合にCassandraやRiakが使う手順は、Dynamoに影響を受けた\emph{Anti-Entropy}というものだ。Anti-Entropyにおいて、各レプリカは\emph{マークル木(Merkle Trees)}を交換する。これは、担当するキー範囲のうち最新状態と同期できていない部分を識別するものだ。マークル木とは、ハッシュの検証を階層的に行うものだ。もしキー空間全体のハッシュが二つのレプリカで一致しなければ、レプリケートしているキー空間のより小さい部分のハッシュを順に交換していき、同期できていないキーが特定できるまでそれを続ける。この手法により、ほとんど同じ状態で一部だけ違うというレプリカの間でのデータ交換の量を減らせる。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Gossip}
 \begin{aosasect3}{Gossip}
 
-Finally, as distributed systems grow, it is hard to keep track of how
-each node in the system is doing.  The three Dynamo-based systems
-employ an age-old high school technique known as \emph{gossip} to keep
-track of other nodes.  Periodically (every second or so), a node will
-pick a random node it once communicated with to exchange knowledge of
-the health of the other nodes in the system.  In providing this
-exchange, nodes learn which other nodes are down, and know where to
-route clients in search of a key.
+%% Finally, as distributed systems grow, it is hard to keep track of how
+%% each node in the system is doing.  The three Dynamo-based systems
+%% employ an age-old high school technique known as \emph{gossip} to keep
+%% track of other nodes.  Periodically (every second or so), a node will
+%% pick a random node it once communicated with to exchange knowledge of
+%% the health of the other nodes in the system.  In providing this
+%% exchange, nodes learn which other nodes are down, and know where to
+%% route clients in search of a key.
+分散システムが成長するにつれ、システム内の個々のノードが何をしているのかを追跡するのが難しくなってくる。Dynamoベースの三つのシステムが他のノードを追跡するために使っているのは、\emph{Gossip}という昔ながらのテクニックだ。定期的(毎秒など)に、あるノードがランダムに別のノードを選んでお互いに通信し、自分が知っている他のノードの健康状態を交換する。このようにすることで各ノードは他のノードがダウンしているかどうかを知ることができ、クライアントからのキーの検索要求をどこに振ればいいかもわかるようになる。
 
 \end{aosasect3}
 
