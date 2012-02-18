@@ -1,47 +1,79 @@
 \begin{aosachapter}{Berkeley DB}{s:bdb}{Margo Seltzer and Keith Bostic}
 %% Based on EN-Revision r229
 
-Conway's Law states that a design reflects the structure of the
-organization that produced it. Stretching that a bit, we might
-anticipate that a software artifact designed and initially produced by
-two people might somehow reflect, not merely the structure of the
-organization, but the internal biases and philosophies each brings to
-the table. One of us (Seltzer) has spent her career between the worlds
-of filesystems and database management systems. If questioned, she'll
-argue the two are fundamentally the same thing, and furthermore,
-operating systems and database management systems are essentially both
-resource managers and providers of convenient abstractions. The
-differences are ``merely'' implementation details. The other (Bostic)
-believes in the tool-based approach to software engineering and in the
-construction of components based on simpler building blocks, because
-such systems are invariably superior to monolithic architectures in
-the important ``-bilities'': understandability, extensibility,
-maintainability, testability, and flexibility.
+%% Conway's Law states that a design reflects the structure of the
+%% organization that produced it. Stretching that a bit, we might
+%% anticipate that a software artifact designed and initially produced by
+%% two people might somehow reflect, not merely the structure of the
+%% organization, but the internal biases and philosophies each brings to
+%% the table. One of us (Seltzer) has spent her career between the worlds
+%% of filesystems and database management systems. If questioned, she'll
+%% argue the two are fundamentally the same thing, and furthermore,
+%% operating systems and database management systems are essentially both
+%% resource managers and providers of convenient abstractions. The
+%% differences are ``merely'' implementation details. The other (Bostic)
+%% believes in the tool-based approach to software engineering and in the
+%% construction of components based on simpler building blocks, because
+%% such systems are invariably superior to monolithic architectures in
+%% the important ``-bilities'': understandability, extensibility,
+%% maintainability, testability, and flexibility.
+コンウェイの法則によると、ソフトウェアの設計はそれを作った組織の構造を反映したものとなるらしい。
+もう少し話を広げると、こんなことも言えないだろうか。
+あるソフトウェアがたった二人によって設計されて作り出されたのなら、
+単に組織の構造を反映しているだけにとどまらず、二人の好みや思想も持ち込まれているのでは?
+二人の片割れであるSeltzerは、そのキャリアをずっとファイルシステムやデータベース管理システムの世界に捧げている。
+彼女はきっとこう言うだろう。「その二つは基本的にまったく同じものでしょう?
+もっと言うなら、OSとデータベース管理システムだってそう。
+本質的にはどちらも、リソース管理と便利な抽象化をしているに過ぎないのだから」
+単に、ちょっとした実装の詳細が違う``だけ''だということだ。
+もう一方のBosticはツールベースのアプローチによるソフトウェア開発を信じており、
+シンプルなブロックを組み合わせて部品を作っていこうとする。
+そういったシステムの方が常に、モノリシックなアーキテクチャに比べて各種の「○○性」
+に優れているからである。そう、理解容易性とか拡張性とか保守性とかテスト可能性とか柔軟性といかいうやつだ。
 
-When you combine those two perspectives, it's not surprising to learn
-that together we spent much of the last two decades working on
-Berkeley DB---a software library that provides fast, flexible,
-reliable and scalable data management.  Berkeley DB provides much of
-the same functionality that people expect from more conventional
-systems, such as relational databases, but packages it differently.
-For example, Berkeley DB provides fast data access, both keyed and
-sequential, as well as transaction support and recovery from failure.
-However, it provides those features in a library that links directly
-with the application that needs those services, rather than being made
-available by a standalone server application.
+%% When you combine those two perspectives, it's not surprising to learn
+%% that together we spent much of the last two decades working on
+%% Berkeley DB---a software library that provides fast, flexible,
+%% reliable and scalable data management.  Berkeley DB provides much of
+%% the same functionality that people expect from more conventional
+%% systems, such as relational databases, but packages it differently.
+%% For example, Berkeley DB provides fast data access, both keyed and
+%% sequential, as well as transaction support and recovery from failure.
+%% However, it provides those features in a library that links directly
+%% with the application that needs those services, rather than being made
+%% available by a standalone server application.
+この考えを組み合わせると、私たち二人がこの二十年間の大半をBerkeley DBに費やしてきたと知っても驚かないだろう。
+高速で柔軟性・信頼性・拡張性に富むデータ管理用のソフトウェアライブラリ、それがBerkeley DBだ。
+Berkeley DBは、人々がもっと伝統的なシステム、たとえばリレーショナルデータベースなどに期待する機能の多くを提供する。
+しかし、そのまとめかたは異なっている。
+たとえば、Berkeley DBはキーによるアクセスもシーケンシャルアクセスも高速に行え、
+トランザクションにも対応しているし障害回復機能もある。
+しかし、そういった機能はライブラリとして提供しており、
+それを使いたいアプリケーション側で直接リンクして使うようになっている。
+スタンドアロンのサーバーアプリケーションとして提供しているわけではない。
 
-In this chapter, we'll take a deeper look at Berkeley DB and see that
-it is composed of a collection of modules, each of which embodies the
-Unix ``do one thing well'' philosophy.  Applications that embed
-Berkeley DB can use those components directly or they can simply use
-them implicitly via the more familiar operations to get, put, and
-delete data items.  We'll focus on architecture---how we got started,
-what we were designing, and where we've ended up and why. Designs can
-(and certainly will!) be forced to adapt and change---what's vital is
-maintaining principles and a consistent vision over time. We will also
-briefly consider the code evolution of long-term software
-projects. Berkeley DB has over two decades of on-going development,
-and that inevitably takes its toll on good design.
+%% In this chapter, we'll take a deeper look at Berkeley DB and see that
+%% it is composed of a collection of modules, each of which embodies the
+%% Unix ``do one thing well'' philosophy.  Applications that embed
+%% Berkeley DB can use those components directly or they can simply use
+%% them implicitly via the more familiar operations to get, put, and
+%% delete data items.  We'll focus on architecture---how we got started,
+%% what we were designing, and where we've ended up and why. Designs can
+%% (and certainly will!) be forced to adapt and change---what's vital is
+%% maintaining principles and a consistent vision over time. We will also
+%% briefly consider the code evolution of long-term software
+%% projects. Berkeley DB has over two decades of on-going development,
+%% and that inevitably takes its toll on good design.
+本章ではBerkeley DBの詳細を扱う。さまざまなモジュールの集まりで作られていることや、
+それぞれがUnixの思想である``ひとつのことをうまくやらせる(do one thing well)''を体現していることもわかるだろう。
+Berkeley DBを組み込んだアプリケーション側からは、これらのコンポーネントを直接使うこともできるし、
+あるいはもっとシンプルに、慣れ親しんだget、put、deleteといった操作を通じて暗黙的に使うこともできる。
+ここでは、そのアーキテクチャに注目する。最初はどう考えたのか、どんな設計をしたのか、そして最終的にどうなったのか、それはなぜか、そういったことだ。
+設計は、状況に合わせて変化することもあり得る(実際、あったし!)。
+大切なのは、原則を外さずに一貫したビジョンを持ち続けることだ。
+また本章では、長期間にわたるソフトウェア開発プロジェクトにおけるコードの成長についても簡単に検討する。
+Berkeley DBはふたつのディケイドにまたがる現在進行中のプロジェクトであり、
+必然的に「よい設計」にも打撃を与えている。
 
 %% \begin{aosasect1}{In the Beginning}
 \begin{aosasect1}{はじまり}
