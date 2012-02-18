@@ -1,0 +1,50 @@
+body {
+    font-family: "ÉÅÉCÉäÉI", Meiryo, "ÉqÉâÉMÉmñæí© Pro W3","Hiragino Mincho Pro", "ÇlÇr ÇoÉSÉVÉbÉN", "MS PGothic", sans-serif; 
+
+    line-height: 150%;
+    margin-left:auto;
+    margin-right:auto;
+    width: 700px;
+}
+
+.flushright {
+    text-align: right;
+}
+
+em {
+    /*background-color: yellow;*/
+    font-weight: bold;
+}
+
+strong {
+    background-color: pink;
+}
+
+div.lead {
+	background-color: #eee;
+	border: dotted 1px black;
+	padding: 10px;
+}
+
+div.column {
+    background-color: #eee;
+}
+
+h2 {
+	/*border: solid 1px black;*/
+}
+
+h3 {
+	border-bottom: solid 1px black;
+}
+
+div.footnote {
+    color: gray;
+}
+
+
+p {
+	text-indent: 1em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
