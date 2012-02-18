@@ -43,7 +43,8 @@ briefly consider the code evolution of long-term software
 projects. Berkeley DB has over two decades of on-going development,
 and that inevitably takes its toll on good design.
 
-\begin{aosasect1}{In the Beginning}
+%% \begin{aosasect1}{In the Beginning}
+\begin{aosasect1}{はじまり}
 
 Berkeley DB dates back to an era when the Unix operating system was
 proprietary to AT\&T and there were hundreds of utilities and libraries
@@ -109,7 +110,8 @@ DB tool-based and object-oriented approach has allowed it to
 incrementally improve and re-invent itself to match the requirements
 of the software using it. 
 
-\begin{aosabox}{Design Lesson 1}
+%% \begin{aosabox}{Design Lesson 1}
+\begin{aosabox}{デザインレッスン1}
 
 It is vital for any complex software package's testing and maintenance
 that the software be designed and built as a cooperating set of
@@ -130,7 +132,8 @@ C.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Architectural Overview}
+%% \begin{aosasect1}{Architectural Overview}
+\begin{aosasect1}{アーキテクチャの概要}
 
 In this section, we'll review the Berkeley DB library's architecture,
 beginning with LIBTP, and highlight key aspects of its evolution.
@@ -140,9 +143,11 @@ original paper, illustrates the original LIBTP architecture, while
 \aosafigref{fig.bdb.bdb20} presents the Berkeley DB 2.0 designed
 architecture.
 
-\aosafigure[300pt]{../images/bdb/libtp.eps}{Architecture of the LIBTP Prototype System}{fig.bdb.libtp}
+%% \aosafigure[300pt]{../images/bdb/libtp.eps}{Architecture of the LIBTP Prototype System}{fig.bdb.libtp}
+\aosafigure[300pt]{../images/bdb/libtp.eps}{LIBTPプロトタイプシステムのアーキテクチャ}{fig.bdb.libtp}
 
-\aosafigure[300pt]{../images/bdb/bdb20.eps}{Intended Architecture for Berkeley DB-2.0.}{fig.bdb.bdb20}
+%% \aosafigure[300pt]{../images/bdb/bdb20.eps}{Intended Architecture for Berkeley DB-2.0.}{fig.bdb.bdb20}
+\aosafigure[300pt]{../images/bdb/bdb20.eps}{Berkeley DB-2.0で意図していたアーキテクチャ}{fig.bdb.bdb20}
 
 The only significant difference between the LIBTP implementation and
 the Berkeley DB 2.0 design was the removal of the process
@@ -152,7 +157,8 @@ than providing subsystem level synchronization. As is discussed in
 \aosasecref{sec.bdb.int}, that original design might have served us
 better.
 
-\aosafigure{../images/bdb/bdb20-actual.eps}{Actual Berkeley DB 2.0.6 Architecture.}{fig.bdb.bdbact}
+%% \aosafigure{../images/bdb/bdb20-actual.eps}{Actual Berkeley DB 2.0.6 Architecture.}{fig.bdb.bdbact}
+\aosafigure{../images/bdb/bdb20-actual.eps}{実際のBerkeley DB 2.0.6のアーキテクチャ}{fig.bdb.bdbact}
 
 The difference between the design and the actual released db-2.0.6
 architecture, shown in \aosafigref{fig.bdb.bdbact}, illustrates the
@@ -203,7 +209,8 @@ operations. It took us multiple attempts to make the implementation
 palatable (it is still not as clean as we would like), and after
 reworking it numerous time, we pulled it out into its own module. 
 
-\begin{aosabox}{Design Lesson 2}
+%% \begin{aosabox}{Design Lesson 2}
+\begin{aosabox}{デザインレッスン2}
 
 A software design is simply one of several ways to force yourself to
 think through the entire problem before attempting to solve it.
@@ -223,7 +230,8 @@ deliver in that release.
 
 \end{aosabox}
 
-\aosafigure{../images/bdb/bdb50.eps}{Berkeley DB-5.0.21 Architecture}{fig.bdb.bdb50}
+%% \aosafigure{../images/bdb/bdb50.eps}{Berkeley DB-5.0.21 Architecture}{fig.bdb.bdb50}
+\aosafigure{../images/bdb/bdb50.eps}{Berkeley DB-5.0.21のアーキテクチャ}{fig.bdb.bdb50}
 
 \begin{table}[t]\scriptsize\centering
 \begin{tabular}[c] { | l | l | l | l | l | }
@@ -304,7 +312,8 @@ understand what it does and how it fits into the larger picture.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Access Methods: Btree, Hash, Recno, Queue}
+%% \begin{aosasect1}{The Access Methods: Btree, Hash, Recno, Queue}
+\begin{aosasect1}{アクセス手法: Btree, Hash, Recno, Queue}
 
 The Berkeley DB access methods provide both keyed lookup of, and
 iteration over, variable and fixed-length byte strings.  Btree and
@@ -340,7 +349,8 @@ application of one of the endlessly-repeated rules of software
 development: don't optimize a code path in any way that detracts from
 clarity and simplicity until you know that it's necessary to do so. 
 
-\begin{aosabox}{Design Lesson 3}
+%% \begin{aosabox}{Design Lesson 3}
+\begin{aosabox}{デザインレッスン3}
 
 Software architecture does not age gracefully. Software architecture
 degrades in direct proportion to the number of changes made to the
@@ -366,7 +376,8 @@ record-level locking).
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Library Interface Layer}
+%% \begin{aosasect1}{The Library Interface Layer}
+\begin{aosasect1}{ライブラリインターフェイス層}
 \label{sec.bdb.int}
 
 Over time, as we added additional functionality, we discovered that
@@ -375,7 +386,8 @@ functionality (for example, a table join operation uses multiple
 cursors to iterate over the rows, just as an application might use a
 cursor to iterate over those same rows).
 
-\begin{aosabox}{Design Lesson 4}
+%% \begin{aosabox}{Design Lesson 4}
+\begin{aosabox}{デザインレッスン4}
 
 It doesn't matter how you name your variables, methods, functions, or
 what comments or code style you use; that is, there are a large number
@@ -418,7 +430,8 @@ change would have modified every single Berkeley DB application, most
 of every application's calls into Berkeley DB, and in many cases would
 have required application re-structuring. 
 
-\begin{aosabox}{Design Lesson 5}
+%% \begin{aosabox}{Design Lesson 5}
+\begin{aosabox}{デザインレッスン5}
 
 Software architects must choose their upgrade battles carefully: users
 will accept minor changes to upgrade to new releases (if you guarantee
@@ -469,7 +482,8 @@ problem with it.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Underlying Components}
+%% \begin{aosasect1}{The Underlying Components}
+\begin{aosasect1}{基盤となるコンポーネント}
 
 There are four components underlying the access methods: a buffer
 manager, a lock manager, a log manager and a transaction
@@ -498,7 +512,8 @@ cannot step on the application's name space by declaring global
 variables, not to mention that forcing errors to return in a single
 path through the call stack enforces good programmer discipline. 
 
-\begin{aosabox}{Design Lesson 6}
+%% \begin{aosabox}{Design Lesson 6}
+\begin{aosabox}{デザインレッスン6}
 
 In library design, respect for the namespace is vital. Programmers who
 use your library should not need to memorize dozens of reserved names
@@ -521,7 +536,8 @@ that mapped-in segment). To support this feature, we
 wrote a version of the Berkeley Software Distribution \code{queue} package
 that implemented a wide variety of linked lists. 
 
-\begin{aosabox}{Design Lesson 7}
+%% \begin{aosabox}{Design Lesson 7}
+\begin{aosabox}{デザインレッスン7}
 
 Before we wrote a shared-memory linked-list package, Berkeley DB
 engineers hand-coded a variety of different data structures in shared
@@ -544,7 +560,8 @@ infecting and corroding a piece of code.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Buffer Manager: Mpool}
+%% \begin{aosasect1}{The Buffer Manager: Mpool}
+\begin{aosasect1}{バッファマネージャー: Mpool}
 
 The Berkeley DB Mpool subsystem is an in-memory buffer pool of file
 pages, which hides the fact that main memory is a limited resource,
@@ -574,7 +591,8 @@ disk, Berkeley DB still acquires and releases these pins on every
 access, because the underlying model provided by Mpool is that of a
 cache, not persistent storage.
 
-\begin{aosasect2}{The Mpool File Abstraction}
+%% \begin{aosasect2}{The Mpool File Abstraction}
+\begin{aosasect2}{Mpoolのファイル抽象化}
 
 Mpool assumes it sits atop a filesystem, exporting the file
 abstraction through the API\@. For example, \code{DB\_MPOOLFILE} handles
@@ -598,7 +616,8 @@ inconsistent state at any instant.
 
 \end{aosasect2}
 
-\begin{aosasect2}{ Write-ahead Logging}
+%% \begin{aosasect2}{ Write-ahead Logging}
+\begin{aosasect2}{ログ先行書き込み}
 
 Berkeley DB uses write-ahead-logging (WAL) as its transaction
 mechanism to make recovery after failure possible.  The term
@@ -627,7 +646,8 @@ created in the cache. These APIs allow Mpool to provide the
 functionality necessary to support Berkeley DB's transactional
 requirements, without forcing all users of Mpool to do so. 
 
-\begin{aosabox}{Design Lesson 8}
+%% \begin{aosabox}{Design Lesson 8}
+\begin{aosabox}{デザインレッスン8}
 
 Write-ahead logging is another example of providing encapsulation and
 layering, even when the functionality is never going to be useful to
@@ -641,7 +661,8 @@ software easier to maintain, test, debug and extend.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Lock Manager: Lock}
+%% \begin{aosasect1}{The Lock Manager: Lock}
+\begin{aosasect1}{ロックマネージャー: Lock}
 
 % Granularity of Locks and Degrees of Consistency in a Shared Data Base
 
@@ -677,7 +698,8 @@ and \code{DB\_ENV\--{\textgreater}lock\_id\_free} calls to allocate and
 deallocate lockers.  So applications need not implement
 their own locker ID allocator, although they certainly can.
 
-\begin{aosasect2}{Lock Objects}
+%% \begin{aosasect2}{Lock Objects}
+\begin{aosasect2}{ロックオブジェクト}
 
 Lock objects are arbitrarily long opaque byte-strings that represent
 the objects being locked. When two different lockers want to lock a
@@ -704,7 +726,8 @@ type. The DB\_RECORD\_LOCK type lets us perform record level locking
 in the queue access method, and the DB\_DATABASE\_LOCK type lets us
 lock an entire database. 
 \hspace{-.5cm}
-\begin{aosabox}{Design Lesson 9}
+%% \begin{aosabox}{Design Lesson 9}
+\begin{aosabox}{デザインレッスン9}
 
 Berkeley DB's choice to use page-level locking was made for good
 reasons, but we've found that choice to be problematic at times. Page-level locking
@@ -725,7 +748,8 @@ there be corruption, we chose stability over increased concurrency.
 
 \end{aosasect2}
 
-\begin{aosasect2}{The Conflict Matrix}
+%% \begin{aosasect2}{The Conflict Matrix}
+\begin{aosasect2}{衝突マトリクス}
 
 The last abstraction of the locking subsystem we'll discuss is the
 conflict matrix. A conflict matrix defines the different types of
@@ -778,7 +802,8 @@ modes (e.g., read, write, etc.).   \aosatblref{tbl.bdb.two}
 
 \end{aosasect2}
 
-\begin{aosasect2}{Supporting Hierarchical Locking}
+%% \begin{aosasect2}{Supporting Hierarchical Locking}
+\begin{aosasect2}{階層化ロックのサポート}
 
 Before explaining the different lock modes in the Berkeley DB conflict
 matrix, let's talk about how the locking subsystem supports
@@ -826,7 +851,8 @@ one lock only long enough to acquire the next lock.  That is, you lock
 an internal Btree page only long enough to read the information that
 allows you to select and lock a page at the next level.
 
-\begin{aosabox}{Design Lesson 10}
+%% \begin{aosabox}{Design Lesson 10}
+\begin{aosabox}{デザインレッスン10}
 
 Berkeley DB's general-purpose design was well rewarded when we added
 concurrent data store functionality. Initially Berkeley
@@ -852,7 +878,8 @@ special mode of concurrent access.)
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Log Manager: Log}
+%% \begin{aosasect1}{The Log Manager: Log}
+\begin{aosasect1}{ログマネージャー: Log}
 \label{sec.bdb.log}
 
 The log manager provides the abstraction of a structured, append-only
@@ -860,7 +887,8 @@ file. As with the other modules, we intended to design a
 general-purpose logging facility, however the logging subsystem is
 probably the module where we were least successful. 
 
-\begin{aosabox}{Design Lesson 11}
+%% \begin{aosabox}{Design Lesson 11}
+\begin{aosabox}{デザインレッスン11}
 
 When you find an architectural problem you don't want to fix ``right
 now'' and that you're inclined to just let go, remember that being
@@ -896,7 +924,8 @@ seeks to the given offset of the given log file and returns the record
 written at that location. But how does the log manager know how many
 bytes to return from that location?
 
-\begin{aosasect2}{Log Record Formatting}
+%% \begin{aosasect2}{Log Record Formatting}
+\begin{aosasect2}{ログレコードの書式}
 
 The log must persist per-record metadata so that, given an LSN, the
 log manager can determine the size of the record to return. At a
@@ -927,7 +956,8 @@ Berkeley DB examines the LSN on the page and asks the log manager to
 guarantee that the specified LSN is on stable storage. Only then does
 Mpool write the page to disk. 
 
-\begin{aosabox}{Design Lesson 12}
+%% \begin{aosabox}{Design Lesson 12}
+\begin{aosabox}{デザインレッスン12}
 
 Mpool and Log use internal handle methods to facilitate write-ahead
 logging, and in some cases, the method declaration is longer than the
@@ -965,7 +995,8 @@ be processed.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Breaking the Abstraction}
+%% \begin{aosasect2}{Breaking the Abstraction}
+\begin{aosasect2}{抽象化の打破}
 
 There are also a few ``special'' log records.  Checkpoint records are,
 perhaps, the most familiar of those special records. Checkpointing is
@@ -1048,7 +1079,8 @@ data structures.  (In retrospect, this information should logically
 have been placed with the Berkeley DB environment information itself,
 outside of any subsystem.) 
 
-\begin{aosabox}{Design Lesson 13}
+%% \begin{aosabox}{Design Lesson 13}
+\begin{aosabox}{デザインレッスン13}
 
 There is rarely such thing as an unimportant bug. Sure, there's a typo
 now and then, but usually a bug implies somebody didn't fully
@@ -1064,7 +1096,8 @@ as revealing fundamental underlying flaws in the design itself.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Transaction Manager: Txn}
+%% \begin{aosasect1}{The Transaction Manager: Txn}
+\begin{aosasect1}{トランザクションマネージャー: Txn}
 
 Our last module is the transaction manager, which ties together the
 individual components to provide the transactional ACID properties of
@@ -1108,7 +1141,8 @@ belonging to the designated transaction, undoing each operation that
 the transaction had done, returning the database to its
 pre-transaction state.
 
-\begin{aosasect2}{Checkpoint Processing}
+%% \begin{aosasect2}{Checkpoint Processing}
+\begin{aosasect2}{チェックポイントの処理}
 
 % Principles of transaction-oriented database recovery
 
@@ -1141,7 +1175,8 @@ need to be recovered if the system fails.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Recovery}
+%% \begin{aosasect2}{Recovery}
+\begin{aosasect2}{リカバリー}
 
 The last piece of the transactional puzzle is recovery. The goal of
 recovery is to move the on-disk database from a potentially
@@ -1242,7 +1277,8 @@ In theory, the final checkpoint is unnecessary. In practice, it bounds
 the time for future recoveries and leaves the database in a consistent
 state. 
 
-\begin{aosabox}{Design Lesson 14}
+%% \begin{aosabox}{Design Lesson 14}
+\begin{aosabox}{デザインレッスン14}
 
 Database recovery is a complex topic, difficult to write and harder to
 debug because recovery simply shouldn't happen all that often. In his
@@ -1259,7 +1295,8 @@ constrain programming problems to problems we \emph{can} solve.
 
 \end{aosasect1}
 \newpage
-\begin{aosasect1}{Wrapping Up}
+%% \begin{aosasect1}{Wrapping Up}
+\begin{aosasect1}{まとめ}
 
 Berkeley DB is now over twenty years old. It was arguably the first
 general-purpose transactional key/value store and is the grandfather
