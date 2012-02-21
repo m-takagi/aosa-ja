@@ -78,69 +78,109 @@ Berkeley DBはふたつのディケイドにまたがる現在進行中のプロ
 %% \begin{aosasect1}{In the Beginning}
 \begin{aosasect1}{はじまり}
 
-Berkeley DB dates back to an era when the Unix operating system was
-proprietary to AT\&T and there were hundreds of utilities and libraries
-whose lineage had strict licensing constraints. Margo Seltzer was a
-graduate student at the University of California, Berkeley, and Keith
-Bostic was a member of Berkeley's Computer Systems Research Group. At
-the time, Keith was working on removing AT\&T's proprietary software
-from the Berkeley Software Distribution.
+%% Berkeley DB dates back to an era when the Unix operating system was
+%% proprietary to AT\&T and there were hundreds of utilities and libraries
+%% whose lineage had strict licensing constraints. Margo Seltzer was a
+%% graduate student at the University of California, Berkeley, and Keith
+%% Bostic was a member of Berkeley's Computer Systems Research Group. At
+%% the time, Keith was working on removing AT\&T's proprietary software
+%% from the Berkeley Software Distribution.
+Berkeley DBが生まれたのは、まだUnixオペレーティングシステムがAT\&Tに独占されていた頃のことだ。
+何百ものユーティリティやライブラリがあったが、厳しいライセンスの制約に縛られていた。
+Margo Seltzerはその当時カリフォルニア大学バークレー校の大学院生。
+一方Keith BosticはバークレーのComputer Systems Research Groupに属していた。
+当時のKeithが携わっていたのは、AT\&Tのプロプライエタリなソフトウェアを
+Berkeley Software Distributionから取り除く作業だった。
 
-The Berkeley DB project began with the modest goal of replacing the
-in-memory \code{hsearch} hash package and the on-disk \code{dbm/ndbm} hash
-packages with a new and improved hash implementation able to operate
-both in-memory and on disk, as well as be freely redistributed without
-a proprietary license. The \code{hash} library that Margo Seltzer
-wrote~\cite{bib:seltzer:hash} was based on
-Litwin's Extensible Linear Hashing research. It boasted a clever
-scheme allowing a constant time mapping between hash values and page
-addresses, as well as the ability to handle large data---items
-larger than the underlying hash bucket or filesystem page size,
-typically four to eight kilobytes.
+%% The Berkeley DB project began with the modest goal of replacing the
+%% in-memory \code{hsearch} hash package and the on-disk \code{dbm/ndbm} hash
+%% packages with a new and improved hash implementation able to operate
+%% both in-memory and on disk, as well as be freely redistributed without
+%% a proprietary license. The \code{hash} library that Margo Seltzer
+%% wrote~\cite{bib:seltzer:hash} was based on
+%% Litwin's Extensible Linear Hashing research. It boasted a clever
+%% scheme allowing a constant time mapping between hash values and page
+%% addresses, as well as the ability to handle large data---items
+%% larger than the underlying hash bucket or filesystem page size,
+%% typically four to eight kilobytes.
+Berkeley DBプロジェクトが立ち上がった当時のささやかな目標は、
+インメモリのハッシュパッケージである\code{hsearch}やディスク上でのハッシュパッケージである\code{dbm/ndbm}を置き換えることだった。
+新しい、そしてより改善されたハッシュ実装を作り、メモリ上でもディスク上でも扱えるようにする。
+そしてプロプライエタリなライセンスに縛られずに自由に配布できる。それを目指していた。
+Margo Seltzerが書いた~\cite{bib:seltzer:hash}\code{hash}ライブラリは、LitwinのExtensible Linear Hashingに関する研究を利用したものだった。
+巧妙な方法で一定時間でのハッシュ値とページアドレスのマッピングを実現しただけでなく、
+ハッシュのバケットやファイルシステムのページサイズ（たいていは4kバイトや8kバイト）を超える大きなアイテムも扱えるようにした。
 
-If hash tables were good, then Btrees and hash tables would be better.
-Mike Olson, also a graduate student at the University of California,
-Berkeley, had written a number of Btree implementations, and agreed to
-write one more. The three of us transformed Margo's hash software and
-Mike's Btree software into an access-method-agnostic API, where
-applications reference hash tables or Btrees via database handles
-that had handle methods to read and modify data.
+%% If hash tables were good, then Btrees and hash tables would be better.
+%% Mike Olson, also a graduate student at the University of California,
+%% Berkeley, had written a number of Btree implementations, and agreed to
+%% write one more. The three of us transformed Margo's hash software and
+%% Mike's Btree software into an access-method-agnostic API, where
+%% applications reference hash tables or Btrees via database handles
+%% that had handle methods to read and modify data.
+ハッシュテーブルがうまくいくのなら、Btreeとハッシュテーブルの組み合わせはもっとうまくいくだろう。
+同じくカリフォルニア大学バークレー校の大学院生だったMike Olsonはこれまでに数多くのBtreeを実装しており、
+新たにまた実装することにも同意してくれた。我々三人は、Margoのhashソフトウェアと
+MikeのBtreeソフトウェアをアクセス方式に依存しないAPIに変換した。
+アプリケーション側からはデータベースハンドルを通じてハッシュテーブルあるいはBtreeを参照でき、
+データベースハンドルがデータの読み込みや変更をするメソッドを保持していた。
 
-Building on these two access methods, Mike Olson and Margo Seltzer
-wrote a research paper (\cite{bib:seltzer:libtp}) describing LIBTP, a
-programmatic transactional library that ran in an application's
-address space.
+%% Building on these two access methods, Mike Olson and Margo Seltzer
+%% wrote a research paper (\cite{bib:seltzer:libtp}) describing LIBTP, a
+%% programmatic transactional library that ran in an application's
+%% address space.
+これら二つのアクセス方式を元にして、Mike OlsonとMargo Seltzerは研究論文を共著した(\cite{bib:seltzer:libtp})。
+この論文で論じているのはLIBTPで、これはアプリケーションのアドレス空間で動くプログラムのトランザクションライブラリである。
 
-The hash and Btree libraries were incorporated into the final 4BSD
-releases, under the name Berkeley DB 1.85.  Technically, the Btree
-access method implements a B+link tree, however, we will use the
-term Btree for the rest of this chapter, as that is what the access
-method is called.
-Berkeley DB 1.85's
-structure and APIs will likely be familiar to anyone who has used any
-Linux or BSD-based system.
+%% The hash and Btree libraries were incorporated into the final 4BSD
+%% releases, under the name Berkeley DB 1.85.  Technically, the Btree
+%% access method implements a B+link tree, however, we will use the
+%% term Btree for the rest of this chapter, as that is what the access
+%% method is called.
+%% Berkeley DB 1.85's
+%% structure and APIs will likely be familiar to anyone who has used any
+%% Linux or BSD-based system.
+ハッシュとBtreeのライブラリは最終的に4BSDのリリースに組み込まれ、ここでBerkeley DB 1.85と名付けられた。
+偽寿的にはBtreeアクセス方式が実装しているのはB+link木だったが、本章では今後Btreeと呼ぶことにする。
+アクセス方式の名前がそうなっているからだ。
+Berkeley DB 1.85の構造やAPIは、
+これまでに何らかのLinuxやBSD系システムを使ったことがある人にはなじみやすいものだろう。
 
-The Berkeley DB 1.85 library was quiescent for a few years, until 1996
-when Netscape contracted with Margo Seltzer and Keith Bostic to build
-out the full transactional design described in the LIBTP paper and
-create a production-quality version of the software. This effort
-produced the first transactional version of Berkeley DB, version 2.0.
+%% The Berkeley DB 1.85 library was quiescent for a few years, until 1996
+%% when Netscape contracted with Margo Seltzer and Keith Bostic to build
+%% out the full transactional design described in the LIBTP paper and
+%% create a production-quality version of the software. This effort
+%% produced the first transactional version of Berkeley DB, version 2.0.
+Berkeley DB 1.85ライブラリはその後数年ほとんど動きがなかったが、
+1996年にNetscapeがMargo SeltzerやKeith Bosticと契約を結び、
+LIBTPの論文で示された完全にトランザクショナルな設計による商用に耐えるバージョンを作ることになった。
+その結果できあがったのが、初めてトランザクションをサポートしたバージョンであるBerkeley DB 2.0だ。
 
-The subsequent history of Berkeley DB is a simpler and more
-traditional timeline: Berkeley DB 2.0 (1997) introduced transactions
-to Berkeley DB; Berkeley DB 3.0 (1999) was a re-designed version,
-adding further levels of abstraction and indirection to accommodate
-growing functionality. Berkeley DB 4.0 (2001) introduced replication
-and high availability, and Oracle Berkeley DB 5.0 (2010) added SQL
-support.
+%% The subsequent history of Berkeley DB is a simpler and more
+%% traditional timeline: Berkeley DB 2.0 (1997) introduced transactions
+%% to Berkeley DB; Berkeley DB 3.0 (1999) was a re-designed version,
+%% adding further levels of abstraction and indirection to accommodate
+%% growing functionality. Berkeley DB 4.0 (2001) introduced replication
+%% and high availability, and Oracle Berkeley DB 5.0 (2010) added SQL
+%% support.
+それ以降のBerkeley DBの歴史はシンプルで、よくありがちな流れになっている。
+Berkeley DB 2.0 (1997)で、トランザクションがBerkeley DBに導入された。
+Berkeley DB 3.0 (1999)は新たに設計しなおしたバージョンで、
+さらに高度な抽象化によってさまざまな機能の増加に対応した。
+Berkeley DB 4.0 (2001)ではレプリケーションや高可用性に関する機能が導入され、
+Oracle Berkeley DB 5.0 (2010)ではSQLが使えるようになった。
 
-At the time of writing, Berkeley DB is the most widely used database
-toolkit in the world, with hundreds of millions of deployed copies
-running in everything from routers and browsers to mailers and
-operating systems. Although more than twenty years old, the Berkeley
-DB tool-based and object-oriented approach has allowed it to
-incrementally improve and re-invent itself to match the requirements
-of the software using it. 
+%% At the time of writing, Berkeley DB is the most widely used database
+%% toolkit in the world, with hundreds of millions of deployed copies
+%% running in everything from routers and browsers to mailers and
+%% operating systems. Although more than twenty years old, the Berkeley
+%% DB tool-based and object-oriented approach has allowed it to
+%% incrementally improve and re-invent itself to match the requirements
+%% of the software using it. 
+本章の執筆時点では、Berkeley DBは世界で最も広く使われているデータベースツールキットである。
+何億ものコピーが、ルーターやブラウザからメールソフトやOSまであらゆるところで動いている。
+20年以上たった現在でもBerkeley DBのツールベースでオブジェクト指向なアプローチは現役であり、
+自身をインクリメンタルに改良して使う側のソフトウェアの要求に応え続けている。
 
 %% \begin{aosabox}{Design Lesson 1}
 \begin{aosabox}{デザインレッスン1}
