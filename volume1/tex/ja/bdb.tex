@@ -185,20 +185,33 @@ Oracle Berkeley DB 5.0 (2010)ではSQLが使えるようになった。
 %% \begin{aosabox}{Design Lesson 1}
 \begin{aosabox}{デザインレッスン1}
 
-It is vital for any complex software package's testing and maintenance
-that the software be designed and built as a cooperating set of
-modules with well-defined API boundaries. The boundaries can (and
-should!) shift as needs dictate, but they always need to be there.
-The existence of those boundaries prevents the software from becoming
-an unmaintainable pile of spaghetti. Butler Lampson once said that all
-problems in computer science can be solved by another level of
-indirection. More to the point, when asked what it meant for something
-to be object-oriented, Lampson said it meant being able to have
-multiple implementations behind an API\@. The Berkeley DB design and
-implementation embody this approach of permitting multiple
-implementations behind a common interface, providing an
-object-oriented look and feel, even though the library is written in
-C.
+%% It is vital for any complex software package's testing and maintenance
+%% that the software be designed and built as a cooperating set of
+%% modules with well-defined API boundaries. The boundaries can (and
+%% should!) shift as needs dictate, but they always need to be there.
+%% The existence of those boundaries prevents the software from becoming
+%% an unmaintainable pile of spaghetti. Butler Lampson once said that all
+%% problems in computer science can be solved by another level of
+%% indirection. More to the point, when asked what it meant for something
+%% to be object-oriented, Lampson said it meant being able to have
+%% multiple implementations behind an API\@. The Berkeley DB design and
+%% implementation embody this approach of permitting multiple
+%% implementations behind a common interface, providing an
+%% object-oriented look and feel, even though the library is written in
+%% C.
+複雑なソフトウェアパッケージをテストしたり保守したりしていく上で必須なのが、
+ソフトウェアをうまくモジュール分割した設計にしておいて
+モジュール間をよくできたAPIで連携させることだ。
+モジュールの境界はニーズにあわせて移動できる(移動できるべき!)
+が、常に境界が必須だというわけではない。
+モジュールの境界があれば、ソフトウェアがメンテナンス不能なスパゲッティ状態になることを防げる。
+Butler Lampsonはかつてこう言った。
+「計算機科学の世界のあらゆる問題は、別のレベルの手段で解決できる」。
+さらに、何かがオブジェクト指向であるとはどういうことなのかと聞かれたLampsonの答えは
+「APIを介して複数の実装を持てるということさ」だった。
+Berkeley DBの設計や実装はこの考え方を具現化したものであり、
+複数の実装を共通のインターフェイスで扱えるようになっている。
+オブジェクト指向の見た目を持っているが、実際のところこのライブラリはCで書かれているのだ。
 
 \end{aosabox}
 
