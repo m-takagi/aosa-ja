@@ -183,7 +183,7 @@ Oracle Berkeley DB 5.0 (2010)ではSQLが使えるようになった。
 自身をインクリメンタルに改良して使う側のソフトウェアの要求に応え続けている。
 
 %% \begin{aosabox}{Design Lesson 1}
-\begin{aosabox}{デザインレッスン1}
+\begin{aosabox}{設計講座1}
 
 %% It is vital for any complex software package's testing and maintenance
 %% that the software be designed and built as a cooperating set of
@@ -316,7 +316,7 @@ LIBTPではこれと対照的に、ログやリカバリーのルーチンを個
 この件については\aosasecref{sec.bdb.log}で詳しく説明する。
 三点目が、すべてのモジュール間呼び出しを先頭にアンダースコアをつけた名前空間にまとめたという点だ。
 これで、システムを使うアプリケーション側が関数名の重複を気にせずに済むようになった。
-この件についてはデザインレッスン6で解説する。
+この件については設計講座6で解説する。
 
 %% Fourth, the logging subsystem's API is now cursor based (there is no
 %% \code{log\_get} API; it is replaced by the \code{log\_cursor} API).
@@ -345,7 +345,7 @@ Berkeley DBはこれまで、ログの読み書きの制御に複数のスレッ
 が、何度も作りなおした後でモジュール内に組み込んだ。
 
 %% \begin{aosabox}{Design Lesson 2}
-\begin{aosabox}{デザインレッスン2}
+\begin{aosabox}{設計講座2}
 
 %% A software design is simply one of several ways to force yourself to
 %% think through the entire problem before attempting to solve it.
@@ -526,7 +526,7 @@ development: don't optimize a code path in any way that detracts from
 clarity and simplicity until you know that it's necessary to do so. 
 
 %% \begin{aosabox}{Design Lesson 3}
-\begin{aosabox}{デザインレッスン3}
+\begin{aosabox}{設計講座3}
 
 Software architecture does not age gracefully. Software architecture
 degrades in direct proportion to the number of changes made to the
@@ -563,7 +563,7 @@ cursors to iterate over the rows, just as an application might use a
 cursor to iterate over those same rows).
 
 %% \begin{aosabox}{Design Lesson 4}
-\begin{aosabox}{デザインレッスン4}
+\begin{aosabox}{設計講座4}
 
 It doesn't matter how you name your variables, methods, functions, or
 what comments or code style you use; that is, there are a large number
@@ -607,7 +607,7 @@ of every application's calls into Berkeley DB, and in many cases would
 have required application re-structuring. 
 
 %% \begin{aosabox}{Design Lesson 5}
-\begin{aosabox}{デザインレッスン5}
+\begin{aosabox}{設計講座5}
 
 Software architects must choose their upgrade battles carefully: users
 will accept minor changes to upgrade to new releases (if you guarantee
@@ -689,7 +689,7 @@ variables, not to mention that forcing errors to return in a single
 path through the call stack enforces good programmer discipline. 
 
 %% \begin{aosabox}{Design Lesson 6}
-\begin{aosabox}{デザインレッスン6}
+\begin{aosabox}{設計講座6}
 
 In library design, respect for the namespace is vital. Programmers who
 use your library should not need to memorize dozens of reserved names
@@ -713,7 +713,7 @@ wrote a version of the Berkeley Software Distribution \code{queue} package
 that implemented a wide variety of linked lists. 
 
 %% \begin{aosabox}{Design Lesson 7}
-\begin{aosabox}{デザインレッスン7}
+\begin{aosabox}{設計講座7}
 
 Before we wrote a shared-memory linked-list package, Berkeley DB
 engineers hand-coded a variety of different data structures in shared
@@ -823,7 +823,7 @@ functionality necessary to support Berkeley DB's transactional
 requirements, without forcing all users of Mpool to do so. 
 
 %% \begin{aosabox}{Design Lesson 8}
-\begin{aosabox}{デザインレッスン8}
+\begin{aosabox}{設計講座8}
 
 Write-ahead logging is another example of providing encapsulation and
 layering, even when the functionality is never going to be useful to
@@ -903,7 +903,7 @@ in the queue access method, and the DB\_DATABASE\_LOCK type lets us
 lock an entire database. 
 \hspace{-.5cm}
 %% \begin{aosabox}{Design Lesson 9}
-\begin{aosabox}{デザインレッスン9}
+\begin{aosabox}{設計講座9}
 
 Berkeley DB's choice to use page-level locking was made for good
 reasons, but we've found that choice to be problematic at times. Page-level locking
@@ -1028,7 +1028,7 @@ an internal Btree page only long enough to read the information that
 allows you to select and lock a page at the next level.
 
 %% \begin{aosabox}{Design Lesson 10}
-\begin{aosabox}{デザインレッスン10}
+\begin{aosabox}{設計講座10}
 
 Berkeley DB's general-purpose design was well rewarded when we added
 concurrent data store functionality. Initially Berkeley
@@ -1064,7 +1064,7 @@ general-purpose logging facility, however the logging subsystem is
 probably the module where we were least successful. 
 
 %% \begin{aosabox}{Design Lesson 11}
-\begin{aosabox}{デザインレッスン11}
+\begin{aosabox}{設計講座11}
 
 When you find an architectural problem you don't want to fix ``right
 now'' and that you're inclined to just let go, remember that being
@@ -1133,7 +1133,7 @@ guarantee that the specified LSN is on stable storage. Only then does
 Mpool write the page to disk. 
 
 %% \begin{aosabox}{Design Lesson 12}
-\begin{aosabox}{デザインレッスン12}
+\begin{aosabox}{設計講座12}
 
 Mpool and Log use internal handle methods to facilitate write-ahead
 logging, and in some cases, the method declaration is longer than the
@@ -1256,7 +1256,7 @@ have been placed with the Berkeley DB environment information itself,
 outside of any subsystem.) 
 
 %% \begin{aosabox}{Design Lesson 13}
-\begin{aosabox}{デザインレッスン13}
+\begin{aosabox}{設計講座13}
 
 There is rarely such thing as an unimportant bug. Sure, there's a typo
 now and then, but usually a bug implies somebody didn't fully
@@ -1454,7 +1454,7 @@ the time for future recoveries and leaves the database in a consistent
 state. 
 
 %% \begin{aosabox}{Design Lesson 14}
-\begin{aosabox}{デザインレッスン14}
+\begin{aosabox}{設計講座14}
 
 Database recovery is a complex topic, difficult to write and harder to
 debug because recovery simply shouldn't happen all that often. In his
