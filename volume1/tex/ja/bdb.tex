@@ -220,13 +220,18 @@ Berkeley DBの設計や実装はこの考え方を具現化したものであり
 %% \begin{aosasect1}{Architectural Overview}
 \begin{aosasect1}{アーキテクチャの概要}
 
-In this section, we'll review the Berkeley DB library's architecture,
-beginning with LIBTP, and highlight key aspects of its evolution.
+%% In this section, we'll review the Berkeley DB library's architecture,
+%% beginning with LIBTP, and highlight key aspects of its evolution.
+この節ではBerkeley DBライブラリのアーキテクチャを取り上げる。
+まずはLIBTPから始め、そしてその進化の鍵となる局面を強調する。
 
-\aosafigref{fig.bdb.libtp}, which is taken from Seltzer and Olson's
-original paper, illustrates the original LIBTP architecture, while
-\aosafigref{fig.bdb.bdb20} presents the Berkeley DB 2.0 designed
-architecture.
+%% \aosafigref{fig.bdb.libtp}, which is taken from Seltzer and Olson's
+%% original paper, illustrates the original LIBTP architecture, while
+%% \aosafigref{fig.bdb.bdb20} presents the Berkeley DB 2.0 designed
+%% architecture.
+\aosafigref{fig.bdb.libtp}はSeltzerとOlsonの最初の論文から引用したもので、
+当初のLIBTPのアーキテクチャを示している。一方\aosafigref{fig.bdb.bdb20}
+は、Berkeley DB 2.0で計画していたアーキテクチャである。
 
 %% \aosafigure[300pt]{../images/bdb/libtp.eps}{Architecture of the LIBTP Prototype System}{fig.bdb.libtp}
 \aosafigure[300pt]{../images/bdb/libtp.eps}{LIBTPプロトタイプシステムのアーキテクチャ}{fig.bdb.libtp}
@@ -234,84 +239,146 @@ architecture.
 %% \aosafigure[300pt]{../images/bdb/bdb20.eps}{Intended Architecture for Berkeley DB-2.0.}{fig.bdb.bdb20}
 \aosafigure[300pt]{../images/bdb/bdb20.eps}{Berkeley DB-2.0で意図していたアーキテクチャ}{fig.bdb.bdb20}
 
-The only significant difference between the LIBTP implementation and
-the Berkeley DB 2.0 design was the removal of the process
-manager. LIBTP required that each thread of control register itself with the
-library and then synchronized the individual threads/processes rather
-than providing subsystem level synchronization. As is discussed in
-\aosasecref{sec.bdb.int}, that original design might have served us
-better.
+%% The only significant difference between the LIBTP implementation and
+%% the Berkeley DB 2.0 design was the removal of the process
+%% manager. LIBTP required that each thread of control register itself with the
+%% library and then synchronized the individual threads/processes rather
+%% than providing subsystem level synchronization. As is discussed in
+%% \aosasecref{sec.bdb.int}, that original design might have served us
+%% better.
+LIBTPの実装とBerkeley DB 2.0の設計との間での唯一の大きな違いは、
+プロセスマネージャーが削除されたという点である。
+LIBTPではコントロールするスレッドが自分自身をライブラリに登録してから
+個々のスレッド/プロセスを同期させなければならず、
+サブシステムレベルでの同期処理は用意していなかった。
+\aosasecref{sec.bdb.int}で議論するが、
+オリジナルの設計のほうがうまく機能したかもしれない。
 
 %% \aosafigure{../images/bdb/bdb20-actual.eps}{Actual Berkeley DB 2.0.6 Architecture.}{fig.bdb.bdbact}
 \aosafigure{../images/bdb/bdb20-actual.eps}{実際のBerkeley DB 2.0.6のアーキテクチャ}{fig.bdb.bdbact}
 
-The difference between the design and the actual released db-2.0.6
-architecture, shown in \aosafigref{fig.bdb.bdbact}, illustrates the
-reality of implementing a robust recovery manager. The recovery
-subsystem is shown in gray. Recovery includes both the driver
-infrastructure, depicted in the recovery box, as well as a set of
-recovery redo and undo routines that recover the operations performed
-by the access methods. These are represented by the circle labelled
-``access method recovery routines.'' There is a consistent design to
-how recovery is handled in Berkeley DB 2.0 as opposed to hand-coded
-logging and recovery routines in LIBTP particular to specific
-access methods.  This
-general purpose design also produces a much richer interface between
-the various modules.
+%% The difference between the design and the actual released db-2.0.6
+%% architecture, shown in \aosafigref{fig.bdb.bdbact}, illustrates the
+%% reality of implementing a robust recovery manager. The recovery
+%% subsystem is shown in gray. Recovery includes both the driver
+%% infrastructure, depicted in the recovery box, as well as a set of
+%% recovery redo and undo routines that recover the operations performed
+%% by the access methods. These are represented by the circle labelled
+%% ``access method recovery routines.'' There is a consistent design to
+%% how recovery is handled in Berkeley DB 2.0 as opposed to hand-coded
+%% logging and recovery routines in LIBTP particular to specific
+%% access methods.  This
+%% general purpose design also produces a much richer interface between
+%% the various modules.
+当初の設計と、実際にリリースされたdb-2.0.6のアーキテクチャ(\aosafigref{fig.bdb.bdbact})
+の違いを見れば、現実には堅牢なリカバリーマネージャーを実装したことがわかる。
+図の中でグレーで表記されている部分がリカバリーサブシステムである。
+リカバリー処理には、ドライバの基盤として図中に「recovery」と記されている部分だけではなく
+redoやundoのルーチンのリカバリーも含まれる。後者は、アクセスメソッドによる操作をリカバーするものだ。
+後者については``access method recovery routines''と書かれた円で表記している。
+このように、Berkeley DB 2.0では一貫性のある設計でリカバリーを扱っている。
+LIBTPではこれと対照的に、ログやリカバリーのルーチンを個々のアクセス方式ごとに手書きしていた。
+この汎用的な設計により、さまざまなモジュール間でのよりリッチなインターフェイスができあがった。
 
-\aosafigref{fig.bdb.bdb50} illustrates the Berkeley DB-5.0.21
-architecture.  The numbers in the diagram reference the APIs listed
-in the table in \aosatblref{tbl.bdb.apitab}. Although the original
-architecture is still visible, the current architecture shows its age
-with the addition of new modules, the decomposition of old modules
-(e.g., \code{log} has become \code{log} and \code{dbreg}), and a 
-significant increase in
-the number of intermodule APIs).
+%% \aosafigref{fig.bdb.bdb50} illustrates the Berkeley DB-5.0.21
+%% architecture.  The numbers in the diagram reference the APIs listed
+%% in the table in \aosatblref{tbl.bdb.apitab}. Although the original
+%% architecture is still visible, the current architecture shows its age
+%% with the addition of new modules, the decomposition of old modules
+%% (e.g., \code{log} has become \code{log} and \code{dbreg}), and a 
+%% significant increase in
+%% the number of intermodule APIs).
+\aosafigref{fig.bdb.bdb50}にBerkeley DB-5.0.21のアーキテクチャを示す。
+図中の番号は、\aosatblref{tbl.bdb.apitab}にまとめたAPIの番号を表す。
+中には当初から変わらない部分も見受けられるが、現在のアーキテクチャは時を経て変化している。
+新たなモジュールが追加されたり古いモジュールが分割されたり
+(たとえば、かつての\code{log}は\code{log}と\code{dbreg}に分かれた)、
+さらにモジュール間のAPIが激増したりしている。
 
-Over a decade of evolution, dozens of commercial releases, and
-hundreds of new features later, we see that the architecture is
-significantly more complex than its ancestors.  The key things to note
-are: First, replication adds an entirely new layer to the system, but
-it does so cleanly, interacting with the rest of the system via the
-same APIs as does the historical code.  Second, the \code{log} module is
-split into \code{log} and \code{dbreg} (database registration).  This is discussed
-in more detail in \aosasecref{sec.bdb.log}.  Third, we have placed all
-inter-module calls into a namespace identified with leading
-underscores, so that applications won't collide with our function
-names. We discuss this further in Design Lesson 6.
+%% Over a decade of evolution, dozens of commercial releases, and
+%% hundreds of new features later, we see that the architecture is
+%% significantly more complex than its ancestors.  The key things to note
+%% are: First, replication adds an entirely new layer to the system, but
+%% it does so cleanly, interacting with the rest of the system via the
+%% same APIs as does the historical code.  Second, the \code{log} module is
+%% split into \code{log} and \code{dbreg} (database registration).  This is discussed
+%% in more detail in \aosasecref{sec.bdb.log}.  Third, we have placed all
+%% inter-module calls into a namespace identified with leading
+%% underscores, so that applications won't collide with our function
+%% names. We discuss this further in Design Lesson 6.
+この10年の進化、十回を超える商用リリース、そして何百もの新機能。
+これらを経て、以前のバージョンよりもアーキテクチャがかなり複雑化してきた。
+中でも特筆すべき点をいくつか取り上げる。
+まずは、レプリケーション機能がまったく新しいレイヤーとしてシステムに追加されたこと。
+しかしこれは完全にクリーンな状態で追加されており、
+おもしろいことにシステムの残りの部分で同じAPIを使っているところは以前のコードがそのまま動く。
+二点目が、\code{log}モジュールを\code{log}と\code{dbreg} (database registration)に分割したことだ。
+この件については\aosasecref{sec.bdb.log}で詳しく説明する。
+三点目が、すべてのモジュール間呼び出しを先頭にアンダースコアをつけた名前空間にまとめたという点だ。
+これで、システムを使うアプリケーション側が関数名の重複を気にせずに済むようになった。
+この件についてはデザインレッスン6で解説する。
 
-Fourth, the logging subsystem's API is now cursor based (there is no
-\code{log\_get} API; it is replaced by the \code{log\_cursor} API).
-Historically, Berkeley DB never had more than one thread of control
-reading or writing the log at any instant in time, so the library had
-a single notion of the current seek pointer in the log.  This was
-never a good abstraction, but with replication it became
-unworkable. Just as the application API supports iteration using
-cursors, the log now supports iteration using cursors.  Fifth, the
-\code{fileop} module inside of the access methods provides support for
-transactionally protected database create, delete, and rename
-operations. It took us multiple attempts to make the implementation
-palatable (it is still not as clean as we would like), and after
-reworking it numerous time, we pulled it out into its own module. 
+%% Fourth, the logging subsystem's API is now cursor based (there is no
+%% \code{log\_get} API; it is replaced by the \code{log\_cursor} API).
+%% Historically, Berkeley DB never had more than one thread of control
+%% reading or writing the log at any instant in time, so the library had
+%% a single notion of the current seek pointer in the log.  This was
+%% never a good abstraction, but with replication it became
+%% unworkable. Just as the application API supports iteration using
+%% cursors, the log now supports iteration using cursors.  Fifth, the
+%% \code{fileop} module inside of the access methods provides support for
+%% transactionally protected database create, delete, and rename
+%% operations. It took us multiple attempts to make the implementation
+%% palatable (it is still not as clean as we would like), and after
+%% reworking it numerous time, we pulled it out into its own module. 
+四点目が、ログ出力サブシステムのAPIがカーソルベースとなった
+(\code{log\_get} API がなくなって、\code{log\_cursor} APIに置き換えられた)という点だ。
+Berkeley DBはこれまで、ログの読み書きの制御に複数のスレッドを持つことは一度たりともなかった。
+したがって、ライブラリはログ内の現在のシーク位置を一か所気にするだけだった。
+これは決してうまい抽象化であるとは言えず、レプリケーション環境では動作しなくなった。
+アプリケーションのAPIがカーソルを使った反復処理に対応したことで、
+ログもカーソルを使った反復処理をサポートするようになった。
+五点目が、アクセス方式の中の\code{fileop}モジュールが
+データベースの作成・削除・リネームをトランザクション内でできるようにしたことだ。
+この実装をうまくまとめるために何度か試行錯誤をした
+(そしてまだ満足のいくレベルにはなっていない)
+が、何度も作りなおした後でモジュール内に組み込んだ。
 
 %% \begin{aosabox}{Design Lesson 2}
 \begin{aosabox}{デザインレッスン2}
 
-A software design is simply one of several ways to force yourself to
-think through the entire problem before attempting to solve it.
-Skilled programmers use different techniques to this end: some write a
-first version and throw it away, some write extensive manual pages or
-design documents, others fill out a code template where every
-requirement is identified and assigned to a specific function or
-comment. For example, in Berkeley DB, we created a complete set of
-Unix-style manual pages for the access methods and underlying
-components before writing any code. Regardless of the technique used,
-it's difficult to think clearly about program architecture after code
-debugging begins, not to mention that large architectural changes
-often waste previous debugging effort. Software architecture requires
-a different mind set from debugging code, and the architecture you
-have when you begin debugging is usually the architecture you'll
-deliver in that release.
+%% A software design is simply one of several ways to force yourself to
+%% think through the entire problem before attempting to solve it.
+%% Skilled programmers use different techniques to this end: some write a
+%% first version and throw it away, some write extensive manual pages or
+%% design documents, others fill out a code template where every
+%% requirement is identified and assigned to a specific function or
+%% comment. For example, in Berkeley DB, we created a complete set of
+%% Unix-style manual pages for the access methods and underlying
+%% components before writing any code. Regardless of the technique used,
+%% it's difficult to think clearly about program architecture after code
+%% debugging begins, not to mention that large architectural changes
+%% often waste previous debugging effort. Software architecture requires
+%% a different mind set from debugging code, and the architecture you
+%% have when you begin debugging is usually the architecture you'll
+%% deliver in that release.
+ソフトウェアの設計というものは、単に問題の全体像を把握してから
+解決を試みようという流れを強制するための手段のひとつにすぎない。
+熟練したプログラマーは、その目的を達成するためにさまざまなテクニックを使う。
+まずはとりあえず動くものを書いて、最終的にそれを捨ててしまうという人もいるだろう。
+詳細なマニュアルや設計文書を書くところから始める人もいるだろう。
+すべての要件を明確化したコードのテンプレートを作ってから、
+個別に関数やコメントをはめ込んでいく人もいるだろう。
+Berkeley DBの場合は、まず最初に完全なUnixマニュアルページを作るところから始めた。
+各アクセス方式やその土台となるコンポーネントのマニュアルを、
+まだ一切コードを書いていない状態で作ったのだ。
+どんな手法を使うにせよ、コードを書いてデバッグが始まってから
+プログラムのアーキテクチャについて考えるのは難しい。
+大規模なアーキテクチャの変更をしようとすると、
+それまでのデバッグの労力が無駄になってしまうこともよくあるだろう。
+ソフトウェアのアーキテクチャを考えるときにはコードのデバッグをするときとは異なる考え方が要求される。
+そして、デバッグを始めた時点でのアーキテクチャが、
+通常はリリースの時まで引き継がれることになる。
 
 \end{aosabox}
 
@@ -321,18 +388,22 @@ deliver in that release.
 \begin{table}[t]\scriptsize\centering
 \begin{tabular}[c] { | l | l | l | l | l | }
 \hline
-\multicolumn{5}{|c|}{Application APIs} \\
+%% \multicolumn{5}{|c|}{Application APIs} \\
+\multicolumn{5}{|c|}{アプリケーションAPI} \\
 \hline
-\multicolumn{2}{|c|}{1. DBP handle operations} & \multicolumn{2}{|c|}{2. DB\_ENV Recovery} & 3. Transaction APIs \\
+%% \multicolumn{2}{|c|}{1. DBP handle operations} & \multicolumn{2}{|c|}{2. DB\_ENV Recovery} & 3. Transaction APIs \\
+\multicolumn{2}{|c|}{1. DBPハンドル操作} & \multicolumn{2}{|c|}{2. DB\_ENVリカバリー} & 3. トランザクションAPI \\
 \multicolumn{2}{|l|}{open}  & \multicolumn{2}{|l|}{open(... DB\_RECOVER ...)} & DB\_ENV->txn\_begin \\
 \multicolumn{2}{|l|}{get}   & \multicolumn{2}{|l|} { }& DB\_TXN->abort \\
 \multicolumn{2}{|l|}{put}   & \multicolumn{2}{|l|} { }& DB\_TXN->commit \\
 \multicolumn{2}{|l|}{del}   & \multicolumn{2}{|l|} { }& DB\_TXN->prepare \\
 \multicolumn{2}{|l|}{cursor} & \multicolumn{2}{|l|} { }& \\
 \hline
-\multicolumn{5} { | c | }{APIs Used by the Access Methods} \\
+%% \multicolumn{5} { | c | }{APIs Used by the Access Methods} \\
+\multicolumn{5} { | c | }{各アクセス方式が使うAPI} \\
 \hline
-4. Into Lock        & 5. Into Mpool    & 6. Into Log           & 7. Into Dbreg & \\
+%% 4. Into Lock        & 5. Into Mpool    & 6. Into Log           & 7. Into Dbreg & \\
+4. Lockへ        & 5. Mpoolへ    & 6. Logへ           & 7. Dbregへ & \\
 \_\_lock\_downgrade & \_\_memp\_nameop & \_\_log\_print\_record & \_\_dbreg\_setup & \\
 \_\_lock\_vec       & \_\_memp\_fget   &                    & \_\_dbreg\_net\_id & \\
 \_\_lock\_get       & \_\_memp\_fput   &                    & \_\_dbreg\_revoke & \\
@@ -343,9 +414,11 @@ deliver in that release.
                  & \_\_memp\_ftruncate       &                    & & \\
                  & \_\_memp\_extend\_freelist &                    & & \\
 \hline
-\multicolumn{5} { | c | }{Recovery APIs} \\
+%% \multicolumn{5} { | c | }{Recovery APIs} \\
+\multicolumn{5} { | c | }{リカバリーAPI} \\
 \hline
-8. Into Lock     & 9. Into Mpool & 10. Into Log     & 11. Into Dbreg         & 12. Into Txn \\
+%% 8. Into Lock     & 9. Into Mpool & 10. Into Log     & 11. Into Dbreg         & 12. Into Txn \\
+8. Lockへ     & 9. Mpoolへ & 10. Logへ     & 11. Dbregへ         & 12. Txnへ \\
 \_\_lock\_getlocker & \_\_memp\_fget   & \_\_log\_compare    & \_\_dbreg\_close\_files    & \_\_txn\_getckp \\
 \_\_lock\_get\_list  & \_\_memp\_fput   & \_\_log\_open       & \_\_dbreg\_mark\_restored  & \_\_txn\_checkpoint \\
                  & \_\_memp\_fset   & \_\_log\_earliest   & \_\_dbreg\_init\_recover   & \_\_txn\_reset \\
@@ -353,23 +426,29 @@ deliver in that release.
                  &               & \_\_log\_cursor     &                        & \_\_txn\_findlastckp \\
                  &               & \_\_log\_vtruncate  &                        & \_\_txn\_ckp\_read \\
 \hline
-\multicolumn{5} { | c | }{APIs Used by the Transaction Module} \\
+%% \multicolumn{5} { | c | }{APIs Used by the Transaction Module} \\
+\multicolumn{5} { | c | }{トランザクションモジュールが使うAPI} \\
 \hline
-13. Into Lock    & 14. Into Mpool & 15. Into Log      & 16. Into Dbreg & \\
+%% 13. Into Lock    & 14. Into Mpool & 15. Into Log      & 16. Into Dbreg & \\
+13. Lockへ    & 14. Mpoolへ & 15. Logへ      & 16. Dbregへ & \\
 \_\_lock\_vec       & \_\_memp\_sync   & \_\_log\_cursor       & \_\_dbreg\_invalidate\_files & \\
 \_\_lock\_downgrade & \_\_memp\_nameop & \_\_log\_current\_lsn  & \_\_dbreg\_close\_files & \\
                  &               &                    & \_\_dbreg\_log\_files & \\
 \hline
-\multicolumn{5} { | c | }{API Into the Replication System} \\
+%% \multicolumn{5} { | c | }{API Into the Replication System} \\
+\multicolumn{5} { | c | }{レプリケーションシステムへのAPI} \\
 \hline
-& & 17. From Log       & & 18. From Txn \\
+%% & & 17. From Log       & & 18. From Txn \\
+& & 17. Logから       & & 18. Txnから \\
 & & \_\_rep\_send\_message & & \_\_rep\_lease\_check \\
 & & \_\_rep\_bulk\_message & & \_\_rep\_txn\_applied \\
 & &                    & & \_\_rep\_send\_message \\
 \hline
-\multicolumn{5} { | c | }{API From the Replication System} \\
+%% \multicolumn{5} { | c | }{API From the Replication System} \\
+\multicolumn{5} { | c | }{レプリケーション日ステムからのAPI} \\
 \hline
-19. Into Lock & 20. Into Mpool & 21. Into Log           & 22. Into Dbreg           & 23. Into Txn \\
+%% 19. Into Lock & 20. Into Mpool & 21. Into Log           & 22. Into Dbreg           & 23. Into Txn \\
+19. Lockへ & 20. Mpoolへ & 21. Logへ           & 22. Dbregへ           & 23. Txnへ \\
 \_\_lock\_vec    & \_\_memp\_fclose  & \_\_log\_get\_stable\_lsn   & \_\_dbreg\_mark\_restored    & \_\_txn\_recycle\_id \\
 \_\_lock\_get    & \_\_memp\_fget    & \_\_log\_cursor           & \_\_dbreg\_invalidate\_files & \_\_txn\_begin \\
 \_\_lock\_id     & \_\_memp\_fput    & \_\_log\_newfile          & \_\_dbreg\_close\_files      & \_\_txn\_recover \\
@@ -379,21 +458,33 @@ deliver in that release.
               &                & \_\_log\_vtruncate        &                          &  \\
 \hline
 \end{tabular}
-\caption{Berkeley DB 5.0.21 APIs}
+%% \caption{Berkeley DB 5.0.21 APIs}
+\caption{Berkeley DB 5.0.21のAPI}
 \label{tbl.bdb.apitab}
 \end{table}
 
-Why architect the transactional library out of components rather than
-tune it to a single anticipated use? There are three answers to this
-question. First, it forces a more disciplined design. Second, without
-strong boundaries in the code, complex software packages inevitably
-degenerate into unmaintainable piles of glop. Third, you can never
-anticipate all the ways customers will use your software; if you
-empower users by giving them access to software components, they will
-use them in ways you never considered.
+%% Why architect the transactional library out of components rather than
+%% tune it to a single anticipated use? There are three answers to this
+%% question. First, it forces a more disciplined design. Second, without
+%% strong boundaries in the code, complex software packages inevitably
+%% degenerate into unmaintainable piles of glop. Third, you can never
+%% anticipate all the ways customers will use your software; if you
+%% empower users by giving them access to software components, they will
+%% use them in ways you never considered.
+なぜアーキテクトはトランザクションライブラリをコンポーネントから外に出したのだろう?
+想定されるたったひとつの使い方にあわせてチューニングすればよかったのではないだろうか?
+この問いへの答えは次の三つである。
+まず、外に出せばよりしっかりとした設計を強要できる。
+次に、コードの間にきちんとした境界がなければ、
+複雑なソフトウェアパッケージは必然的に退化して保守不能な状態になってしまう。
+最後に、ユーザーがそのソフトウェアをどのように使うかなど、完全に予測するのは不可能だ。
+ユーザーにソフトウェアコンポーネントへのアクセスを許可すると、
+きっと思いもよらない方法でそれを使われることになるだろう。
 
-In subsequent sections we'll consider each component of Berkeley DB,
-understand what it does and how it fits into the larger picture.
+%% In subsequent sections we'll consider each component of Berkeley DB,
+%% understand what it does and how it fits into the larger picture.
+これ以降のセクションではBerkeley DBの各コンポーネントについて検討し、
+その動きを理解して全体の中でどのような位置づけになっているのかを把握する。
 
 \end{aosasect1}
 
