@@ -6,7 +6,7 @@ aosa.tex            TAKAGI Masahiro <matakagi@gmail.com>      100
 asterisk.tex        Arai Kunimitsu                            100
 audacity.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
 bash.tex            TAKAGI Masahiro <matakagi@gmail.com>      100
-bdb.tex             TAKAGI Masahiro <matakagi@gmail.com>       25
+bdb.tex             TAKAGI Masahiro <matakagi@gmail.com>       30
 cmake.tex
 colophon.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
 eclipse.tex         Masugata Seiji                              ?
