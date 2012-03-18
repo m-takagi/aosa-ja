@@ -600,105 +600,172 @@ Berkeley DBの各アクセスメソッドの内部構造に関する議論はこ
 \begin{aosasect1}{ライブラリインターフェイス層}
 \label{sec.bdb.int}
 
-Over time, as we added additional functionality, we discovered that
-both applications and internal code needed the same top-level
-functionality (for example, a table join operation uses multiple
-cursors to iterate over the rows, just as an application might use a
-cursor to iterate over those same rows).
+%% Over time, as we added additional functionality, we discovered that
+%% both applications and internal code needed the same top-level
+%% functionality (for example, a table join operation uses multiple
+%% cursors to iterate over the rows, just as an application might use a
+%% cursor to iterate over those same rows).
+長年にわたって機能追加を続けていくうちに、ようやく気付いたことがある。
+アプリケーションのコードと内部のコードとで同じ機能を共有する必要があるということだ
+(たとえばテーブルのJOIN操作では複数のカーソルを使って行の反復処理を行う。
+一方アプリケーション側でも、カーソルを使って同じ行を反復処理することになるだろう)。
 
 %% \begin{aosabox}{Design Lesson 4}
 \begin{aosabox}{設計講座4}
 
-It doesn't matter how you name your variables, methods, functions, or
-what comments or code style you use; that is, there are a large number
-of formats and styles that are ``good enough.'' What does matter, and
-matters very much, is that naming and style be consistent. Skilled
-programmers derive a tremendous amount of information from code format
-and object naming. You should view naming and style inconsistencies as
-some programmers investing time and effort to lie to the other
-programmers, and vice versa. Failing to follow house coding
-conventions is a firing offense.
+%% It doesn't matter how you name your variables, methods, functions, or
+%% what comments or code style you use; that is, there are a large number
+%% of formats and styles that are ``good enough.'' What does matter, and
+%% matters very much, is that naming and style be consistent. Skilled
+%% programmers derive a tremendous amount of information from code format
+%% and object naming. You should view naming and style inconsistencies as
+%% some programmers investing time and effort to lie to the other
+%% programmers, and vice versa. Failing to follow house coding
+%% conventions is a firing offense.
+変数やメソッドや関数の名前の付けかた、コメントの書きかた、
+そしてコードの書きかた。どんなスタイルを選んでもかまわない。
+世の中には「よい書きかた」とされている書式やスタイルがいろいろある。
+そんなことより大切なのは、どう書くかではなく命名規約やコーディングスタイルの一貫性を保つことだ。
+熟練したプログラマーは、コードのフォーマットやオブジェクトの命名から
+大量の情報を引き出す。命名規約やスタイルが一貫していないと、
+コードの内容を読み取るのに時間と労力がかかってしまい、
+他のプログラマーに誤読されてしまうことになるだろう。
+内部的なコーディング規約に反するのは、そのシステムに対して発砲しているのに等しい。
 
 \end{aosabox}
 
-For this reason, we decomposed the access method APIs into precisely
-defined layers. These layers of interface routines perform all of the
-necessary generic error checking, function-specific error checking,
-interface tracking, and other tasks such as automatic transaction
-management. When applications call into Berkeley DB, they call the
-first level of interface routines based on methods in the object
-handles. (For example, \code{\_\_dbc\_put\_pp}, is the interface call
-for the Berkeley DB cursor ``put'' method, to update a data item. The
-``\_pp'' is the suffix we use to identify all functions that an
-application can call.) 
+%% For this reason, we decomposed the access method APIs into precisely
+%% defined layers. These layers of interface routines perform all of the
+%% necessary generic error checking, function-specific error checking,
+%% interface tracking, and other tasks such as automatic transaction
+%% management. When applications call into Berkeley DB, they call the
+%% first level of interface routines based on methods in the object
+%% handles. (For example, \code{\_\_dbc\_put\_pp}, is the interface call
+%% for the Berkeley DB cursor ``put'' method, to update a data item. The
+%% ``\_pp'' is the suffix we use to identify all functions that an
+%% application can call.) 
+というわけで、アクセスメソッドAPIを分割してきちんと定義された階層に分けることにした。
+インターフェイスルーチン層は、必要となる汎用的なエラーチェックや
+関数固有のエラーチェック、インターフェイスの追跡などをすべて行う。
+それ以外にも、自動トランザクション管理などもこの層の仕事だ。
+アプリケーションがBerkeley DBの機能を利用するときには、
+処理対象のオブジェクトが持つメソッドにもとづいた第一レベルのインターフェイスを呼び出す。
+(たとえば、\code{\_\_dbc\_put\_pp}はBerkeley DBのカーソルの
+``put''メソッドに対応するインターフェイスの呼び出しで、データアイテムを更新する。
+最後の``\_pp''は、アプリケーションから呼び出せる関数であることを示すサフィックスである)。
 
-One of the Berkeley DB tasks performed in the interface layer is
-tracking what threads are running inside the Berkeley DB library. This
-is necessary because some internal Berkeley DB operations may be
-performed only when no threads are running inside the
-library. Berkeley DB tracks threads in the library by marking that a
-thread is executing inside the library at the beginning of every
-library API and clearing that flag when the API call returns. This
-entry/exit checking is always performed in the interface layer, as is
-a similar check to determine if the call is being performed in a
-replicated environment.
+%% One of the Berkeley DB tasks performed in the interface layer is
+%% tracking what threads are running inside the Berkeley DB library. This
+%% is necessary because some internal Berkeley DB operations may be
+%% performed only when no threads are running inside the
+%% library. Berkeley DB tracks threads in the library by marking that a
+%% thread is executing inside the library at the beginning of every
+%% library API and clearing that flag when the API call returns. This
+%% entry/exit checking is always performed in the interface layer, as is
+%% a similar check to determine if the call is being performed in a
+%% replicated environment.
+Berkeley DBがインターフェイス層で行うタスクの一つが、
+どのスレッドがBerkeley DBライブラリ内で動作中なのかを追跡することだ。
+追跡が必要となる理由は、Berkeley DBの内部的な操作の中には
+ライブラリ内でスレッドが立ち上がっていないときにしか実行できないものもあるからである。
+Berkeley DBがライブラリ内でのスレッドの動きを追跡する方法は、
+ライブラリのAPIをコールするたびにそのスレッドが実行中であるというフラグを立てておき、
+APIコールの結果が返ってきた時点でフラグをクリアするというものだ。
+この「入場/退場のチェック」が、常にインターフェイス層で行われる。
+これは、そのコールがレプリケーション環境から行われたのかをチェックするのと同じ方法である。
 
-The obvious question is ``why not pass a thread identifier into the
-library, wouldn't that be easier?'' The answer is yes, it would be a
-great deal easier, and we surely wish we'd done just that. But, that
-change would have modified every single Berkeley DB application, most
-of every application's calls into Berkeley DB, and in many cases would
-have required application re-structuring. 
+%% The obvious question is ``why not pass a thread identifier into the
+%% library, wouldn't that be easier?'' The answer is yes, it would be a
+%% great deal easier, and we surely wish we'd done just that. But, that
+%% change would have modified every single Berkeley DB application, most
+%% of every application's calls into Berkeley DB, and in many cases would
+%% have required application re-structuring. 
+当然、こんな疑問が出てくるはずだ。
+「スレッドIDを直接ライブラリに渡したほうがずっと簡単なのでは?」
+答えはイエスだ。そのほうがずっと簡単だろうし、できることならそうしたかった。
+しかし、そんな変更をしてしまうと、Berkeley DBを使ったアプリケーションはすべて修正が必要となる。
+アプリケーションからのBerkeley DBの機能の呼び出しの大半を書き換えることになり、
+たいていの場合はアプリケーションの構造を再考することになるだろう。
 
 %% \begin{aosabox}{Design Lesson 5}
 \begin{aosabox}{設計講座5}
 
-Software architects must choose their upgrade battles carefully: users
-will accept minor changes to upgrade to new releases (if you guarantee
-compile-time errors, that is, obvious failures until the upgrade is
-complete; upgrade changes should never fail in subtle ways). But to
-make truly fundamental changes, you must admit it's a new code base
-and requires a port of your user base. Obviously, new code bases and
-application ports are not cheap in time or resources, but neither is
-angering your user base by telling them a huge overhaul is really a
-minor upgrade.
+%% Software architects must choose their upgrade battles carefully: users
+%% will accept minor changes to upgrade to new releases (if you guarantee
+%% compile-time errors, that is, obvious failures until the upgrade is
+%% complete; upgrade changes should never fail in subtle ways). But to
+%% make truly fundamental changes, you must admit it's a new code base
+%% and requires a port of your user base. Obviously, new code bases and
+%% application ports are not cheap in time or resources, but neither is
+%% angering your user base by telling them a huge overhaul is really a
+%% minor upgrade.
+ソフトウェアアーキテクトは、アップグレードに伴ういざこざへの対応に気をつける必要がある。
+新しいリリースに対応するために要する変更が少しで済むのなら、ユーザーはそれを許容するだろう
+(コンパイル時にエラーが出るようにしておけば、まだアップグレードが完了していないことが明白になる。
+アップグレードの際によくわからないエラーで悩まされることもなくなるだろう)。
+しかし、まったく根本的に変化させるには、新しいコードベースを使わざるを得ない。そしてユーザーにも新たなコードベースへの移行を求めることになる。
+明らかに、アプリケーションを一から書き直してユーザーの移行を促すのは、時間的にもリソース的にもたやすいことではない。
+しかし、実際にはちょっとしたアップグレードなのに大規模な改修が必要となってユーザーを怒らせるといったことはしなくて済む。
 
 \end{aosabox}
 
-Another task performed in the interface layer is transaction
-generation.  The Berkeley DB library supports a mode where every
-operation takes place in an automatically generated transaction (this
-saves the application having to create and commit its own explicit
-transactions). Supporting this mode requires that every time an
-application calls through the API without specifying its own
-transaction, a transaction is automatically created.
+%% Another task performed in the interface layer is transaction
+%% generation.  The Berkeley DB library supports a mode where every
+%% operation takes place in an automatically generated transaction (this
+%% saves the application having to create and commit its own explicit
+%% transactions). Supporting this mode requires that every time an
+%% application calls through the API without specifying its own
+%% transaction, a transaction is automatically created.
+インターフェイス層で行われるもうひとつのタスクが、トランザクションの生成だ。
+Berkeley DBライブラリがサポートするモードのひとつに、すべての操作が自動生成されたトランザクション内で行われるというモードがある
+(これによって、アプリケーション側で明示的にトランザクションを作成したりコミットしたりする手間を省ける)。
+このモードをサポートするには、アプリケーション側からトランザクションを明示せずに
+APIをコールされるたびに、トランザクションを自動生成することになる。
 
-Finally, all Berkeley DB APIs require argument checking. In Berkeley
-DB there are two flavors of error checking---generic checks to
-determine if our database has been corrupted during a previous
-operation or if we are in the midst of a replication state change (for
-example, changing which replica allows writes). There are also checks
-specific to an API: correct flag usage, correct parameter usage,
-correct option combinations, and any other type of error we can check
-before actually performing the requested operation.
+%% Finally, all Berkeley DB APIs require argument checking. In Berkeley
+%% DB there are two flavors of error checking---generic checks to
+%% determine if our database has been corrupted during a previous
+%% operation or if we are in the midst of a replication state change (for
+%% example, changing which replica allows writes). There are also checks
+%% specific to an API: correct flag usage, correct parameter usage,
+%% correct option combinations, and any other type of error we can check
+%% before actually performing the requested operation.
+最後に、すべてのBerkeley DB APIは引数のチェックを要する。
+Berkeley DBのエラーチェックには二種類ある。
+ひとつは汎用的なチェックで、直近の操作でデータベースが破壊されていないかどうかを調べたり
+レプリケーションの状態が変わっている最中(たとえば、書き込み可能なレプリカの切り替え中など)であるかどうかを調べたりといったものだ。
+もうひとつは個々のAPIに固有のチェックで、
+フラグの用法やパラメータの使い方、オプションの組み合わせ、
+その他実際にリクエストを処理する前に確認できるあらゆるエラーのチェックを行う。
 
-This API-specific checking is all encapsulated in functions suffixed
-with \code{\_arg}. Thus, the error checking specific to the cursor
-\code{put} method is located in the function \code{\_\_dbc\_put\_arg},
-which is called by the \code{\_\_dbc\_put\_pp} function.
+%% This API-specific checking is all encapsulated in functions suffixed
+%% with \code{\_arg}. Thus, the error checking specific to the cursor
+%% \code{put} method is located in the function \code{\_\_dbc\_put\_arg},
+%% which is called by the \code{\_\_dbc\_put\_pp} function.
+API固有のチェックはすべて、最後に\code{\_arg}がつく名前の関数にカプセル化されている。
+つまり、カーソルの\code{put}メソッドに関するエラーチェックは\code{\_\_dbc\_put\_arg}関数にまとめられており、
+これが\code{\_\_dbc\_put\_pp}関数から呼び出される。
 
-Finally, when all the argument verification and transaction generation
-is complete, we call the worker method that actually performs the
-operation (in our example, it would be \code{\_\_dbc\_put}), which is
-the same function we use when calling the cursor put functionality
-internally.
+%% Finally, when all the argument verification and transaction generation
+%% is complete, we call the worker method that actually performs the
+%% operation (in our example, it would be \code{\_\_dbc\_put}), which is
+%% the same function we use when calling the cursor put functionality
+%% internally.
+最終的に、引数の検証やトランザクションの生成が完了したら、
+実際の処理を行うワーカーメソッド(今回の場合は\code{\_\_dbc\_put})を呼び出す。
+これは、我々がカーソルのput機能を内部的に使うときに利用するのと同じ関数である。
 
-This decomposition evolved during a period of intense activity, when
-we were determining precisely what actions we needed to take when
-working in replicated environments. After iterating over the code base
-some non-trivial number of times, we pulled apart all this preamble
-checking to make it easier to change the next time we identified a
-problem with it.
+%% This decomposition evolved during a period of intense activity, when
+%% we were determining precisely what actions we needed to take when
+%% working in replicated environments. After iterating over the code base
+%% some non-trivial number of times, we pulled apart all this preamble
+%% checking to make it easier to change the next time we identified a
+%% problem with it.
+このように分割することで、大がかりな操作があったときに
+レプリケーション環境で実際にどんなアクションが必要となるのかを判断しやすくなった。
+コードベースに手を加える作業を数え切れないほど繰り返した結果、
+すべての事前チェックを分離することができた。
+そして、今後もし何か問題が発生したときにもより手を加えやすくなったのだ。
 
 \end{aosasect1}
 
