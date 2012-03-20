@@ -772,76 +772,123 @@ API固有のチェックはすべて、最後に\code{\_arg}がつく名前の�
 %% \begin{aosasect1}{The Underlying Components}
 \begin{aosasect1}{基盤となるコンポーネント}
 
-There are four components underlying the access methods: a buffer
-manager, a lock manager, a log manager and a transaction
-manager. We'll discuss each of them separately, but they all have some
-common architectural features.
+%% There are four components underlying the access methods: a buffer
+%% manager, a lock manager, a log manager and a transaction
+%% manager. We'll discuss each of them separately, but they all have some
+%% common architectural features.
+アクセスメソッドの基盤となるのが、
+バッファマネージャー・ロックマネージャー・ログマネージャーそしてトランザクションマネージャーの
+四つのコンポーネントだ。それぞれについて個別に扱うが、
+これらすべてに共通するアーキテクチャ上の特性もある。
 
-First, all of the subsystems have their own APIs, and initially each
-subsystem had its own object handle with all methods for that
-subsystem based on the handle. For example, you could use Berkeley
-DB's lock manager to handle your own locks or to write your own remote
-lock manager, or you could use Berkeley DB's buffer manager to handle
-your own file pages in shared memory. Over time, the
-subsystem-specific handles were removed from the API in order to
-simplify Berkeley DB applications. Although the subsystems are still
-individual components that can be used independently of the other
-subsystems, they now share a common object handle, the \code{DB\_ENV}
-``environment'' handle. This architectural feature enforces layering
-and generalization. Even though the layer moves from time-to-time, and
-there are still a few places where one subsystem reaches across into
-another subsystem, it is good discipline for programmers to think about
-the parts of the system as separate software products in their own right.
+%% First, all of the subsystems have their own APIs, and initially each
+%% subsystem had its own object handle with all methods for that
+%% subsystem based on the handle. For example, you could use Berkeley
+%% DB's lock manager to handle your own locks or to write your own remote
+%% lock manager, or you could use Berkeley DB's buffer manager to handle
+%% your own file pages in shared memory. Over time, the
+%% subsystem-specific handles were removed from the API in order to
+%% simplify Berkeley DB applications. Although the subsystems are still
+%% individual components that can be used independently of the other
+%% subsystems, they now share a common object handle, the \code{DB\_ENV}
+%% ``environment'' handle. This architectural feature enforces layering
+%% and generalization. Even though the layer moves from time-to-time, and
+%% there are still a few places where one subsystem reaches across into
+%% another subsystem, it is good discipline for programmers to think about
+%% the parts of the system as separate software products in their own right.
+まず、すべてのサブシステムには自前のAPIが存在する。
+当初は各サブシステムが自身のオブジェクトハンドルを保持しており、
+そのハンドルでサブシステムのすべてのメソッドを扱っていた。
+たとえばBerkeley DBのロックマネージャーを使うと、自身のロックを処理したりリモートのロックマネージャーに書き出したりできる。
+あるいはBerkeley DBのバッファマネージャーを使うと、自身のファイルページを共有メモリで扱える。
+時を経て、これらのサブシステム固有のハンドルはAPIから削除された。Berkeley DBを使うアプリケーションをシンプルにするためだ。
+サブシステム群は今でも個別のコンポーネントだし他のサブシステムとは独立して使えるようになっているが、
+今では共通のオブジェクトハンドルである\code{DB\_ENV} ``environment''ハンドルを共有するようになった。
+このアーキテクチャが、レイヤー化と汎化を強制する。
+レイヤーの区切りは時とともに変化するし、あるサブシステムが別のサブシステムの役割に立ち入っている部分もいくつか存在する。
+しかし、プログラマーにとっては、システムの各部分を個別のソフトウェアプロダクトとして考えるのはよいことだ。
 
-Second, all of the subsystems (in fact, all Berkeley DB functions)
-return error codes up the call stack.  As a library, Berkeley DB
-cannot step on the application's name space by declaring global
-variables, not to mention that forcing errors to return in a single
-path through the call stack enforces good programmer discipline. 
+%% Second, all of the subsystems (in fact, all Berkeley DB functions)
+%% return error codes up the call stack.  As a library, Berkeley DB
+%% cannot step on the application's name space by declaring global
+%% variables, not to mention that forcing errors to return in a single
+%% path through the call stack enforces good programmer discipline. 
+次に、すべてのサブシステム(実際のところ、すべてのBerkeley DBの関数)はエラーコードをコールスタックに返す。
+Berkeley DBはライブラリであり、グローバル変数を宣言したりしてアプリケーションの名前空間に立ち入ることができない。
+言うまでもないが、すべてのエラーをコールスタック経由の単一のパスで返すことはよい習慣である。
 
 %% \begin{aosabox}{Design Lesson 6}
 \begin{aosabox}{設計講座6}
 
-In library design, respect for the namespace is vital. Programmers who
-use your library should not need to memorize dozens of reserved names
-for functions, constants, structures, and global variables to avoid
-naming collisions between an application and the library.
+%% In library design, respect for the namespace is vital. Programmers who
+%% use your library should not need to memorize dozens of reserved names
+%% for functions, constants, structures, and global variables to avoid
+%% naming collisions between an application and the library.
+ライブラリを設計する際には、名前空間を利用することが大切である。
+そうしなければ、ライブラリを使う側のプログラマーからすれば、
+関数や定数そして構造体やグローバル変数の名前を何十個も覚えておかないと
+アプリケーション側で名前が衝突してしまうことになる。
 
 \end{aosabox}
 
-Finally, all of the subsystems support shared memory. Because Berkeley
-DB supports sharing databases between multiple running processes, all
-interesting data structures have to live in shared memory. The most
-significant implication of this choice is that in-memory data
-structures must use base address and offset pairs instead of pointers
-in order for pointer-based data structures to work in the context of
-multiple processes. In other words, instead of indirecting through a
-pointer, the Berkeley DB library must create a pointer from a base
-address (the address at which the shared memory segment is mapped into
-memory) plus an offset (the offset of a particular data structure in
-that mapped-in segment). To support this feature, we
-wrote a version of the Berkeley Software Distribution \code{queue} package
-that implemented a wide variety of linked lists. 
+%% Finally, all of the subsystems support shared memory. Because Berkeley
+%% DB supports sharing databases between multiple running processes, all
+%% interesting data structures have to live in shared memory. The most
+%% significant implication of this choice is that in-memory data
+%% structures must use base address and offset pairs instead of pointers
+%% in order for pointer-based data structures to work in the context of
+%% multiple processes. In other words, instead of indirecting through a
+%% pointer, the Berkeley DB library must create a pointer from a base
+%% address (the address at which the shared memory segment is mapped into
+%% memory) plus an offset (the offset of a particular data structure in
+%% that mapped-in segment). To support this feature, we
+%% wrote a version of the Berkeley Software Distribution \code{queue} package
+%% that implemented a wide variety of linked lists. 
+最後に、すべてのサブシステムは共有メモリをサポートする。
+Berkeley DBは複数のプロセスからのデータベースの共有をサポートしているので、
+すべてのデータ構造は共有メモリ上に存在することになる。
+この方式を選んだことによる最大の影響は、
+インメモリのデータ構造がポインタではなくベースアドレスとオフセットのペアを使わなければならないということだ。
+これは、ポインタベースのデータ構造をマルチプロセスのコンテキストでも動作させるために必要となる。
+言い換えると、ポインタ経由で間接参照するのではなく、
+Berkeley DBライブラリはベースアドレス(メモリ内で共有メモリセグメントがマップされたアドレス)
+にオフセット(マップされたセグメントの中で、そのデータ構造が存在する位置)
+を足した場所を参照しなければならないということである。
+この機能をサポートするために、我々はBerkeley Software Distribution \code{queue}
+パッケージの別バージョンを書いた。これはさまざまな種類のリンクリストを実装したものである。
 
 %% \begin{aosabox}{Design Lesson 7}
 \begin{aosabox}{設計講座7}
 
-Before we wrote a shared-memory linked-list package, Berkeley DB
-engineers hand-coded a variety of different data structures in shared
-memory, and these implementations were fragile and difficult to
-debug. The shared-memory list package, modeled after the BSD list
-package (\code{queue.h}), replaced all of those efforts.  Once it was
-debugged, we never had to debug another shared memory linked-list
-problem.  This illustrates three important design principles: First,
-if you have functionality that appears more than once, write the
-shared functions and use them, because the mere existence of two
-copies of any specific functionality in your code guarantees that one
-of them is incorrectly implemented.  Second, when you develop a set of
-general purpose routines, write a test suite for the set of routines,
-so you can debug them in isolation.  Third, the harder code is to
-write, the more important for it to be separately written and
-maintained; it's almost impossible to keep surrounding code from
-infecting and corroding a piece of code.
+%% Before we wrote a shared-memory linked-list package, Berkeley DB
+%% engineers hand-coded a variety of different data structures in shared
+%% memory, and these implementations were fragile and difficult to
+%% debug. The shared-memory list package, modeled after the BSD list
+%% package (\code{queue.h}), replaced all of those efforts.  Once it was
+%% debugged, we never had to debug another shared memory linked-list
+%% problem.  This illustrates three important design principles: First,
+%% if you have functionality that appears more than once, write the
+%% shared functions and use them, because the mere existence of two
+%% copies of any specific functionality in your code guarantees that one
+%% of them is incorrectly implemented.  Second, when you develop a set of
+%% general purpose routines, write a test suite for the set of routines,
+%% so you can debug them in isolation.  Third, the harder code is to
+%% write, the more important for it to be separately written and
+%% maintained; it's almost impossible to keep surrounding code from
+%% infecting and corroding a piece of code.
+実際に共有メモリのリンクリストパッケージを書き始める前に、
+Berkeley DBエンジニアは共有メモリ内でのさまざまなデータ構造を手書きしていた。
+しかしこれらの実装はどれも脆く、デバッグしにくいものだった。
+共有メモリのリストパッケージはBSDのリストパッケージ(\code{queue.h})を参考にして作ったもので、
+今まで苦労した結果をこれがすべて置き換えてくれた。
+一度デバッグをしてからは、共有メモリのリンクリストに関する問題は二度と発生しなかった。
+このことから得られる重要な設計指針は次の三つだ。
+まず、もし複数回登場する機能があるのなら、共有関数を作ってそれを使うようにする。
+なぜなら、コードの中に同じような機能が複数回登場するということはそのうちのどれかが間違った実装になっているだろうからだ。
+次に、汎用目的のルーチンを開発するときにはそのルーチン群用のテストスイートを書く。
+そうすれば、そのルーチンだけを個別にデバッグできる。
+最後に、書くのが難しいコードであればあるほど、その部分を個別に書いて保守していくことが重要になる。
+そうしないと、その周辺のコードの影響を受けて浸食されていることを防げなくなる。
 
 \end{aosabox}
 
