@@ -897,97 +897,163 @@ Berkeley DBエンジニアは共有メモリ内でのさまざまなデータ構
 %% \begin{aosasect1}{The Buffer Manager: Mpool}
 \begin{aosasect1}{バッファマネージャー: Mpool}
 
-The Berkeley DB Mpool subsystem is an in-memory buffer pool of file
-pages, which hides the fact that main memory is a limited resource,
-requiring the library to move database pages to and from disk when
-handling databases larger than memory. Caching database pages in
-memory was what enabled the original hash library to significantly
-out-perform the historic \code{hsearch} and \code{ndbm}
-implementations.
+%% The Berkeley DB Mpool subsystem is an in-memory buffer pool of file
+%% pages, which hides the fact that main memory is a limited resource,
+%% requiring the library to move database pages to and from disk when
+%% handling databases larger than memory. Caching database pages in
+%% memory was what enabled the original hash library to significantly
+%% out-perform the historic \code{hsearch} and \code{ndbm}
+%% implementations.
+Berkeley DBのMpoolサブシステムは、ファイルページを扱うインメモリのバッファプールである。
+メインメモリが有限なリソースであるという事実を隠し、
+メモリの量を超える大きさのデータベースを扱うときには
+データベースのページをディスクとの間で移動させる。
+データベースのページをメモリ内でキャッシュすることで、
+オリジナルのhashライブラリの性能は劇的に向上した。
+かつての\code{hsearch}や\code{ndbm}の実装の性能を大きく上回る。
 
-Although the Berkeley DB Btree access method is a fairly traditional
-B+tree implementation, pointers between tree nodes are represented as
-page numbers, not actual in-memory pointers, because the library's
-implementation uses the on-disk format as its in-memory format
-as well. The advantage of this representation is that a page can be
-flushed from the cache without format conversion; the disadvantage is
-that traversing an index structures requires (costlier) repeated
-buffer pool lookups rather than (cheaper) memory indirections.
+%% Although the Berkeley DB Btree access method is a fairly traditional
+%% B+tree implementation, pointers between tree nodes are represented as
+%% page numbers, not actual in-memory pointers, because the library's
+%% implementation uses the on-disk format as its in-memory format
+%% as well. The advantage of this representation is that a page can be
+%% flushed from the cache without format conversion; the disadvantage is
+%% that traversing an index structures requires (costlier) repeated
+%% buffer pool lookups rather than (cheaper) memory indirections.
+Berkeley DBのBtreeアクセスメソッドは極めて伝統的なB+木の実装であるが、
+ツリーノード間のポインタはページ番号で表しており、実際のインメモリのポインタではない。
+その理由は、ライブラリの実装がインメモリだけではなくディスク上でのフォーマットも扱うからである。
+このようにする利点は、ページをキャッシュからフラッシュするときにフォーマット変換が不要になることだ。
+逆に欠点は、インデックスを走査する際にバッファプールのルックアップが必要になるということだ。
+バッファプールのルックアップは、間接メモリ参照よりもコストの高い操作である。
 
-There are other performance implications that result from the
-underlying assumption that the in-memory representation of Berkeley DB
-indices is really a cache for on-disk persistent data. For example,
-whenever Berkeley DB accesses a cached page, it first pins the page in
-memory. This pin prevents any other threads or processes from 
-evicting it from the buffer pool. Even if an index
-structure fits entirely in the cache and need never be flushed to
-disk, Berkeley DB still acquires and releases these pins on every
-access, because the underlying model provided by Mpool is that of a
-cache, not persistent storage.
+%% There are other performance implications that result from the
+%% underlying assumption that the in-memory representation of Berkeley DB
+%% indices is really a cache for on-disk persistent data. For example,
+%% whenever Berkeley DB accesses a cached page, it first pins the page in
+%% memory. This pin prevents any other threads or processes from 
+%% evicting it from the buffer pool. Even if an index
+%% structure fits entirely in the cache and need never be flushed to
+%% disk, Berkeley DB still acquires and releases these pins on every
+%% access, because the underlying model provided by Mpool is that of a
+%% cache, not persistent storage.
+それ以外にも、パフォーマンスに関する暗黙の影響がある。それは、
+インメモリでのBerkeley DBのインデックスの表現方法が
+実際のところはディスク上の永続データのキャッシュであるという前提から得られるものだ。
+たとえば、Berkeley DBがキャッシュされたページにアクセスするときには、まずメモリ内のページを固定する。
+固定することで、他のスレッドやプロセスがそのページをバッファプールから削除できないようにする。
+インデックスが完全にキャッシュ内に収まってディスクへのフラッシュが不要だったとしても、
+Berkeley DBはアクセスのたびにページを固定する。
+その理由は、Mpoolが提供する基盤モデルがキャッシュであって永続ストレージではないからだ。
 
 %% \begin{aosasect2}{The Mpool File Abstraction}
 \begin{aosasect2}{Mpoolのファイル抽象化}
 
-Mpool assumes it sits atop a filesystem, exporting the file
-abstraction through the API\@. For example, \code{DB\_MPOOLFILE} handles
-represent an on-disk file, providing methods to get/put pages to/from
-the file.  While Berkeley DB supports temporary and purely in-memory
-databases, these too are referenced by \code{DB\_MPOOLFILE} handles
-because of the underlying Mpool abstractions. The \code{get} and
-\code{put} methods are the primary Mpool APIs: \code{get} ensures a
-page is present in the cache, acquires a pin on the page and returns a
-pointer to the page.  When the library is done with the page, the
-\code{put} call unpins the page, releasing it for 
-eviction.  Early versions of Berkeley DB did not differentiate between
-pinning a page for read access versus pinning a page for write
-access. However, in order to increase concurrency, we extended the
-Mpool API to allow callers to indicate their intention to update a
-page. This ability to distinguish read access from write access was
-essential to implement multi-version concurrency control.
-A page pinned for reading that happens to be dirty can be written to
-disk, while a page pinned for writing cannot, since it may be in an
-inconsistent state at any instant.
+%% Mpool assumes it sits atop a filesystem, exporting the file
+%% abstraction through the API\@. For example, \code{DB\_MPOOLFILE} handles
+%% represent an on-disk file, providing methods to get/put pages to/from
+%% the file.  While Berkeley DB supports temporary and purely in-memory
+%% databases, these too are referenced by \code{DB\_MPOOLFILE} handles
+%% because of the underlying Mpool abstractions. The \code{get} and
+%% \code{put} methods are the primary Mpool APIs: \code{get} ensures a
+%% page is present in the cache, acquires a pin on the page and returns a
+%% pointer to the page.  When the library is done with the page, the
+%% \code{put} call unpins the page, releasing it for 
+%% eviction.  Early versions of Berkeley DB did not differentiate between
+%% pinning a page for read access versus pinning a page for write
+%% access. However, in order to increase concurrency, we extended the
+%% Mpool API to allow callers to indicate their intention to update a
+%% page. This ability to distinguish read access from write access was
+%% essential to implement multi-version concurrency control.
+%% A page pinned for reading that happens to be dirty can be written to
+%% disk, while a page pinned for writing cannot, since it may be in an
+%% inconsistent state at any instant.
+Mpoolはファイルシステム上で動かすことを前提としており、ファイルを抽象化したAPIを公開している。
+たとえば\code{DB\_MPOOLFILE}ハンドルはディスク上のファイルを表し、
+ファイルからページを取得したりページをファイルに書き出したりといったメソッドを提供する。
+Berkeley DBではインメモリのテンポラリデータベースに対応しているが、
+これらもまた\code{DB\_MPOOLFILE}ハンドルから参照されている。
+これは、ベースになるMpoolの抽象化によるものだ。Mpoolの主要なAPIは
+\code{get}メソッドと\code{put}メソッドである。
+\code{get}はページがキャッシュ内にあることを確かめてからそのページを固定し、
+そしてページへのポインタを返す。ライブラリがそのページでの処理を終えたら、
+\code{put}を呼んでページの固定を解除し、明け渡す。
+初期のBerkeley DBは、読み込み用にページを固定するときと書き込み用にページを固定するときを区別していなかった。
+しかし、同時実行性を向上させるためにMpoolのAPIを拡張し、
+呼び出し側でページの書き込み意図を明示できるようにした。
+このように読み込みアクセスと書き込みアクセスを区別できることは、
+多版型同時実行制御を実装するために不可欠だ。
+読み込み用として固定したページはダーティになったとしてもディスクに書き込めるが、
+書き込み用に固定した場合はできない。整合性を欠く状態になっている可能性があるからである。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{ Write-ahead Logging}
 \begin{aosasect2}{ログ先行書き込み}
 
-Berkeley DB uses write-ahead-logging (WAL) as its transaction
-mechanism to make recovery after failure possible.  The term
-write-ahead-logging defines a policy requiring log records describing
-any change be propagated to disk \emph{before} the actual data updates
-they describe. Berkeley DB's use of WAL as its transaction mechanism
-has important implications for Mpool, and Mpool must balance its
-design point as a generic caching mechanism with its need to support
-the WAL protocol.
+%% Berkeley DB uses write-ahead-logging (WAL) as its transaction
+%% mechanism to make recovery after failure possible.  The term
+%% write-ahead-logging defines a policy requiring log records describing
+%% any change be propagated to disk \emph{before} the actual data updates
+%% they describe. Berkeley DB's use of WAL as its transaction mechanism
+%% has important implications for Mpool, and Mpool must balance its
+%% design point as a generic caching mechanism with its need to support
+%% the WAL protocol.
+Berkeley DBは、ログ先行書き込み（WAL）をトランザクションの仕組みとして使っており、
+処理に失敗した場合の復旧をできるようにしている。ログ先行書き込みという用語は、
+実際にデータを更新する\emph{前に}変更内容のログをディスクに書き込ませるという方針を表している。
+Berkeley DBがWALをトランザクション機構に採用しているということは
+Mpoolにとって大切な前提となる。Mpoolは、汎用的なキャッシュの機能と
+WALプロトコルのサポートとの間でバランスをとった設計でなければならない。
 
-Berkeley DB writes log sequence numbers (LSNs) on all data pages to
-document the log record corresponding to the most recent update to a
-particular page.  Enforcing WAL requires that before Mpool writes any
-page to disk, it must verify that the log record corresponding to the
-LSN on the page is safely on disk.  The design challenge is how to
-provide this functionality without requiring that all clients of Mpool
-use a page format identical to that used by Berkeley DB\@. Mpool
-addresses this challenge by providing a collection of \code{set} (and
-\code{get}) methods to direct its behavior.  The \code{DB\_MPOOLFILE} method
-\code{set\_lsn\_offset} provides a byte offset into a page, indicating
-where Mpool should look for an LSN to enforce WAL\@.  If the method is
-never called, Mpool does not enforce the WAL protocol. Similarly, the
-\code{set\_clearlen} method tells Mpool how many bytes of a page
-represent metadata that should be explicitly cleared when a page is
-created in the cache. These APIs allow Mpool to provide the
-functionality necessary to support Berkeley DB's transactional
-requirements, without forcing all users of Mpool to do so. 
+%% Berkeley DB writes log sequence numbers (LSNs) on all data pages to
+%% document the log record corresponding to the most recent update to a
+%% particular page.  Enforcing WAL requires that before Mpool writes any
+%% page to disk, it must verify that the log record corresponding to the
+%% LSN on the page is safely on disk.  The design challenge is how to
+%% provide this functionality without requiring that all clients of Mpool
+%% use a page format identical to that used by Berkeley DB\@. Mpool
+%% addresses this challenge by providing a collection of \code{set} (and
+%% \code{get}) methods to direct its behavior.  The \code{DB\_MPOOLFILE} method
+%% \code{set\_lsn\_offset} provides a byte offset into a page, indicating
+%% where Mpool should look for an LSN to enforce WAL\@.  If the method is
+%% never called, Mpool does not enforce the WAL protocol. Similarly, the
+%% \code{set\_clearlen} method tells Mpool how many bytes of a page
+%% represent metadata that should be explicitly cleared when a page is
+%% created in the cache. These APIs allow Mpool to provide the
+%% functionality necessary to support Berkeley DB's transactional
+%% requirements, without forcing all users of Mpool to do so. 
+Berkeley DBは、すべてのデータページにログシーケンス番号（LSN）を書き込む。
+これを使って、特定のページへの直近の変更に対応するログレコードを記録するのだ。
+WALを強制すると、Mpoolがページをディスクに書き出す前に
+そのページのLSNに対応するログレコードがディスク上にあることを確認しなければならない。
+ここで設計上の難題が発生する。
+この機能を提供しつつ、Mpoolのクライアントで
+Berkeley DBとは違うページフォーマットを使えるようにするにはどうすればいいだろうか。
+Mpoolがこの難題にこたえるために用意したメソッドが\code{set}（および\code{get}）
+のコレクションだ。これを使って振る舞いを指示する。
+\code{DB\_MPOOLFILE}のメソッド\code{set\_lsn\_offset}はページ内のバイトオフセットを提供し、
+どこにLSNがあるのかをMpoolに指示する。これは、WALを確実にするために必要なものだ。
+このメソッドが一切呼ばれなければ、MpoolはWALプロトコルを強要しない。
+同様に\code{set\_clearlen}メソッドは、
+ページをキャッシュ内で作るときにメタデータを何バイトぶん明示的にクリアする必要があるのかを
+Mpoolに伝える。これらのAPIのおかげで、MpoolはBerkeley DBの
+トランザクション要件に対応した機能を提供できるようになる。
+Mpoolを使う全ユーザーに対応を要求せずに済むのだ。
 
 %% \begin{aosabox}{Design Lesson 8}
 \begin{aosabox}{設計講座8}
 
-Write-ahead logging is another example of providing encapsulation and
-layering, even when the functionality is never going to be useful to
-another piece of software: after all, how many programs care about
-LSNs in the cache?  Regardless, the discipline is useful and makes the
-software easier to maintain, test, debug and extend.
+%% Write-ahead logging is another example of providing encapsulation and
+%% layering, even when the functionality is never going to be useful to
+%% another piece of software: after all, how many programs care about
+%% LSNs in the cache?  Regardless, the discipline is useful and makes the
+%% software easier to maintain, test, debug and extend.
+ログ先行書き込みはカプセル化とレイヤー化の一例でもある。
+たとえその機能がソフトウェアの他の箇所では一切使わないものだったとしても。
+結局のところ、キャッシュの中のLSNを気にかけているプログラムがいったいどれほどあるのだというのだろう？
+にもかかわらず、こういう指針は有用だ。
+ソフトウェアの保守やテスト、デバッグ、拡張をしやすくしてくれる。
 
 \end{aosabox}
 
