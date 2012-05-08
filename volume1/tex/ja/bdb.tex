@@ -1066,83 +1066,151 @@ Mpoolを使う全ユーザーに対応を要求せずに済むのだ。
 
 % Granularity of Locks and Degrees of Consistency in a Shared Data Base
 
-Like Mpool, the lock manager was designed as a general-purpose
-component: a hierarchical lock manager (see \cite{bib:gray:lock}),
-designed to support a hierarchy of objects that can be locked (such as
-individual data items), the page on which a data item lives, the file
-in which a data item lives, or even a collection of files. As we
-describe the features of the lock manager, we'll also explain how
-Berkeley DB uses them.  However, as with Mpool, it's important to
-remember that other applications can use the lock manager in
-completely different ways, and that's OK---it was designed to be
-flexible and support many different uses.
+%% Like Mpool, the lock manager was designed as a general-purpose
+%% component: a hierarchical lock manager (see \cite{bib:gray:lock}),
+%% designed to support a hierarchy of objects that can be locked (such as
+%% individual data items), the page on which a data item lives, the file
+%% in which a data item lives, or even a collection of files. As we
+%% describe the features of the lock manager, we'll also explain how
+%% Berkeley DB uses them.  However, as with Mpool, it's important to
+%% remember that other applications can use the lock manager in
+%% completely different ways, and that's OK---it was designed to be
+%% flexible and support many different uses.
+Mpoolと同様、ロックマネージャーも汎用コンポーネントとして作られた。
+階層化ロックマネージャー（\cite{bib:gray:lock}を参照）として
+オブジェクトの階層（個々のデータ項目など）のロックに対応しており、
+それだけでなくデータ項目が存在するページやファイルあるいはファイルのコレクションにも対応している。
+ロックマネージャーの機能を説明するとともに、
+Berkeley DBがそれをどう活用しているのかについても解説する。
+しかし、Mpoolの場合と同様、
+他のアプリケーションからもまったく違う方法でロックマネージャーを使えるという点が重要だ。
+もともとそういった使い方を想定して柔軟に作られており、
+さまざまな使い方に対応している。
 
-The lock manager has three key abstractions: a ``locker'' that identifies
-on whose behalf a lock is being acquired, a ``lock\_object'' that
-identifies the item being locked, and a ``conflict matrix''.
+%% The lock manager has three key abstractions: a ``locker'' that identifies
+%% on whose behalf a lock is being acquired, a ``lock\_object'' that
+%% identifies the item being locked, and a ``conflict matrix''.
+ロックマネージャーが抽象化している重要な概念は次の三つ。
+``ロッカー（locker）''は誰がロックを獲得したのかを表し、
+``ロックオブジェクト（lock\_object）''はロックされれている項目を表す。
+そして最後が``衝突マトリクス（conflict matrix）''である。
 
-Lockers are 32-bit unsigned integers. Berkeley DB divides this 32-bit
-name space into transactional and non-transactional lockers (although
-that distinction is transparent to the lock manager).  When Berkeley
-DB uses the lock manager, it assigns locker IDs in the range 0 to
-0x7fffffff to non-transactional lockers and the range 0x80000000 to
-0xffffffff to transactions. For example, when an application opens a
-database, Berkeley DB acquires a long-term read lock on that database
-to ensure no other thread of control removes or renames it while it is
-in-use. As this is a long-term lock, it does not belong to any
-transaction and the locker holding this lock is non-transactional.
+%% Lockers are 32-bit unsigned integers. Berkeley DB divides this 32-bit
+%% name space into transactional and non-transactional lockers (although
+%% that distinction is transparent to the lock manager).  When Berkeley
+%% DB uses the lock manager, it assigns locker IDs in the range 0 to
+%% 0x7fffffff to non-transactional lockers and the range 0x80000000 to
+%% 0xffffffff to transactions. For example, when an application opens a
+%% database, Berkeley DB acquires a long-term read lock on that database
+%% to ensure no other thread of control removes or renames it while it is
+%% in-use. As this is a long-term lock, it does not belong to any
+%% transaction and the locker holding this lock is non-transactional.
+ロッカーは32ビット符号なし整数である。
+Berkeley DBは、この32ビットの名前空間
+トランザクショナルなロッカーと非トランザクショナルなロッカーの二つに分割する
+（ただしロックマネージャー側からはこれらを区別しない）。
+Berkeley DBがロックマネージャーを使うときは、
+非トランザクショナルなロッカーについては0から0x7fffffff、
+トランザクショナルなロッカーについては0x80000000から0xffffffff
+の範囲のロッカーIDをトランザクションに割り当てる。
+たとえば、あるアプリケーションがデータベースを開いたとする。
+このときBerkeley DBはそのデータベースに対して長期間の読み込みロックを確保し、
+利用中は他の制御スレッドからの削除やリネームができないようにする。
+このロックは長期間のロックなのでトランザクションには属さず、
+ロッカーはこのロックを非トランザクショナルとして保持する。
 
-Any application using the lock manager needs to assign locker ids, so
-the lock manager API provides both \code{DB\_ENV\--{\textgreater}lock\_id}
-and \code{DB\_ENV\--{\textgreater}lock\_id\_free} calls to allocate and
-deallocate lockers.  So applications need not implement
-their own locker ID allocator, although they certainly can.
+%% Any application using the lock manager needs to assign locker ids, so
+%% the lock manager API provides both \code{DB\_ENV\--{\textgreater}lock\_id}
+%% and \code{DB\_ENV\--{\textgreater}lock\_id\_free} calls to allocate and
+%% deallocate lockers.  So applications need not implement
+%% their own locker ID allocator, although they certainly can.
+ロックマネージャーを使うすべてのアプリケーションは、ロッカーIDを割り当てる必要がある。
+そこで、ロックマネージャーのAPIでは\code{DB\_ENV\--{\textgreater}lock\_id}と
+\code{DB\_ENV\--{\textgreater}lock\_id\_free}の両方を提供している。
+これらを呼べば、ロッカーの割り当てと解放ができる。
+なので、アプリケーション側ではロッカーIDの割り当て処理の実装は不要だ。
 
 %% \begin{aosasect2}{Lock Objects}
 \begin{aosasect2}{ロックオブジェクト}
 
-Lock objects are arbitrarily long opaque byte-strings that represent
-the objects being locked. When two different lockers want to lock a
-particular object, they use the same opaque byte string to reference
-that object.  That is, it is the application's responsibility to agree
-on conventions for describing objects in terms of opaque byte strings.
+%% Lock objects are arbitrarily long opaque byte-strings that represent
+%% the objects being locked. When two different lockers want to lock a
+%% particular object, they use the same opaque byte string to reference
+%% that object.  That is, it is the application's responsibility to agree
+%% on conventions for describing objects in terms of opaque byte strings.
+ロックオブジェクトは任意の長さの不透明なバイト文字列で、
+これがロック対象のオブジェクトを表す。
+二つの異なるロッカーが特定のオブジェクトをロックしようとしたときは、
+どちらも同じバイト文字列でそのオブジェクトを表す。
+つまり、オブジェクトを不透明なバイト文字列で表すときの規約については
+アプリケーション側で決めておく必要がある。
 
-For example, Berkeley DB uses a DB\_LOCK\_ILOCK structure to describe
-its database locks. This structure contains three fields: a file
-identifier, a page number, and a type.
+%% For example, Berkeley DB uses a DB\_LOCK\_ILOCK structure to describe
+%% its database locks. This structure contains three fields: a file
+%% identifier, a page number, and a type.
+たとえばBerkeley DBでは、DB\_LOCK\_ILOCK構造体をつかってデータベースロックを表す。
+この構造体に含まれるフィールドは三つ。ファイルIDとページ番号、そして型である。
 
-In almost all cases, Berkeley DB needs to describe only the particular
-file and page it wants to lock. Berkeley DB assigns a unique 32-bit
-number to each database at create time, writes it into the database's
-metadata page, and then uses it as the database's unique identifier
-in the Mpool, locking, and logging subsystems. This is the
-\code{fileid} to which we refer in the DB\_LOCK\_ILOCK structure. Not
-surprisingly, the page number indicates which page of the particular
-database we wish to lock.  When we reference page locks, we set the
-type field of the structure to DB\_PAGE\_LOCK\@.  However, we can also
-lock other types of objects as necessary. As mentioned earlier, we
-sometimes lock a database handle, which requires a DB\_HANDLE\_LOCK
-type. The DB\_RECORD\_LOCK type lets us perform record level locking
-in the queue access method, and the DB\_DATABASE\_LOCK type lets us
-lock an entire database. 
+%% In almost all cases, Berkeley DB needs to describe only the particular
+%% file and page it wants to lock. Berkeley DB assigns a unique 32-bit
+%% number to each database at create time, writes it into the database's
+%% metadata page, and then uses it as the database's unique identifier
+%% in the Mpool, locking, and logging subsystems. This is the
+%% \code{fileid} to which we refer in the DB\_LOCK\_ILOCK structure. Not
+%% surprisingly, the page number indicates which page of the particular
+%% database we wish to lock.  When we reference page locks, we set the
+%% type field of the structure to DB\_PAGE\_LOCK\@.  However, we can also
+%% lock other types of objects as necessary. As mentioned earlier, we
+%% sometimes lock a database handle, which requires a DB\_HANDLE\_LOCK
+%% type. The DB\_RECORD\_LOCK type lets us perform record level locking
+%% in the queue access method, and the DB\_DATABASE\_LOCK type lets us
+%% lock an entire database. 
+%% \hspace{-.5cm}
+ほとんどの場合、Berkeley DBで表す必要があるのは
+ロックしたい特定のファイルやページだけである。
+Berkeley DBはデータベースの作成時に一意な32ビット数値を割り当てており、
+データベースのメタデータページにそれを書き込んでいる。
+Mpoolやロック、ログなどのサブシステムでは、これをデータベースの一意なIDとして使う。
+DB\_LOCK\_ILOCK構造体の\code{fileid}が、そのIDである。
+おそらく予想通りだろうが、ページ番号が指すのはデータベース内でロックしたいページである。
+ページロックを指すときには、構造体のtypeフィールドにDB\_PAGE\_LOCKを設定する。
+しかし、必要に応じて他の型のオブジェクトもロックできる。
+先述のとおり、時にはデータベースのハンドルをロックすることもあり、
+その場合に指定する型はDB\_HANDLE\_LOCKとなる。
+DB\_RECORD\_LOCK型を使えばqueueアクセスメソッドでレコードレベルのロックができ、
+DB\_DATABASE\_LOCK型を使えばデータベース全体をロックする。
 \hspace{-.5cm}
 %% \begin{aosabox}{Design Lesson 9}
 \begin{aosabox}{設計講座9}
 
-Berkeley DB's choice to use page-level locking was made for good
-reasons, but we've found that choice to be problematic at times. Page-level locking
-limits the concurrency of the application as one thread of control
-modifying a record on a database page will prevent other threads of
-control from modifying other records on the same page, while
-record-level locks permit such concurrency as long as the two threads
-of control are not modifying the same record.  Page-level locking
-enhances stability as it limits the number of recovery paths that are
-possible (a page is always in one of a couple of states during
-recovery, as opposed to the infinite number of possible states a page
-might be in if multiple records are being added and deleted to a
-page). As Berkeley DB was intended for use as an embedded system where
-no database administrator would be available to fix things should
-there be corruption, we chose stability over increased concurrency.
+%% Berkeley DB's choice to use page-level locking was made for good
+%% reasons, but we've found that choice to be problematic at times. Page-level locking
+%% limits the concurrency of the application as one thread of control
+%% modifying a record on a database page will prevent other threads of
+%% control from modifying other records on the same page, while
+%% record-level locks permit such concurrency as long as the two threads
+%% of control are not modifying the same record.  Page-level locking
+%% enhances stability as it limits the number of recovery paths that are
+%% possible (a page is always in one of a couple of states during
+%% recovery, as opposed to the infinite number of possible states a page
+%% might be in if multiple records are being added and deleted to a
+%% page). As Berkeley DB was intended for use as an embedded system where
+%% no database administrator would be available to fix things should
+%% there be corruption, we chose stability over increased concurrency.
+Berkeley DBがページレベルのロックを選んだことにはそれなりの理由がある。
+しかし、時にはその選択が問題となることも出てきた。
+ページレベルのロックはアプリケーションの同時実行性を制限してしまう。
+ある制御スレッドがデータベースのレコードを変更すると、
+他のスレッドからは同じページにあるそれ以外のレコードを変更できなくなる。
+一方レコードレベルのロックなら、全く同じレコードを変更しようとしない限りはそんな制限を受けない。
+ページレベルのロックをすれば安定性が向上する。
+考えうるリカバリーパスが絞り込めるからである
+（リカバリ中は、ページは常にいくつかの状態の中のひとつでいる。
+しかし、もしひとつのページの中で複数のレコードが追加されたり削除されたりしていたら、
+無数の可能性が存在しうることになる）。
+Berkeley DBは組み込みシステムでの利用を想定して作られたものである。
+そんな環境では、何か問題があったときに対応してくれるようなデータベース管理者がいるとは限らない。
+そこで私たちは、同時実行性よりも安定性を重視することにしたのだ。
 
 \end{aosabox}
 
@@ -1151,31 +1219,49 @@ there be corruption, we chose stability over increased concurrency.
 %% \begin{aosasect2}{The Conflict Matrix}
 \begin{aosasect2}{衝突マトリクス}
 
-The last abstraction of the locking subsystem we'll discuss is the
-conflict matrix. A conflict matrix defines the different types of
-locks present in the system and how they interact. Let's call the
-entity holding a lock, the holder and the entity requesting a lock the
-requester, and let's also assume that the holder and requester have
-different locker ids.  The conflict matrix is an array indexed by
-\code{[requester][holder]}, where each entry contains a zero if there
-is no conflict, indicating that the requested lock can be granted, and
-a one if there is a conflict, indicating that the request cannot be
-granted.
+%% The last abstraction of the locking subsystem we'll discuss is the
+%% conflict matrix. A conflict matrix defines the different types of
+%% locks present in the system and how they interact. Let's call the
+%% entity holding a lock, the holder and the entity requesting a lock the
+%% requester, and let's also assume that the holder and requester have
+%% different locker ids.  The conflict matrix is an array indexed by
+%% \code{[requester][holder]}, where each entry contains a zero if there
+%% is no conflict, indicating that the requested lock can be granted, and
+%% a one if there is a conflict, indicating that the request cannot be
+%% granted.
+ロックのサブシステムの中で最後に取り上げる抽象概念が、衝突マトリクスだ。
+これは、システム内に存在するさまざまな型のロックとその相互作用について定義する。
+ロックを保持するエンティティを「ホルダー」、
+ロックを要求するエンティティを「リクエスター」と呼び、
+ホルダーとリクエスターがそれぞれ別のロッカーIDを持っているものとする。
+このとき、衝突マトリクスは\code{[requester][holder]}をインデックスとする配列になる。
+もし衝突がなければそのエントリの値は0で、これはロックが認められることを表す。
+衝突が発生する場合の値は1で、これは要求が認められなかったことを表す。
 
-The lock manager contains a default conflict matrix, which happens to
-be exactly what Berkeley DB needs, however, an application is free to
-design its own lock modes and conflict matrix to suit its own
-purposes.  The only requirement on the conflict matrix is that it is
-square (it has the same number of rows and columns) and that the
-application use 0-based sequential integers to describe its lock
-modes (e.g., read, write, etc.).   \aosatblref{tbl.bdb.two}
- shows the Berkeley DB conflict matrix.
+%% The lock manager contains a default conflict matrix, which happens to
+%% be exactly what Berkeley DB needs, however, an application is free to
+%% design its own lock modes and conflict matrix to suit its own
+%% purposes.  The only requirement on the conflict matrix is that it is
+%% square (it has the same number of rows and columns) and that the
+%% application use 0-based sequential integers to describe its lock
+%% modes (e.g., read, write, etc.).   \aosatblref{tbl.bdb.two}
+%%  shows the Berkeley DB conflict matrix.
+ロックマネージャーにはデフォルトの衝突マトリクスが組み込まれており、
+これはたまたまBerkeley DBが必要とするものと完全に一致している。
+しかし、アプリケーション側で目的に合わせて
+自前のロックモードと衝突マトリクスを作ってもかまわない。
+衝突マトリクスに関する条件は、正方行列である
+（行の数と列の数が等しい）ことと、
+ロックモード（read、writeなど）をゼロから始まる整数の連番で表すということだけである。
+\aosatblref{tbl.bdb.two}に、Berkeley DBの衝突マトリクスを示す。
 
 \begin{table}[h]\small\centering
 \begin{tabular} { | l | c | c | c | c | c | c | c | c | c | }
 \hline
-& {\bf Holder} & & & & & & & & \\
-{\bf Requester} & {\bf No-Lock}	& {\bf Read} & {\bf Write} & {\bf Wait}	& {\bf iWrite} & {\bf iRead} & {\bf iRW} & {\bf uRead} & {\bf wasWrite}\\
+%% & {\bf Holder} & & & & & & & & \\
+& {\bf ホルダー} & & & & & & & & \\
+%% {\bf Requester} & {\bf No-Lock}	& {\bf Read} & {\bf Write} & {\bf Wait}	& {\bf iWrite} & {\bf iRead} & {\bf iRW} & {\bf uRead} & {\bf wasWrite}\\
+{\bf リクエスター} & {\bf No-Lock}	& {\bf Read} & {\bf Write} & {\bf Wait}	& {\bf iWrite} & {\bf iRead} & {\bf iRW} & {\bf uRead} & {\bf wasWrite}\\
 \hline
 {\bf No-Lock}	&	&	& &	& & &	& & \\
 \hline
@@ -1196,7 +1282,8 @@ modes (e.g., read, write, etc.).   \aosatblref{tbl.bdb.two}
 {\bf iwasWrite}	& 		& \checkmark	& \checkmark & 		& \checkmark   & \checkmark  & \checkmark & 	       & \checkmark\\
 \hline
 \end{tabular}
-\caption{Read-Writer Conflict Matrix.}
+%% \caption{Read-Writer Conflict Matrix.}
+\caption{Read-Writer衝突マトリクス}
 \label{tbl.bdb.two}
 \end{table}
 
@@ -1205,72 +1292,131 @@ modes (e.g., read, write, etc.).   \aosatblref{tbl.bdb.two}
 %% \begin{aosasect2}{Supporting Hierarchical Locking}
 \begin{aosasect2}{階層化ロックのサポート}
 
-Before explaining the different lock modes in the Berkeley DB conflict
-matrix, let's talk about how the locking subsystem supports
-hierarchical locking. Hierarchical locking is the ability to lock
-different items within a containment hierarchy. For example, files
-contain pages, while pages contain individual elements. When modifying
-a single page element in a hierarchical locking system, we want to
-lock just that element; if we were modifying every element on the
-page, it would be more efficient to simply lock the page, and if we
-were modifying every page in a file, it would be best to lock the
-entire file. Additionally, hierarchical locking must understand the
-hierarchy of the containers because locking a page also says something
-about locking the file: you cannot modify the file that contains a
-page at the same time that pages in the file are being modified.
+%% Before explaining the different lock modes in the Berkeley DB conflict
+%% matrix, let's talk about how the locking subsystem supports
+%% hierarchical locking. Hierarchical locking is the ability to lock
+%% different items within a containment hierarchy. For example, files
+%% contain pages, while pages contain individual elements. When modifying
+%% a single page element in a hierarchical locking system, we want to
+%% lock just that element; if we were modifying every element on the
+%% page, it would be more efficient to simply lock the page, and if we
+%% were modifying every page in a file, it would be best to lock the
+%% entire file. Additionally, hierarchical locking must understand the
+%% hierarchy of the containers because locking a page also says something
+%% about locking the file: you cannot modify the file that contains a
+%% page at the same time that pages in the file are being modified.
+Berkeley DBの衝突マトリクスにおけるさまざまなロックモードについて説明する前に、
+ロックサブシステムがどうやって階層化ロックに対応しているのかを説明しよう。
+階層化ロックとは、さまざまな項目を階層を保ったままロックすることだ。
+たとえば、ファイルの中には複数のページがあり、ページの中には個々の要素が含まれる。
+あるページの要素を階層化ロックのもとで変更するときは、
+その要素だけをロックしておきたい。
+ページ上の全要素を変更するなら、各要素をロックするよりも
+単にそのページを丸ごとロックしたほうが効率的だ。
+同様に、ファイル内のすべてのページを変更するのなら
+ファイル全体をロックするのがいちばんだ。
+さらに、階層化ロックを行うにはコンテナの階層についても知っておく必要がある。
+あるページをロックするということは、ファイルをロックするということでもあるからだ。
+あるページが変更されているとき、そのページを含むファイルを同時に変更することはできない。
 
-The question then is how to allow different lockers to lock at
-different hierarchical levels without chaos resulting.  The answer
-lies in a construct called an intention lock. A locker acquires an
-intention lock on a container to indicate the intention to lock things
-within that container. So, obtaining a read-lock on a page implies
-obtaining an intention-to-read lock on the file. Similarly, to write a
-single page element, you must acquire an intention-to-write lock on
-both the page and the file. In the conflict matrix above, the \code{iRead},
-\code{iWrite}, and \code{iWR} locks are all intention locks that indicate an
-intention to read, write or do both, respectively.
+%% The question then is how to allow different lockers to lock at
+%% different hierarchical levels without chaos resulting.  The answer
+%% lies in a construct called an intention lock. A locker acquires an
+%% intention lock on a container to indicate the intention to lock things
+%% within that container. So, obtaining a read-lock on a page implies
+%% obtaining an intention-to-read lock on the file. Similarly, to write a
+%% single page element, you must acquire an intention-to-write lock on
+%% both the page and the file. In the conflict matrix above, the \code{iRead},
+%% \code{iWrite}, and \code{iWR} locks are all intention locks that indicate an
+%% intention to read, write or do both, respectively.
+というわけで、問題は、
+さまざまなロッカーが異なる階層レベルを見るときに混乱を引き起こさずに済ませるには
+どうすればいいか？ということになる。その答えはインテンションロックと呼ばれる概念にある。
+あるロッカーがコンテナに対するインテンションロックを獲得すると、
+そのコンテナの中身に対してもロックする意図があるということを表す。
+つまり、ページへの書き込みロックを獲得するということは、
+ファイルへの書き込みインテンションロックを獲得することを意味する。
+同様に、あるページのひとつの要素に書き込むには、
+ページとファイルの両方に対する書き込みインテンションロックを獲得しなければならない。
+さきほどの衝突マトリクスにおいて
+\code{iRead}、\code{iWrite}、そして\code{iWR}はすべてインテンションロックであり、
+それぞれ読み込み、書き込み、その両方に対する意図を指す。
 
-Therefore, when performing hierarchical locking, rather than
-requesting a single lock on something, it is necessary to request
-potentially many locks: the lock on the actual entity as well as
-intention locks on any containing entities. This need leads to the
-Berkeley DB \code{DB\_ENV\--{\textgreater}lock\_vec} interface, which
-takes an array of lock requests and grants them (or rejects them),
-atomically.
+%% Therefore, when performing hierarchical locking, rather than
+%% requesting a single lock on something, it is necessary to request
+%% potentially many locks: the lock on the actual entity as well as
+%% intention locks on any containing entities. This need leads to the
+%% Berkeley DB \code{DB\_ENV\--{\textgreater}lock\_vec} interface, which
+%% takes an array of lock requests and grants them (or rejects them),
+%% atomically.
+したがって、単に何かを単体でロックするのではなく階層化ロックを実行しようとした場合は、
+多数のロックを要求しなければならなくなる。実際にロックしたいエンティティだけでなく、
+それを含むエンティティに対するインテンションロックも必要となる。
+そのためにはBerkeley DBの\code{DB\_ENV\--{\textgreater}lock\_vec}
+インターフェイスが必要だ。これは、ロック要求の配列を受け取って、
+その承認（あるいは却下）をアトミックに行う。
 
-Although Berkeley DB doesn't use hierarchical locking internally, it
-takes advantage of the ability to specify different conflict
-matrices, and the ability to specify multiple lock requests at once.
-We use the default conflict matrix when providing transactional
-support, but a different conflict matrix to provide simple concurrent
-access without transaction and recovery support.  We use 
-\code{DB\_ENV\--{\textgreater}lock\_vec} to perform lock
-coupling, a technique that enhances the concurrency of Btree
-traversals~\cite{bib:comer:btree}.  In lock coupling, you hold
-one lock only long enough to acquire the next lock.  That is, you lock
-an internal Btree page only long enough to read the information that
-allows you to select and lock a page at the next level.
+%% Although Berkeley DB doesn't use hierarchical locking internally, it
+%% takes advantage of the ability to specify different conflict
+%% matrices, and the ability to specify multiple lock requests at once.
+%% We use the default conflict matrix when providing transactional
+%% support, but a different conflict matrix to provide simple concurrent
+%% access without transaction and recovery support.  We use 
+%% \code{DB\_ENV\--{\textgreater}lock\_vec} to perform lock
+%% coupling, a technique that enhances the concurrency of Btree
+%% traversals~\cite{bib:comer:btree}.  In lock coupling, you hold
+%% one lock only long enough to acquire the next lock.  That is, you lock
+%% an internal Btree page only long enough to read the information that
+%% allows you to select and lock a page at the next level.
+Berkeley DBは内部的には階層化ロックを使っていないが、
+異なる衝突マトリクスを指定できるという機能や
+複数のロック要求を一度に指定できる機能は活用している。
+デフォルトの衝突マトリクスはトランザクションをサポートするときに使うが、
+トランザクションやリカバリーのサポートをやめてシンプルな同時アクセス機能を提供するときには
+別の衝突マトリクスを使う。
+我々は\code{DB\_ENV\--{\textgreater}lock\_vec}を使ってロックの結合をする。
+これはBtreeの走査の同時並行性をあげるためのテクニックだ\cite{bib:comer:btree}。
+ロックを結合するときには、ひとつのロックを保持するのは次のロックを獲得するまでの間となる。
+つまり、内部のBtreeページをロックするのは、
+次のレベルのページを選んでロックするための情報を読み込むまでの間である。
 
 %% \begin{aosabox}{Design Lesson 10}
 \begin{aosabox}{設計講座10}
 
-Berkeley DB's general-purpose design was well rewarded when we added
-concurrent data store functionality. Initially Berkeley
-DB provided only two modes of operation: either you ran without any
-write concurrency or with full transaction support. Transaction
-support carries a certain degree of complexity for the developer and
-we found some applications wanted improved concurrency without the
-overhead of full transactional support. To provide this feature, we
-added support for API-level locking that allows concurrency, while
-guaranteeing no deadlocks.  This required a new and different lock
-mode to work in the presence of cursors. Rather than adding special
-purpose code to the lock manager, we were able to create an alternate
-lock matrix that supported only the lock modes necessary for the
-API-level locking.  Thus, simply by configuring the lock manager
-differently, we were able provide the locking support we
-needed. (Sadly, it was not as easy to change the access methods; there
-are still significant parts of the access method code to handle this
-special mode of concurrent access.)
+%% Berkeley DB's general-purpose design was well rewarded when we added
+%% concurrent data store functionality. Initially Berkeley
+%% DB provided only two modes of operation: either you ran without any
+%% write concurrency or with full transaction support. Transaction
+%% support carries a certain degree of complexity for the developer and
+%% we found some applications wanted improved concurrency without the
+%% overhead of full transactional support. To provide this feature, we
+%% added support for API-level locking that allows concurrency, while
+%% guaranteeing no deadlocks.  This required a new and different lock
+%% mode to work in the presence of cursors. Rather than adding special
+%% purpose code to the lock manager, we were able to create an alternate
+%% lock matrix that supported only the lock modes necessary for the
+%% API-level locking.  Thus, simply by configuring the lock manager
+%% differently, we were able provide the locking support we
+%% needed. (Sadly, it was not as easy to change the access methods; there
+%% are still significant parts of the access method code to handle this
+%% special mode of concurrent access.)
+Berkeley DBを汎用性重視の設計にしておいたことが、
+並列データ格納機能を追加するときに役立った。
+当初Berkeley DBが用意していた操作モードは二種類だけで、
+並列書き込みを一切考慮しないモードと
+完全なトランザクションに対応したモードだけだった。
+トランザクションに対応すると開発者にとってはそれなりに複雑になってしまうし、
+アプリケーションによっては、トランザクションのサポートが不完全でもいいから
+並列処理を改善してほしいという場合もあった。
+この機能を提供するために、まずはAPIレベルのロックに対応して並列処理をできるようにし、
+デッドロックが発生しないことを保証した。
+そのために必要なのは、新たなロックモードを別途用意してカーソル上で動作させるということだった。
+これを実現するために新たなコードをロックマネージャーに追加する必要はなく、
+APIレベルのロックに必要なロックモードだけに対応したロックマトリクスを用意するだけでよかった。
+このようにして、単にロックマネージャーの設定を調整するだけで、
+必要となるロックサポートを提供できたのだ
+（残念ながら、アクセスメソッドの変更は、それほどお手軽にはできなかった。
+アクセスメソッド側には、並列アクセスのための特別なモードに対応するためのコードが大量に存在する）。
 
 \end{aosabox}
 
