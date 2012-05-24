@@ -1428,213 +1428,374 @@ APIレベルのロックに必要なロックモードだけに対応したロ�
 \begin{aosasect1}{ログマネージャー: Log}
 \label{sec.bdb.log}
 
-The log manager provides the abstraction of a structured, append-only
-file. As with the other modules, we intended to design a
-general-purpose logging facility, however the logging subsystem is
-probably the module where we were least successful. 
+%% The log manager provides the abstraction of a structured, append-only
+%% file. As with the other modules, we intended to design a
+%% general-purpose logging facility, however the logging subsystem is
+%% probably the module where we were least successful. 
+ログマネージャーは、構造化された追記限定のファイルを抽象化したものである。
+他のモジュールと同様、汎用的なログ機能を念頭に置いて作っている。
+しかしログ出力サブシステムは、各種モジュール群の中でおそらく最もできの悪いものであろう。
 
 %% \begin{aosabox}{Design Lesson 11}
 \begin{aosabox}{設計講座11}
 
-When you find an architectural problem you don't want to fix ``right
-now'' and that you're inclined to just let go, remember that being
-nibbled to death by ducks will kill you just as surely as being
-trampled by elephants. Don't be too hesitant to change entire
-frameworks to improve software structure, and when you make the
-changes, don't make a partial change with the idea that you'll clean
-up later---do it all and then move forward. As has been often
-repeated, ``If you don't have the time to do it right now, you won't
-find the time to do it later.'' And while you're changing the
-framework, write the test structure as well.
+%% When you find an architectural problem you don't want to fix ``right
+%% now'' and that you're inclined to just let go, remember that being
+%% nibbled to death by ducks will kill you just as surely as being
+%% trampled by elephants. Don't be too hesitant to change entire
+%% frameworks to improve software structure, and when you make the
+%% changes, don't make a partial change with the idea that you'll clean
+%% up later---do it all and then move forward. As has been often
+%% repeated, ``If you don't have the time to do it right now, you won't
+%% find the time to do it later.'' And while you're changing the
+%% framework, write the test structure as well.
+アーキテクチャ上の問題が見つかったけれども「とりあえず今のところは」
+修正したくない。できればそのままにしておきたいなあ…だって？
+アヒルのくちばしでの突っつきも、数え切れないほど続いたら死に至るかもよ。
+そう、ゾウに踏みつぶされたら死んでしまうのと同じように。
+ソフトウェアの構造を改良するため根本的にフレームワークを変更してしまうことを恐れてはいけない。
+また、一部だけ変更して後で徐々に整えていこうなんて考えではいけない。
+やるなら全体的にやってしまって、それから次に進もう。何度となく言われているように、
+「今それをする時間がないのなら、いつまでたってもそんな時間はひねり出せないだろう」
+ってことだ。また、フレームワークを変更するときにはテストもきちんと書いておこう。
 
 \end{aosabox}
 
-A log is conceptually quite simple: it takes opaque byte strings and
-writes them sequentially to a file, assigning each a unique
-identifier, called a log sequence number (LSN). Additionally, the log
-must provide efficient forward and backward traversal and retrieval by
-LSN\@.  There are two tricky parts: first, the log must guarantee it is
-in a consistent state after any possible failure (where consistent
-means it contains a contiguous sequence of uncorrupted log records);
-second, because log records must be written to stable storage for
-transactions to commit, the performance of the log is usually what
-bounds the performance of any transactional application.
+%% A log is conceptually quite simple: it takes opaque byte strings and
+%% writes them sequentially to a file, assigning each a unique
+%% identifier, called a log sequence number (LSN). Additionally, the log
+%% must provide efficient forward and backward traversal and retrieval by
+%% LSN\@.  There are two tricky parts: first, the log must guarantee it is
+%% in a consistent state after any possible failure (where consistent
+%% means it contains a contiguous sequence of uncorrupted log records);
+%% second, because log records must be written to stable storage for
+%% transactions to commit, the performance of the log is usually what
+%% bounds the performance of any transactional application.
+ログの概念は極めてシンプルである。
+不透明なバイト文字列を受け取り、それをシーケンシャルにファイルへ書き出し、
+各レコードに一意な識別子を付与する。この識別子はログシーケンス番号(LSN)と呼ばれる。
+さらに、このLSNを使って両方向への効率的な走査やレコードの取得をできるようにしておく必要がある。
+注意すべき点は次の二カ所だ。まず、考え得るあらゆる障害があった後でもその一貫性を保証しなければならない
+(ここでいう一貫性とは、障害の前後の一連のレコードは正常な状態で残らなければいけないということである)。
+次に、ログレコードはトランザクションのコミットのたびに安定したストレージに書き出す必要があるので、
+ログのパフォーマンスはトランザクションを利用するあらゆるアプリケーションに影響する。
 
-As the log is an append-only data structure, it can grow without
-bound.  We implement the log as a collection of sequentially numbered
-files, so log space may be reclaimed by simply removing old log
-files. Given the multi-file architecture of the log, we form LSNs as
-pairs specifying a file number and offset within the file. Thus, given
-an LSN, it is trivial for the log manager to locate the record: it
-seeks to the given offset of the given log file and returns the record
-written at that location. But how does the log manager know how many
-bytes to return from that location?
+%% As the log is an append-only data structure, it can grow without
+%% bound.  We implement the log as a collection of sequentially numbered
+%% files, so log space may be reclaimed by simply removing old log
+%% files. Given the multi-file architecture of the log, we form LSNs as
+%% pairs specifying a file number and offset within the file. Thus, given
+%% an LSN, it is trivial for the log manager to locate the record: it
+%% seeks to the given offset of the given log file and returns the record
+%% written at that location. But how does the log manager know how many
+%% bytes to return from that location?
+ログは追記しかしないデータ構造なので、何の束縛もなしにサイズを増やせる。
+我々はログを連番のファイルとして実装したので、
+ログ用のスペースを確保するには単に古いログファイルを削除するだけでよい。
+ログのアーキテクチャを複数ファイル形式にしたので、
+LSNの形式はファイル番号とファイル内オフセットのペアとした。
+したがって、LSNさえわかれば、ログマネージャーは簡単にレコードを見つけられる。
+指定されたファイルの指定されたオフセットまでシークし、そこに書かれているレコードを返すだけのことだ。
+しかし、場所はわかったとして、そこから何バイトぶん返せばいいのかはどうやって知るのだろう?
 
 %% \begin{aosasect2}{Log Record Formatting}
 \begin{aosasect2}{ログレコードの書式}
 
-The log must persist per-record metadata so that, given an LSN, the
-log manager can determine the size of the record to return. At a
-minimum, it needs to know the length of the record. We prepend every
-log record with a log record header containing the record's length,
-the offset of the previous record (to facilitate backward traversal),
-and a checksum for the log record (to identify log corruption and the
-end of the log file). This metadata is sufficient for the log manager
-to maintain the sequence of log records, but it is not sufficient to
-actually implement recovery; that functionality is encoded in the
-contents of log records and in how Berkeley DB uses those log records.
+%% The log must persist per-record metadata so that, given an LSN, the
+%% log manager can determine the size of the record to return. At a
+%% minimum, it needs to know the length of the record. We prepend every
+%% log record with a log record header containing the record's length,
+%% the offset of the previous record (to facilitate backward traversal),
+%% and a checksum for the log record (to identify log corruption and the
+%% end of the log file). This metadata is sufficient for the log manager
+%% to maintain the sequence of log records, but it is not sufficient to
+%% actually implement recovery; that functionality is encoded in the
+%% contents of log records and in how Berkeley DB uses those log records.
+ログには必ずレコード単位のメタデータが含まなければならない。
+そうすれば、LSNさえわかれば返すレコードのサイズもわかるようになる。
+最低限、レコードの長さが取得できなければいけない。
+我々が選んだのは、すべてのログレコードの前にレコードヘッダを付加する方法だ。
+レコード長や前のレコードからのオフセット(逆方向の走査用)、そしてログレコードのチェックサム
+(ログの破壊やファイルの終端を検出するため)といった情報がヘッダに含まれる。
+このメタデータがあれば、ログマネージャーがレコードの並びを保守するには十分だ。
+しかしこれだけでは、リカバリー処理を実装することができない。
+リカバリー機能はログレコードの中身に組み込まれており、
+Berkeley DBはログレコード自体を使ってリカバリー処理を行う。
 
 % Principles of transaction-oriented database recovery
 
-Berkeley DB uses the log manager to write before- and after-images of
-data before updating items in the database
-\cite{bib:haerder:recovery}.  These log records contain enough
-information to either redo or undo operations on the
-database. Berkeley DB then uses the log both for transaction abort
-(that is, undoing any effects of a transaction when the transaction is
-discarded) and recovery after application or system failure.
+%% Berkeley DB uses the log manager to write before- and after-images of
+%% data before updating items in the database
+%% \cite{bib:haerder:recovery}.  These log records contain enough
+%% information to either redo or undo operations on the
+%% database. Berkeley DB then uses the log both for transaction abort
+%% (that is, undoing any effects of a transaction when the transaction is
+%% discarded) and recovery after application or system failure.
+Berkeley DBは、ログマネージャーを利用して
+更新前・更新後のイメージをそれぞれ記録してからデータベース内のアイテムを更新する
+\cite{bib:haerder:recovery}。
+このログレコードには、データベース上での操作を取り消したりやり直したりするために
+必要な情報が含まれている。
+Berkeley DBはこのログを利用して、トランザクションのアボート
+(それまで行われた変更をすべて取り消してトランザクションを破棄する処理)
+やアプリケーションあるいはシステムが異常終了したときのリカバリーを行う。
 
-In addition to APIs to read and write log records, the log manager
-provides an API to force log records to disk
-(\code{DB\_ENV\--{\textgreater}log\_flush}).  This allows Berkeley DB to
-implement write-ahead logging---before evicting a page from Mpool,
-Berkeley DB examines the LSN on the page and asks the log manager to
-guarantee that the specified LSN is on stable storage. Only then does
-Mpool write the page to disk. 
+%% In addition to APIs to read and write log records, the log manager
+%% provides an API to force log records to disk
+%% (\code{DB\_ENV\--{\textgreater}log\_flush}).  This allows Berkeley DB to
+%% implement write-ahead logging---before evicting a page from Mpool,
+%% Berkeley DB examines the LSN on the page and asks the log manager to
+%% guarantee that the specified LSN is on stable storage. Only then does
+%% Mpool write the page to disk. 
+ログレコードの読み書き用のAPI以外に、
+ログレコードを強制的にディスクに書き込むAPI
+(\code{DB\_ENV\--{\textgreater}log\_flush})も用意されている。
+このAPIを利用して、Berkeley DBのログ先行書き込みを実装しているのだ。
+ページをMpoolから削除する前に、Berkeley DBがページのLSNを調べ、
+そのLSNがストレージ上に格納されているかどうかをログマネージャに問い合わせる。
+それが確認できたときにだけMpoolがページをディスクに書き出すのだ。
 
 %% \begin{aosabox}{Design Lesson 12}
 \begin{aosabox}{設計講座12}
 
-Mpool and Log use internal handle methods to facilitate write-ahead
-logging, and in some cases, the method declaration is longer than the
-code it runs, since the code is often comparing two integral values
-and nothing more. Why bother with such insignificant methods, just to
-maintain consistent layering?  Because if your code is not so
-object-oriented as to make your teeth hurt, it is not object-oriented
-enough. Every piece of code should do a small number of things and
-there should be a high-level design encouraging programmers to build
-functionality out of smaller chunks of functionality, and so on. If
-there's anything we have learned about software development in the
-past few decades, it is that our ability to build and maintain
-significant pieces of software is fragile. Building and maintaining
-significant pieces of software is difficult and error-prone, and as
-the software architect, you must do everything that you can, as early
-as you can, as often as you can, to maximize the information conveyed
-in the structure of your software.
+%% Mpool and Log use internal handle methods to facilitate write-ahead
+%% logging, and in some cases, the method declaration is longer than the
+%% code it runs, since the code is often comparing two integral values
+%% and nothing more. Why bother with such insignificant methods, just to
+%% maintain consistent layering?  Because if your code is not so
+%% object-oriented as to make your teeth hurt, it is not object-oriented
+%% enough. Every piece of code should do a small number of things and
+%% there should be a high-level design encouraging programmers to build
+%% functionality out of smaller chunks of functionality, and so on. If
+%% there's anything we have learned about software development in the
+%% past few decades, it is that our ability to build and maintain
+%% significant pieces of software is fragile. Building and maintaining
+%% significant pieces of software is difficult and error-prone, and as
+%% the software architect, you must do everything that you can, as early
+%% as you can, as often as you can, to maximize the information conveyed
+%% in the structure of your software.
+MpoolとLogは内部処理のメソッドでログ先行書き込みを利用しており、
+場合によってはメソッドの宣言のほうが実際のコードよりも長くなることもある。
+メソッドで実際に行っているのが単なる積分値の比較だけだということが多いからである。
+一貫したレイヤー構造を保つためだけに、わざわざそこまでする必要があるのかって?
+歯が痛くなるほどのオブジェクト指向じゃなければ、
+十分にオブジェクト指向しているとは言えないのだよ。
+あらゆるコード片は、あまり多くのことをやりすぎないようにしなければならない。
+また、小規模な機能のかたまりを取りまとめて一つの機能を構築させるよう、
+上位レベルの設計をしていかなければいけない。
+過去数十年間でソフトウェア開発について学んだことがあるとすれば、
+大量のソフトウェア部品を組み上げたり保守したりする能力はとてもはかないものだということである。
+大量のソフトウェア部品を組み上げたり保守したりするのは
+難しくて間違いを犯しやすい。そして、ソフトウェアアーキテクトとして、
+できる限りのことをしてできるだけ早くできるだけ頻繁に
+ソフトウェアが運ぶ情報を最大化しなければならない。
 
 \end{aosabox}
 
-Berkeley DB imposes structure on the log records to facilitate
-recovery.  Most Berkeley DB log records describe transactional
-updates. Thus, most log records correspond to page modifications to a
-database, performed on behalf of a transaction. This description
-provides the basis for identifying what metadata Berkeley DB must
-attach to each log record: a database, a transaction, and a record
-type. The transaction identifier and record type fields are present in every
-record at the same location.  This allows the recovery system to
-extract a record type and dispatch the record to an appropriate
-handler that can interpret the record and perform appropriate
-actions. The transaction identifier lets the recovery process identify the
-transaction to which a log record belongs, so that during the various
-stages of recovery, it knows whether the record can be ignored or must
-be processed.
+%% Berkeley DB imposes structure on the log records to facilitate
+%% recovery.  Most Berkeley DB log records describe transactional
+%% updates. Thus, most log records correspond to page modifications to a
+%% database, performed on behalf of a transaction. This description
+%% provides the basis for identifying what metadata Berkeley DB must
+%% attach to each log record: a database, a transaction, and a record
+%% type. The transaction identifier and record type fields are present in every
+%% record at the same location.  This allows the recovery system to
+%% extract a record type and dispatch the record to an appropriate
+%% handler that can interpret the record and perform appropriate
+%% actions. The transaction identifier lets the recovery process identify the
+%% transaction to which a log record belongs, so that during the various
+%% stages of recovery, it knows whether the record can be ignored or must
+%% be processed.
+Berkeley DBは、リカバリー機能を提供できるようなログレコードの構造を強いている。
+Berkeley DBのログレコードの大半は、トランザクションの更新を記録するものである。
+したがって、ログレコードの大半はデータベースのページを書き換えるものであり、
+トランザクション上で実行されていることになる。
+これを踏まえると、Berkeley DBのログレコードに付加すべきメタデータが決まる。
+それがデータベース・トランザクション・レコードタイプである。
+トランザクションIDおよびレコードタイプのフィールドは、
+すべてのレコードで同じ位置に存在する。
+こうすることで、リカバリーシステムがレコードタイプを取得し、
+レコードの処理を適切なハンドラに振り分けて正しく処理できるようになる。
+トランザクションIDを見ればそのログレコードがどのトランザクションに属するのかがわかるので、
+リカバリー中にそのレコードを無視できるのか処理が必要なのかも判断できる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Breaking the Abstraction}
-\begin{aosasect2}{抽象化の打破}
+\begin{aosasect2}{抽象化違反}
 
-There are also a few ``special'' log records.  Checkpoint records are,
-perhaps, the most familiar of those special records. Checkpointing is
-the process of making the on-disk state of the database consistent as
-of some point in time. In other words, Berkeley DB aggressively caches
-database pages in Mpool for performance. However, those pages must
-eventually get written to disk and the sooner we do so, the more
-quickly we will be able to recover in the case of application or
-system failure. This implies a trade-off between the frequency of
-checkpointing and the length of recovery: the more frequently a system
-takes checkpoints, the more quickly it will be able to
-recover. Checkpointing is a transaction function, so we'll describe
-the details of checkpointing in the next section.  For the purposes of
-this section, we'll talk about checkpoint records and how the log
-manager struggles between being a stand-alone module and a
-special-purpose Berkeley DB component.
+%% There are also a few ``special'' log records.  Checkpoint records are,
+%% perhaps, the most familiar of those special records. Checkpointing is
+%% the process of making the on-disk state of the database consistent as
+%% of some point in time. In other words, Berkeley DB aggressively caches
+%% database pages in Mpool for performance. However, those pages must
+%% eventually get written to disk and the sooner we do so, the more
+%% quickly we will be able to recover in the case of application or
+%% system failure. This implies a trade-off between the frequency of
+%% checkpointing and the length of recovery: the more frequently a system
+%% takes checkpoints, the more quickly it will be able to
+%% recover. Checkpointing is a transaction function, so we'll describe
+%% the details of checkpointing in the next section.  For the purposes of
+%% this section, we'll talk about checkpoint records and how the log
+%% manager struggles between being a stand-alone module and a
+%% special-purpose Berkeley DB component.
+「特別な」ログレコードがいくつかある。
+その中でもおそらく最もなじみ深いのが、チェックポイントレコードだろう。
+チェックポイントとは、ある特定時点のデータベースの状態を
+ディスク上に書き出す処理のことである。
+言い換えれば、Berkeley DBはかなりアグレッシブに
+データベースのページをMpoolにキャッシュしているということだ。
+これはパフォーマンスを稼ぐためである。
+しかし、キャッシュしたページもいずれはディスクに書き出さねばならず、
+早めに書けば書くほど障害時のリカバリーを素早く行えるようになる。
+これらを考慮すると、チェックポイントの頻度とリカバリーに要する時間との間に
+トレードオフが発生することがわかる。
+つまり、チェックポイントを頻繁に行えば行うほどリカバリーが素早くできるようになる。
+チェックポイントはトランザクションの機能なので、その詳細は次のセクションで扱う。
+このセクションは、まずチェックポイントレコードについて解説する。
+そして、スタンドアロンのモジュールの場合と
+特化型のBerkeley DBコンポーネントの場合に
+ログマネージャーがそれをどう扱うのかを見ていく。
 
-In general, the log manager, itself, has no notion of record types, so
-in theory, it should not distinguish between checkpoint records and
-other records---they are simply opaque byte strings that the log
-manager writes to disk. In practice, the log maintains metadata
-revealing that it does understand the contents of some records. For
-example, during log startup, the log manager examines all the log
-files it can find to identify the most recently written log file. It
-assumes that all log files prior to that one are complete and intact,
-and then sets out to examine the most recent log file and determine
-how much of it contains valid log records. It reads from the beginning
-of a log file, stopping if/when it encounters a log record header that
-does not checksum properly, which indicates either the end of the log
-or the beginning of log file corruption. In either case, it determines
-the logical end of log.
+%% In general, the log manager, itself, has no notion of record types, so
+%% in theory, it should not distinguish between checkpoint records and
+%% other records---they are simply opaque byte strings that the log
+%% manager writes to disk. In practice, the log maintains metadata
+%% revealing that it does understand the contents of some records. For
+%% example, during log startup, the log manager examines all the log
+%% files it can find to identify the most recently written log file. It
+%% assumes that all log files prior to that one are complete and intact,
+%% and then sets out to examine the most recent log file and determine
+%% how much of it contains valid log records. It reads from the beginning
+%% of a log file, stopping if/when it encounters a log record header that
+%% does not checksum properly, which indicates either the end of the log
+%% or the beginning of log file corruption. In either case, it determines
+%% the logical end of log.
+一般に、ログマネージャー自身はレコードタイプを気にしないものだ。
+したがって、チェックポイントレコードだろうがそれ以外のレコードだろうが区別してはいけない。
+どちらも単なる不透明なバイト文字列であり、ログマネージャーは単にそれをディスクに書き込むだけのことである。
+実際には、ログはいくつかのレコードの内容を理解するようなメタデータを維持する。
+たとえばログを立ち上げるときに、ログマネージャーがすべてのログファイルを吟味して
+直近に書き込まれたログファイルがどれであるかを調べる。
+それより前のログファイルはすべて完全で壊れていないものとみなし、
+さらに最新のログファイル内に有効なログレコードが何件あるかを調べる。
+ログファイルの先頭から読み込み、チェックサムが適切に設定されていない
+レコードヘッダが見つかった時点で停止する。つまりそこが、
+ログの終端あるいはログファイルが壊れている場所ということだ。
+いずれにせよ、ログの論理的な終端はその位置になる。
 
-During this process of reading the log to find the current end, the
-log manager extracts the Berkeley DB record type, looking for
-checkpoint records. It retains the position of the last checkpoint
-record it finds in log manager metadata as a ``favor'' to the
-transaction system. That is, the transaction system needs to find the
-last checkpoint, but rather than having both the log manager and
-transaction manager read the entire log file to do so, the transaction
-manager delegates that task to the log manager. This is a classic
-example of violating abstraction boundaries in exchange for
-performance.
+%% During this process of reading the log to find the current end, the
+%% log manager extracts the Berkeley DB record type, looking for
+%% checkpoint records. It retains the position of the last checkpoint
+%% record it finds in log manager metadata as a ``favor'' to the
+%% transaction system. That is, the transaction system needs to find the
+%% last checkpoint, but rather than having both the log manager and
+%% transaction manager read the entire log file to do so, the transaction
+%% manager delegates that task to the log manager. This is a classic
+%% example of violating abstraction boundaries in exchange for
+%% performance.
+ログを読んで現在の終端位置を探す処理の間に、
+ログマネージャーはBerkeley DBのレコードタイプを展開して
+チェックポイントレコードを探す。ログマネージャーのメタデータの中で見つけた
+最後のチェックポイントレコードの位置を、トランザクションシステム用に保持する。
+どういうことかというと、まずトランザクションシステムは
+直近のチェックポイントの位置を知る必要がある。しかし、
+ログマネージャーとトランザクションマネージャーがそれぞれ
+ログをまるごと読み込んで位置を調べるのではなく、
+トランザクションマネージャーがその処理をログマネージャーに委譲するということだ。
+抽象化による処理の切り分けに違反してでもパフォーマンスを求めたという、ありがちな話だ。
 
-What are the implications of this tradeoff? Imagine that a system
-other than Berkeley DB is using the log manager. If it happens to
-write the value corresponding to the checkpoint record type in the
-same position that Berkeley DB places its record type, then the log
-manager will identify that record as a checkpoint record. However,
-unless the application asks the log manager for that information (by
-directly accessing \code{cached\_ckp\_lsn} field in the log metadata),
-this information never affects anything. In short, this is either a
-harmful layering violation or a savvy performance optimization.
+%% What are the implications of this tradeoff? Imagine that a system
+%% other than Berkeley DB is using the log manager. If it happens to
+%% write the value corresponding to the checkpoint record type in the
+%% same position that Berkeley DB places its record type, then the log
+%% manager will identify that record as a checkpoint record. However,
+%% unless the application asks the log manager for that information (by
+%% directly accessing \code{cached\_ckp\_lsn} field in the log metadata),
+%% this information never affects anything. In short, this is either a
+%% harmful layering violation or a savvy performance optimization.
+このトレードオフから、いったい何が導けるだろう?
+たとえば、Berkeley DB以外のシステムがこのログマネージャーを使う場面を想像してみよう。
+Berkeley DBがレコードタイプを書き込んでいるのと同じ位置に、
+たまたまチェックポイントレコードタイプに対応する値が書かれてしまったとすると、
+ログマネージャーはそのレコードをチェックポイントだと解釈してしまう。
+しかし、アプリケーション側から
+(ログのメタデータの\code{cached\_ckp\_lsn}フィールドに直接アクセスして)
+問い合わせない限り、この情報は何も影響を及ぼさない。
+要するにこれは、有害なレイヤー化違反あるいは
+抜け目のないパフォーマンス最適化だということだ。
 
-File management is another place where the separation between the log
-manager and Berkeley DB is fuzzy. As mentioned earlier, most Berkeley
-DB log records have to identify a database. Each log record could
-contain the full filename of the database, but that would be
-expensive in terms of log space, and clumsy, because recovery would
-have to map that name to some sort of handle it could use to access
-the database (either a file descriptor or a database handle). Instead,
-Berkeley DB identifies databases in the log by an integer identifier,
-called a log file id, and implements a set of functions, called
-\code{dbreg} (for ``database registration''), to maintain mappings
-between filenames and log file ids. The persistent version of this
-mapping (with the record type \code{DBREG\_REGISTER})
-is written to log records when the database is opened.  However, we also need
-in-memory representations of this mapping to facilitate transaction
-abort and recovery. What subsystem should be responsible for
-maintaining this mapping?
+%% File management is another place where the separation between the log
+%% manager and Berkeley DB is fuzzy. As mentioned earlier, most Berkeley
+%% DB log records have to identify a database. Each log record could
+%% contain the full filename of the database, but that would be
+%% expensive in terms of log space, and clumsy, because recovery would
+%% have to map that name to some sort of handle it could use to access
+%% the database (either a file descriptor or a database handle). Instead,
+%% Berkeley DB identifies databases in the log by an integer identifier,
+%% called a log file id, and implements a set of functions, called
+%% \code{dbreg} (for ``database registration''), to maintain mappings
+%% between filenames and log file ids. The persistent version of this
+%% mapping (with the record type \code{DBREG\_REGISTER})
+%% is written to log records when the database is opened.  However, we also need
+%% in-memory representations of this mapping to facilitate transaction
+%% abort and recovery. What subsystem should be responsible for
+%% maintaining this mapping?
+ファイル管理もまた、ログマネージャーとBerkeley DBの役割分担が曖昧になっているところのひとつだ。
+先述のとおり、Berkeley DBのログレコードの大半はデータベースを特定できなければならない。
+各ログレコードにデータベースファイルのフルパスを含めてもよいが、そんなことをすればログの容量が肥大化するし
+あまり美しくない。リカバリーのときにはそのファイル名をデータベースアクセス用のハンドル的な何か
+(ファイルディスクリプタあるいはデータベースハンドル)に変換する処理が必要になってしまうからだ。
+そのかわりにBerkeley DBが使っているのが、ログに一意な整数値を記録する方法だ。
+これはファイルIDと呼ばれており、このIDを処理するための\code{dbreg}
+(``DataBase REGistration'')関数群を用意してファイル名とログファイルIDのマッピングを管理している。
+永続版のマッピング(レコードタイプ\code{DBREG\_REGISTER})がログレコードに書き込まれるのは、
+データベースをオープンしたときである。しかし、それだけではなく
+このマッピングのインメモリでの表現も必要だ。
+トランザクションの異常終了やリカバリーに対応するために、これが必要となる。
+このマッピングは、どのサブシステムに任せるべきだろうか?
 
-In theory, the file to log-file-id mapping is a high-level Berkeley DB
-function; it does not belong to any of the subsystems, which were
-intended to be ignorant of the larger picture. In the original design,
-this information was left in the logging subsystems data structures
-because the logging system seemed like the best choice. However, after
-repeatedly finding and fixing bugs in the implementation, the mapping
-support was pulled out of the logging subsystem code and into its own
-small subsystem with its own object-oriented interfaces and private
-data structures.  (In retrospect, this information should logically
-have been placed with the Berkeley DB environment information itself,
-outside of any subsystem.) 
+%% In theory, the file to log-file-id mapping is a high-level Berkeley DB
+%% function; it does not belong to any of the subsystems, which were
+%% intended to be ignorant of the larger picture. In the original design,
+%% this information was left in the logging subsystems data structures
+%% because the logging system seemed like the best choice. However, after
+%% repeatedly finding and fixing bugs in the implementation, the mapping
+%% support was pulled out of the logging subsystem code and into its own
+%% small subsystem with its own object-oriented interfaces and private
+%% data structures.  (In retrospect, this information should logically
+%% have been placed with the Berkeley DB environment information itself,
+%% outside of any subsystem.) 
+理屈の上では、ファイルとログファイルIDのマッピングは上位レベルのBerkeley DB
+の機能だろう。どれかのサブシステムに属するような機能ではない。
+サブシステムは全体像を意識せずに済むように作られるものだ。
+当初の設計では、このマッピング情報はログ記録用サブシステムのデータ構造にあった。
+あの頃はそこに置くのが最適だと思っていたんだ。
+でも、それから何度となく実装のバグを見つけては修正をしているうちに、
+マッピングの機能はログ記録用サブシステムから切り出された。
+そしてそれ単体で小さなサブシステムとし、
+オブジェクト指向のインターフェイスとprivateなデータ構造を用意した
+(今思えば、この情報はBerkeley DBの環境情報自体に持たせるべきだった。
+サブシステムにするべきではなかった)。
 
 %% \begin{aosabox}{Design Lesson 13}
 \begin{aosabox}{設計講座13}
 
-There is rarely such thing as an unimportant bug. Sure, there's a typo
-now and then, but usually a bug implies somebody didn't fully
-understand what they were doing and implemented the wrong thing.
-When you fix a bug, don't look for the symptom: look for the
-underlying cause, the misunderstanding, if you will, because that
-leads to a better understanding of the program's architecture as well
-as revealing fundamental underlying flaws in the design itself.
+%% There is rarely such thing as an unimportant bug. Sure, there's a typo
+%% now and then, but usually a bug implies somebody didn't fully
+%% understand what they were doing and implemented the wrong thing.
+%% When you fix a bug, don't look for the symptom: look for the
+%% underlying cause, the misunderstanding, if you will, because that
+%% leads to a better understanding of the program's architecture as well
+%% as revealing fundamental underlying flaws in the design itself.
+どうでもいいバグなどというものはめったにない。
+ああ、確かにちょっとしたtypoとかは時々あるだろう。
+でもふつうは、バグが発生したということは、
+何をしたいのかを把握せずに間違った実装をした可能性があるということだ。
+バグを修正するときには、単におかしなところを見つけるだけではいけない。
+なぜそうなったのか、何か誤解があったのではないかということを探るようにしよう。
+そうすれば、そのプログラムのアーキテクチャをより深く理解できるようになるし、
+そもそもの設計自体に根本的な問題があればそれもはっきりするだろう。
 
 \end{aosabox}
 
