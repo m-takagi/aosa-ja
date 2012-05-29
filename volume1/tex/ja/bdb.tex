@@ -1806,118 +1806,208 @@ Berkeley DBがレコードタイプを書き込んでいるのと同じ位置に
 %% \begin{aosasect1}{The Transaction Manager: Txn}
 \begin{aosasect1}{トランザクションマネージャー: Txn}
 
-Our last module is the transaction manager, which ties together the
-individual components to provide the transactional ACID properties of
-atomicity, consistency, isolation, and durability. The transaction
-manager is responsible for beginning and completing (either committing
-or aborting) transactions, coordinating the log and buffer managers to
-take transaction checkpoints, and orchestrating recovery. We'll visit
-each of these areas in order.
+%% Our last module is the transaction manager, which ties together the
+%% individual components to provide the transactional ACID properties of
+%% atomicity, consistency, isolation, and durability. The transaction
+%% manager is responsible for beginning and completing (either committing
+%% or aborting) transactions, coordinating the log and buffer managers to
+%% take transaction checkpoints, and orchestrating recovery. We'll visit
+%% each of these areas in order.
+最後に取り上げるモジュールはトランザクションマネージャーだ。
+このモジュールは、独立したコンポーネントたちをとりまとめて
+トランザクショナルなACID特性を提供する。
+トランザクションマネージャーの役割は、トランザクションの開始と終了
+(コミットあるいはアボート)・ログマネージャーやバッファマネージャーとの協調による
+トランザクションチェックポイントの受け取り・リカバリーのとりまとめである。
+それぞれについて、順に説明する。
 
 % The transaction concept: virtues and limitations
 
-Jim Gray invented the ACID acronym to
-describe the key properties that transactions provide \cite{bib:gray:trans}.  Atomicity
-means that all the operations performed within a transaction appear in
-the database in a single unit---they either are all present in the
-database or all absent. Consistency means that a transaction moves the
-database from one logically consistent state to another. For example,
-if the application specifies that all employees must be assigned to a
-department that is described in the database, then the consistency
-property enforces that (with properly written transactions). Isolation
-means that from the perspective of a transaction, it appears that the
-transaction is running sequentially without any concurrent
-transactions running. Finally, durability means that once a
-transaction is committed, it stays committed---no failure can cause a
-committed transaction to disappear.
+%% Jim Gray invented the ACID acronym to
+%% describe the key properties that transactions provide \cite{bib:gray:trans}.  Atomicity
+%% means that all the operations performed within a transaction appear in
+%% the database in a single unit---they either are all present in the
+%% database or all absent. Consistency means that a transaction moves the
+%% database from one logically consistent state to another. For example,
+%% if the application specifies that all employees must be assigned to a
+%% department that is described in the database, then the consistency
+%% property enforces that (with properly written transactions). Isolation
+%% means that from the perspective of a transaction, it appears that the
+%% transaction is running sequentially without any concurrent
+%% transactions running. Finally, durability means that once a
+%% transaction is committed, it stays committed---no failure can cause a
+%% committed transaction to disappear.
+ジム・グレイはACIDという言葉の生みの親である。これは、トランザクションが提供する機能をまとめた略語だ\cite{bib:gray:trans}。
+原子性(Atomicity)とは、一つのトランザクションで実行するすべての操作をひとまとめにして扱うという意味である。
+データベースにすべて反映されるかひとつも反映されないか、そのいずれかしかない。
+整合性(Consistency)とは、トランザクションの実行前後がそれぞれ論理的に整合性のある状態になっているという意味である。
+たとえば、あるアプリケーションでは、すべての従業員が何らかの部署に所属している必要があるものとする。
+このとき、そうなっているように強制するのが整合性の役割である。
+独立性(Isolation)とは、トランザクションの観点からはすべてのトランザクションがシーケンシャルに実行されるという意味である。
+他のトランザクションと並列で実行されることはない。
+最後の永続性(Durability)とは、トランザクションをいったんコミットしたらそれはコミットされたままになるという意味である。
+一度コミットした内容は、どんな障害があっても消えることはない。
 
-The transaction subsystem enforces the ACID properties, with the
-assistance of the other subsystems. It uses traditional transaction
-begin, commit, and abort operations to delimit the beginning and
-ending points of a transaction. It also provides a prepare call, which
-facilitates two phase commit, a technique for providing transactional
-properties across distributed transactions, which are not discussed in
-this chapter. Transaction begin allocates a new transaction identifier
-and returns a transaction handle, \code{DB\_TXN}, to the application.
-Transaction commit writes a commit log record and then forces the log
-to disk (unless the application indicates that it is willing to forego
-durability in exchange for faster commit processing), ensuring that
-even in the presence of failure, the transaction will be
-committed. Transaction abort reads backwards through the log records
-belonging to the designated transaction, undoing each operation that
-the transaction had done, returning the database to its
-pre-transaction state.
+%% The transaction subsystem enforces the ACID properties, with the
+%% assistance of the other subsystems. It uses traditional transaction
+%% begin, commit, and abort operations to delimit the beginning and
+%% ending points of a transaction. It also provides a prepare call, which
+%% facilitates two phase commit, a technique for providing transactional
+%% properties across distributed transactions, which are not discussed in
+%% this chapter. Transaction begin allocates a new transaction identifier
+%% and returns a transaction handle, \code{DB\_TXN}, to the application.
+%% Transaction commit writes a commit log record and then forces the log
+%% to disk (unless the application indicates that it is willing to forego
+%% durability in exchange for faster commit processing), ensuring that
+%% even in the presence of failure, the transaction will be
+%% committed. Transaction abort reads backwards through the log records
+%% belonging to the designated transaction, undoing each operation that
+%% the transaction had done, returning the database to its
+%% pre-transaction state. 
+トランザクションサブシステムは、ACID特性を強要するために他のサブシステムにも力を借りている。
+昔ながらのbegin・commit・abort方式でトランザクションを扱い、
+トランザクションの開始位置を終了位置を区切る。
+また、準備済みの呼び出し機能も用意しており、これを使えば2フェーズコミットを実現できる。
+2フェーズコミットとは分散トランザクション環境でトランザクション扱うためのテクニックだが、
+本章では扱わない。トランザクションの開始(begin)では、
+新しいトランザクションIDを割り当ててトランザクションハンドル\code{DB\_TXN}をアプリケーションに返す。
+トランザクションの確定(commit)では、コミットログレコードを記録してからログをディスクに書き出させる
+(ただし、アプリケーション側でディスクに書き出さないよう指定していた場合はその限りではない。
+後々の永続性を犠牲にしてでもコミット処理を高速化させたいということもある)。
+これで、その後何かの障害が発生したとしても、確定したトランザクションの内容はそのまま残るようになる。
+トランザクションの取り消し(abort)は、ログレコードを逆から読んでそのトランザクションでの作業を取得し、
+ここまでにそのトランザクションで行ったすべての操作を取り消して、
+データベースをトランザクション開始前の状態に戻す。
 
 %% \begin{aosasect2}{Checkpoint Processing}
 \begin{aosasect2}{チェックポイントの処理}
 
 % Principles of transaction-oriented database recovery
 
-The transaction manager is also responsible for taking checkpoints.
-There are a number of different techniques in the literature for
-taking checkpoints~\cite{bib:haerder:recovery}. Berkeley DB uses a
-variant of fuzzy checkpointing.  Fundamentally, checkpointing involves
-writing buffers from Mpool to disk. This is a potentially expensive
-operation, and it's important that the system continues to process new
-transactions while doing so, to avoid long service disruptions. At the
-beginning of a checkpoint, Berkeley DB examines the set of currently
-active transactions to find the lowest LSN written by any of
-them. This LSN becomes the checkpoint LSN\@. The transaction manager
-then asks Mpool to flush its dirty buffers to disk; writing those
-buffers might trigger log flush operations. After all the buffers are
-safely on disk, the transaction manager then writes a checkpoint
-record containing the checkpoint LSN\@.  This record states that all the
-operations described by log records before the checkpoint LSN are now
-safely on disk.  Therefore, log records prior to the checkpoint LSN
-are no longer necessary for recovery. This has two implications:
-First, the system can reclaim any log files prior to the checkpoint
-LSN\@. Second, recovery need only process records after the checkpoint
-LSN, because the updates described by records prior to the checkpoint
-LSN are reflected in the on-disk state.
+%% The transaction manager is also responsible for taking checkpoints.
+%% There are a number of different techniques in the literature for
+%% taking checkpoints~\cite{bib:haerder:recovery}. Berkeley DB uses a
+%% variant of fuzzy checkpointing.  Fundamentally, checkpointing involves
+%% writing buffers from Mpool to disk. This is a potentially expensive
+%% operation, and it's important that the system continues to process new
+%% transactions while doing so, to avoid long service disruptions. At the
+%% beginning of a checkpoint, Berkeley DB examines the set of currently
+%% active transactions to find the lowest LSN written by any of
+%% them. This LSN becomes the checkpoint LSN\@. The transaction manager
+%% then asks Mpool to flush its dirty buffers to disk; writing those
+%% buffers might trigger log flush operations. After all the buffers are
+%% safely on disk, the transaction manager then writes a checkpoint
+%% record containing the checkpoint LSN\@.  This record states that all the
+%% operations described by log records before the checkpoint LSN are now
+%% safely on disk.  Therefore, log records prior to the checkpoint LSN
+%% are no longer necessary for recovery. This has two implications:
+%% First, the system can reclaim any log files prior to the checkpoint
+%% LSN\@. Second, recovery need only process records after the checkpoint
+%% LSN, because the updates described by records prior to the checkpoint
+%% LSN are reflected in the on-disk state.
+トランザクションマネージャーには、チェックポイントを受け取る役割もある。
+チェックポイントを受け取るには、いくつかの方法がある~\cite{bib:haerder:recovery}。
+Berkeley DBで使っているのは、ファジーチェックポイント方式の一種である。
+基本的に、チェックポイントとはバッファの内容をMpoolからディスクへと書き出すことだ。
+これは大掛かりな操作になる可能性もあるが、チェックポイント処理の間でも
+新たなトランザクションを開始できるようにしておくことが大切だ。
+そうしないと、サービスの停止時間が長くなってしまう。
+チェックポイント処理を始めるにあたって、Berkeley DBは現在アクティブな
+トランザクション群を調べて、それらが書き出した中で一番小さなLSNを探す。
+このLSNが、チェックポイントのLSNになる。
+次に、トランザクションマネージャーがMpoolに対して、ダーティなバッファをディスクに
+書き出すよう指示する。この書き込みが、ログのフラッシュ操作の引き金となることだろう。
+すべてのバッファをきちんとディスクに書き込めたら、
+チェックポイントLSNを含むチェックポイントレコードをトランザクションマネージャーが書き込む。
+このレコードが記録された時点で、チェックポイントLSN以前のログレコードに書かれた操作が
+すべてディスク上に記録されたことになる。
+したがって、チェックポイントLSNより前のログレコードは、もはやリカバリー不要である。
+ここから得られる結論は次の二つだ。まず、チェックポイントLSN
+より前のログファイルは消してしまってもかまわないということ。
+そして、リカバリー処理ではチェックポイントLSN移行のレコードだけを処理すればよいということ。
+なぜなら、それより前のレコードの内容は既にディスク上に反映されているからである。
 
-Note that there may be many log records between the checkpoint LSN and
-the actual checkpoint record.  That's fine, since those records describe
-operations that logically happened after the checkpoint and that may
-need to be recovered if the system fails.
+%% Note that there may be many log records between the checkpoint LSN and
+%% the actual checkpoint record.  That's fine, since those records describe
+%% operations that logically happened after the checkpoint and that may
+%% need to be recovered if the system fails.
+注意すべき点は、チェックポイントLSNと実際のチェックポイントレコードの間には
+多くのログレコードがある可能性があるということだ。
+しかし、それでも問題ない。というのも、そういったレコードの内容は
+論理的なチェックポイントより後に発生したものであり、
+システムに障害が発生した場合にはそれらもリカバリーが必要になるだろうから。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Recovery}
 \begin{aosasect2}{リカバリー}
 
-The last piece of the transactional puzzle is recovery. The goal of
-recovery is to move the on-disk database from a potentially
-inconsistent state to a consistent state. Berkeley DB uses a fairly
-conventional two-pass scheme that corresponds loosely to ``relative to
-the last checkpoint LSN, undo any transactions that never committed
-and redo any transactions that did commit.'' The details are a bit
-more involved.
+%% The last piece of the transactional puzzle is recovery. The goal of
+%% recovery is to move the on-disk database from a potentially
+%% inconsistent state to a consistent state. Berkeley DB uses a fairly
+%% conventional two-pass scheme that corresponds loosely to ``relative to
+%% the last checkpoint LSN, undo any transactions that never committed
+%% and redo any transactions that did commit.'' The details are a bit
+%% more involved.
+トランザクションに関するあれこれの中で最後のピースとなるのがリカバリー処理だ。
+リカバリーの目標は、ディスク上のデータベースを
+(おそらく整合性が崩れてしまっている状態から)
+整合性のある状態に戻すことである。
+Berkeley DBが使っているのは、由緒正しい2パス方式で、簡単に言えば
+「直近のチェックポイントLSNに対して、
+コミットされていないすべてのトランザクションを取り消し(UNDO)、
+コミットされていたトランザクションをすべて再現する(REDO)」
+といったものである。その詳細は、多少込み入っている。
 
-Berkeley DB needs to reconstruct its mapping between log file ids and
-actual databases so that it can redo and undo operations on the
-databases. The log contains a full history of \code{DBREG\_REGISTER}
-log records, but since databases stay open for a long time and we do
-not want to require that log files persist for the entire duration a
-database is open, we'd like a more efficient way to access this
-mapping. Prior to writing a checkpoint record, the transaction manager
-writes a collection of \code{DBREG\_REGISTER} records describing the
-current mapping from log file ids to databases.  During recovery,
-Berkeley DB uses these log records to reconstruct the file mapping.
+%% Berkeley DB needs to reconstruct its mapping between log file ids and
+%% actual databases so that it can redo and undo operations on the
+%% databases. The log contains a full history of \code{DBREG\_REGISTER}
+%% log records, but since databases stay open for a long time and we do
+%% not want to require that log files persist for the entire duration a
+%% database is open, we'd like a more efficient way to access this
+%% mapping. Prior to writing a checkpoint record, the transaction manager
+%% writes a collection of \code{DBREG\_REGISTER} records describing the
+%% current mapping from log file ids to databases.  During recovery,
+%% Berkeley DB uses these log records to reconstruct the file mapping.
+Berkeley DBはまず、ログファイルのIDと実際のデータベースとのマッピングを
+再構築しなければいけない。それを使ってデータベース上の操作の
+REDOやUNDOを行うのだ。ログには\code{DBREG\_REGISTER}レコードの
+完全な歴史が含まれている。しかし、データベースは長期間稼働しているわけだし、
+その間のログファイルをずっと残しておかなければいけないというのもあまり望ましくない。
+そこで、もう少し効率的な方法でこのマッピングにアクセスしていく。
+チェックポイントレコードを書き込む前に、トランザクションマネージャーが
+一連の\code{DBREG\_REGISTER}レコード群を書き込む。
+これは、その時点でのログファイルIDとデータベースのマッピングを表すものである。
+リカバリーの際には、Berkeley DBはこれらのログレコードを使ってファイルのマッピングを再構築する。
 
-When recovery begins, the transaction manager probes the log manager's
-\code{cached\_ckp\_lsn} value to determine the location of the last
-checkpoint record in the log. This record contains the checkpoint LSN.
-Berkeley DB needs to recover from that checkpoint LSN, but in order to
-do so, it needs to reconstruct the log file id mapping that existed at
-the checkpoint LSN; this information appears in the checkpoint
-\emph{prior} to the checkpoint LSN\@. Therefore, Berkeley DB must look
-for the last checkpoint record that occurs before the checkpoint LSN.
-Checkpoint records contain, not only the checkpoint LSN, but the LSN
-of the previous checkpoint to facilitate this process. Recovery begins
-at the most recent checkpoint and using the \code{prev\_lsn} field in
-each checkpoint record, traverses checkpoint records backwards through
-the log until it finds a checkpoint record appearing
-before the checkpoint LSN\@. Algorithmically:
+%% When recovery begins, the transaction manager probes the log manager's
+%% \code{cached\_ckp\_lsn} value to determine the location of the last
+%% checkpoint record in the log. This record contains the checkpoint LSN.
+%% Berkeley DB needs to recover from that checkpoint LSN, but in order to
+%% do so, it needs to reconstruct the log file id mapping that existed at
+%% the checkpoint LSN; this information appears in the checkpoint
+%% \emph{prior} to the checkpoint LSN\@. Therefore, Berkeley DB must look
+%% for the last checkpoint record that occurs before the checkpoint LSN.
+%% Checkpoint records contain, not only the checkpoint LSN, but the LSN
+%% of the previous checkpoint to facilitate this process. Recovery begins
+%% at the most recent checkpoint and using the \code{prev\_lsn} field in
+%% each checkpoint record, traverses checkpoint records backwards through
+%% the log until it finds a checkpoint record appearing
+%% before the checkpoint LSN\@. Algorithmically:
+リカバリーが始まると、トランザクションマネージャーがログマネージャーの
+\code{cached\_ckp\_lsn}の値を見て、
+ログの中での直近のチェックポイントレコードの場所を調べる。
+このレコードに、チェックポイントのLSNが含まれている。
+このLSN移行のリカバーが必要になるわけだが、そのためには
+チェックポイントのLSNの時点でのログファイルIDのマッピングを再構築しなければいけない。
+この情報が含まれているのは、チェックポイントのLSN\emph{より前の}チェックポイントだ。
+したがってBerkeley DBは、チェックポイントのLSNの直前に発生したチェックポイントの
+レコードを読まなければいけない。チェックポイントレコードには、
+そのチェックポイントのLSNだけではなく直前のチェックポイントのLSNも
+含まれているので、これを使えばよい。リカバリーは最新のチェックポイントから始まり、
+各チェックポイントレコードの\code{prev\_lsn}フィールドを使って
+チェックポイントレコードをさかのぼっていく。そして、チェックポイントのLSNの
+ひとつ前のチェックポイントに到達した時点で終了する。アルゴリズム的にはこのようになる。
 
 \vspace{-0.2cm}
 \begin{verbatim}
@@ -1931,70 +2021,115 @@ while (cur_lsn > ckp_lsn) {
 \end{verbatim}
 \vspace{-0.2cm}
 
-Starting with the checkpoint selected by the previous algorithm,
-recovery reads sequentially until the end of the log to reconstruct
-the log file id mappings. When it reaches the end of the log, its
-mappings should correspond exactly to the mappings that existed when
-the system stopped.  Also during this pass, recovery keeps track of
-any transaction commit records encountered, recording their 
-transaction identifiers. Any transaction for which log records appear, but
-whose transaction identifier does not appear in a transaction commit record,
-was either aborted or never completed and should be treated as
-aborted. When recovery reaches the end of the log, it reverses
-direction and begins reading backwards through the log.  For each
-transactional log record encountered, it extracts the transaction identifier
-and consults the list of transactions that have committed, to
-determine if this record should be undone. If it finds that the transaction
-identifier does not belong to a committed transaction, it extracts the record
-type and calls a recovery routine for that log record, directing it to
-undo the operation described. If the record belongs to a committed
-transaction, recovery ignores it on the backwards pass. This backward
-pass continues all the way back to the checkpoint LSN\footnote{Note that we only
-need to go backwards to the checkpoint LSN, not the checkpoint record
-preceding it.}. Finally, recovery reads the log one last time in the
-forward direction, this time redoing any log records belonging to
-committed transactions. When this final pass completes, recovery takes
-a checkpoint. At this point, the database is fully consistent and
-ready to begin running the application.
+%% Starting with the checkpoint selected by the previous algorithm,
+%% recovery reads sequentially until the end of the log to reconstruct
+%% the log file id mappings. When it reaches the end of the log, its
+%% mappings should correspond exactly to the mappings that existed when
+%% the system stopped.  Also during this pass, recovery keeps track of
+%% any transaction commit records encountered, recording their 
+%% transaction identifiers. Any transaction for which log records appear, but
+%% whose transaction identifier does not appear in a transaction commit record,
+%% was either aborted or never completed and should be treated as
+%% aborted. When recovery reaches the end of the log, it reverses
+%% direction and begins reading backwards through the log.  For each
+%% transactional log record encountered, it extracts the transaction identifier
+%% and consults the list of transactions that have committed, to
+%% determine if this record should be undone. If it finds that the transaction
+%% identifier does not belong to a committed transaction, it extracts the record
+%% type and calls a recovery routine for that log record, directing it to
+%% undo the operation described. If the record belongs to a committed
+%% transaction, recovery ignores it on the backwards pass. This backward
+%% pass continues all the way back to the checkpoint LSN\footnote{Note that we only
+%% need to go backwards to the checkpoint LSN, not the checkpoint record
+%% preceding it.}. Finally, recovery reads the log one last time in the
+%% forward direction, this time redoing any log records belonging to
+%% committed transactions. When this final pass completes, recovery takes
+%% a checkpoint. At this point, the database is fully consistent and
+%% ready to begin running the application.
+先ほどのアルゴリズムで選んだチェックポイントから始まって、
+ログをシーケンシャルに読みながらリカバリーを進めて
+ログファイルIDのマッピングを再構築する。
+ログの終端に達した時点で、システムが停止したときと
+まったく同じマッピングが復元されているはずだ。
+またこのとき同時に、トランザクションのコミットのレコードがあれば
+そのトランザクションIDも記録しておく。ログレコードの中に登場する
+トランザクションの中でそのトランザクションIDがコミットレコードに
+登場しないものがあれば、それはアボートされたか完了しなかったものとみなす。
+そのトランザクションは、リカバリー処理でもアボートされたものとして扱わなければいけない。
+リカバリーがログの終端まで進んだら、向きを反転させて逆向きにログを読んでいく。
+トランザクションログレコードが見つかるたびにトランザクションIDを取り出し、
+そのトランザクションがコミットされたものかどうかを調べてレコードの扱い方を判断する。
+取り出したトランザクションIDがコミット済みトランザクションのリストに存在しない場合は、
+さらにレコードタイプを調べてそのログレコード用のリカバリールーチンを呼び、
+ログに記録された操作をUNDOする。取り出したトランザクションIDが
+コミット済みのものであった場合は、ここでは何もせずそのまま流す。
+この逆向きのパスを、チェックポイントLSNに戻るまで続ける
+\footnote{ここではチェックポイントLSNまで戻れば十分であり、
+そのひとつ前のチェックポイントレコードまで戻る必要はないことに注意}。
+最後に、再び方向転換して順方向にログを読む。
+このときに、コミット済みのトランザクションに属するすべてのログレコードを
+REDOしていく。
+この最後のパスが完了したら、チェックポイントを作成する。
+これでデータベースは完全に整合性のある状態になり、
+アプリケーションを実行する準備が整った。
 
-Thus, recovery can be summarized as:
+%% Thus, recovery can be summarized as:
+リカバリー処理をまとめると、次のようになる。
 
 \vspace{-0.2cm}
 
 \begin{aosaenumerate}
 
-  \item Find the checkpoint prior to the checkpoint LSN in the most
-  recent checkpoint
+  %% \item Find the checkpoint prior to the checkpoint LSN in the most
+  %% recent checkpoint
+  \item 直近のチェックポイントのチェックポイントLSNのひとつ前のチェックポイントを探す
 
-  \item Read forward to restore log file id mappings and construct a
-  list of committed transactions
+  %% \item Read forward to restore log file id mappings and construct a
+  %% list of committed transactions
+  \item そこから順方向に読み進め、ログファイルIDのマッピングとコミット済みトランザクションのリストを構築する
 
-  \item Read backward to the checkpoint LSN, undoing all operations for
-  uncommitted transactions
+  %% \item Read backward to the checkpoint LSN, undoing all operations for
+  %% uncommitted transactions
+  \item チェックポイントLSNに向かって逆方向に読み進め、コミットしていないトランザクション上の操作をすべてUNDOする
 
-  \item Read forward, redoing all operations for committed transactions
+  %% \item Read forward, redoing all operations for committed transactions
+  \item 順方向に読み進め、コミット済みトランザクション上の操作をすべてREDOする
 
-  \item Checkpoint
+  %% \item Checkpoint
+  \item チェックポイントを作る
 
 \end{aosaenumerate}
 
 \vspace{-0.2cm}
 
-In theory, the final checkpoint is unnecessary. In practice, it bounds
-the time for future recoveries and leaves the database in a consistent
-state. 
+%% In theory, the final checkpoint is unnecessary. In practice, it bounds
+%% the time for future recoveries and leaves the database in a consistent
+%% state. 
+理屈の上では、最後のチェックポイント処理は不要である。
+しかし実用性を考慮して、今後のリカバリー処理の時間を短縮したり
+データベースを整合性のある状態にしたりするためにチェックポイント処理をしている。
 
 %% \begin{aosabox}{Design Lesson 14}
 \begin{aosabox}{設計講座14}
 
-Database recovery is a complex topic, difficult to write and harder to
-debug because recovery simply shouldn't happen all that often. In his
-Turing Award Lecture, Edsger Dijkstra argued that programming was
-inherently difficult and the beginning of wisdom is to admit we are
-unequal to the task. Our goal as architects and programmers is to use
-the tools at our disposal: design, problem decomposition, review,
-testing, naming and style conventions, and other good habits, to
-constrain programming problems to problems we \emph{can} solve.
+%% Database recovery is a complex topic, difficult to write and harder to
+%% debug because recovery simply shouldn't happen all that often. In his
+%% Turing Award Lecture, Edsger Dijkstra argued that programming was
+%% inherently difficult and the beginning of wisdom is to admit we are
+%% unequal to the task. Our goal as architects and programmers is to use
+%% the tools at our disposal: design, problem decomposition, review,
+%% testing, naming and style conventions, and other good habits, to
+%% constrain programming problems to problems we \emph{can} solve.
+データベースのリカバリーは複雑なトピックであり、
+実装するのも難しいしデバッグも困難だ。というのも、
+リカバリー処理はそんなに頻繁に発生するものではないからである。
+エドガー・ダイクストラは、チューリング賞受賞講演で
+「プログラミングとは本質的に難しいものであり、
+そのとてつもない難しさを真摯に認めることからすべてが始まる」と主張した。
+アーキテクトとして、そしてプログラマーとしての私たちの目標は、
+さまざまな道具を自由に使いこなすことだ。設計・問題の分割・
+レビュー・テスト・命名規約やコーディングスタイルなどの道具を使いこなし、
+プログラミングに関するさまざまな問題を、自分たちで解決\emph{可能}な問題に落とし込む。
 
 \end{aosabox}
 
@@ -2005,16 +2140,26 @@ constrain programming problems to problems we \emph{can} solve.
 %% \begin{aosasect1}{Wrapping Up}
 \begin{aosasect1}{まとめ}
 
-Berkeley DB is now over twenty years old. It was arguably the first
-general-purpose transactional key/value store and is the grandfather
-of the NoSQL movement. Berkeley DB continues as the underlying storage
-system for hundreds of commercial products and thousands of Open
-Source applications (including SQL, XML and NoSQL engines) and has
-millions of deployments across the globe. The lessons we've learned
-over the course of its development and maintenance are encapsulated in
-the code and summarized in the design tips outlined above. We offer
-them in the hope that other software designers and architects will
-find them useful.
+%% Berkeley DB is now over twenty years old. It was arguably the first
+%% general-purpose transactional key/value store and is the grandfather
+%% of the NoSQL movement. Berkeley DB continues as the underlying storage
+%% system for hundreds of commercial products and thousands of Open
+%% Source applications (including SQL, XML and NoSQL engines) and has
+%% millions of deployments across the globe. The lessons we've learned
+%% over the course of its development and maintenance are encapsulated in
+%% the code and summarized in the design tips outlined above. We offer
+%% them in the hope that other software designers and architects will
+%% find them useful.
+Berkeley DBが誕生してから既に20年以上が経過した。
+Berkeley DBは史上初の汎用的かつトランザクション対応なキーバリューストアであり、
+昨今のNoSQLムーブメントの始祖だと言っても過言ではないだろう。
+Berkeley DBは、今でも何百もの商用製品のストレージシステムとして使われており、
+また何千ものオープンソースアプリケーション(SQLエンジンやXMLエンジン、
+NoSQLエンジンなど)でも同様に使われている。そして、
+世界中で数え切れないほどの環境にデプロイされている。
+我々がその開発や保守を通じて学んできたことがコードに込められており、
+その設計時のちょっとした小技については本章でまとめた。
+他のソフトウェアデザイナーやアーキテクトにも、ぜひこれらを活用してもらいたいものだ。
 
 \end{aosasect1}
 
