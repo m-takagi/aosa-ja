@@ -1,216 +1,380 @@
 \begin{aosachapter}{CMake}{s:cmake}{Bill Hoffman and Kenneth Martin}
 %% Based on EN-Revision r229
 
-In 1999 the National Library of Medicine engaged a small company
-called Kitware to develop a better way to configure, build, and deploy
-complex software across many different platforms. This work was part
-of the Insight Segmentation and Registration Toolkit, or
-ITK\footnote{\url{http://www.itk.org/}}.  Kitware, the engineering
-lead on the project, was tasked with developing a build system that
-the ITK researchers and developers could use. The system had to be
-easy to use, and allow for the most productive use of the researchers'
-programming time. Out of this directive emerged CMake as a replacement
-for the aging autoconf/libtool approach to building software.  It was
-designed to address the weaknesses of existing tools while maintaining
-their strengths.
+%% In 1999 the National Library of Medicine engaged a small company
+%% called Kitware to develop a better way to configure, build, and deploy
+%% complex software across many different platforms. This work was part
+%% of the Insight Segmentation and Registration Toolkit, or
+%% ITK\footnote{\url{http://www.itk.org/}}.  Kitware, the engineering
+%% lead on the project, was tasked with developing a build system that
+%% the ITK researchers and developers could use. The system had to be
+%% easy to use, and allow for the most productive use of the researchers'
+%% programming time. Out of this directive emerged CMake as a replacement
+%% for the aging autoconf/libtool approach to building software.  It was
+%% designed to address the weaknesses of existing tools while maintaining
+%% their strengths.
+1999年、米国医療図書館はKitwareという小さな会社と契約した。
+各種のプラットフォーム上にまたがる複雑なソフトウェアの
+構成やビルド、そしてデプロイをうまくやる仕組みを開発するためである。
+この作業は、Insight Segmentation and Registration Toolkit(ITK)\footnote{\url{http://www.itk.org/}}
+の一部であった。プロジェクトのエンジニアリングを率いるKitwareの役割は、
+ITKの研究者や開発者が使えるようなビルドシステムの開発だった。
+このシステムは使いやすくなければならず、
+研究者がプログラミングをするときに最も効率的に使えるようにしなければいけなかった。
+そんな指令のもとで生まれたCMakeは、
+年代物のautoconf/libtoolによる手法を置き換えるためのツールである。
+既存のツールの弱みを克服しつつ、その利点だけは維持するように作られている。
 
-In addition to a build system, over the years CMake has evolved into a
-family of development tools: CMake, CTest, CPack, and CDash. CMake is
-the build tool responsible for building software. CTest is a test
-driver tool, used to run regression tests. CPack is a packaging tool
-used to create platform-specific installers for software built with
-CMake. CDash is a web application for displaying testing results and
-performing continuous integration testing.
+%% In addition to a build system, over the years CMake has evolved into a
+%% family of development tools: CMake, CTest, CPack, and CDash. CMake is
+%% the build tool responsible for building software. CTest is a test
+%% driver tool, used to run regression tests. CPack is a packaging tool
+%% used to create platform-specific installers for software built with
+%% CMake. CDash is a web application for displaying testing results and
+%% performing continuous integration testing.
+ビルドシステム以外にも、年月を経てCMakeは、各種開発ツールのファミリーへと進化した。
+CMake、CTest、CPack、そしてCDashだ。
+CMakeはビルドツールで、ソフトウェアのビルドに利用する。
+CTestはテストドライバーで、回帰テストを実行するときに使う。
+CPackはパッケージングツールで、CMakeでビルドしたソフトウェアに各種プラットフォーム用のインストーラーを作るときに使う。
+CDashはウェブアプリケーションで、テスト結果を表示したり継続的インテグレーションを実行したりする。
 
-\begin{aosasect1}{CMake History and Requirements}
+%% \begin{aosasect1}{CMake History and Requirements}
+\begin{aosasect1}{CMakeの歴史と要件}
 
-When CMake was being developed, the normal practice for a project was
-to have a configure script and Makefiles for Unix platforms, and
-Visual Studio project files for Windows. This duality of build systems
-made cross-platform development very tedious for many projects: the
-simple act of adding a new source file to a project was painful. The
-obvious goal for developers was to have a single unified build system.
-The developers of CMake had experience with two approaches of solving
-the unified build system problem.
+%% When CMake was being developed, the normal practice for a project was
+%% to have a configure script and Makefiles for Unix platforms, and
+%% Visual Studio project files for Windows. This duality of build systems
+%% made cross-platform development very tedious for many projects: the
+%% simple act of adding a new source file to a project was painful. The
+%% obvious goal for developers was to have a single unified build system.
+%% The developers of CMake had experience with two approaches of solving
+%% the unified build system problem.
+CMakeの開発が始まったころに一般の開発プロジェクトで使われていた手段は、
+Unix系ならconfigureスクリプトとMakefileだし
+WindowsならVisual Studioのプロジェクトだった。
+このように二通りのビルドシステムがあるおかげで、
+クロスプラットフォームの開発はとても面倒くさいものになっていた。
+新しいソースファイルをプロジェクトに追加するだけのことでさえ、
+手間のかかる作業だった。当然、開発者にとっては
+ビルドシステムが統一されたほうがありがたい。
+CMakeの開発では、二通りの手法で統一ビルドシステムの問題に立ち向かった。
 
-One approach was the VTK build system of 1999.  That system consisted
-of a configure script for Unix and an executable called \code{pcmaker}
-for Windows. \code{pcmaker} was a C program that read in Unix
-Makefiles and created NMake files for Windows.  The binary executable
-for \code{pcmaker} was checked into the VTK CVS system repository.  Several
-common cases, like adding a new library, required changing that source
-and checking in a new binary.
-Although this was a unified system in some sense, it had many
-shortcomings.
+%% One approach was the VTK build system of 1999.  That system consisted
+%% of a configure script for Unix and an executable called \code{pcmaker}
+%% for Windows. \code{pcmaker} was a C program that read in Unix
+%% Makefiles and created NMake files for Windows.  The binary executable
+%% for \code{pcmaker} was checked into the VTK CVS system repository.  Several
+%% common cases, like adding a new library, required changing that source
+%% and checking in a new binary.
+%% Although this was a unified system in some sense, it had many
+%% shortcomings.
+そのひとつが、1999年のVTKビルドシステムだ。
+このシステムは、Unix用のconfigureスクリプトとWindows用の実行ファイル
+\code{pcmaker}で構成されている。
+\code{pcmaker}はCで書かれたプログラムで、
+UnixのMakefileを読み込んでWindows用のNMakeファイルを出力する。
+\code{pcmaker}の実行ファイルはVTK CVSシステムリポジトリにチェックインされていた。
+新しいライブラリを追加するなどのありがちな作業をするにも、
+ソースを変更して新しいバイナリをチェックインする必要があった。
+ある意味では統一システムと言えなくもなかったが、問題も多かった。
 
-The other approach the developers had experience with was a
-\code{gmake} based build system for TargetJr.  TargetJr was a C++
-computer vision environment originally developed on Sun
-workstations. Originally TargetJr used the \code{imake} system to
-create Makefiles. However, at some point, when a Windows port was
-needed, the \code{gmake} system was created. Both Unix compilers and
-Windows compilers could be used with this \code{gmake}-based system.
-The system required several environment variables to be set prior to
-running \code{gmake}.  Failure to have the correct environment caused
-the system to fail in ways that were difficult to debug, especially
-for end users.
+%% The other approach the developers had experience with was a
+%% \code{gmake} based build system for TargetJr.  TargetJr was a C++
+%% computer vision environment originally developed on Sun
+%% workstations. Originally TargetJr used the \code{imake} system to
+%% create Makefiles. However, at some point, when a Windows port was
+%% needed, the \code{gmake} system was created. Both Unix compilers and
+%% Windows compilers could be used with this \code{gmake}-based system.
+%% The system required several environment variables to be set prior to
+%% running \code{gmake}.  Failure to have the correct environment caused
+%% the system to fail in ways that were difficult to debug, especially
+%% for end users.
+開発者が使ったもうひとつの手法は、TargetJr用の
+\code{gmake}ベースのビルドシステムだった。
+TargetJrはC++で書かれた画像処理環境で、
+当初はSunのワークステーション上で開発されていた。
+そのころのTargetJrは、\code{imake}システムでMakefileを作っていた。
+Windowsへの移植が必要になったときに作られたのが\code{gmake}システムだ。
+UnixのコンパイラもWindowsのコンパイラも、
+どちらもこの\code{gmake}ベースのシステムを使える。
+このシステムでは、\code{gmake}を実行する前に環境変数の設定が必要となる。
+環境変数を正しく設定しないと実行に失敗し、その原因を突き止めるのは
+(特にエンドユーザーにとっては)とても難しい。
 
-Both of these systems suffered from a serious flaw: they forced
-Windows developers to use the command line. Experienced Windows
-developers prefer to use integrated development environments (IDEs).
-This would encourage Windows developers to create IDE files by hand
-and contribute them to the project, creating the dual build system
-again.  In addition to the lack of IDE support, both of the systems
-described above made it extremely difficult to combine software
-projects. For example, VTK (\aosachapref{s:vtk}) had very few modules for reading images
-mostly because the build system made it very difficult to use
-libraries like libtiff and libjpeg.
+%% Both of these systems suffered from a serious flaw: they forced
+%% Windows developers to use the command line. Experienced Windows
+%% developers prefer to use integrated development environments (IDEs).
+%% This would encourage Windows developers to create IDE files by hand
+%% and contribute them to the project, creating the dual build system
+%% again.  In addition to the lack of IDE support, both of the systems
+%% described above made it extremely difficult to combine software
+%% projects. For example, VTK (\aosachapref{s:vtk}) had very few modules for reading images
+%% mostly because the build system made it very difficult to use
+%% libraries like libtiff and libjpeg.
+どちらのシステムにも深刻な問題があった。
+Windowsの開発者にコマンドラインを使わせる必要があるということだ。
+Windowsの開発者はIDE(統合開発環境)を使いたがることが多い。
+その結果どうなったかというと、Windowsの開発者はIDE用のファイルを手で書いて
+それをプロジェクトに追加するようになった。
+2系統のビルドシステムが存在する時代に逆戻りだ。
+IDE対応の問題以外にも、先述のふたつのシステムには
+複数のプロジェクトを組み合わせるのがとてつもなく難しいという問題もあった。
+たとえばVTK (\aosachapref{s:vtk})には、画像を読み込むモジュールが決定的に欠けていた。
+このシステムではlibtiffやlibjpegといったライブラリを使うのがとても難しかったのだ。
 
-It was decided that a new build system would be developed for ITK and
-C++ in general. The basic constraints of the new build system would be
-as follows:
+%% It was decided that a new build system would be developed for ITK and
+%% C++ in general. The basic constraints of the new build system would be
+%% as follows:
+そこで、ITKとC++用の汎用的なビルドシステムを新たに開発することになった。
+新たに作るシステムに必要とされた要件は、次のようなものだ。
 
 \begin{aosaitemize}
 
-  \item Depend only on a C++ compiler being installed on the system.
+  %% \item Depend only on a C++ compiler being installed on the system.
+  \item システムにインストールされているC++コンパイラだけに依存すること。
 
-  \item It must be able to generate Visual Studio IDE input files.
+  %% \item It must be able to generate Visual Studio IDE input files.
+  \item Visual Studio IDE用のファイルを生成できること。
 
-  \item It must be easy to create the basic build system targets,
-    including static libraries, shared libraries, executables, and
-    plugins.
+  %% \item It must be easy to create the basic build system targets,
+  %%   including static libraries, shared libraries, executables, and
+  %%   plugins.
+  \item 基本的なビルドシステムターゲット(スタティックライブラリ・共有ライブラリ・
+  実行ファイル・プラグインなど)を簡単に作れること。
 
-  \item It must be able to run build time code generators.
+  %% \item It must be able to run build time code generators.
+  \item ビルド時にコードジェネレーターを実行できること。
 
-  \item It must support separate build trees from the source tree.
+  %% \item It must support separate build trees from the source tree.
+  \item ひとつのソースツリー内で複数のビルドツリーに分割できること。
 
-  \item It must be able to perform system introspection, i.e.,
-    be able to determine automatically what the target system
-    could and could not do.
+  %% \item It must be able to perform system introspection, i.e.,
+  %%   be able to determine automatically what the target system
+  %%   could and could not do.
+  \item システムのイントロスペクションができること。
+  つまり、ターゲットシステム上で何ができて何ができないのかを自動判別できること。
 
-  \item It must do dependency scanning of C/C++ header files
-    automatically.
+  %% \item It must do dependency scanning of C/C++ header files
+  %%   automatically.
+  \item C/C++ヘッダファイルの依存関係を自動的にスキャンできること。
 
-  \item All features would need to work consistently and equally well
-    on all supported platforms.
+  %% \item All features would need to work consistently and equally well
+  %%   on all supported platforms.
+  \item すべての機能が、どのプラットフォームでも同じように安定して動作すること。
 
 \end{aosaitemize}
 
-In order to avoid depending on any additional libraries and parsers,
-CMake was designed with only one major dependency, the C++ compiler
-(which we can safely assume we have if we're building C++ code). At the
-time, building and installing scripting languages like Tcl was difficult
-on many popular UNIX and Windows systems. It can still be an
-issue today on modern supercomputers and secured computers with no
-Internet connection, so it can still be difficult to build third-party
-libraries. Since the build
-system is such a basic requirement for a package, it was decided that no
-additional dependencies would be introduced into CMake. This
-did limit CMake to creating its own simple language, which is a choice
-that still causes some people to dislike CMake. However, at the time
-the most popular embedded language was Tcl. If CMake had been a
-Tcl-based build system, it is unlikely that it would have gained the
-popularity that it enjoys today.
+%% In order to avoid depending on any additional libraries and parsers,
+%% CMake was designed with only one major dependency, the C++ compiler
+%% (which we can safely assume we have if we're building C++ code). At the
+%% time, building and installing scripting languages like Tcl was difficult
+%% on many popular UNIX and Windows systems. It can still be an
+%% issue today on modern supercomputers and secured computers with no
+%% Internet connection, so it can still be difficult to build third-party
+%% libraries. Since the build
+%% system is such a basic requirement for a package, it was decided that no
+%% additional dependencies would be introduced into CMake. This
+%% did limit CMake to creating its own simple language, which is a choice
+%% that still causes some people to dislike CMake. However, at the time
+%% the most popular embedded language was Tcl. If CMake had been a
+%% Tcl-based build system, it is unlikely that it would have gained the
+%% popularity that it enjoys today.
+外部のライブラリやパーサーへの依存を回避するため、CMakeはC++コンパイラだけに
+依存するように設計した(C++のコードをビルドするならC++コンパイラは必ずあるだろうという前提だ)。
+その当時は、Tclのようなスクリプト言語の環境をUNIXやWindows上に用意するのは
+簡単ではなかったのだ。また、現代であっても、
+モダンなスーパーコンピューターやインターネットから隔離されたセキュアなコンピューターなど、
+サードパーティのライブラリをビルドしづらい環境は存在する。
+ビルドシステムはパッケージの基本要件なので、CMakeには
+コンパイラ以外の依存関係を持ち込まないように決めたのだ。
+そのせいでCMake用のシンプルな言語を作ることができなくて、
+それが原因でCMakeを嫌っている人もいる。
+しかし、その当時最もよく使われていた組み込み用言語がTclであったことを思い出そう。
+もしあのときCMakeがTclベースのビルドシステムを作っていたら、
+これほどまでに広まることがあっただろうか？
 
-The ability to generate IDE project files is a strong selling point
-for CMake, but it also limits CMake to providing only the features
-that the IDE can support natively.  However, the benefits of providing
-native IDE build files outweigh the limitations.  Although this
-decision made the development of CMake more difficult, it made the
-development of ITK and other projects using CMake much easier.
-Developers are happier and more productive when using the tools they
-are most familiar with.  By allowing developers to use their preferred
-tools, projects can take best advantage of their most important
-resource: the developer.
+%% The ability to generate IDE project files is a strong selling point
+%% for CMake, but it also limits CMake to providing only the features
+%% that the IDE can support natively.  However, the benefits of providing
+%% native IDE build files outweigh the limitations.  Although this
+%% decision made the development of CMake more difficult, it made the
+%% development of ITK and other projects using CMake much easier.
+%% Developers are happier and more productive when using the tools they
+%% are most familiar with.  By allowing developers to use their preferred
+%% tools, projects can take best advantage of their most important
+%% resource: the developer.
+IDE用のプロジェクトファイルの生成機能は、CMakeの強いセールスポイントとなる。
+しかし同時に、CMakeで提供できる機能がIDEがネイティブサポートする機能だけに制限されてしまう。
+ただ、そんな制限よりもIDE用のビルドファイルを提供できる利点のほうがずっと上回る。
+この方針にしたおかげでCMake自体の開発は難しくなったが、
+ITKやその他のプロジェクトでのCMakeを使った開発がとても簡単になった。
+開発者にとっては、使いなれたツールを使えるというのは
+ありがたいことだし生産性も上がるというものだ。
+開発者が自分の好みのツールを使えるようにしたおかげで、
+開発プロジェクトで最も大切なリソースである「開発者」
+が大きなアドバンテージを得られるようになった。
 
-All C/C++ programs require one or more of the following fundamental
-building blocks of software: executables, static libraries, shared
-libraries, and plugins. CMake had to provide the ability to create
-these products on all supported platforms. Although all platforms
-support the creation of those products, the compiler flags used to
-create them vary greatly from compiler to compiler and platform to
-platform.  By hiding the complexity and platform differences behind a
-simple command in CMake, developers are able to create them on
-Windows, Unix and Mac. This ability allows developers to focus on the
-project rather than on the details of how to build a shared library.
+%% All C/C++ programs require one or more of the following fundamental
+%% building blocks of software: executables, static libraries, shared
+%% libraries, and plugins. CMake had to provide the ability to create
+%% these products on all supported platforms. Although all platforms
+%% support the creation of those products, the compiler flags used to
+%% create them vary greatly from compiler to compiler and platform to
+%% platform.  By hiding the complexity and platform differences behind a
+%% simple command in CMake, developers are able to create them on
+%% Windows, Unix and Mac. This ability allows developers to focus on the
+%% project rather than on the details of how to build a shared library.
+すべてのC/C++プログラムは、実行ファイルかスタティックライブラリ、
+共有ライブラリ、プラグインのいずれかをビルドすることになる。
+CMakeの機能を使えば、これらのプロダクトをすべての対応プラットフォーム上で作成できる。
+すべてのプラットフォームがこれらのプロダクトの作成に対応しているとはいえ、
+そのときに使うコンパイルフラグはコンパイラによって異なるし、
+プラットフォームによっても異なる。
+その複雑性やプラットフォーム間の差異をCMakeのシンプルなコマンドの裏側に
+隠すことで、開発者はWindowsやUnixそしてMac上での開発ができるようになる。
+プロジェクトそのものの開発に注力でき、
+共有ライブラリをビルドする方法などの細かいことは意識せずに済むのだ。
 
-Code generators provide added complexity to a build system.  From the
-start, VTK provided a system that automatically wrapped the
-C++ code into Tcl, Python, and Java by
-parsing the C++ header files, and automatically generating a wrapping
-layer.  This requires a build system that can build a C/C++ executable
-(the wrapper generator), then run that executable at build time to
-create more C/C++ source code (the wrappers for the particular
-modules).  That generated source code must then be compiled into
-executables or shared libraries. All of this has to happen within the
-IDE environments and the generated Makefiles.
+%% Code generators provide added complexity to a build system.  From the
+%% start, VTK provided a system that automatically wrapped the
+%% C++ code into Tcl, Python, and Java by
+%% parsing the C++ header files, and automatically generating a wrapping
+%% layer.  This requires a build system that can build a C/C++ executable
+%% (the wrapper generator), then run that executable at build time to
+%% create more C/C++ source code (the wrappers for the particular
+%% modules).  That generated source code must then be compiled into
+%% executables or shared libraries. All of this has to happen within the
+%% IDE environments and the generated Makefiles.
+コードジェネレータを搭載しようとすると、ビルドシステムはさらに複雑になる。
+VTKには当初から、C++のコードを自動的にラップしてTclやPythonそしてJavaで
+使えるようにするシステムがあった。これは、C++のヘッダーファイルを解析して
+ラッピングレイヤーを自動生成するものである。そのためには、C/C++の
+実行ファイルをビルドできるビルドシステム(ラッパージェネレータ)が必要となり、
+ビルド時にそれを実行してC/C++のソースコード
+(何らかのモジュール用のラッパー)を生成することになる。
+そして、生成されたソースコードをコンパイルして
+実行ファイルなり共有ライブラリなりを生成しなければいけない。
+これらすべてを、IDE環境や自動生成されたMakefile
+で行う必要があるのだ。
 
-When developing flexible cross-platform C/C++ software, it is
-important to program to the features of the system, and not to the
-specific system. Autotools has a model for doing system introspection
-which involves compiling small snippets of code, inspecting and
-storing the results of that compile. Since CMake was meant to be
-cross-platform it adopted a similar system introspection technique.
-This allows developers to program to the canonical system instead of
-to specific systems. This is important to make future portability
-possible, as compilers and operating systems change over time.  For
-example, code like this:
+%% When developing flexible cross-platform C/C++ software, it is
+%% important to program to the features of the system, and not to the
+%% specific system. Autotools has a model for doing system introspection
+%% which involves compiling small snippets of code, inspecting and
+%% storing the results of that compile. Since CMake was meant to be
+%% cross-platform it adopted a similar system introspection technique.
+%% This allows developers to program to the canonical system instead of
+%% to specific systems. This is important to make future portability
+%% possible, as compilers and operating systems change over time.  For
+%% example, code like this:
+柔軟なクロスプラットフォーム対応のC/C++ソフトウェアを開発する際に重要なのは、
+システムの機能をプログラムするのであって特定のシステムをプログラムするのではないということだ。
+Autotoolsがシステムの状態を把握するために使っているモデルは、
+ちょっとしたコード片をコンパイルし、その結果を調べて保存しておくというものだ。
+CMakeはクロスプラットフォーム対応を目指しているので、
+同様のテクニックでシステムの状態を調べることにした。
+これで開発者は、個々のシステムへの対応を気にせず
+システム本来の機能のプログラムができるようになる。
+これは、将来のポータビリティを確保するためにも重要だ。
+というのも、コンパイラやOSは時とともに変わっていくものだからである。
+たとえば、こんなコードを考えてみよう。
 
+%% \begin{verbatim}
+%% #ifdef linux
+%% // do some linux stuff
+%% #endif
+%% \end{verbatim}
 \begin{verbatim}
 #ifdef linux
-// do some linux stuff
+// Linux関連の処理
 #endif
 \end{verbatim}
 
-\noindent Is more brittle than code like this:
+%% \noindent Is more brittle than code like this:
+\noindent このコードよりも、次のコードのほうが崩れにくい。
 
+%% \begin{verbatim}
+%% #ifdef HAS_FEATURE
+%% // do something with a feature
+%% #endif
+%% \end{verbatim}
 \begin{verbatim}
 #ifdef HAS_FEATURE
-// do something with a feature
+// 何かの機能を使った処理
 #endif
 \end{verbatim}
 
-Another early CMake requirement also came from autotools: the ability
-to create build trees that are separate from the source tree. This
-allows for multiple build types to be performed on the same source
-tree. It also prevents the source tree from being cluttered with build
-files, which often confuses version control systems.
+%% Another early CMake requirement also came from autotools: the ability
+%% to create build trees that are separate from the source tree. This
+%% allows for multiple build types to be performed on the same source
+%% tree. It also prevents the source tree from being cluttered with build
+%% files, which often confuses version control systems.
+初期のCMakeの要件には、autotoolsから引き継いだものがもうひとつあった。
+それが、ソースツリーとは別にビルドツリーを作れる機能である。
+この機能を使えば、同じソースツリーに複数のビルド形式を構築できる。
+また、ソースツリーとビルドファイルがごちゃごちゃになってしまうことも防げる。
+ごちゃごちゃになってしまえば、バージョン管理システムも混乱してしまう。
 
-One of the most important features of a build system is the ability to
-manage dependencies. If a source file is changed, then all products
-using that source file must be rebuilt. For C/C++ code, the header
-files included by a \code{.c} or \code{.cpp} file must also be checked
-as part of the dependencies.  Tracking down issues where only some of
-the code that should be compiled actually gets compiled as a result of
-incorrect dependency information can be time consuming.
+%% One of the most important features of a build system is the ability to
+%% manage dependencies. If a source file is changed, then all products
+%% using that source file must be rebuilt. For C/C++ code, the header
+%% files included by a \code{.c} or \code{.cpp} file must also be checked
+%% as part of the dependencies.  Tracking down issues where only some of
+%% the code that should be compiled actually gets compiled as a result of
+%% incorrect dependency information can be time consuming.
+ビルドシステムで最も重要な機能のひとつが、依存関係の管理である。
+あるソースファイルを変更したら、そのソースファイルを使っている
+すべてのプロダクトを再ビルドしなければならない。
+C/C++のコードなら、\code{.c}ファイルあるいは\code{.cpp}ファイルから
+インクルードしているヘッダファイルの変更もチェックする必要がある。
+本来コンパイルすべきコードの中にコンパイル漏れがあったせいで
+依存関係の情報がおかしくなったなどという問題の原因を追うのは
+時間の無駄だ。
 
-All of the requirements and features of the new build system had to
-work equally well on all supported platforms. CMake needed to provide
-a simple API for developers to create complicated software systems
-without having to understand platform details. In effect, software
-using CMake is outsourcing the build complications to the CMake
-team. Once the vision for the build tool was created with the basic
-set of requirements, implementation needed to proceed in an agile way.
-ITK needed a build system almost from day one. The first versions of
-CMake did not meet all of the requirements set out in the vision, but
-they were able to build on Windows and Unix.
+%% All of the requirements and features of the new build system had to
+%% work equally well on all supported platforms. CMake needed to provide
+%% a simple API for developers to create complicated software systems
+%% without having to understand platform details. In effect, software
+%% using CMake is outsourcing the build complications to the CMake
+%% team. Once the vision for the build tool was created with the basic
+%% set of requirements, implementation needed to proceed in an agile way.
+%% ITK needed a build system almost from day one. The first versions of
+%% CMake did not meet all of the requirements set out in the vision, but
+%% they were able to build on Windows and Unix.
+新しく作るビルドシステムは、
+これまでにあげたすべての要件や機能を
+すべての対応プラットフォームで同様に実現する必要があった。
+CMakeに求められたのは、開発者が複雑なソフトウェアシステムを作るときに
+プラットフォームの詳細を知らなくても済むようなシンプルなAPIだった。
+事実上、CMakeを使っているソフトウェアは
+ビルドに関する複雑なあれこれを
+CMakeチームにアウトソースしているに等しい。
+これらの基本要件に基づいたビジョンができあがったら、
+その実装をアジャイル手法で進めていくなければいけなかった。
+というのも、ITKは新しいビルドシステムをすぐにでも必要としていたのだ。
+最初のバージョンのCMakeはここまでにあげた要件をすべて満たしているわけではなかったが、
+WindowsとUnix上でのビルドはできるものだった。
 
 \end{aosasect1}
 
-\begin{aosasect1}{How CMake Is Implemented}
+%% \begin{aosasect1}{How CMake Is Implemented}
+\begin{aosasect1}{CMakeの実装方法}
 
 As mentioned, CMake's development languages are C and C++. To explain
 its internals this section will first describe the CMake process from
 a user's point of view, then examine its structures.
 
-\begin{aosasect2}{The CMake Process}
+%% \begin{aosasect2}{The CMake Process}
+\begin{aosasect2}{CMakeプロセス}
 
 CMake has two main phases. The first is the ``configure'' step, in which
 CMake processes all the input given to it and creates an internal
 representation of the build to be performed. Then next phase is the
 ``generate'' step. In this phase the actual build files are created.
 
-\begin{aosasect3}{Environment Variables (or Not)}
+%% \begin{aosasect3}{Environment Variables (or Not)}
+\begin{aosasect3}{環境変数(あるいはそれ以外)}
 
 In many build systems in 1999, and even today, shell level environment
 variables are used during the build of a project. It is typical that a
@@ -229,7 +393,8 @@ CMake during each run.
 
 \end{aosasect3}
 
-\begin{aosasect3}{The Configure Step}
+%% \begin{aosasect3}{The Configure Step}
+\begin{aosasect3}{構成ステップ}
 
 During the configure step, CMake first reads the \code{CMakeCache.txt}
 if it exists from a prior run.  It then reads \code{CMakeLists.txt},
@@ -270,7 +435,8 @@ containing maps of \code{cmTarget} objects.
 
 \end{aosasect3}
 
-\begin{aosasect3}{The Generate Step}
+%% \begin{aosasect3}{The Generate Step}
+\begin{aosasect3}{生成ステップ}
 
 Once the configure step has been completed, the generate step can take
 place. The generate step is when CMake creates the build files for the
@@ -290,9 +456,11 @@ An overview of the process can be seen in \aosafigref{fig.cma.pro}.
 
 \end{aosasect2}
 
-\begin{aosasect2}{CMake: The Code}
+%% \begin{aosasect2}{CMake: The Code}
+\begin{aosasect2}{CMake: そのコード}
 
-\begin{aosasect3}{CMake Objects}
+%% \begin{aosasect3}{CMake Objects}
+\begin{aosasect3}{CMakeオブジェクト}
 
 CMake is an object-oriented system using inheritance, design patterns
 and encapsulation.  The major C++ objects and their relationships can
@@ -345,7 +513,8 @@ virtual const char* GetFullDocumentation()
 
 \end{aosasect3}
 
-\begin{aosasect3}{Dependency Analysis}
+%% \begin{aosasect3}{Dependency Analysis}
+\begin{aosasect3}{依存関係の解析}
 
 CMake has powerful built-in dependency analysis capabilities for
 individual Fortran, C and C++ source code files. Since Integrated
@@ -382,7 +551,8 @@ dependency.
 
 \end{aosasect3}
 
-\begin{aosasect3}{CTest and CPack}
+%% \begin{aosasect3}{CTest and CPack}
+\begin{aosasect3}{CTestおよびCPack}
 
 Along the way, CMake grew from a build system into
 a family of tools for building, testing, and packaging
@@ -415,7 +585,8 @@ supports creating RPM, Debian \code{.deb} files, \code{.tar},
 
 \end{aosasect2}
 
-\begin{aosasect2}{Graphical Interfaces}
+%% \begin{aosasect2}{Graphical Interfaces}
+\begin{aosasect2}{グラフィカルインターフェイス}
 
 The first place many users first see CMake is one of CMake's user
 interface programs. CMake has two main user interface programs:
@@ -453,7 +624,8 @@ button is enabled.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Testing CMake}
+%% \begin{aosasect2}{Testing CMake}
+\begin{aosasect2}{CMakeのテスト}
 
 Any new CMake developer is first introduced to the testing process
 used in CMake development. The process makes use of the CMake family
@@ -480,14 +652,16 @@ some period of time.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons Learned}
+%% \begin{aosasect1}{Lessons Learned}
+\begin{aosasect1}{教訓}
 
 CMake was successfully building ITK from day one, and that was the
 most important part of the project. If we could redo the development
 of CMake, not much would change. However, there are always things that
 could have been done better.
 
-\begin{aosasect2}{Backwards Compatibility}
+%% \begin{aosasect2}{Backwards Compatibility}
+\begin{aosasect2}{後方互換性}
 
 Maintaining backwards compatibility is important to the CMake
 development team. The main goal of the project is to make building
@@ -502,7 +676,8 @@ but will still build the project as older versions did.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Language, Language, Language}
+%% \begin{aosasect2}{Language, Language, Language}
+\begin{aosasect2}{言語、言語、言語}
 
 The CMake language is meant to be very simple. However, it is one of
 the major obstacles to adoption when a new project is considering
@@ -517,7 +692,8 @@ existing language from the start.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Plugins Did Not Work}
+%% \begin{aosasect2}{Plugins Did Not Work}
+\begin{aosasect2}{プラグインが動かない!}
 
 To provide the ability for extension of the CMake language by
 projects, CMake has a plugin class. This allows a project to create
@@ -531,7 +707,8 @@ to build a project because a plugin failed to build or load.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Reduce Exposed APIs}
+%% \begin{aosasect2}{Reduce Exposed APIs}
+\begin{aosasect2}{公開APIの削減}
 
 A big lesson learned during the development of the CMake project is
 that you don't have to maintain backward compatibility with something
