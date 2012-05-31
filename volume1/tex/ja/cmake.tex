@@ -361,96 +361,160 @@ WindowsとUnix上でのビルドはできるものだった。
 %% \begin{aosasect1}{How CMake Is Implemented}
 \begin{aosasect1}{CMakeの実装方法}
 
-As mentioned, CMake's development languages are C and C++. To explain
-its internals this section will first describe the CMake process from
-a user's point of view, then examine its structures.
+%% As mentioned, CMake's development languages are C and C++. To explain
+%% its internals this section will first describe the CMake process from
+%% a user's point of view, then examine its structures.
+先述の通り、CMake自体の開発に使った言語はCとC++である。
+その内部を解説するにあたって、このセクションではまずCMakeの動きを
+ユーザーの視点から説明する。それから、その構造を見ていこう。
 
 %% \begin{aosasect2}{The CMake Process}
-\begin{aosasect2}{CMakeプロセス}
+\begin{aosasect2}{CMakeの処理工程}
 
-CMake has two main phases. The first is the ``configure'' step, in which
-CMake processes all the input given to it and creates an internal
-representation of the build to be performed. Then next phase is the
-``generate'' step. In this phase the actual build files are created.
+%% CMake has two main phases. The first is the ``configure'' step, in which
+%% CMake processes all the input given to it and creates an internal
+%% representation of the build to be performed. Then next phase is the
+%% ``generate'' step. In this phase the actual build files are created.
+CMakeには、主要なフェーズが二つある。まず最初が``構成(configure)''で、
+ここではCMakeがすべての入力を処理し、
+ビルドを実行するための内部表現を生成する。
+次のフェーズが``生成(generate)''で、
+実際のビルドファイルをここで生成する。
 
 %% \begin{aosasect3}{Environment Variables (or Not)}
-\begin{aosasect3}{環境変数(あるいはそれ以外)}
+\begin{aosasect3}{環境変数(またはそれ以外の変数)}
 
-In many build systems in 1999, and even today, shell level environment
-variables are used during the build of a project. It is typical that a
-project has a PROJECT\_ROOT environment variable that points to the
-location of the root of the source tree.  Environment variables are
-also used to point to optional or external packages. The trouble with
-this approach is that for the build to work, all of these external
-variables need to be set each time a build is performed. To solve this
-problem CMake has a cache file that stores all of the variables
-required for a build in one place. These are not shell or environment
-variables, but CMake variables. The first time CMake is run for a
-particular build tree, it creates a \code{CMakeCache.txt} file which
-stores all the persistent variables for that build. Since the file is
-part of the build tree, the variables will always be available to
-CMake during each run.
+%% In many build systems in 1999, and even today, shell level environment
+%% variables are used during the build of a project. It is typical that a
+%% project has a PROJECT\_ROOT environment variable that points to the
+%% location of the root of the source tree.  Environment variables are
+%% also used to point to optional or external packages. The trouble with
+%% this approach is that for the build to work, all of these external
+%% variables need to be set each time a build is performed. To solve this
+%% problem CMake has a cache file that stores all of the variables
+%% required for a build in one place. These are not shell or environment
+%% variables, but CMake variables. The first time CMake is run for a
+%% particular build tree, it creates a \code{CMakeCache.txt} file which
+%% stores all the persistent variables for that build. Since the file is
+%% part of the build tree, the variables will always be available to
+%% CMake during each run.
+1999年当時に限らず現在でも、プロジェクトのビルドの際に
+シェルの環境変数が使われている。よくありがちな使い方は、
+環境変数PROJECT\_ROOTでソースツリーのルートの場所を表すといったものだ。
+環境変数は、オプションパッケージや外部パッケージの場所を表すときにも用いられる。
+この手法の問題は、ビルドのたびにこれらの環境変数を設定しないと
+ビルドがうまくいかないということだ。この問題を解決するために、
+CMakeはキャッシュファイルを作っている。
+このキャッシュファイルに、ビルドに必要なすべての変数を格納しているのだ。
+シェルの環境変数などではなく、CMake独自の変数である。
+あるビルドツリー上で最初にCMakeを実行したときに
+\code{CMakeCache.txt}というファイルを作って、
+そこにビルド用の変数をすべて格納する。
+このファイル自体もビルドツリーの一員なので、
+CMakeを実行するたびにその内容を参照できる。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{The Configure Step}
 \begin{aosasect3}{構成ステップ}
 
-During the configure step, CMake first reads the \code{CMakeCache.txt}
-if it exists from a prior run.  It then reads \code{CMakeLists.txt},
-found in the root of the source tree given to CMake. During the
-configure step, the \code{CMakeLists.txt} files are parsed by the
-CMake language parser. Each of the CMake commands found in the file is
-executed by a command pattern object. Additional \code{CMakeLists.txt}
-files can be parsed
-during this step by the \code{include} and \code{add\_subdirectory}
-CMake commands.
-CMake has a C++ object for each of the commands that can be used in
-the CMake language. Some examples of commands are \code{add\_library},
-\code{if}, \code{add\_executable}, \code{add\_subdirectory}, and
-\code{include}. In effect, the entire language of CMake is implemented
-as calls to commands. The parser simply converts the CMake input files
-into command calls and lists of strings that are arguments to
-commands.
+%% During the configure step, CMake first reads the \code{CMakeCache.txt}
+%% if it exists from a prior run.  It then reads \code{CMakeLists.txt},
+%% found in the root of the source tree given to CMake. During the
+%% configure step, the \code{CMakeLists.txt} files are parsed by the
+%% CMake language parser. Each of the CMake commands found in the file is
+%% executed by a command pattern object. Additional \code{CMakeLists.txt}
+%% files can be parsed
+%% during this step by the \code{include} and \code{add\_subdirectory}
+%% CMake commands.
+%% CMake has a C++ object for each of the commands that can be used in
+%% the CMake language. Some examples of commands are \code{add\_library},
+%% \code{if}, \code{add\_executable}, \code{add\_subdirectory}, and
+%% \code{include}. In effect, the entire language of CMake is implemented
+%% as calls to commands. The parser simply converts the CMake input files
+%% into command calls and lists of strings that are arguments to
+%% commands.
+構成ステップでは、まず最初に前回実行したときの\code{CMakeCache.txt}
+があるかどうかを調べ、存在すればそれを読み込む。それに続いて、
+ソースツリーのルートにある\code{CMakeLists.txt}を読み込む。
+構成ステップで\code{CMakeLists.txt}をパースするのはCMake言語パーサーだ。
+このファイル内で見つかったCMakeコマンドを、コマンドパターンオブジェクトが実行する。
+このステップでさらに別の\code{CMakeLists.txt}ファイルをパースさせることもできる。
+そのために使えるCMakeのコマンドが\code{include}と\code{add\_subdirectory}だ。
+CMakeは個々のコマンドに対応するC++のオブジェクトを持っており、
+これをCMake言語から使えるようになっている。たとえば
+\code{add\_library}や\code{if}、\code{add\_executable}、
+\code{add\_subdirectory}、そして\code{include}といったコマンドがある。
+事実上、CMake言語はこれらのコマンドの呼び出しで実装されている。
+パーサーは、単純にCMakeの入力ファイルをコマンド呼び出しに変換するだけであり、
+文字列のリストはそれらのコマンドへの引数となる。
 
-The configure step essentially ``runs'' the user-provided CMake
-code. After all of the code is executed, and all cache variable values
-have been computed, CMake has an in-memory representation of the
-project to be built. This will include all of the libraries,
-executables, custom commands, and all other information required to
-create the final build files for the selected generator. At this
-point, the \code{CMakeCache.txt} file is saved to disk for use in
-future runs of CMake.
+%% The configure step essentially ``runs'' the user-provided CMake
+%% code. After all of the code is executed, and all cache variable values
+%% have been computed, CMake has an in-memory representation of the
+%% project to be built. This will include all of the libraries,
+%% executables, custom commands, and all other information required to
+%% create the final build files for the selected generator. At this
+%% point, the \code{CMakeCache.txt} file is saved to disk for use in
+%% future runs of CMake.
+構成ステップは本質的に、ユーザーが指定したCMakeのコードを
+``実行''するステップだ。すべてのコードを実行して
+キャッシュ変数の値を算出し終えたら、
+CMakeはそのプロジェクトのインメモリ表現を得たことになる。
+この中にはすべてのライブラリや実行ファイルそしてカスタムコマンドが含まれており、
+選んだジェネレータで最終的にビルドするために必要な情報がすべて含まれている。
+この時点で\code{CMakeCache.txt}ファイルを保存し、
+次にCMakeを実行したときに使えるようにする。
 
-The in-memory representation of the project is a collection of
-targets, which are simply things that may be built, such as
-libraries and executables. CMake also supports custom
-targets: users can define their inputs and outputs, and provide
-custom executables or scripts to be run at build time. CMake
-stores each target in a \code{cmTarget} object. These objects are
-stored in turn in the \code{cmMakefile} object, which is basically a
-storage place for all of the targets found in a given directory of the
-source tree. The end result is a tree of \code{cmMakefile} objects
-containing maps of \code{cmTarget} objects.
+%% The in-memory representation of the project is a collection of
+%% targets, which are simply things that may be built, such as
+%% libraries and executables. CMake also supports custom
+%% targets: users can define their inputs and outputs, and provide
+%% custom executables or scripts to be run at build time. CMake
+%% stores each target in a \code{cmTarget} object. These objects are
+%% stored in turn in the \code{cmMakefile} object, which is basically a
+%% storage place for all of the targets found in a given directory of the
+%% source tree. The end result is a tree of \code{cmMakefile} objects
+%% containing maps of \code{cmTarget} objects. 
+プロジェクトのインメモリ表現とはターゲットの集まりである。
+ターゲットとは単にビルド対象のものを指す。ライブラリや実行ファイルなどである。
+CMakeはカスタムターゲットもサポートしている。
+ユーザーが自分で入出力を定義し、ビルド時に実行する
+カスタムコマンドやスクリプトを用意すればよい。
+CMakeは、各ターゲットを\code{cmTarget}オブジェクトに格納する。
+そして、これらのオブジェクトがさらに\code{cmMakefile}オブジェクトに格納される。
+\code{cmMakefile}オブジェクトは基本的に、ソースツリー内の指定したディレクトリにある
+すべてのターゲットを格納するものである。最終的にできあがるのは
+\code{cmMakefile}オブジェクトのツリーで、その中に
+\code{cmTarget}オブジェクトのマップが含まれている。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{The Generate Step}
 \begin{aosasect3}{生成ステップ}
 
-Once the configure step has been completed, the generate step can take
-place. The generate step is when CMake creates the build files for the
-target build tool selected by the user. At this point the internal
-representation of targets (libraries, executables, custom targets) is
-converted to either an input to an IDE build tool like Visual Studio,
-or a set of Makefiles to be executed by \code{make}. CMake's internal
-representation after the configure step is as generic as possible so
-that as much code and data structures as possible can be shared
-between different built tools.
+%% Once the configure step has been completed, the generate step can take
+%% place. The generate step is when CMake creates the build files for the
+%% target build tool selected by the user. At this point the internal
+%% representation of targets (libraries, executables, custom targets) is
+%% converted to either an input to an IDE build tool like Visual Studio,
+%% or a set of Makefiles to be executed by \code{make}. CMake's internal
+%% representation after the configure step is as generic as possible so
+%% that as much code and data structures as possible can be shared
+%% between different built tools.
+構成ステップが完了したら、次は生成ステップの出番だ。
+このステップは、ユーザーが選んだターゲットビルドツール用のビルドファイルを
+CMakeが生成する。この時点で、ターゲット(ライブラリ・実行ファイル・カスタムターゲット)
+の内部表現を変換して、Visual StudioなどのIDE用のファイルあるいは
+\code{make}で実行するためのMakefile群にする。構成ステップを終えた時点での
+CMakeの内部表現は可能な限り汎用的な形式にしており、
+異なるビルドツール間でもできるだけ多くのコードやデータ構造を共有できるようにしている。
 
-An overview of the process can be seen in \aosafigref{fig.cma.pro}.
+%% An overview of the process can be seen in \aosafigref{fig.cma.pro}.
+これらの工程の概要を\aosafigref{fig.cma.pro}に示す。
 
-\aosafigure[200pt]{../images/cmake/process.eps}{Overview of the CMake Process}{fig.cma.pro}
+%% \aosafigure[200pt]{../images/cmake/process.eps}{Overview of the CMake Process}{fig.cma.pro}
+\aosafigure[200pt]{../images/cmake/process.eps}{CMakeの処理工程の概要}{fig.cma.pro}
 
 \end{aosasect3}
 
