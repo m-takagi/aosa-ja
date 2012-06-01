@@ -11,7 +11,7 @@ cmake.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
 colophon.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
 eclipse.tex         Masugata Seiji                              ?
 frontmatter.tex     TAKAGI Masahiro <matakagi@gmail.com>      100
-graphite.tex
+graphite.tex        TAKAGI Masahiro <matakagi@gmail.com>        0
 hdfs.tex
 integration.tex     TAKAGI Masahiro <matakagi@gmail.com>      100
 intro.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
