@@ -1,32 +1,57 @@
 \begin{aosachapter}{Graphite}{s:graphite}{Chris Davis}
 %% Based on EN-Revision r229
 
-Graphite\footnote{\url{http://launchpad.net/graphite}} performs two
-pretty simple tasks: storing numbers that change over time and
-graphing them. There has been a lot of software written over the years
-to do these same tasks.  What makes Graphite unique is that it
-provides this functionality as a network service that is both easy to
-use and highly scalable.  The protocol for feeding data into Graphite
-is simple enough that you could learn to do it by hand in a few
-minutes (not that you'd actually want to, but it's a decent litmus
-test for simplicity).  Rendering graphs and retrieving data points are
-as easy as fetching a URL\@.  This makes it very natural to integrate
-Graphite with other software and enables users to build powerful
-applications on top of Graphite.  One of the most common uses of
-Graphite is building web-based dashboards for monitoring and analysis.
-Graphite was born in a high-volume e-commerce environment and its
-design reflects this.  Scalability and real-time access to data are
-key goals.
+%% Graphite\footnote{\url{http://launchpad.net/graphite}} performs two
+%% pretty simple tasks: storing numbers that change over time and
+%% graphing them. There has been a lot of software written over the years
+%% to do these same tasks.  What makes Graphite unique is that it
+%% provides this functionality as a network service that is both easy to
+%% use and highly scalable.  The protocol for feeding data into Graphite
+%% is simple enough that you could learn to do it by hand in a few
+%% minutes (not that you'd actually want to, but it's a decent litmus
+%% test for simplicity).  Rendering graphs and retrieving data points are
+%% as easy as fetching a URL\@.  This makes it very natural to integrate
+%% Graphite with other software and enables users to build powerful
+%% applications on top of Graphite.  One of the most common uses of
+%% Graphite is building web-based dashboards for monitoring and analysis.
+%% Graphite was born in a high-volume e-commerce environment and its
+%% design reflects this.  Scalability and real-time access to data are
+%% key goals.
+Graphite\footnote{\url{http://launchpad.net/graphite}}
+が行うのはたった二つのとてもシンプルな作業だけ。
+刻々と変わる値を記録することと、それをグラフ化することだ。
+同じようなことをするソフトウェアは、これまでにも数多く存在した。
+Graphiteがそれらと一線を画すのは、その機能をネットワークサービスとして
+提供しているという点だ。そのおかげで、使いやすいだけでなく
+とてもスケーラブルになる。データをGraphiteに渡すときのプロトコルは
+非常にシンプルで、ほんの数分もあれば手でも書けるようになるだろう
+(実際に手で書こうとは思わないだろうが、それくらいシンプルだということだ)。
+グラフをレンダリングしたりデータポイントを取得したりといった操作は
+URLにアクセスするのと同じくらい簡単である。そのおかげで、
+Graphiteを他のソフトウェアと組み合わせて使うのも簡単だし、
+Graphiteを裏で使った強力なアプリケーションを作ることもできる。
+Graphiteの最もよくある利用例は、ウェブベースのダッシュボードを作ってデータの監視や分析のために使うというものだ。
+Graphiteは大規模なeコマース環境で使うために作られたものであり、それを反映した設計となっている。
+スケーラビリティがあること、そしてリアルタイムにデータにアクセスできること。
+これが最大の目標だ。
 
-The components that allow Graphite to achieve these goals include a
-specialized database library and its storage format, a caching
-mechanism for optimizing I/O operations, and a simple yet effective
-method of clustering Graphite servers. Rather than simply
-describing how Graphite works today, I will explain how Graphite was
-initially implemented (quite naively), what problems I ran into, and
-how I devised solutions to them.
+%% The components that allow Graphite to achieve these goals include a
+%% specialized database library and its storage format, a caching
+%% mechanism for optimizing I/O operations, and a simple yet effective
+%% method of clustering Graphite servers. Rather than simply
+%% describing how Graphite works today, I will explain how Graphite was
+%% initially implemented (quite naively), what problems I ran into, and
+%% how I devised solutions to them.
+そのためにGraphiteが用意したのが、
+特化型のデータベースライブラリとそれ用のストレージフォーマット、
+入出力操作の最適化のためのキャッシュ機構、
+シンプルながらも効率的な方法でのGraphiteサーバーのクラスタリングといったコンポーネントである。
+本章では、単に現時点でのGraphiteの動きを解説するだけでなく、
+Graphiteを最初に書いたときの様子(どれだけ世間知らずだったか)や
+どんな問題に遭遇したか、そしてそれをどうやって解決したかなどについても説明する。
 
-\begin{aosasect1}{The Database Library: Storing Time-Series Data}
+%% \begin{aosasect1}{The Database Library: Storing Time-Series Data}
+\begin{aosasect1}{データベースライブラリ: 時系列データの格納}
 
 Graphite is written entirely in Python and consists of three major
 components: a database library named \code{whisper}, a back-end daemon named
@@ -54,7 +79,8 @@ read from, based on the timestamp and the archive configuration.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Back End: A Simple Storage Service}
+%% \begin{aosasect1}{The Back End: A Simple Storage Service}
+\begin{aosasect1}{バックエンド: シンプルなストレージサービス}
 
 Graphite's back end is a daemon process called \code{carbon-cache}, usually
 simply referred to as \code{carbon}.  It is built on Twisted, a highly
@@ -115,7 +141,8 @@ and get the best performance we can out of a typical hard drive.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Front End: Graphs On-Demand}
+%% \begin{aosasect1}{The Front End: Graphs On-Demand}
+\begin{aosasect1}{フロントエンド: グラフオンデマンド}
 
 The Graphite webapp allows users to request custom graphs with a
 simple URL-based API\@. Graphing parameters are specified in the
@@ -168,7 +195,8 @@ available features.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Dashboards}
+%% \begin{aosasect1}{Dashboards}
+\begin{aosasect1}{ダッシュボード}
 
 Since its inception Graphite has been used as a tool for creating
 web-based dashboards. The URL API makes this a natural use
@@ -188,7 +216,8 @@ easily.
 
 \end{aosasect1}
 
-\begin{aosasect1}{An Obvious Bottleneck}
+%% \begin{aosasect1}{An Obvious Bottleneck}
+\begin{aosasect1}{明らかなボトルネック}
 
 Once my users started building dashboards, Graphite quickly began to
 have performance issues. I investigated the web server logs to see
@@ -227,7 +256,8 @@ data is skipped.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Optimizing I/O}
+%% \begin{aosasect1}{Optimizing I/O}
+\begin{aosasect1}{入出力の最適化}
 
 Imagine that you have 60,000 metrics that you send to your Graphite
 server, and each of these metrics has one data point per
@@ -292,7 +322,8 @@ queueing mechanism is depicted in \aosafigref{fig.gra.queue}.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Keeping It Real-Time}
+%% \begin{aosasect1}{Keeping It Real-Time}
+\begin{aosasect1}{リアルタイム性の維持}
 
 Buffering data points was a nice way to optimize \code{carbon}'s I/O but it
 didn't take long for my users to notice a rather troubling side
@@ -319,7 +350,8 @@ is real-time.
 
 \vspace{-0.1cm} % shrink this space so no orphan at top of next page
 
-\begin{aosasect1}{Kernels, Caches, and Catastrophic Failures}
+%% \begin{aosasect1}{Kernels, Caches, and Catastrophic Failures}
+\begin{aosasect1}{カーネル、キャッシュ、壊滅的な障害}
 
 \vspace{-0.1cm} % shrink this space so no orphan at top of next page
 
@@ -380,7 +412,8 @@ the problem.  For that, we'll need more hardware.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Clustering}
+%% \begin{aosasect1}{Clustering}
+\begin{aosasect1}{クラスタリング}
 
 Making multiple Graphite servers appear to be a single system from
 a user perspective isn't terribly difficult, at least for a na\"{\i}ve
@@ -430,7 +463,8 @@ made. From a user standpoint, whatever data was on the lost server
 will be missing from their graphs unless that data is duplicated on
 another server in the cluster.
 
-\begin{aosasect2}{A Brief Analysis of Clustering Efficiency}
+%% \begin{aosasect2}{A Brief Analysis of Clustering Efficiency}
+\begin{aosasect2}{クラスタリングの効率についてのちょっとした分析}
 
 The most expensive part of a graphing request is rendering the graph.
 Each rendering is performed by a single server so adding more servers
@@ -456,7 +490,8 @@ the hierarchy may not appear as quickly to the user.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Distributing Metrics in a Cluster}
+%% \begin{aosasect2}{Distributing Metrics in a Cluster}
+\begin{aosasect2}{クラスタ内での分散メトリクス}
 
 The Graphite webapp is rather homogeneous throughout a cluster, in
 that it performs the exact same job on each server. \code{carbon}'s role,
@@ -492,7 +527,8 @@ the system administrator.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Design Reflections}
+%% \begin{aosasect1}{Design Reflections}
+\begin{aosasect1}{設計の反映}
 
 My experience in working on Graphite has reaffirmed a belief of mine
 that scalability has very little to do with low-level performance but
@@ -568,7 +604,8 @@ special syntax.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Becoming Open Source}
+%% \begin{aosasect1}{Becoming Open Source}
+\begin{aosasect1}{そしてオープンソースへ…}
 
 Looking back at the evolution of Graphite, I am still surprised both by
 how far it has come as a project and by how far it has taken me as a
