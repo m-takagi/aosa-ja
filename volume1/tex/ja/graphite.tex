@@ -53,78 +53,148 @@ Graphiteを最初に書いたときの様子(どれだけ世間知らずだっ�
 %% \begin{aosasect1}{The Database Library: Storing Time-Series Data}
 \begin{aosasect1}{データベースライブラリ: 時系列データの格納}
 
-Graphite is written entirely in Python and consists of three major
-components: a database library named \code{whisper}, a back-end daemon named
-\code{carbon}, and a front-end webapp that renders graphs and provides a
-basic UI\@. While \code{whisper} was written specifically for Graphite, it can
-also be used independently. It is very similar in design to the
-round-robin-database used by RRDtool, and only stores time-series
-numeric data.  Usually we think of databases as server processes that
-client applications talk to over sockets. However, \code{whisper}, much like
-RRDtool, is a database library used by applications to manipulate and
-retrieve data stored in specially formatted files. The most basic
-\code{whisper} operations are \code{create} to make a new \code{whisper} file,
-\code{update} to write new data points into a file, and \code{fetch}
-to retrieve data points.
+%% Graphite is written entirely in Python and consists of three major
+%% components: a database library named \code{whisper}, a back-end daemon named
+%% \code{carbon}, and a front-end webapp that renders graphs and provides a
+%% basic UI\@. While \code{whisper} was written specifically for Graphite, it can
+%% also be used independently. It is very similar in design to the
+%% round-robin-database used by RRDtool, and only stores time-series
+%% numeric data.  Usually we think of databases as server processes that
+%% client applications talk to over sockets. However, \code{whisper}, much like
+%% RRDtool, is a database library used by applications to manipulate and
+%% retrieve data stored in specially formatted files. The most basic
+%% \code{whisper} operations are \code{create} to make a new \code{whisper} file,
+%% \code{update} to write new data points into a file, and \code{fetch}
+%% to retrieve data points.
+GraphiteはすべてPythonで書かれており、三つの主要なコンポーネントで構成されている。
+データベースライブラリの\code{whisper}、バックエンドデーモンの\code{carbon}、
+そしてフロントエンドのウェブアプリケーション。
+フロントエンドは、グラフのレンダリングをして基本的なUIを提供する。
+\code{whisper}はGraphite用に書かれたものではあるが、それ単体で独立して使うこともできる。
+その構造はRRDtoolが使うラウンドロビンデータベースと似ており、
+時系列の数値データだけを格納する。通常はデータベースをサーバープロセスと考え、
+クライアントアプリケーションはそれに対してソケット越しにやりとりする。
+しかし\code{whisper}は、RRDtoolと同様にアプリケーションが利用するデータベースライブラリであり、
+特別なフォーマットのファイルに保存されたデータを扱うものだ。
+\code{whisper}の基本操作には、
+新たな\code{whisper}ファイルを作る\code{create}や
+新しいデータポイントをファイルに書き込む\code{update}、
+そしてデータポイントを取得する\code{fetch}がある。
 
-\aosafigure[300pt]{../images/graphite/whisper-file.eps}{Basic Anatomy of a \code{whisper} File}{fig.gra.whis}
+%% \aosafigure[300pt]{../images/graphite/whisper-file.eps}{Basic Anatomy of a \code{whisper} File}{fig.gra.whis}
+\aosafigure[300pt]{../images/graphite/whisper-file.eps}{\code{whisper}ファイルの基本構造}{fig.gra.whis}
 
-As shown in \aosafigref{fig.gra.whis}, \code{whisper} files consist of a
-header section containing various metadata, followed by one or more
-archive sections . Each archive is a sequence of consecutive data
-points which are \code{(timestamp, value)} pairs. When an
-\code{update} or \code{fetch} operation is performed, \code{whisper}
-determines the offset in the file where data should be written to or
-read from, based on the timestamp and the archive configuration.
+%% As shown in \aosafigref{fig.gra.whis}, \code{whisper} files consist of a
+%% header section containing various metadata, followed by one or more
+%% archive sections . Each archive is a sequence of consecutive data
+%% points which are \code{(timestamp, value)} pairs. When an
+%% \code{update} or \code{fetch} operation is performed, \code{whisper}
+%% determines the offset in the file where data should be written to or
+%% read from, based on the timestamp and the archive configuration.
+\aosafigref{fig.gra.whis}に示すとおり、
+\code{whisper}ファイルにはヘッダセクションがあってそこにさまざまなメタデータが格納される。
+そしてヘッダセクションの後にはいくつかのアーカイブセクションが続く。
+各アーカイブは一連のデータポイント群で構成されており、
+データポイントは\code{(timestamp, value)}のペアとなる。
+\code{update}あるいは\code{fetch}を実行すると、
+\code{whisper}はまずデータの読み書きをするファイル内のオフセットを調べる。
+このときに利用するのは、タイムスタンプとアーカイブ構成だ。
 
 \end{aosasect1}
 
 %% \begin{aosasect1}{The Back End: A Simple Storage Service}
 \begin{aosasect1}{バックエンド: シンプルなストレージサービス}
 
-Graphite's back end is a daemon process called \code{carbon-cache}, usually
-simply referred to as \code{carbon}.  It is built on Twisted, a highly
-scalable event-driven I/O framework for Python. Twisted enables \code{carbon}
-to efficiently talk to a large number of clients and handle a large
-amount of traffic with low overhead.  \aosafigref{fig.gra.carbon}
-shows the data flow among \code{carbon}, \code{whisper} and the webapp: Client
-applications collect data and send it to the Graphite back end, \code{carbon},
-which stores the data using \code{whisper}. This data can then be used by the
-Graphite webapp to generate graphs.
+%% Graphite's back end is a daemon process called \code{carbon-cache}, usually
+%% simply referred to as \code{carbon}.  It is built on Twisted, a highly
+%% scalable event-driven I/O framework for Python. Twisted enables \code{carbon}
+%% to efficiently talk to a large number of clients and handle a large
+%% amount of traffic with low overhead.  \aosafigref{fig.gra.carbon}
+%% shows the data flow among \code{carbon}, \code{whisper} and the webapp: Client
+%% applications collect data and send it to the Graphite back end, \code{carbon},
+%% which stores the data using \code{whisper}. This data can then be used by the
+%% Graphite webapp to generate graphs.
+Graphiteのバックエンドは\code{carbon-cache}という名前のデーモンプロセスで、
+通常は\code{carbon}と呼ばれている。このバックエンドはTwistedを使って作られている。
+Twistedとは、Python用に書かれた高度にスケーラブルなイベント駆動のI/Oフレームワークである。
+Twistedのおかげで、\code{carbon}は大量のクライアントとのやりとりをこなせ、
+大量のトラフィックをさばいてもオーバーヘッドは少なくて済む。
+\aosafigref{fig.gra.carbon}は、\code{carbon}と\code{whisper}
+そしてウェブアプリケーションの間でのデータの流れを表したものである。
+クライアントアプリケーションが収集したデータをGraphiteのバックエンドである
+\code{carbon}に送信し、そのデータは\code{whisper}を使って格納する。
+このデータをGraphiteウェブアプリケーションが活用して、グラフを生成する。
 
-\aosafigure[250pt]{../images/graphite/dataflow.eps}{Data Flow}{fig.gra.carbon}
+%% \aosafigure[250pt]{../images/graphite/dataflow.eps}{Data Flow}{fig.gra.carbon}
+\aosafigure[250pt]{../images/graphite/dataflow.eps}{データの流れ}{fig.gra.carbon}
 
-The primary function of \code{carbon} is to store data points for metrics
-provided by clients. In Graphite terminology, a metric is any
-measurable quantity that can vary over time (like the CPU utilization
-of a server or the number of sales of a product). A data point is
-simply a \code{(timestamp, value)} pair corresponding to the measured
-value of a particular metric at a point in time. Metrics are uniquely
-identified by their name, and the name of each metric as well as its
-data points are provided by client applications. A common type of
-client application is a monitoring agent that collects system or
-application metrics, and sends its collected values to \code{carbon} for easy
-storage and visualization.  Metrics in Graphite have simple
-hierarchical names, similar to filesystem paths except that a dot is
-used to delimit the hierarchy rather than a slash or backslash.
-\code{carbon} will respect any legal name and creates a \code{whisper} file for each
-metric to store its data points. The \code{whisper} files are stored within
-\code{carbon}'s data directory in a filesystem hierarchy that mirrors the
-dot-delimited hierarchy in each metric's name, so that (for example)
-\code{servers.www01.cpuUsage} maps to
-\code{.../servers/www01/cpuUsage.wsp}.
+%% The primary function of \code{carbon} is to store data points for metrics
+%% provided by clients. In Graphite terminology, a metric is any
+%% measurable quantity that can vary over time (like the CPU utilization
+%% of a server or the number of sales of a product). A data point is
+%% simply a \code{(timestamp, value)} pair corresponding to the measured
+%% value of a particular metric at a point in time. Metrics are uniquely
+%% identified by their name, and the name of each metric as well as its
+%% data points are provided by client applications. A common type of
+%% client application is a monitoring agent that collects system or
+%% application metrics, and sends its collected values to \code{carbon} for easy
+%% storage and visualization.  Metrics in Graphite have simple
+%% hierarchical names, similar to filesystem paths except that a dot is
+%% used to delimit the hierarchy rather than a slash or backslash.
+%% \code{carbon} will respect any legal name and creates a \code{whisper} file for each
+%% metric to store its data points. The \code{whisper} files are stored within
+%% \code{carbon}'s data directory in a filesystem hierarchy that mirrors the
+%% dot-delimited hierarchy in each metric's name, so that (for example)
+%% \code{servers.www01.cpuUsage} maps to
+%% \code{.../servers/www01/cpuUsage.wsp}.
+\code{carbon}の主機能は、クライアントから渡されたメトリクスを
+データポイントとして格納することである。
+Graphiteにおける「メトリクス」とは、計測可能な量であって
+時間とともに変化するもの(サーバーのCPU使用率や
+商品の売上数量など)を意味する。
+データポイントとは単なる\code{(timestamp, value)}のペアであり、
+ある時点での特定のメトリクスの計測値に対応する。
+メトリクスには一意な名前がついており、
+メトリクスの名前とそのデータポイントがクライアントから送られてくる。
+クライアントアプリケーションとしてよくある形式は、
+何らかのシステムやアプリケーションのメトリクスを監視するエージェントとして働くものである。
+収集した値を\code{carbon}に送り、データの格納と可視化をお手軽に行う。
+Graphiteのメトリクスにはシンプルな階層型の名前がついている。
+ファイルシステムのパスと似たものだが、
+階層の区切りにはスラッシュやバックスラッシュではなくドットを使う。
+\code{carbon}は正当な名前ならすべて受け入れ、
+\code{whisper}ファイルをメトリクスごとに作って
+そこにデータポイントを格納する。
+\code{whisper}ファイル群は\code{carbon}のデータディレクトリに
+格納される。そのディレクトリ構成は、メトリクスの名前をドットで区切った
+階層を反映したものとなる。つまり、たとえば\code{servers.www01.cpuUsage}
+なら\code{.../servers/www01/cpuUsage.wsp}に格納されることになる。
 
-When a client application wishes to send data points to Graphite it
-must establish a TCP connection to \code{carbon}, usually on port
-2003\footnote{There is another port over which serialized objects can
-be sent, which is more efficient than the plain-text format. This is
-only needed for very high levels of traffic.}.  The client does all
-the talking; \code{carbon} does not send anything over the connection. The
-client sends data points in a simple plain-text format while the
-connection may be left open and re-used as needed. The format is one
-line of text per data point where each line contains the dotted metric
-name, value, and a Unix epoch timestamp separated by spaces.  For
-example, a client might send:
+%% When a client application wishes to send data points to Graphite it
+%% must establish a TCP connection to \code{carbon}, usually on port
+%% 2003\footnote{There is another port over which serialized objects can
+%% be sent, which is more efficient than the plain-text format. This is
+%% only needed for very high levels of traffic.}.  The client does all
+%% the talking; \code{carbon} does not send anything over the connection. The
+%% client sends data points in a simple plain-text format while the
+%% connection may be left open and re-used as needed. The format is one
+%% line of text per data point where each line contains the dotted metric
+%% name, value, and a Unix epoch timestamp separated by spaces.  For
+%% example, a client might send:
+クライアントアプリケーションからデータポイントをGraphite
+に送信するには、まず\code{carbon}とのTCPコネクションを確立する必要がある。
+通常は、ポート2003を利用する
+\footnote{もうひとつ別のポートもあって、シリアライズしたオブジェクトを
+送れるようにもなっている。そのほうが、プレーンテキスト形式で送るよりも
+効率的になる。ただ、これが必要となるのはトラフィックが非常に激しい場合だけである。}。
+話しかけるのはクライアント側だけで、
+\code{carbon}がネットワーク越しに何かを送信することはない。
+クライアントはデータポイントをシンプルなプレーンテキスト形式で送信し、
+コネクションは開いたままにしておいて必要に応じて再利用する。
+そのフォーマットはデータポイントごとに1行のテキストにまとめたものであり、
+各行にはドット区切りのメトリクス名とその値、
+そしてUnixタイムスタンプがスペース区切りで書かれている。
+たとえば、クライアントから送るデータの形式はこのようになる。
 
 \begin{verbatim}
 servers.www01.cpuUsage 42 1286269200
@@ -134,125 +204,201 @@ servers.www01.cpuUsageUser 44 1286269260
 products.snake-oil.salesPerMinute 119 1286269260
 \end{verbatim}
 
-On a high level, all \code{carbon} does is listen for data in this format and
-try to store it on disk as quickly as possible using \code{whisper}. Later on
-we will discuss the details of some tricks used to ensure scalability
-and get the best performance we can out of a typical hard drive.
+%% On a high level, all \code{carbon} does is listen for data in this format and
+%% try to store it on disk as quickly as possible using \code{whisper}. Later on
+%% we will discuss the details of some tricks used to ensure scalability
+%% and get the best performance we can out of a typical hard drive.
+上位レベルでとらえた\code{carbon}の仕事は、
+この形式のデータを待ち受けて、受け取ったデータを即時に
+\code{whisper}でディスクに書き込むというのがすべてだ。
+本章では後ほど、スケーラビリティを確保しつつ
+一般のハードディスクドライブで最高のパフォーマンスを引き出す
+ための小技についても紹介する。
 
 \end{aosasect1}
 
 %% \begin{aosasect1}{The Front End: Graphs On-Demand}
 \begin{aosasect1}{フロントエンド: グラフオンデマンド}
 
-The Graphite webapp allows users to request custom graphs with a
-simple URL-based API\@. Graphing parameters are specified in the
-query-string of an HTTP GET request, and a PNG image is returned in
-response. For example, the URL:
+%% The Graphite webapp allows users to request custom graphs with a
+%% simple URL-based API\@. Graphing parameters are specified in the
+%% query-string of an HTTP GET request, and a PNG image is returned in
+%% response. For example, the URL:
+Graphiteのウェブアプリケーションを使えば、
+シンプルなURLベースのAPIを使ってカスタムグラフを作らせることができる。
+グラフの各種パラメータの指定にはHTTP GETリクエストのクエリ文字列を使い、
+レスポンスとしてPNG画像が戻ってくる。たとえば、次の例を考えよう。
+
 \begin{verbatim}
 http://graphite.example.com/render?target=servers.www01.cpuUsage&
 width=500&height=300&from=-24h
 \end{verbatim}
 
-\noindent requests a $500{\times}300$ graph for the metric
-\code{servers.www01.cpuUsage} and the past 24 hours of data. Actually,
-only the target parameter is required; all the others are optional and
-use your default values if omitted.
+%% \noindent requests a $500{\times}300$ graph for the metric
+%% \code{servers.www01.cpuUsage} and the past 24 hours of data. Actually,
+%% only the target parameter is required; all the others are optional and
+%% use your default values if omitted.
+\noindent
+このURLへのリクエスト結果は$500{\times}300$のグラフとなる。
+メトリクス\code{servers.www01.cpuUsage}の、過去24時間のデータを描画したものだ。
+実際のところ、必須パラメータはtargetだけであり、
+それ以外はすべて任意指定だ。省略した場合はデフォルト値を利用する。
 
-Graphite supports a wide variety of display options as well as data
-manipulation functions that follow a simple functional syntax. For
-example, we could graph a 10-point moving average of the metric in our
-previous example like this:
+%% Graphite supports a wide variety of display options as well as data
+%% manipulation functions that follow a simple functional syntax. For
+%% example, we could graph a 10-point moving average of the metric in our
+%% previous example like this:
+Graphiteはさまざまな表示オプションに対応しており、
+シンプルな関数型の構文によるデータ操作関数も用意されている。
+たとえば、先ほどの例において10ポイント間の移動平均をグラフにしたければ
+次のようにすればよい。
 
 \begin{verbatim}
 target=movingAverage(servers.www01.cpuUsage,10)
 \end{verbatim}
 
+%% \noindent
+%% Functions can be nested, allowing for complex expressions and
+%% calculations.
 \noindent
-Functions can be nested, allowing for complex expressions and
-calculations.
+関数はネストできるので、複雑な表現や計算も可能である。
 
 \pagebreak
 
-Here is another example that gives the running total of sales for the
-day using per-product metrics of sales-per-minute:
+%% Here is another example that gives the running total of sales for the
+%% day using per-product metrics of sales-per-minute:
+もうひとつ別の例を示す。これは、その日の現時点までの売上合計を、
+商品ごとの毎分売上数量を使って算出している。
 
 \begin{verbatim}
 target=integral(sumSeries(products.*.salesPerMinute))\&from=midnight
 \end{verbatim}
 
+%% \noindent
+%% The \code{sumSeries} function computes a time-series that is the sum
+%% of each metric matching the pattern
+%% \code{products.*.salesPerMinute}. Then \code{integral} computes a
+%% running total rather than a per-minute count. From here it isn't too
+%% hard to imagine how one might build a web UI for viewing and
+%% manipulating graphs. Graphite comes with its own Composer UI, shown in
+%% \aosafigref{fig.gra.ui}, that does this using Javascript to modify the
+%% graph's URL parameters as the user clicks through menus of the
+%% available features.
 \noindent
-The \code{sumSeries} function computes a time-series that is the sum
-of each metric matching the pattern
-\code{products.*.salesPerMinute}. Then \code{integral} computes a
-running total rather than a per-minute count. From here it isn't too
-hard to imagine how one might build a web UI for viewing and
-manipulating graphs. Graphite comes with its own Composer UI, shown in
-\aosafigref{fig.gra.ui}, that does this using Javascript to modify the
-graph's URL parameters as the user clicks through menus of the
-available features.
+\code{sumSeries}関数は、パターン\code{products.*.salesPerMinute}
+にマッチする各メトリクスの合計について時系列データを計算する。
+そして\code{integral}が、毎分のカウントではなくそこまでの合計を計算する。
+ここまでくれば、グラフを表示したり操作したりする
+ウェブUIを作るのもそれほど難しくはなさそうだと思えるだろう。
+Graphiteには自前のComposer UIが組み込まれている。\aosafigref{fig.gra.ui}
+のようなもので、ユーザーがメニューから何かの機能をクリックすると
+JavaScriptを使ってグラフのURLパラメータを変更する。
 
-\aosafigure{../images/graphite/composer-ui.eps}{Graphite's Composer Interface}{fig.gra.ui}
+%% \aosafigure{../images/graphite/composer-ui.eps}{Graphite's Composer Interface}{fig.gra.ui}
+\aosafigure{../images/graphite/composer-ui.eps}{GraphiteのComposer Interface}{fig.gra.ui}
 
 \end{aosasect1}
 
 %% \begin{aosasect1}{Dashboards}
 \begin{aosasect1}{ダッシュボード}
 
-Since its inception Graphite has been used as a tool for creating
-web-based dashboards. The URL API makes this a natural use
-case. Making a dashboard is as simple as making an HTML page full of
-tags like this:
+%% Since its inception Graphite has been used as a tool for creating
+%% web-based dashboards. The URL API makes this a natural use
+%% case. Making a dashboard is as simple as making an HTML page full of
+%% tags like this:
+その黎明期から、Graphiteはウェブベースのダッシュボードを作るためのツールとして
+使い続けられてきた。URL形式のAPIがあるので、これはごく自然な使い方である。
+ダッシュボードの作り方はとても単純で、単にこんな感じのタグを使った
+HTMLページを作るとの同じ程度の話だ。
 
 \begin{verbatim}
 <img src="http://graphite.example.com/render?parameters-for-my-awesome-graph">
 \end{verbatim}
 
-However, not everyone likes crafting URLs by hand, so Graphite's Composer UI
-provides a point-and-click method to create a graph from which you can
-simply copy and paste the URL\@. When coupled with another tool that
-allows rapid creation of web pages (like a wiki) this becomes easy
-enough that non-technical users can build their own dashboards pretty
-easily.
+%% However, not everyone likes crafting URLs by hand, so Graphite's Composer UI
+%% provides a point-and-click method to create a graph from which you can
+%% simply copy and paste the URL\@. When coupled with another tool that
+%% allows rapid creation of web pages (like a wiki) this becomes easy
+%% enough that non-technical users can build their own dashboards pretty
+%% easily.
+しかし、URLを手で組み立てるのが気に入らない人もいるだろう。
+そこで、GraphiteのComposer UIではマウスのクリックだけでグラフを作れる
+仕組みを用意した。グラフができあがれば、あとはそのURLをコピーして使うだけで済む。
+ウェブページを作成するためのさまざまなツール(Wikiなど)と組み合わせれば、
+技術に詳しくないユーザーでも自分用のダッシュボードが簡単に作れるようになる。
 
 \end{aosasect1}
 
 %% \begin{aosasect1}{An Obvious Bottleneck}
 \begin{aosasect1}{明らかなボトルネック}
 
-Once my users started building dashboards, Graphite quickly began to
-have performance issues. I investigated the web server logs to see
-what requests were bogging it down. It was pretty obvious that the
-problem was the sheer number of graphing requests. The webapp was
-CPU-bound, rendering graphs constantly. I noticed that there were a
-lot of identical requests, and the dashboards were to blame.
+%% Once my users started building dashboards, Graphite quickly began to
+%% have performance issues. I investigated the web server logs to see
+%% what requests were bogging it down. It was pretty obvious that the
+%% problem was the sheer number of graphing requests. The webapp was
+%% CPU-bound, rendering graphs constantly. I noticed that there were a
+%% lot of identical requests, and the dashboards were to blame.
+あるユーザーがダッシュボードを作り始めたとき、
+Graphiteがあっという間にパフォーマンスを落としてしまった。
+私はウェブサーバーのログを調べ、いったいどんなリクエストが原因なのかを確かめた。
+その結果わかったのは、グラフ描画のリクエストが大量に発生しているのが原因だということだった。
+絶え間なくグラフのレンダリングをしていたので、
+CPUがウェブアプリケーションのボトルネックとなっていたのだ。
+まったく同じリクエストが大量に発生していることに気付き、
+ダッシュボードに原因があることがわかった。
 
-Imagine you have a dashboard with 10 graphs in it and the page
-refreshes once a minute. Each time a user opens the dashboard in
-their browser, Graphite has to handle 10 more requests per
-minute. This quickly becomes expensive.
+%% Imagine you have a dashboard with 10 graphs in it and the page
+%% refreshes once a minute. Each time a user opens the dashboard in
+%% their browser, Graphite has to handle 10 more requests per
+%% minute. This quickly becomes expensive.
+ダッシュボードに10個のグラフが表示されており、それが1分おきに再読み込みされる様子を想像してみよう。
+ユーザーがダッシュボードをブラウザで開くたびに、
+Graphiteは毎分10リクエストを余分に処理しなければいけなくなる。
+あっという間に負荷は上がってしまう。
 
-A simple solution is to render each graph only once and then serve a
-copy of it to each user. The Django web framework (which Graphite is
-built on) provides an excellent caching mechanism that can use various
-back ends such as memcached. Memcached\footnote{\url{http://memcached.org}}
-is essentially a hash table
-provided as a network service. Client applications can get and set
-key-value pairs just like an ordinary hash table. The main benefit of
-using memcached is that the result of an expensive request (like
-rendering a graph) can be stored very quickly and retrieved later to
-handle subsequent requests. To avoid returning the same stale graphs
-forever, memcached can be configured to expire the cached graphs after
-a short period. Even if this is only a few seconds, the burden it
-takes off Graphite is tremendous because duplicate requests are so
-common.
+%% A simple solution is to render each graph only once and then serve a
+%% copy of it to each user. The Django web framework (which Graphite is
+%% built on) provides an excellent caching mechanism that can use various
+%% back ends such as memcached. Memcached\footnote{\url{http://memcached.org}}
+%% is essentially a hash table
+%% provided as a network service. Client applications can get and set
+%% key-value pairs just like an ordinary hash table. The main benefit of
+%% using memcached is that the result of an expensive request (like
+%% rendering a graph) can be stored very quickly and retrieved later to
+%% handle subsequent requests. To avoid returning the same stale graphs
+%% forever, memcached can be configured to expire the cached graphs after
+%% a short period. Even if this is only a few seconds, the burden it
+%% takes off Graphite is tremendous because duplicate requests are so
+%% common.
+シンプルな解決策は、それぞれのグラフのレンダリングを一度だけにして、
+各ユーザーにはそのコピーを返すようにするという方法だ。
+Graphiteが利用しているウェブフレームワークのDjangoには
+すばらしいキャッシュ機構が組み込まれており、memcached
+などのさまざまなバックエンドを使うようにできる。
+memcached\footnote{\url{http://memcached.org}}は、
+本質的にはハッシュテーブルをネットワークサービスとして提供する仕組みである。
+クライアントアプリケーションからキー・バリューのペアを取得したり設定したりなど、
+ふつうのハッシュテーブルと同じことができる。
+memcachedを使う最大の利点は、重たいリクエスト(グラフのレンダリングなど)
+の結果を手早く保存してそれ以降のリクエストで流用できることだ。
+最新状態を反映していないグラフをいつまでも返し続けることを避けるために、
+キャッシュしたグラフの有効期限をmemcachedの設定で短めにしておくことができる。
+友好期限をほんの数秒にしておいたとしても、Graphiteへの負荷は大きく下がる。
+リクエストの重複があまりにも頻発しているからだ。
 
-Another common case that creates lots of rendering requests is when a
-user is tweaking the display options and applying functions in the
-Composer UI\@. Each time the user changes something, Graphite must
-redraw the graph. The same data is involved in each request so it
-makes sense to put the underlying data in the memcache as well.  This
-keeps the UI responsive to the user because the step of retrieving
-data is skipped.
+%% Another common case that creates lots of rendering requests is when a
+%% user is tweaking the display options and applying functions in the
+%% Composer UI\@. Each time the user changes something, Graphite must
+%% redraw the graph. The same data is involved in each request so it
+%% makes sense to put the underlying data in the memcache as well.  This
+%% keeps the UI responsive to the user because the step of retrieving
+%% data is skipped.
+レンダリングのリクエストが大量に発生する場面がもうひとつ存在する。
+Composer UI上で、表示オプションをいじったり関数を適用したりするときだ。
+ユーザーが何かを変更するたびにGraphiteはグラフを再描画しなければいけない。
+個々のリクエストは同じデータに関するものなので、もとになるデータを
+memcacheに入れておくと効率がよい。こうしておけば、
+ユーザーに反応を返すのが遅れずに済む。データの取得処理を飛ばせるからだ。
 
 \end{aosasect1}
 
