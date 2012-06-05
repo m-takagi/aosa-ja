@@ -405,92 +405,176 @@ memcacheに入れておくと効率がよい。こうしておけば、
 %% \begin{aosasect1}{Optimizing I/O}
 \begin{aosasect1}{入出力の最適化}
 
-Imagine that you have 60,000 metrics that you send to your Graphite
-server, and each of these metrics has one data point per
-minute. Remember that each metric has its own \code{whisper} file on the
-filesystem. This means \code{carbon} must do one write operation to 60,000
-different files each minute.  As long as \code{carbon} can write to one file
-each millisecond, it should be able to keep up. This isn't too far
-fetched, but let's say you have 600,000 metrics updating each minute,
-or your metrics are updating every second, or perhaps you simply
-cannot afford fast enough storage. Whatever the case, assume the rate
-of incoming data points exceeds the rate of write operations that your
-storage can keep up with. How should this situation be handled?
+%% Imagine that you have 60,000 metrics that you send to your Graphite
+%% server, and each of these metrics has one data point per
+%% minute. Remember that each metric has its own \code{whisper} file on the
+%% filesystem. This means \code{carbon} must do one write operation to 60,000
+%% different files each minute.  As long as \code{carbon} can write to one file
+%% each millisecond, it should be able to keep up. This isn't too far
+%% fetched, but let's say you have 600,000 metrics updating each minute,
+%% or your metrics are updating every second, or perhaps you simply
+%% cannot afford fast enough storage. Whatever the case, assume the rate
+%% of incoming data points exceeds the rate of write operations that your
+%% storage can keep up with. How should this situation be handled?
+60,000件のメトリクスをGraphiteサーバーに送信し、
+そのそれぞれが1分ごとにデータポイントを作るという場面を考えてみる。
+各メトリクスにに対応する\code{whisper}ファイルが
+ファイルシステム上に用意されていたことを思い出そう。
+つまり、\code{carbon}は60,000の異なるファイルに
+毎分1回の書き込みをする必要があるということだ。
+\code{carbon}が1ファイルへの書き込みを1ミリ秒で行えるのなら、
+十分に対応できる。これくらいならそんなに無茶な話ではない。
+でも、毎分更新するメトリクスが600,000件あったとしたらどうだろう?
+あるいは更新頻度が1秒ごとだったら?高速なストレージを導入する余裕がなかったとしたら?
+まあなんでもいい。入力のデータポイントの分量が、
+ストレージ側の書き込み速度の限界に達してしまったとしよう。
+そんな場合はどうすればいいだろうか?
 
-Most hard drives these days have slow seek time\footnote{Solid-state
-drives generally have extremely fast seek times compared to
-conventional hard drives.}, that is, the delay between doing I/O
-operations at two different locations, compared to writing a
-contiguous sequence of data. This means the more contiguous writing we
-do, the more throughput we get. But if we have thousands of files that
-need to be written to frequently, and each write is very small (one
-\code{whisper} data point is only 12 bytes) then our disks are definitely
-going to spend most of their time seeking.
+%% Most hard drives these days have slow seek time\footnote{Solid-state
+%% drives generally have extremely fast seek times compared to
+%% conventional hard drives.}, that is, the delay between doing I/O
+%% operations at two different locations, compared to writing a
+%% contiguous sequence of data. This means the more contiguous writing we
+%% do, the more throughput we get. But if we have thousands of files that
+%% need to be written to frequently, and each write is very small (one
+%% \code{whisper} data point is only 12 bytes) then our disks are definitely
+%% going to spend most of their time seeking.
+最近のハードディスクドライブは、シークタイムが遅いものが多い
+\footnote{SSDなら、一般的にハードディスクドライブよりもずっとシークタイムが高速になる。}。
+そのため、別々の場所への書き込みのほうがシーケンシャルな書き込みよりも遅延が大きくなる。
+つまり、連続書き込みを増やせば増やすほど、スループットを稼げるというわけだ。
+しかし、数千ものファイルに頻繁に書き込む必要があって
+個々の書き込みの分量が非常に小さい場合
+(\code{whisper}のデータポイントは1件あたりたったの12バイトだ)
+は、結局のところは大半の時間をシークに費やすことになる。
 
-Working under the assumption that the rate of write operations has a
-relatively low ceiling, the only way to increase our data point
-throughput beyond that rate is to write multiple data points in a
-single write operation. This is feasible because \code{whisper} arranges
-consecutive data points contiguously on disk. So I added an
-\code{update\_many} function to \code{whisper}, which takes a list of data
-points for a single metric and compacts contiguous data points into a
-single write operation.  Even though this made each write larger, the
-difference in time it takes to write ten data points (120 bytes)
-versus one data point (12 bytes) is negligible. It takes quite a few
-more data points before the size of each write starts to noticeably
-affect the latency.
+%% Working under the assumption that the rate of write operations has a
+%% relatively low ceiling, the only way to increase our data point
+%% throughput beyond that rate is to write multiple data points in a
+%% single write operation. This is feasible because \code{whisper} arranges
+%% consecutive data points contiguously on disk. So I added an
+%% \code{update\_many} function to \code{whisper}, which takes a list of data
+%% points for a single metric and compacts contiguous data points into a
+%% single write operation.  Even though this made each write larger, the
+%% difference in time it takes to write ten data points (120 bytes)
+%% versus one data point (12 bytes) is negligible. It takes quite a few
+%% more data points before the size of each write starts to noticeably
+%% affect the latency.
+書き込み操作の比率が比較的早めに限界に達するという前提で考えると、
+その限界を超えるスループットをたたきだすための唯一の方法は、
+複数のデータポイントの書き込みを一度の書き込み操作で済ませることだ。
+これは実現可能である。なぜなら\code{whisper}は、
+連続したデータポイントをディスク上でも連続した領域に配置するからだ。
+というわけで、私は\code{whisper}に\code{update\_many}関数を追加した。
+この関数は、ひとつのメトリクスに関するデータポイントのリストを受け取り、
+連続したデータポイントを単一の書き込み操作に圧縮する。
+一回の書き込みのデータ量は大きくなってしまうが、10件のデータポイント
+(120バイト)の書き込みと1件のデータポイント(12バイト)の書き込み
+に要する時間の差は無視できる程度のものである。
+よっぽど大量のデータポイントをひとまとめにしない限り、
+サイズの差がレイテンシに影響を及ぼすことはないだろう。
 
-Next I implemented a buffering mechanism in \code{carbon}. Each incoming data
-point gets mapped to a queue based on its metric name and is then
-appended to that queue.  Another thread repeatedly iterates through
-all of the queues and for each one it pulls all of the data points out
-and writes them to the appropriate \code{whisper} file with
-\code{update\_many}. Going back to our example, if we have 600,000
-metrics updating every minute and our storage can only keep up with 1
-write per millisecond, then the queues will end up holding about 10
-data points each on average. The only resource this costs us is
-memory, which is relatively plentiful since each data point is only a
-few bytes.
+%% Next I implemented a buffering mechanism in \code{carbon}. Each incoming data
+%% point gets mapped to a queue based on its metric name and is then
+%% appended to that queue.  Another thread repeatedly iterates through
+%% all of the queues and for each one it pulls all of the data points out
+%% and writes them to the appropriate \code{whisper} file with
+%% \code{update\_many}. Going back to our example, if we have 600,000
+%% metrics updating every minute and our storage can only keep up with 1
+%% write per millisecond, then the queues will end up holding about 10
+%% data points each on average. The only resource this costs us is
+%% memory, which is relatively plentiful since each data point is only a
+%% few bytes.
+次に私は、\code{carbon}にバッファリングの機能を実装した。
+入力のデータポイントをメトリクス名に基づくキューにマップし、
+対応するキューにデータポイントを追加していったのだ。
+別スレッドから繰り返し全キューを走査し、すべてのデータポイントを取得する。
+そして、適切な\code{whisper}ファイルに\code{update\_many}で書き込んでいった。
+先ほどの例に戻ろう。600,000件のメトリクスを1分ごとに更新するときに、
+ストレージ側では1回の書き込みに1ミリ秒かってしまうとする。
+そんな場合なら、平均して10件程度のデータポイントを各キューに持たせることになる。
+このとき使用量が増える唯一のリソースはメモリであり、
+メモリは比較的潤沢に使える。というのも各データポイントはたかだか数バイトにしかならないからだ。
 
-This strategy dynamically buffers as many datapoints as necessary to sustain
-a rate of incoming datapoints that may exceed the rate of I/O operations your
-storage can keep up with. A nice advantage of this approach is that it adds a degree of
-resiliency to handle temporary I/O slowdowns. If the system needs to
-do other I/O work outside of Graphite then it is likely that the rate
-of write operations will decrease, in which case \code{carbon}'s queues will
-simply grow. The larger the queues, the larger the writes. Since the
-overall throughput of data points is equal to the rate of write
-operations times the average size of each write, \code{carbon} is able to
-keep up as long as there is enough memory for the queues.  \code{carbon}'s
-queueing mechanism is depicted in \aosafigref{fig.gra.queue}.
+%% This strategy dynamically buffers as many datapoints as necessary to sustain
+%% a rate of incoming datapoints that may exceed the rate of I/O operations your
+%% storage can keep up with. A nice advantage of this approach is that it adds a degree of
+%% resiliency to handle temporary I/O slowdowns. If the system needs to
+%% do other I/O work outside of Graphite then it is likely that the rate
+%% of write operations will decrease, in which case \code{carbon}'s queues will
+%% simply grow. The larger the queues, the larger the writes. Since the
+%% overall throughput of data points is equal to the rate of write
+%% operations times the average size of each write, \code{carbon} is able to
+%% keep up as long as there is enough memory for the queues.  \code{carbon}'s
+%% queueing mechanism is depicted in \aosafigref{fig.gra.queue}.
+この方式では、必要に応じてデータポイントを動的にバッファリングし、
+ストレージ側のI/Oが持ちこたえられる程度に
+入力データポイントのスピードを抑えることになる。
+この方式のよいところは、一時的にI/Oがスローダウンしたときなどに
+弾力的な扱いができるところだ。
+Graphite以外の他の場所でI/Oを伴う作業が発生するなら、
+書き込み操作を減らせばよい。その場合は単に\code{carbon}
+のキューが大きくなるだけのことだ。
+キューが大きくなればなるほど、書き込みの量も大きくなる。
+データポイントの全体的なスループットは
+書き込み操作の回数と各書き込みの平均サイズを掛け合わせたものになるので、
+キュー用に確保できるメモリが十分にある限りは\code{carbon}
+を持ちこたえさせることができる。
+\code{carbon}のキューの仕組みは\aosafigref{fig.gra.queue}
+のようになる。
 
-\aosafigure[250pt]{../images/graphite/carbon-queues.eps}{Carbon's Queueing Mechanism}{fig.gra.queue}
+%% \aosafigure[250pt]{../images/graphite/carbon-queues.eps}{Carbon's Queueing Mechanism}{fig.gra.queue}
+\aosafigure[250pt]{../images/graphite/carbon-queues.eps}{Carbonのキューのしくみ}{fig.gra.queue}
 
 \end{aosasect1}
 
 %% \begin{aosasect1}{Keeping It Real-Time}
 \begin{aosasect1}{リアルタイム性の維持}
 
-Buffering data points was a nice way to optimize \code{carbon}'s I/O but it
-didn't take long for my users to notice a rather troubling side
-effect.  Revisiting our example again, we've got 600,000 metrics that
-update every minute and we're assuming our storage can only keep up
-with 60,000 write operations per minute. This means we will have
-approximately 10 minutes worth of data sitting in \code{carbon}'s queues at
-any given time.  To a user this means that the graphs they request
-from the Graphite webapp will be missing the most recent 10 minutes of
-data: Not good!
+%% Buffering data points was a nice way to optimize \code{carbon}'s I/O but it
+%% didn't take long for my users to notice a rather troubling side
+%% effect.  Revisiting our example again, we've got 600,000 metrics that
+%% update every minute and we're assuming our storage can only keep up
+%% with 60,000 write operations per minute. This means we will have
+%% approximately 10 minutes worth of data sitting in \code{carbon}'s queues at
+%% any given time.  To a user this means that the graphs they request
+%% from the Graphite webapp will be missing the most recent 10 minutes of
+%% data: Not good!
+データポイントをバッファリングするというのは
+\code{carbon}のI/Oの最適化という面ではよい方法だ。
+しかしすぐに、それ以外の副作用も見つかってしまった。
+ここでもう一度、先ほどの例に戻ってみよう。600,000件のメトリクスを
+1分ごとに更新したいけれど、ストレージの性能的には1分間に60,000回の
+書き込み操作が限界である、という状況だ。
+これはつまり、どの時点を見ても\code{carbon}
+のキューにはほぼ10分ぶんのデータが溜まっているということになる。
+ユーザーの視点で考えると、Graphiteのウェブアプリケーションから
+リクエストを送っても最新の10分のデータは表示されないということだ。
+これはひどい!
 
-Fortunately the solution is pretty straight-forward. I simply added a
-socket listener to \code{carbon} that provides a query interface for
-accessing the buffered data points and then modifies the Graphite
-webapp to use this interface each time it needs to retrieve data.  The
-webapp then combines the data points it retrieves from \code{carbon} with the
-data points it retrieved from disk and voila, the graphs are
-real-time. Granted, in our example the data points are updated to the
-minute and thus not exactly ``real-time'', but the fact that each data
-point is instantly accessible in a graph once it is received by \code{carbon}
-is real-time.
+%% Fortunately the solution is pretty straight-forward. I simply added a
+%% socket listener to \code{carbon} that provides a query interface for
+%% accessing the buffered data points and then modifies the Graphite
+%% webapp to use this interface each time it needs to retrieve data.  The
+%% webapp then combines the data points it retrieves from \code{carbon} with the
+%% data points it retrieved from disk and voila, the graphs are
+%% real-time. Granted, in our example the data points are updated to the
+%% minute and thus not exactly ``real-time'', but the fact that each data
+%% point is instantly accessible in a graph once it is received by \code{carbon}
+%% is real-time.
+幸いなことに、この問題は簡単に解決できる。
+私は\code{carbon}にソケットリスナーを追加して、
+バッファリングされたデータポイントにアクセスするための
+問い合わせインターフェイスを作った。そしてGraphiteの
+ウェブアプリケーションを修正し、データを取得するときには
+このインターフェイスを使うようにしたのだ。
+このインターフェイスで\code{carbon}から取得したデータポイントと
+ディスクから取得したデータポイントを組み合わせれば、ほらできあがり。
+これでリアルタイムのグラフを表示できるようになった。
+確かに、先ほどの例は1分ごとの更新だったし厳密には「リアルタイム」
+だとは言えないかもしれない。しかし実際のところ、\code{carbon}
+が受け取ったデータポイントが即時にグラフに反映されるという意味では
+リアルタイムだと言えるだろう。
 
 \end{aosasect1}
 
