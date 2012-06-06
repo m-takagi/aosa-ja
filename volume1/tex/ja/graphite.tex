@@ -585,60 +585,109 @@ Graphite以外の他の場所でI/Oを伴う作業が発生するなら、
 
 \vspace{-0.1cm} % shrink this space so no orphan at top of next page
 
-As is probably obvious by now, a key characteristic of system
-performance that Graphite's own performance depends on is I/O latency.
-So far we've assumed our system has consistently low I/O latency
-averaging around 1 millisecond per write, but this is a big assumption
-that requires a little deeper analysis. Most hard drives simply aren't
-that fast; even with dozens of disks in a RAID array there is very
-likely to be more than 1 millisecond latency for random access. Yet if
-you were to try and test how quickly even an old laptop could write a
-whole kilobyte to disk you would find that the write system call
-returns in far less than 1 millisecond. Why?
+%% As is probably obvious by now, a key characteristic of system
+%% performance that Graphite's own performance depends on is I/O latency.
+%% So far we've assumed our system has consistently low I/O latency
+%% averaging around 1 millisecond per write, but this is a big assumption
+%% that requires a little deeper analysis. Most hard drives simply aren't
+%% that fast; even with dozens of disks in a RAID array there is very
+%% likely to be more than 1 millisecond latency for random access. Yet if
+%% you were to try and test how quickly even an old laptop could write a
+%% whole kilobyte to disk you would find that the write system call
+%% returns in far less than 1 millisecond. Why?
+そろそろお気づきだろうが、Graphiteのパフォーマンスに大きな影響を及ぼすのは
+I/Oのレイテンシーである。ここまでは、I/Oのレイテンシーが書き込みあたり1ミリ秒
+という比較的低めの環境を想定してきた。しかしこれはおおざっぱな見込みにすぎず、
+もう少し深く分析する必要がある。大半のハードディスクドライブは、
+そんなに速度が出ない。10台以上のディスクでRAIDアレイを組んだとしても、
+ランダムアクセスのレイテンシーはきっと1ミリ秒を超えることだろう。
+しかし、たとえば旧型のラップトップで1キロバイトのデータをディスクに
+書き込んだ場合、writeシステムコールは1ミリ秒よりずっと速く結果を返すはずだ。
+いったいなぜだろう?
 
-Whenever software has inconsistent or unexpected performance
-characteristics, usually either buffering or caching is to blame. In
-this case, we're dealing with both. The write system call doesn't
-technically write your data to disk, it simply puts it in a buffer
-which the kernel then writes to disk later on. This is why the write
-call usually returns so quickly. Even after the buffer has been
-written to disk, it often remains cached for subsequent reads. Both of
-these behaviors, buffering and caching, require memory of
-course.
+%% Whenever software has inconsistent or unexpected performance
+%% characteristics, usually either buffering or caching is to blame. In
+%% this case, we're dealing with both. The write system call doesn't
+%% technically write your data to disk, it simply puts it in a buffer
+%% which the kernel then writes to disk later on. This is why the write
+%% call usually returns so quickly. Even after the buffer has been
+%% written to disk, it often remains cached for subsequent reads. Both of
+%% these behaviors, buffering and caching, require memory of
+%% course.
+あるソフトウェアが一見してつじつまの合わない予想外のパフォーマンスを見せた場合、
+たいていはバッファリングあるいはキャッシュがからんでいる。この場合は、その両方だ。
+writeシステムコールはデータを実際にディスクに書き込むわけではなく
+単にバッファに入れるだけであり、後でディスクに書き込むのはカーネルの役割となる。
+だからこそ、writeが予想外に速く処理を終えるのだ。
+バッファをディスクに書き込んでからも、それ以降のreadに備えて
+キャッシュしたままにしておくことが多い。こういったバッファリングやキャッシュを
+行うには、当然ながらメモリが必要になる。
 
-Kernel developers, being the smart folks that they are, decided it
-would be a good idea to use whatever user-space memory is currently
-free instead of allocating memory outright. This turns out to be a
-tremendously useful performance booster and it also explains why no
-matter how much memory you add to a system it will usually end up
-having almost zero ``free'' memory after doing a modest amount of
-I/O\@. If your user-space applications aren't using that memory then
-your kernel probably is. The downside of this approach is that this
-``free'' memory can be taken away from the kernel the moment a
-user-space application decides it needs to allocate more memory for
-itself. The kernel has no choice but to relinquish it, losing whatever
-buffers may have been there.
+%% Kernel developers, being the smart folks that they are, decided it
+%% would be a good idea to use whatever user-space memory is currently
+%% free instead of allocating memory outright. This turns out to be a
+%% tremendously useful performance booster and it also explains why no
+%% matter how much memory you add to a system it will usually end up
+%% having almost zero ``free'' memory after doing a modest amount of
+%% I/O\@. If your user-space applications aren't using that memory then
+%% your kernel probably is. The downside of this approach is that this
+%% ``free'' memory can be taken away from the kernel the moment a
+%% user-space application decides it needs to allocate more memory for
+%% itself. The kernel has no choice but to relinquish it, losing whatever
+%% buffers may have been there.
+賢いカーネル開発者たちは、ユーザーメモリ空間で余っているメモリを使うほうが
+きっちりメモリを確保しておくよりもよさげだと判断した。
+そのおかげでパフォーマンスを大きく確保できたわけだ。
+システムのメモリをいくら増やしてもI/Oを繰り返すうちに
+いつの間にか``空き''メモリがゼロになっている、という現象もこれで説明がつく。
+ユーザー空間のアプリケーションでそんなにメモリを使っているわけでもないのになあ…
+というときは、おそらくカーネルがメモリを使っているのだろう。
+この手法には弱点もある。ユーザー空間のアプリケーション側で必要なメモリが増えると
+カーネルが使える``空き''メモリがなくなってしまうということだ。
+そんな場合はカーネル側でメモリを使うのをあきらめざるを得ず、
+それまで保持していたバッファの中身を失ってしまう。
 
-So what does all of this mean for Graphite? We just highlighted
-\code{carbon}'s reliance on consistently low I/O latency and we also know
-that the write system call only returns quickly because the data is
-merely being copied into a buffer. What happens when there is not
-enough memory for the kernel to continue buffering writes? The writes
-become synchronous and thus terribly slow! This causes a dramatic drop
-in the rate of \code{carbon}'s write operations, which causes \code{carbon}'s queues
-to grow, which eats up even more memory, starving the kernel even
-further. In the end, this kind of situation usually results in \code{carbon}
-running out of memory or being killed by an angry sysadmin.
+%% So what does all of this mean for Graphite? We just highlighted
+%% \code{carbon}'s reliance on consistently low I/O latency and we also know
+%% that the write system call only returns quickly because the data is
+%% merely being copied into a buffer. What happens when there is not
+%% enough memory for the kernel to continue buffering writes? The writes
+%% become synchronous and thus terribly slow! This causes a dramatic drop
+%% in the rate of \code{carbon}'s write operations, which causes \code{carbon}'s queues
+%% to grow, which eats up even more memory, starving the kernel even
+%% further. In the end, this kind of situation usually results in \code{carbon}
+%% running out of memory or being killed by an angry sysadmin.
+そんなこと、Graphiteに何の関係があるんだって?
+先ほど強調したように、\code{carbon}はI/Oのレイテンシが一貫して低いことを前提としている。
+また、writeシステムコールが高速に動作するのは単にデータをバッファにコピーしているだけだからだということも知っている。
+カーネルが使えるメモリが少なくなって、バッファへの書き込みが続行不能になったら、いったいどうなるだろう?
+同期書き込みしかできなくなるわけで、これは恐ろしく遅い!
+これは\code{carbon}の書き込み操作にも深刻な影響を与え、
+その結果\code{carbon}のキューが肥大化する。
+その結果としてメモリの使用量が増え、カーネルが使えるメモリはさらに減って……。
+最終的にどうなるか。\code{carbon}がメモリを食いつぶしてしまうか、
+いらついたシステム管理者に強制終了させられてしまうだろう。
 
-To avoid this kind of catastrophe, I added several features to \code{carbon}
-including configurable limits on how many data points can be queued
-and rate-limits on how quickly various \code{whisper} operations can be
-performed.  These features can protect \code{carbon} from spiraling out of
-control and instead impose less harsh effects like dropping some data
-points or refusing to accept more data points. However, proper values
-for those settings are system-specific and require a fair amount of
-testing to tune. They are useful but they do not fundamentally solve
-the problem.  For that, we'll need more hardware.
+%% To avoid this kind of catastrophe, I added several features to \code{carbon}
+%% including configurable limits on how many data points can be queued
+%% and rate-limits on how quickly various \code{whisper} operations can be
+%% performed.  These features can protect \code{carbon} from spiraling out of
+%% control and instead impose less harsh effects like dropping some data
+%% points or refusing to accept more data points. However, proper values
+%% for those settings are system-specific and require a fair amount of
+%% testing to tune. They are useful but they do not fundamentally solve
+%% the problem.  For that, we'll need more hardware.
+こんな悲惨な結果を避けるために、私は\code{carbon}にちょっとした機能を追加した。
+キューに格納できるデータポイント数や
+\code{whisper}の各種操作の頻度を、設定で制限できるようにしたのだ。
+これらの機能を使えば、\code{carbon}が制御不能なスパイラルに陥ることを防げる。
+そのかわりにいくつかのデータポイントを取りこぼしたり
+データポイントをさばききれなくなったりといった影響も出るが、
+そうしないときの悪影響に比べればまだ我慢できる。
+しかし、これらの適切な設定値はシステムによって異なり、
+何度もテストしないと適切な値にチューニングできないだろう。
+便利な機能ではあるが、問題を根本的に解決するというものではない。
+根本的に解決するには、ハードウェアを増強するしかない。
 
 \end{aosasect1}
 
