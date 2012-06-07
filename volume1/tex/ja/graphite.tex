@@ -694,113 +694,207 @@ writeシステムコールはデータを実際にディスクに書き込むわ
 %% \begin{aosasect1}{Clustering}
 \begin{aosasect1}{クラスタリング}
 
-Making multiple Graphite servers appear to be a single system from
-a user perspective isn't terribly difficult, at least for a na\"{\i}ve
-implementation.  The webapp's user interaction primarily consists of
-two operations: finding metrics and fetching data points (usually in
-the form of a graph). The find and fetch operations of the webapp are
-tucked away in a library that abstracts their implementation from the
-rest of the codebase, and they are also exposed through HTTP request
-handlers for easy remote calls.
+%% Making multiple Graphite servers appear to be a single system from
+%% a user perspective isn't terribly difficult, at least for a na\"{\i}ve
+%% implementation.  The webapp's user interaction primarily consists of
+%% two operations: finding metrics and fetching data points (usually in
+%% the form of a graph). The find and fetch operations of the webapp are
+%% tucked away in a library that abstracts their implementation from the
+%% rest of the codebase, and they are also exposed through HTTP request
+%% handlers for easy remote calls.
+複数のGraphiteサーバーを立てつつ、ユーザー側からは単一のシステムに見えるようにする。
+そんなことも、対して難しくはない。少なくとも、馬鹿正直な実装である限りは。
+Graphiteウェブアプリケーションのユーザーインターフェイスは、主に二種類の操作で成り立っている。
+メトリクスの選択(find)と、(通常はグラフ形式での)データポイントの取得(fetch)だ。
+これらの操作はライブラリとして切り出されており、その実装が他のコードベースとは
+切り離されて抽象化されている。また、HTTPリクエストハンドラも公開しており、
+リモートからの呼び出しにも対応できる。
 
-The \code{find} operation searches the local filesystem of \code{whisper}
-data for things matching a user-specified pattern, just as a filesystem
-glob like \code{*.txt} matches files with that extension.
-Being a tree structure, the result returned by \code{find} is a
-collection of \code{Node} objects, each deriving from either the \code{Branch} or
-\code{Leaf} sub-classes of \code{Node}. Directories correspond to branch nodes and
-\code{whisper} files correspond to leaf nodes.  This layer of abstraction
-makes it easy to support different types of underlying storage
-including RRD files\footnote{RRD files are actually branch nodes
-because they can contain multiple data sources; an RRD data source
-is a leaf node.} and gzipped \code{whisper} files.
+%% The \code{find} operation searches the local filesystem of \code{whisper}
+%% data for things matching a user-specified pattern, just as a filesystem
+%% glob like \code{*.txt} matches files with that extension.
+%% Being a tree structure, the result returned by \code{find} is a
+%% collection of \code{Node} objects, each deriving from either the \code{Branch} or
+%% \code{Leaf} sub-classes of \code{Node}. Directories correspond to branch nodes and
+%% \code{whisper} files correspond to leaf nodes.  This layer of abstraction
+%% makes it easy to support different types of underlying storage
+%% including RRD files\footnote{RRD files are actually branch nodes
+%% because they can contain multiple data sources; an RRD data source
+%% is a leaf node.} and gzipped \code{whisper} files.
+\code{find}操作は、ローカルファイルシステム上の\code{whisper}データを検索して、
+ユーザーが指定したパターンに一致するものを見つける。ちょうど、ファイルシステム上で
+\code{*.txt}などとして特定の拡張子のファイルを探すのと同じようなことだ。
+\code{find}が返す結果はツリー構造で\code{Node}オブジェクトのコレクションとなり、
+\code{Node}のサブクラスである\code{Branch}あるいは\code{Leaf}
+のいずれかで表される。ディレクトリがブランチノードに、
+そして\code{whisper}ファイルがリーフノードにそれぞれ対応する。
+この抽象化レイヤーのおかげで、ベースとなるストレージを
+さまざまな形式に対応させるのも簡単になった。たとえばRRDファイル
+\footnote{実は、RRDファイルはブランチノードである。
+というのも、ひとつのファイルに複数のデータソースを含めることができるからだ。
+RRDのデータソースがリーフノードとなる。}
+やgzipした\code{whisper}ファイルにも対応している。
 
-The \code{Leaf} interface defines a \code{fetch} method whose
-implementation depends on the type of leaf node. In the case of
-\code{whisper} files it is simply a thin wrapper around the \code{whisper} library's
-own fetch function.  When clustering support was added, the
-\code{find} function was extended to be able to make remote find calls
-via HTTP to other Graphite servers specified in the webapp's
-configuration. The node data contained in the results of these HTTP
-calls gets wrapped as \code{RemoteNode} objects which conform to the usual
-\code{Node}, \code{Branch}, and \code{Leaf} interfaces. This makes the clustering
-transparent to the rest of the webapp's codebase. The \code{fetch}
-method for a remote leaf node is implemented as another HTTP call to
-retrieve the data points from the node's Graphite server.
+%% The \code{Leaf} interface defines a \code{fetch} method whose
+%% implementation depends on the type of leaf node. In the case of
+%% \code{whisper} files it is simply a thin wrapper around the \code{whisper} library's
+%% own fetch function.  When clustering support was added, the
+%% \code{find} function was extended to be able to make remote find calls
+%% via HTTP to other Graphite servers specified in the webapp's
+%% configuration. The node data contained in the results of these HTTP
+%% calls gets wrapped as \code{RemoteNode} objects which conform to the usual
+%% \code{Node}, \code{Branch}, and \code{Leaf} interfaces. This makes the clustering
+%% transparent to the rest of the webapp's codebase. The \code{fetch}
+%% method for a remote leaf node is implemented as another HTTP call to
+%% retrieve the data points from the node's Graphite server.
+\code{Leaf}インターフェイスには\code{fetch}メソッドが定義されており、
+その実装はリーフノードの形式によって異なる。
+\code{whisper}ファイルの場合は、単に
+\code{whisper}ライブラリ自体のfetch関数を薄くラップしているだけである。
+クラスタリングに対応し始めたときに\code{find}関数は拡張され、
+HTTP経由でリモートのfind関数を呼べるようになった。呼び出す先のGraphite
+サーバーは、ウェブアプリケーションの設定項目として指定する。
+ノードのデータには、これらのHTTPコールの結果を\code{RemoteNode}
+オブジェクトでラップしたものが含まれるようになる。このオブジェクトは、通常の
+\code{Node}や\code{Branch}そして\code{Leaf}といったインターフェイスに対応している。
+このおかげで、クラスタリング環境をウェブアプリケーションで透過的に扱えるようになった。
+リモートリーフノードの\code{fetch}メソッドは別のHTTPコールとして実装されており、
+データポイントをそのノードのGraphiteサーバーから取得するようになっている。
 
-All of these calls are made between the webapps the same way a client
-would call them, except with one additional parameter specifying that
-the operation should only be performed locally and not be
-redistributed throughout the cluster.  When the webapp is asked to
-render a graph, it performs the \code{find} operation to locate the
-requested metrics and calls \code{fetch} on each to retrieve their
-data points. This works whether the data is on the local server,
-remote servers, or both. If a server goes down, the remote calls
-timeout fairly quickly and the server is marked as being out of
-service for a short period during which no further calls to it will be
-made. From a user standpoint, whatever data was on the lost server
-will be missing from their graphs unless that data is duplicated on
-another server in the cluster.
+%% All of these calls are made between the webapps the same way a client
+%% would call them, except with one additional parameter specifying that
+%% the operation should only be performed locally and not be
+%% redistributed throughout the cluster.  When the webapp is asked to
+%% render a graph, it performs the \code{find} operation to locate the
+%% requested metrics and calls \code{fetch} on each to retrieve their
+%% data points. This works whether the data is on the local server,
+%% remote servers, or both. If a server goes down, the remote calls
+%% timeout fairly quickly and the server is marked as being out of
+%% service for a short period during which no further calls to it will be
+%% made. From a user standpoint, whatever data was on the lost server
+%% will be missing from their graphs unless that data is duplicated on
+%% another server in the cluster.
+ウェブアプリケーション間でのこれらの呼び出しは、
+すべてクライアントからの呼び出しと同じように行っている。
+ただ、追加のパラメータがひとつあって、
+その操作をローカルだけで行いクラスタには伝搬させないという指定もできる。
+グラフを描画するよう指示を受けたウェブアプリケーションは、
+まず\code{find}を使って対象のメトリクスを探し、
+そして\code{fetch}を呼んでそのデータポイントを取得する。
+データがローカルサーバーにあろうがリモートサーバーにあろうが、
+あるいはその両方に分かれていようがこの動きは変わらない。
+サーバーがダウンしている場合、リモート呼び出しがタイムアウトすると
+すぐにそのサーバーをサービス不能状態と認識し、
+一定の期間はそのサーバーへの呼び出しが発生しないようになる。
+ユーザー側から見れば、ダウン中のサーバーにあったデータは
+グラフから抜けた状態になる。
+ただし、クラスタ内の他のサーバーにデータのコピーがある場合はその限りではない。
 
 %% \begin{aosasect2}{A Brief Analysis of Clustering Efficiency}
 \begin{aosasect2}{クラスタリングの効率についてのちょっとした分析}
 
-The most expensive part of a graphing request is rendering the graph.
-Each rendering is performed by a single server so adding more servers
-does effectively increase capacity for rendering graphs. However, the
-fact that many requests end up distributing \code{find} calls to every
-other server in the cluster means that our clustering scheme is
-sharing much of the front-end load rather than dispersing it.  What we
-have achieved at this point, however, is an effective way to
-distribute back-end load, as each \code{carbon} instance operates
-independently.  This is a good first step since most of the time the
-back end is a bottleneck far before the front end is, but clearly the
-front end will not scale horizontally with this approach.
+%% The most expensive part of a graphing request is rendering the graph.
+%% Each rendering is performed by a single server so adding more servers
+%% does effectively increase capacity for rendering graphs. However, the
+%% fact that many requests end up distributing \code{find} calls to every
+%% other server in the cluster means that our clustering scheme is
+%% sharing much of the front-end load rather than dispersing it.  What we
+%% have achieved at this point, however, is an effective way to
+%% distribute back-end load, as each \code{carbon} instance operates
+%% independently.  This is a good first step since most of the time the
+%% back end is a bottleneck far before the front end is, but clearly the
+%% front end will not scale horizontally with this approach.
+グラフを表示するリクエストの中で最もコストのかかる部分は、
+グラフのレンダリングである。レンダリングは単一のサーバーで行われるので、
+サーバーを増やせばグラフのレンダリング能力が向上する。
+しかし、リクエストの結果として発生する\code{find}の呼び出しが
+クラスタ内のあらゆるサーバーに向かうので、
+フロントエンドにかかる負荷の多くを各サーバーで共有することになってしまう。
+しかし、既に我々はバックエンドの負荷をうまく分散させる方法を手に入れている。
+個々の\code{carbon}インスタンスを独立して動かすことである。
+これは、はじめの一歩としてはよい方法だ。というのも、
+ほとんどの場合はフロントエンドよりバックエンドのほうが先にボトルネックになるからである。
+しかし、当然ながら、この方式ではフロントエンドをスケールアウトさせることができない。
 
-In order to make the front end scale more effectively, the number of
-remote \code{find} calls made by the webapp must be reduced. Again,
-the easiest solution is caching. Just as memcached is already used to
-cache data points and rendered graphs, it can also be used to cache
-the results of \code{find} requests.  Since the location of metrics is
-much less likely to change frequently, this should typically be cached
-for longer. The trade-off of setting the cache timeout for \code{find}
-results too long, though, is that new metrics that have been added to
-the hierarchy may not appear as quickly to the user.
+%% In order to make the front end scale more effectively, the number of
+%% remote \code{find} calls made by the webapp must be reduced. Again,
+%% the easiest solution is caching. Just as memcached is already used to
+%% cache data points and rendered graphs, it can also be used to cache
+%% the results of \code{find} requests.  Since the location of metrics is
+%% much less likely to change frequently, this should typically be cached
+%% for longer. The trade-off of setting the cache timeout for \code{find}
+%% results too long, though, is that new metrics that have been added to
+%% the hierarchy may not appear as quickly to the user.
+フロントエンドをもっとうまくスケールさせるには、
+ウェブアプリケーションから発行するリモートへの
+\code{find}の呼び出しを減らす必要がある。
+一番簡単な解決法は、毎度おなじみのキャッシュだ。
+既にmemcachedを導入してデータポイントやレンダリング済みグラフを
+キャッシュしているが、さらに\code{find}の結果もここにキャッシュしておける。
+各メトリクスの場所はそんなに頻繁には変わらないので、
+これは少し長めにキャッシュしておける。
+しかし、\code{find}の結果のキャッシュ期間を長めに設定するトレードオフとして、
+新しく追加されたメトリクスはしばらく待たないとユーザーに見えなくなってしまう。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Distributing Metrics in a Cluster}
 \begin{aosasect2}{クラスタ内での分散メトリクス}
 
-The Graphite webapp is rather homogeneous throughout a cluster, in
-that it performs the exact same job on each server. \code{carbon}'s role,
-however, can vary from server to server depending on what data you
-choose to send to each instance. Often there are many different
-clients sending data to \code{carbon}, so it would be quite annoying to
-couple each client's configuration with your Graphite cluster's
-layout. Application metrics may go to one \code{carbon} server, while
-business metrics may get sent to multiple \code{carbon} servers for
-redundancy.
+%% The Graphite webapp is rather homogeneous throughout a cluster, in
+%% that it performs the exact same job on each server. \code{carbon}'s role,
+%% however, can vary from server to server depending on what data you
+%% choose to send to each instance. Often there are many different
+%% clients sending data to \code{carbon}, so it would be quite annoying to
+%% couple each client's configuration with your Graphite cluster's
+%% layout. Application metrics may go to one \code{carbon} server, while
+%% business metrics may get sent to multiple \code{carbon} servers for
+%% redundancy.
+Graphiteウェブアプリケーションはクラスタ内のいたるところで均質であり、
+どのサーバー上でもまったく同じ処理をこなせる。しかし、
+\code{carbon}の役割はサーバーによって異なり、
+どのデータをどのサーバーに送信するかによって大きく変わってくる。
+たくさんの異なるクライアントから\code{carbon}にデータが送られてくることが多いので、
+個々のクライアントの設定をGraphiteクラスタ上の配置を関連付けるのはとても面倒な作業だ。
+アプリケーションのメトリクスは単一の\code{carbon}サーバーにまとめ、
+業務メトリクスは複数の\code{carbon}サーバーに送って冗長性を確保するなどということになる。
 
-To simplify the management of scenarios like this, Graphite comes with
-an additional tool called \code{carbon-relay}. Its job is quite simple;
-it receives metric data from clients exactly like the standard \code{carbon}
-daemon (which is actually named \code{carbon-cache}) but instead of storing
-the data, it applies a set of rules to the metric names to determine
-which \code{carbon-cache} servers to relay the data to. Each rule consists of
-a regular expression and a list of destination servers. For each data
-point received, the rules are evaluated in order and the first rule
-whose regular expression matches the metric name is used. This way all
-the clients need to do is send their data to the \code{carbon-relay} and it
-will end up on the right servers.
+%% To simplify the management of scenarios like this, Graphite comes with
+%% an additional tool called \code{carbon-relay}. Its job is quite simple;
+%% it receives metric data from clients exactly like the standard \code{carbon}
+%% daemon (which is actually named \code{carbon-cache}) but instead of storing
+%% the data, it applies a set of rules to the metric names to determine
+%% which \code{carbon-cache} servers to relay the data to. Each rule consists of
+%% a regular expression and a list of destination servers. For each data
+%% point received, the rules are evaluated in order and the first rule
+%% whose regular expression matches the metric name is used. This way all
+%% the clients need to do is send their data to the \code{carbon-relay} and it
+%% will end up on the right servers.
+そういった場合の管理をシンプルにするために、
+Graphiteには\code{carbon-relay}というツールも用意されている。
+このツールの役割は極めてシンプルだ。クライアントからのメトリクスのデータを
+標準の\code{carbon}デーモン(実際の名前は\code{carbon-cache})と
+まったく同じ方法で受け取るが、そのデータをただ格納するのではなく、
+メトリクス名に対していくつかのルールを適用して、
+データをどの\code{carbon-cache}サーバーに転送するかを判断する。
+このときのルールは、正規表現と対象サーバーリストで構成されている。
+データポイントを受信するたびにルールを順に評価し、
+正規表現にマッチした最初のルールを利用する。
+クライアント側で必要なことは、データを\code{carbon-relay}
+に送信するだけだ。その先は、自動的に正しいサーバーに送られるようになる。
 
-In a sense \code{carbon-relay} provides replication functionality, though it
-would more accurately be called input duplication since it does not
-deal with synchronization issues. If a server goes down temporarily,
-it will be missing the data points for the time period in which it was
-down but otherwise function normally. There are administrative scripts
-that leave control of the re-synchronization process in the hands of
-the system administrator.
+%% In a sense \code{carbon-relay} provides replication functionality, though it
+%% would more accurately be called input duplication since it does not
+%% deal with synchronization issues. If a server goes down temporarily,
+%% it will be missing the data points for the time period in which it was
+%% down but otherwise function normally. There are administrative scripts
+%% that leave control of the re-synchronization process in the hands of
+%% the system administrator.
+ある意味では\code{carbon-relay}がレプリケーション機能を提供しているとも言えるが、
+より正確には入力の複製機能とでも言うべきだろう。というのも、同期機能は持っていないからだ。
+あるサーバーが一時的にダウンしたとすると、その期間のデータポイントは失われるが、
+それ以外の機能は正常に動作する。
+また、システム管理者が再同期処理をコントロールするための管理スクリプトも用意されている。
 
 \end{aosasect2}
 
