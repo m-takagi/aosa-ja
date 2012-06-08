@@ -12,7 +12,7 @@ colophon.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
 eclipse.tex         Masugata Seiji                              ?
 frontmatter.tex     TAKAGI Masahiro <matakagi@gmail.com>      100
 graphite.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
-hdfs.tex
+hdfs.tex            TAKAGI Masahiro <matakagi@gmail.com>        0
 integration.tex     TAKAGI Masahiro <matakagi@gmail.com>      100
 intro.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
 jitsi.tex           Arai Kunimitsu                            100
