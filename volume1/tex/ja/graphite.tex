@@ -901,101 +901,191 @@ Graphiteには\code{carbon-relay}というツールも用意されている。
 \end{aosasect1}
 
 %% \begin{aosasect1}{Design Reflections}
-\begin{aosasect1}{設計の反映}
+\begin{aosasect1}{設計に関する重い}
 
-My experience in working on Graphite has reaffirmed a belief of mine
-that scalability has very little to do with low-level performance but
-instead is a product of overall design. I have run into many
-bottlenecks along the way but each time I look for improvements in
-design rather than speed-ups in performance. I have been asked many
-times why I wrote Graphite in Python rather than Java or C++, and my
-response is always that I have yet to come across a true need for the
-performance that another language could offer. In
-\cite{bib:knuth:goto}, Donald Knuth famously said that premature
-optimization is the root of all evil.  As long as we assume that our
-code will continue to evolve in non-trivial ways then all
-optimization\footnote{Knuth specifically meant low-level code
-optimization, not macroscopic optimization such as design
-improvements.} is in some sense premature.
+%% My experience in working on Graphite has reaffirmed a belief of mine
+%% that scalability has very little to do with low-level performance but
+%% instead is a product of overall design. I have run into many
+%% bottlenecks along the way but each time I look for improvements in
+%% design rather than speed-ups in performance. I have been asked many
+%% times why I wrote Graphite in Python rather than Java or C++, and my
+%% response is always that I have yet to come across a true need for the
+%% performance that another language could offer. In
+%% \cite{bib:knuth:goto}, Donald Knuth famously said that premature
+%% optimization is the root of all evil.  As long as we assume that our
+%% code will continue to evolve in non-trivial ways then all
+%% optimization\footnote{Knuth specifically meant low-level code
+%% optimization, not macroscopic optimization such as design
+%% improvements.} is in some sense premature.
+これまでGraphiteに関わってきて、私の認識が正しいことを再確認した。
+スケーラビリティを確保するには、低レベルのパフォーマンスをいくら改善してもほとんど効果はなく、
+結局は全体的な設計が重要であるということだ。
+これまでにいろんなボトルネックが見つかったが、そのたびに考えたのは、
+パフォーマンスを確保するために速度を上げるということではなく設計を改善させるということだった。
+「なんでまた、GraphiteをPythonで書いてしまったんだろう。JavaとかC++にすればよかったんじゃない?」
+と自問することも多かったが、結論はいつも同じ。
+「JavaやC++じゃないとどうしようもないほどのパフォーマンスを要求される場面なんかいままでになかったんだし、
+それならPythonの使いやすさをとったほうがいいんじゃない?」
+かのドナルド・クヌースが\cite{bib:knuth:goto}で言うとおり、早まった最適化は諸悪の根源である。
+自分のコードが今後も大きく成長し続けるという前提で考える限り、あらゆる最適化
+\footnote{クヌースが言及していたのは低レベルのコードの最適化についてであり、
+設計の改善などの巨視的な最適化を否定しているわけではない。}
+はある意味「早まった」ものだと言える。
 
-One of Graphite's greatest strengths and greatest weaknesses is the
-fact that very little of it was actually ``designed'' in the
-traditional sense.  By and large Graphite evolved gradually, hurdle by
-hurdle, as problems arose. Many times the hurdles were foreseeable and
-various pre-emptive solutions seemed natural. However it can be useful
-to avoid solving problems you do not actually have yet, even if it
-seems likely that you soon will. The reason is that you can learn much
-more from closely studying actual failures than from theorizing about
-superior strategies.  Problem solving is driven by both the empirical
-data we have at hand and our own knowledge and intuition. I've found
-that doubting your own wisdom sufficiently can force you to look at
-your empirical data more thoroughly.
+%% One of Graphite's greatest strengths and greatest weaknesses is the
+%% fact that very little of it was actually ``designed'' in the
+%% traditional sense.  By and large Graphite evolved gradually, hurdle by
+%% hurdle, as problems arose. Many times the hurdles were foreseeable and
+%% various pre-emptive solutions seemed natural. However it can be useful
+%% to avoid solving problems you do not actually have yet, even if it
+%% seems likely that you soon will. The reason is that you can learn much
+%% more from closely studying actual failures than from theorizing about
+%% superior strategies.  Problem solving is driven by both the empirical
+%% data we have at hand and our own knowledge and intuition. I've found
+%% that doubting your own wisdom sufficiently can force you to look at
+%% your empirical data more thoroughly.
+Graphiteの最大の強みであり、かつ最大の弱みでもあるのが、
+一般に言われているような意味での``設計''を実はほとんどしていないという事実である。
+Graphiteは徐々に成長してきた。何か問題が発生するたびに、
+そのハードルをひとつひとつ克服していったという感じだ。
+数々のハードルの中には事前に予測できるものもたくさんあったし、
+あらかじめそれらに手を打っておくというのもごく自然に思える。
+しかし、まだ実際に遭遇していない問題に対応するというのは避けたかった。
+たとえいずれは対処せざるを得ない問題だったとしても。
+その理由は、実際に問題に遭遇してから対応するほうが
+事前に理屈で考えた対応方法よりもうまくいくだろうと考えたからである。
+問題を解決するときに使ったのは、手元にある検証データと
+我々の知識や直感だった。自分の知識を疑い続け、
+実際の検証データをより活用するようにした。
 
-For example, when I first wrote \code{whisper} I was convinced that it would
-have to be rewritten in C for speed and that my Python implementation
-would only serve as a prototype. If I weren't under a time-crunch I
-very well may have skipped the Python implementation entirely. It
-turns out however that I/O is a bottleneck so much earlier than CPU
-that the lesser efficiency of Python hardly matters at all in
-practice.
+%% For example, when I first wrote \code{whisper} I was convinced that it would
+%% have to be rewritten in C for speed and that my Python implementation
+%% would only serve as a prototype. If I weren't under a time-crunch I
+%% very well may have skipped the Python implementation entirely. It
+%% turns out however that I/O is a bottleneck so much earlier than CPU
+%% that the lesser efficiency of Python hardly matters at all in
+%% practice.
+最初に\code{whisper}を書いたころは、
+スピードを考慮すると最終的にはCで書きなおすことになるだろうと信じ切っていた。
+いま書いているPython版はあくまでもプロトタイプに過ぎないと考えていたのだ。
+時間に迫られていなければ、Pythonでのプロトタイプを作ろうなどとは思わなかっただろう。
+しかし、I/OのボトルネックのほうがCPUよりもずっと早期に顕在化するということが
+わかった今では、Pythonを使い続けても事実上問題ないであろうと言える。
 
-As I said, though, the evolutionary approach is also a great weakness
-of Graphite. Interfaces, it turns out, do not lend themselves well to
-gradual evolution. A good interface is consistent and employs
-conventions to maximize predictability. By this measure, Graphite's
-URL API is currently a sub-par interface in my opinion. Options and
-functions have been tacked on over time, sometimes forming small
-islands of consistency, but overall lacking a global sense of
-consistency. The only way to solve such a problem is through
-versioning of interfaces, but this too has drawbacks. Once a new
-interface is designed, the old one is still hard to get rid of,
-lingering around as evolutionary baggage like the human appendix. It
-may seem harmless enough until one day your code gets appendicitis
-(i.e. a bug tied to the old interface) and you're forced to
-operate. If I were to change one thing about Graphite early on, it
-would have been to take much greater care in designing the external
-APIs, thinking ahead instead of evolving them bit by bit.
+%% As I said, though, the evolutionary approach is also a great weakness
+%% of Graphite. Interfaces, it turns out, do not lend themselves well to
+%% gradual evolution. A good interface is consistent and employs
+%% conventions to maximize predictability. By this measure, Graphite's
+%% URL API is currently a sub-par interface in my opinion. Options and
+%% functions have been tacked on over time, sometimes forming small
+%% islands of consistency, but overall lacking a global sense of
+%% consistency. The only way to solve such a problem is through
+%% versioning of interfaces, but this too has drawbacks. Once a new
+%% interface is designed, the old one is still hard to get rid of,
+%% lingering around as evolutionary baggage like the human appendix. It
+%% may seem harmless enough until one day your code gets appendicitis
+%% (i.e. a bug tied to the old interface) and you're forced to
+%% operate. If I were to change one thing about Graphite early on, it
+%% would have been to take much greater care in designing the external
+%% APIs, thinking ahead instead of evolving them bit by bit.
+しかし、先ほども言ったとおり、この漸進的な手法はGraphiteの弱点でもある。
+インターフェイスは、徐々に成長させていくということができなかった。
+よいインターフェイスは一貫性があるものであり、
+予想に反する動きを抑えてできるだけ期待通りに動くような規約を使うものである。
+この基準に照らし合わせると、GraphiteのURL APIのインターフェイスは
+現状では及第点に達していないと思う。
+オプションや関数がたびたび追加されたため、部分的には一貫しているところもあるけれども
+全体的に見ればまったく一貫性に欠けるものとなってしまった。
+この問題を解決するにはインターフェイスをバージョン管理していくしかないが、
+そうしたとしても問題は残る。
+新たなインターフェイスを設計したとしても古いものもまだ捨てきれず、
+どんどん荷物が増え続けてしまう。まるで盲腸のようなものだ。
+最初のうちはそんなに気にならないかもしれない。しかし、そのうちいつか、
+コードの虫垂炎(古いインターフェイスに起因するバグ)
+を手術するときがやってくる。
+過去にさかのぼってGraphiteを一か所だけ変更できるなら、
+外部向けAPIの設計をもっと念入りにやり直したい。
+その場しのぎで対応するのではなく、事前にきちんと考えておくべきだった。
 
-Another aspect of Graphite that causes some frustration is the limited
-flexibility of the hierarchical metric naming model. While it is quite
-simple and very convenient for most use cases, it makes some
-sophisticated queries very difficult, even impossible, to
-express. When I first thought of creating Graphite I knew from the
-very beginning that I wanted a human-editable URL API for creating
-graphs\footnote{This forces the graphs themselves to be open
-source. Anyone can simply look at a graph's URL to understand it or
-modify it.}. While I'm still glad that Graphite provides this today,
-I'm afraid this requirement has burdened the API with excessively
-simple syntax that makes complex expressions unwieldy.  A hierarchy
-makes the problem of determining the ``primary key'' for a metric
-quite simple because a path is essentially a primary key for a node in
-the tree. The downside is that all of the descriptive data (i.e.
-column data) must be embedded directly in the path. A potential
-solution is to maintain the hierarchical model and add a separate
-metadata database to enable more advanced selection of metrics with a
-special syntax.
+%% Another aspect of Graphite that causes some frustration is the limited
+%% flexibility of the hierarchical metric naming model. While it is quite
+%% simple and very convenient for most use cases, it makes some
+%% sophisticated queries very difficult, even impossible, to
+%% express. When I first thought of creating Graphite I knew from the
+%% very beginning that I wanted a human-editable URL API for creating
+%% graphs\footnote{This forces the graphs themselves to be open
+%% source. Anyone can simply look at a graph's URL to understand it or
+%% modify it.}. While I'm still glad that Graphite provides this today,
+%% I'm afraid this requirement has burdened the API with excessively
+%% simple syntax that makes complex expressions unwieldy.  A hierarchy
+%% makes the problem of determining the ``primary key'' for a metric
+%% quite simple because a path is essentially a primary key for a node in
+%% the tree. The downside is that all of the descriptive data (i.e.
+%% column data) must be embedded directly in the path. A potential
+%% solution is to maintain the hierarchical model and add a separate
+%% metadata database to enable more advanced selection of metrics with a
+%% special syntax.
+Graphiteでちょっと気になるところがもうひとつある。
+メトリクスの命名規則が階層型であるせいで、柔軟性に欠けるという点だ。
+極めてシンプルだしたいていの場合は便利に使えるのだが、
+込み入ったクエリの表現が非常に難しくなったり、時には不可能になったりしてしまう。
+Graphiteを作ろうと考え始めたころからずっと思っていたのだが、
+私が欲しいのは、人間が手で編集できる形式のURLを使ったAPIによる
+グラフの作成機能だった
+\footnote{そのため、グラフ自体はオープンソースにせざるを得なかった。
+グラフのURLを見れば何をやっているかは丸わかりだし、手で書き換えるのも簡単だ。}。
+今のGraphiteはその当時の私の思った通りの機能を提供できている。
+だが、そのせいでAPIをシンプルにせざるを得ず、
+複雑な表現をしようとすると手に負えなくなっているのではないかという恐れもある。
+階層型にしたおかげで、メトリクスの``主キー''を極めてシンプルに考えられるようになった。
+パス自体が、本質的にそのツリー内でのノードの主キーとなるからである。
+問題は、説明用のデータ(カラムのデータなど)すべてを
+直接パスに埋め込む必要があるという点だ。
+考えられる解決策としては、階層型のモデルとは別にメタデータのデータベースを用意して、
+より込み入った選択をするための特別な構文を作ることだろう。
 
 \end{aosasect1}
 
 %% \begin{aosasect1}{Becoming Open Source}
 \begin{aosasect1}{そしてオープンソースへ…}
 
-Looking back at the evolution of Graphite, I am still surprised both by
-how far it has come as a project and by how far it has taken me as a
-programmer. It started as a pet project that was only a few hundred
-lines of code. The rendering engine started as an experiment, simply
-to see if I could write one. \code{whisper} was written over the course of a
-weekend out of desperation to solve a show-stopper problem before a
-critical launch date. \code{carbon} has been rewritten more times than I care
-to remember. Once I was allowed to release Graphite under an open
-source license in 2008 I never really expected much response. After a
-few months it was mentioned in a CNET article that got picked up by
-Slashdot and the project suddenly took off and has been active ever
-since.  Today there are dozens of large and mid-sized companies using
-Graphite. The community is quite active and
-continues to grow. Far from being a finished product, there is a lot
-of cool experimental work being done, which keeps it fun to work on
-and full of potential.
+%% Looking back at the evolution of Graphite, I am still surprised both by
+%% how far it has come as a project and by how far it has taken me as a
+%% programmer. It started as a pet project that was only a few hundred
+%% lines of code. The rendering engine started as an experiment, simply
+%% to see if I could write one. \code{whisper} was written over the course of a
+%% weekend out of desperation to solve a show-stopper problem before a
+%% critical launch date. \code{carbon} has been rewritten more times than I care
+%% to remember. Once I was allowed to release Graphite under an open
+%% source license in 2008 I never really expected much response. After a
+%% few months it was mentioned in a CNET article that got picked up by
+%% Slashdot and the project suddenly took off and has been active ever
+%% since.  Today there are dozens of large and mid-sized companies using
+%% Graphite. The community is quite active and
+%% continues to grow. Far from being a finished product, there is a lot
+%% of cool experimental work being done, which keeps it fun to work on
+%% and full of potential.
+Graphiteのこれまでを振り返ると、
+プロジェクトとしてここまで成長したことにも驚かされるし、
+私自身がプログラマーとしてどれだけ成長したかにも驚かされる。
+もともとは個人的に始めたちょっとしたプロジェクトで、
+最初のころはたかだか数百行のコードでしかなかったんだ。
+レンダリングエンジンだって、自分にそんなものが書けるのかを確かめるための
+ちょっとした実験程度のものだった。
+\code{whisper}を書いているときは、公開予定日の直前になって発生した
+重大な問題に対応するため、週末に泣きながら作業を進めたこともあった。
+\code{carbon}は何度となくゼロから書き直すことになった。
+もはや数え切れないくらいの書き直しをしている。
+Graphiteをオープンソースライセンスで公開する許可を得たのは2008年だったが、
+当時はそんなに反応があるわけがないと思っていた。
+それから数カ月の間に、CNETの記事で取り上げられたり
+Slashdotで話題になったりして、
+いまだかつてないほど活発に動き出した。
+今や、大企業や中小企業も含めて何十社もがGraphiteを使っている。
+そのコミュニティはとても活発であり、今も成長し続けている。
+もはや終わってしまったプロダクトとは違って
+今でも実験的な機能をどんどん取り入れたりしているので、
+このプロジェクトでの作業は楽しみと可能性に満ちている。
 
 \end{aosasect1}
 
