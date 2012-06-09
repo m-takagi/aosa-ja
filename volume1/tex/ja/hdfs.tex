@@ -1,52 +1,88 @@
 \begin{aosachaptertoc}{The Hadoop Distributed File System}{s:hdfs}{Robert Chansler, Hairong Kuang, Sanjay Radia, \\ Konstantin Shvachko, and Suresh Srinivas}{Robert Chansler, Hairong Kuang, Sanjay Radia, \\ \hspace*{0.9cm} Konstantin Shvachko, and Suresh Srinivas}
 %% Based on EN-Revision r229
 
-The Hadoop Distributed File System (HDFS) is designed to store very
-large data sets reliably, and to stream those data sets at high
-bandwidth to user applications. In a large cluster, thousands of
-servers both host directly attached storage and execute user
-application tasks. By distributing storage and computation across many
-servers, the resource can grow with demand while remaining economical
-at every size. We describe the architecture of HDFS and report on
-experience using HDFS to manage 40 petabytes of enterprise data at
-Yahoo!
+%% The Hadoop Distributed File System (HDFS) is designed to store very
+%% large data sets reliably, and to stream those data sets at high
+%% bandwidth to user applications. In a large cluster, thousands of
+%% servers both host directly attached storage and execute user
+%% application tasks. By distributing storage and computation across many
+%% servers, the resource can grow with demand while remaining economical
+%% at every size. We describe the architecture of HDFS and report on
+%% experience using HDFS to manage 40 petabytes of enterprise data at
+%% Yahoo!
+Hadoop Distributed File System (HDFS)は、大規模なデータセットを
+高い信頼性で格納するために作られたシステムである。
+また、そのデータセットを広帯域でユーザーアプリケーションに流せるようにもなっている。
+大規模なクラスター環境では、数千台ものサーバーが
+自身にアタッチされたストレージを管理したりユーザーアプリケーションのタスクを実行したりする。
+ストレージや計算処理を多くのサーバーに分散させることで、
+どんな規模であっても必要に応じてリソースを成長させ続けられ、
+かつ無駄なく使うことができる。
+本章ではHDFSのアーキテクチャについて解説し、
+HDFSで40ペタバイトものエンタープライズデータを管理する
+Yahoo!の例を紹介する。
 
-\begin{aosasect1}{Introduction}
+%% \begin{aosasect1}{Introduction}
+\begin{aosasect1}{はじめに}
 
-Hadoop\footnote{\url{http://hadoop.apache.org}} provides a distributed
-filesystem and a framework for the analysis and transformation of
-very large data sets using the MapReduce~\cite{bib:dean:mapreduce}
-paradigm.  While the interface to HDFS is patterned after the Unix
-filesystem, faithfulness to standards was sacrificed in favor of
-improved performance for the applications at hand.
+%% Hadoop\footnote{\url{http://hadoop.apache.org}} provides a distributed
+%% filesystem and a framework for the analysis and transformation of
+%% very large data sets using the MapReduce~\cite{bib:dean:mapreduce}
+%% paradigm.  While the interface to HDFS is patterned after the Unix
+%% filesystem, faithfulness to standards was sacrificed in favor of
+%% improved performance for the applications at hand.
+Hadoop\footnote{\url{http://hadoop.apache.org}}が提供するのは分散ファイルシステムであり、
+さらに、大規模なデータセットをMapReduce~\cite{bib:dean:mapreduce}
+のパラダイムで分析したり変換したりするフレームワークも用意している。
+HDFSのインターフェイスはUnixのファイルシステムのパターンに従っているが、
+アプリケーション側でのパフォーマンスを向上させるためなら
+標準の規約から外れることもいとわない。
 
-An important characteristic of Hadoop is the partitioning of data and
-computation across many (thousands) of hosts, and the execution of
-application computations in parallel close to their data. A Hadoop
-cluster scales computation capacity, storage capacity and I/O
-bandwidth by simply adding commodity servers. Hadoop clusters at
-Yahoo!\ span 40,000 servers, and store 40 petabytes of application
-data, with the largest cluster being 4000 servers. One hundred other
-organizations worldwide report using Hadoop.
+%% An important characteristic of Hadoop is the partitioning of data and
+%% computation across many (thousands) of hosts, and the execution of
+%% application computations in parallel close to their data. A Hadoop
+%% cluster scales computation capacity, storage capacity and I/O
+%% bandwidth by simply adding commodity servers. Hadoop clusters at
+%% Yahoo!\ span 40,000 servers, and store 40 petabytes of application
+%% data, with the largest cluster being 4000 servers. One hundred other
+%% organizations worldwide report using Hadoop.
+Hadoopの重要な特徴は、データや計算処理を多数の(数千台もの)ホストに分散できることであり、
+アプリケーションから実行した計算処理をデータ側で並列実行できることである。
+Hadoopクラスターで計算能力やストレージそしてI/Oの帯域を拡張するには、
+そこらにあるごく普通のサーバーを追加するだけでかまわない。
+Yahoo!のHadoopクラスターをすべて合わせると40,000台のサーバーで構成されており、
+40ペタバイトのデータを管理している。最大のクラスターは4000サーバーである。
+それ以外にも、世界中で100社以上がHadoopを採用しているという報告がある。
 
-HDFS stores filesystem metadata and application data separately. As
-in other distributed filesystems, like PVFS~\cite{bib:carns:pvfs},
-Lustre\footnote{\url{http://www.lustre.org}}, and GFS~\cite{bib:ghemawat:gfs,bib:mckusick:gfs},
-HDFS stores metadata on a
-dedicated server, called the NameNode. Application data are stored on
-other servers called DataNodes.  All servers are fully connected and
-communicate with each other using TCP-based protocols.  Unlike Lustre
-and PVFS, the DataNodes in HDFS do not rely on data protection mechanisms
-such as RAID to make the data durable.  Instead, like GFS, the file
-content is replicated on multiple DataNodes for reliability. While
-ensuring data durability, this strategy has the added advantage that
-data transfer bandwidth is multiplied, and there are more
-opportunities for locating computation near the needed data.
+%% HDFS stores filesystem metadata and application data separately. As
+%% in other distributed filesystems, like PVFS~\cite{bib:carns:pvfs},
+%% Lustre\footnote{\url{http://www.lustre.org}}, and GFS~\cite{bib:ghemawat:gfs,bib:mckusick:gfs},
+%% HDFS stores metadata on a
+%% dedicated server, called the NameNode. Application data are stored on
+%% other servers called DataNodes.  All servers are fully connected and
+%% communicate with each other using TCP-based protocols.  Unlike Lustre
+%% and PVFS, the DataNodes in HDFS do not rely on data protection mechanisms
+%% such as RAID to make the data durable.  Instead, like GFS, the file
+%% content is replicated on multiple DataNodes for reliability. While
+%% ensuring data durability, this strategy has the added advantage that
+%% data transfer bandwidth is multiplied, and there are more
+%% opportunities for locating computation near the needed data.
+HDFSは、ファイルシステムのメタデータとアプリケーションのデータを分けて格納する。
+PVFS~\cite{bib:carns:pvfs}やLustre\footnote{\url{http://www.lustre.org}}そしてGFS~\cite{bib:ghemawat:gfs,bib:mckusick:gfs}
+といった他の分散ファイルシステムと同様、HDFSもメタデータは専用のサーバーに格納しており、これをNameNodeと呼んでいる。
+一方、アプリケーションデータを格納する他のサーバー群はDataNodesと呼んでいる。
+すべてのサーバーが完全に接続されており、お互いのやりとりにはTCPベースのプロトコルを利用する。
+LustreやPVFSとは異なり、HDFSのDataNodesはRAIDなどのデータ保護機構を使わずにデータを永続化する。
+そのかわり、GFSと同様に、ファイルの内容を複数のDataNodeにレプリケートして信頼性を確保する。
+この方式には、データの永続性を確保するだけでなくそれ以外の利点もある。
+データ転送の帯域が拡大し、計算に必要なデータに近い場所で計算をできる可能性が高まるのだ。
 
 \end{aosasect1}
 
-\begin{aosasect1}{Architecture}
+%% \begin{aosasect1}{Architecture}
+\begin{aosasect1}{アーキテクチャ}
 
+%% \begin{aosasect2}{NameNode}
 \begin{aosasect2}{NameNode}
 
 The HDFS namespace is a hierarchy of files and directories. Files and
@@ -64,7 +100,8 @@ may execute multiple application tasks concurrently.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Image and Journal}
+%% \begin{aosasect2}{Image and Journal}
+\begin{aosasect2}{ImageおよびJournal}
 
 The inodes and the list of blocks that define the metadata of the name
 system are called the \emph{image}. NameNode keeps the entire namespace image
@@ -106,6 +143,7 @@ flush-and-sync operation.
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{DataNodes}
 \begin{aosasect2}{DataNodes}
 
 Each block replica on a DataNode is represented by two files in the
@@ -170,7 +208,8 @@ per second without affecting other NameNode operations.
 
 \end{aosasect2}
 
-\begin{aosasect2}{HDFS Client}
+%% \begin{aosasect2}{HDFS Client}
+\begin{aosasect2}{HDFSクライアント}
 
 User applications access the filesystem using the HDFS client, a
 library that exports the HDFS filesystem interface.
@@ -209,6 +248,7 @@ faults and increases read bandwidth.
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{CheckpointNode}
 \begin{aosasect2}{CheckpointNode}
 
 The NameNode in HDFS, in addition to its primary role serving client
@@ -238,6 +278,7 @@ a week-long journal. Good practice is to create a daily checkpoint.
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{BackupNode}
 \begin{aosasect2}{BackupNode}
 
 A recently introduced feature of HDFS is the BackupNode. Like a
@@ -270,7 +311,8 @@ namespace state to the BackupNode.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Upgrades and Filesystem Snapshots}
+%% \begin{aosasect2}{Upgrades and Filesystem Snapshots}
+\begin{aosasect2}{アップグレードおよびファイルシステムスナップショット}
 
 During software upgrades the possibility of corrupting the filesystem
 due to software bugs or human mistakes increases. The purpose of
@@ -325,13 +367,15 @@ layout version.
 
 \end{aosasect1}
 
-\begin{aosasect1}{File I/O Operations and Replica Management}
+%% \begin{aosasect1}{File I/O Operations and Replica Management}
+\begin{aosasect1}{ファイルI/O操作およびレプリカの管理}
 
 Of course, the whole point of a filesystem is to store data in
 files.  To understand how HDFS does this, we must look at how reading
 and writing works, and how blocks are managed.
 
-\begin{aosasect2}{File Read and Write}
+%% \begin{aosasect2}{File Read and Write}
+\begin{aosasect2}{ファイルの読み書き}
 
 An application adds data to HDFS by creating a new file and writing
 the data to it. After the file is closed, the bytes written cannot be
@@ -431,6 +475,7 @@ access.
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{Block Placement}
 \begin{aosasect2}{Block Placement}
 
 For a large cluster, it may not be practical to connect all nodes in a
@@ -498,7 +543,8 @@ rather than three.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Replication Management}
+%% \begin{aosasect2}{Replication Management}
+\begin{aosasect2}{レプリケーションの管理}
 
 The NameNode endeavors to ensure that each block always has the
 intended number of replicas. The NameNode detects that a block has
@@ -536,7 +582,8 @@ number of racks.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Balancer}
+%% \begin{aosasect2}{Balancer}
+\begin{aosasect2}{バランサー}
 
 HDFS block placement strategy does not take into account DataNode disk
 space utilization. This is to avoid placing new---more likely to be
@@ -575,7 +622,8 @@ application processes.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Block Scanner}
+%% \begin{aosasect2}{Block Scanner}
+\begin{aosasect2}{ブロックスキャナー}
 
 Each DataNode runs a block scanner that periodically scans its block
 replicas and verifies that stored checksums match the block data. In
@@ -603,7 +651,8 @@ replicas.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Decommissioning}
+%% \begin{aosasect2}{Decommissioning}
+\begin{aosasect2}{廃止措置}
 
 The cluster administrator specifies list of nodes to be
 decommissioned.  Once a DataNode is marked for decommissioning, it
@@ -617,7 +666,8 @@ availability.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Inter-Cluster Data Copy}
+%% \begin{aosasect2}{Inter-Cluster Data Copy}
+\begin{aosasect2}{クラスタ間データコピー}
 
 When working with large datasets, copying data into and out of a HDFS
 cluster is daunting.  HDFS provides a tool called DistCp for large
@@ -630,7 +680,8 @@ task scheduling, error detection and recovery.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Practice at Yahoo!}
+%% \begin{aosasect1}{Practice at Yahoo!}
+\begin{aosasect1}{Yahoo!における実例}
 
 Large HDFS clusters at Yahoo!\ include about 4000 nodes. A typical
 cluster node has two quad core Xeon processors running at 2.5~GHz,
@@ -669,7 +720,8 @@ important are economical performance, provisions for resource sharing
 among members of the user community, and ease of administration by the
 system operators.
 
-\begin{aosasect2}{Durability of Data}
+%% \begin{aosasect2}{Durability of Data}
+\begin{aosasect2}{データの永続性}
 
 Replication of data three times is a robust guard against loss of data
 due to uncorrelated node failures. It is unlikely Yahoo!\ has ever lost
@@ -707,7 +759,8 @@ are replaced as they are discovered.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Features for Sharing HDFS}
+%% \begin{aosasect2}{Features for Sharing HDFS}
+\begin{aosasect2}{HDFSの共有機能}
 
 As the use of HDFS has grown, the filesystem itself has had to
 introduce means to share the resource among a large number of diverse users. 
@@ -757,7 +810,8 @@ MapReduce job.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Scaling and HDFS Federation}
+%% \begin{aosasect2}{Scaling and HDFS Federation}
+\begin{aosasect2}{スケーリングおよびHDFS Federation}
 
 Scalability of the NameNode has been a key struggle
 \cite{bib:shvachko:hdfs}.  Because the NameNode keeps all the
@@ -802,7 +856,8 @@ deal with remote execution in distributed systems
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons Learned}
+%% \begin{aosasect1}{Lessons Learned}
+\begin{aosasect1}{教訓}
 
 A very small team was able to build the Hadoop filesystem and make it
 stable and robust enough to use it in production.  A large part of the
@@ -825,7 +880,8 @@ corruption due to pointer or memory management bugs.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Acknowledgment}
+%% \begin{aosasect1}{Acknowledgment}
+\begin{aosasect1}{謝辞}
 
 We thank Yahoo!\ for investing in Hadoop and continuing to
 make it available as open source; 80\% of the HDFS and MapReduce code
