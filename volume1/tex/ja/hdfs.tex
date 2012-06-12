@@ -85,18 +85,28 @@ LustreやPVFSとは異なり、HDFSのDataNodesはRAIDなどのデータ保護�
 %% \begin{aosasect2}{NameNode}
 \begin{aosasect2}{NameNode}
 
-The HDFS namespace is a hierarchy of files and directories. Files and
-directories are represented on the NameNode by inodes.  Inodes record
-attributes like permissions, modification and access times, namespace
-and disk space quotas. The file content is split into large blocks
-(typically 128 megabytes, but user selectable file-by-file), and each
-block of the file is independently replicated at multiple DataNodes
-(typically three, but user selectable file-by-file). The NameNode
-maintains the namespace tree and the mapping of blocks to DataNodes.
- The current design has a single
-NameNode for each cluster. The cluster can have thousands of DataNodes
-and tens of thousands of HDFS clients per cluster, as each DataNode
-may execute multiple application tasks concurrently.
+%% The HDFS namespace is a hierarchy of files and directories. Files and
+%% directories are represented on the NameNode by inodes.  Inodes record
+%% attributes like permissions, modification and access times, namespace
+%% and disk space quotas. The file content is split into large blocks
+%% (typically 128 megabytes, but user selectable file-by-file), and each
+%% block of the file is independently replicated at multiple DataNodes
+%% (typically three, but user selectable file-by-file). The NameNode
+%% maintains the namespace tree and the mapping of blocks to DataNodes.
+%%  The current design has a single
+%% NameNode for each cluster. The cluster can have thousands of DataNodes
+%% and tens of thousands of HDFS clients per cluster, as each DataNode
+%% may execute multiple application tasks concurrently.
+HDFSの名前空間は、ファイルとディレクトリの階層構造になっている。
+ファイルとディレクトリは、NameNode上のinodeで表される。
+inodeには、各種の属性が記録されている。
+パーミッション・変更時刻・アクセス時刻・名前空間・ディスクスペース上の割り当て領域などである。
+ファイルの中身は大きめのブロック(一般的には128メガバイトだが、ファイルごとに指定可能)に分割されており、
+各ブロックを複数(一般的には3つだが、ファイルごとに指定可能)のDataNodeへと個別にレプリケートできる。
+NameNodeでは名前空間ツリーを管理し、ブロックとDataNodeの対応も管理する。
+現時点の設計では、クラスターごとにひとつのNameNodeを保持している。
+ひとつのクラスターで何千ものDataNodeと何万ものHDFSクライアントを保持でき、
+それぞれのDataNodeが複数のアプリケーションタスクを並列実行できる。
 
 \end{aosasect2}
 
