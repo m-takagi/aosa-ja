@@ -111,45 +111,79 @@ NameNodeでは名前空間ツリーを管理し、ブロックとDataNodeの対�
 \end{aosasect2}
 
 %% \begin{aosasect2}{Image and Journal}
-\begin{aosasect2}{ImageおよびJournal}
+\begin{aosasect2}{イメージおよびジャーナル}
 
-The inodes and the list of blocks that define the metadata of the name
-system are called the \emph{image}. NameNode keeps the entire namespace image
-in RAM\@. The persistent record of the image stored in the NameNode's
-local native filesystem is called a checkpoint. The NameNode records
-changes to HDFS in a write-ahead log called the journal in
-its local native filesystem. The location of block replicas are not
-part of the persistent checkpoint.
+%% The inodes and the list of blocks that define the metadata of the name
+%% system are called the \emph{image}. NameNode keeps the entire namespace image
+%% in RAM\@. The persistent record of the image stored in the NameNode's
+%% local native filesystem is called a checkpoint. The NameNode records
+%% changes to HDFS in a write-ahead log called the journal in
+%% its local native filesystem. The location of block replicas are not
+%% part of the persistent checkpoint.
+inode、そして名前システムのメタデータを定義するブロックのリストのことを
+\emph{イメージ}と呼ぶ。
+NameNodeは、名前空間全体のイメージをRAMに保持する。
+イメージの永続レコードをそのNameNodeのローカルにあるネイティブファイルシステム上に
+格納したものをチェックポイントと呼ぶ。
+NameNodeはHDFSへの変更をログ先行書き込み方式で記録する。
+これをジャーナルと呼び、ネイティブファイルシステム上につくられる。
+ブロックのレプリカは、永続チェックポイントとは別の場所にある。
 
-Each client-initiated transaction is recorded in the journal, and the
-journal file is flushed and synced before the acknowledgment is sent
-to the client. The checkpoint file is never changed by the NameNode;
-a new file is written when a checkpoint is created during
-restart, when requested by the administrator, or by the CheckpointNode
-described in the next section. During startup the NameNode initializes
-the namespace image from the checkpoint, and then replays changes from
-the journal. A new checkpoint and an empty journal are written back to
-the storage directories before the NameNode starts serving clients.
+%% Each client-initiated transaction is recorded in the journal, and the
+%% journal file is flushed and synced before the acknowledgment is sent
+%% to the client. The checkpoint file is never changed by the NameNode;
+%% a new file is written when a checkpoint is created during
+%% restart, when requested by the administrator, or by the CheckpointNode
+%% described in the next section. During startup the NameNode initializes
+%% the namespace image from the checkpoint, and then replays changes from
+%% the journal. A new checkpoint and an empty journal are written back to
+%% the storage directories before the NameNode starts serving clients.
+クライアント主導で始まったトランザクションはジャーナルに記録され、
+ジャーナルファイルのフラッシュと同期が済んでからクライアントへの通知を送信する。
+チェックポイントファイルは、決してNameNodeから書き換えられることはない。
+新しいファイルが書かれるのは、
+再起動中にチェックポイントが作られたり管理者から要求があったり、
+あるいは次のセクションで紹介するCheckpointNodeからの要求があったりしたときだ。
+スタートアップ時に、NameNodeはチェックポイントから名前空間イメージを立ち上げる。
+そしてジャーナルの変更を再生していく。新たなチェックポイントと空のジャーナルを
+ストレージのディレクトリに書き出したら、NameNodeはクライアントに対応できるようになる。
 
-For improved durability, redundant copies of the checkpoint and
-journal are typically stored on multiple independent local volumes and
-at remote NFS servers. The first choice prevents loss from a single
-volume failure, and the second choice protects against failure of the
-entire node. If the NameNode encounters an error writing the journal
-to one of the storage directories it automatically excludes that
-directory from the list of storage directories. The NameNode
-automatically shuts itself down if no storage directory is available.
+%% For improved durability, redundant copies of the checkpoint and
+%% journal are typically stored on multiple independent local volumes and
+%% at remote NFS servers. The first choice prevents loss from a single
+%% volume failure, and the second choice protects against failure of the
+%% entire node. If the NameNode encounters an error writing the journal
+%% to one of the storage directories it automatically excludes that
+%% directory from the list of storage directories. The NameNode
+%% automatically shuts itself down if no storage directory is available.
+永続性を向上させるため、チェックポイントやジャーナルの冗長なコピーをとっておくことが一般的だ。
+複数の独立したローカルボリュームやリモートのNFSサーバーなどにコピーを格納する。
+複数のローカルボリュームに置いておけばどれかひとつのボリュームに障害が発生してもデータを失わずに済むし、
+リモートのNFSサーバーに置いておけばノード全体の障害からもデータを守れる。
+NameNodeがジャーナルをストレージに書き込む際にエラーが発生すると、
+自動的にそのストレージをストレージディレクトリのリストから除外するようになる。
+また、使えるストレージディレクトリがひとつもなくなった時点で
+NameNodeは自動的に自分自身をシャットダウンさせる。
 
-The NameNode is a multithreaded system and processes requests
-simultaneously from multiple clients. Saving a transaction to disk
-becomes a bottleneck since all other threads need to wait until the
-synchronous flush-and-sync procedure initiated by one of them is
-complete.  In order to optimize this process, the NameNode batches
-multiple transactions. When one of the NameNode's threads initiates a
-flush-and-sync operation, all the transactions batched at that time
-are committed together. Remaining threads only need to check that
-their transactions have been saved and do not need to initiate a
-flush-and-sync operation.
+%% The NameNode is a multithreaded system and processes requests
+%% simultaneously from multiple clients. Saving a transaction to disk
+%% becomes a bottleneck since all other threads need to wait until the
+%% synchronous flush-and-sync procedure initiated by one of them is
+%% complete.  In order to optimize this process, the NameNode batches
+%% multiple transactions. When one of the NameNode's threads initiates a
+%% flush-and-sync operation, all the transactions batched at that time
+%% are committed together. Remaining threads only need to check that
+%% their transactions have been saved and do not need to initiate a
+%% flush-and-sync operation.
+NameNodeはマルチスレッドに対応しており、複数のクライアントからのリクエストを同時に処理する。
+そのため、トランザクションのディスクへの保存がボトルネックとなる。
+どれかひとつのスレッドがフラッシュからシンクにいたる手続きを開始すると、
+それが完了するまで他のスレッドが待つ必要があるからである。
+この流れを最適化するため、NameNodeは複数のトランザクションを一括で処理する。
+どれかひとつのNameNodeのスレッドがフラッシュとシンクの操作を始めると、
+その時点でコミット済みのすべてのトランザクションをひとまとめにして処理する。
+残りのスレッドは、自分のトランザクションが保存されたかどうかだけを確認すればよいのであって、
+個別にフラッシュとシンクをする必要はない。
 
 \end{aosasect2}
 
