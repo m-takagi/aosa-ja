@@ -190,65 +190,114 @@ NameNodeはマルチスレッドに対応しており、複数のクライアン
 %% \begin{aosasect2}{DataNodes}
 \begin{aosasect2}{DataNodes}
 
-Each block replica on a DataNode is represented by two files in the
-local native filesystem. The first file contains the data itself and
-the second file records the block's metadata including checksums for
-the data and the generation stamp. The size of the data file equals
-the actual length of the block and does not require extra space to
-round it up to the nominal block size as in traditional
-filesystems. Thus, if a block is half full it needs only half of the
-space of the full block on the local drive.
+%% Each block replica on a DataNode is represented by two files in the
+%% local native filesystem. The first file contains the data itself and
+%% the second file records the block's metadata including checksums for
+%% the data and the generation stamp. The size of the data file equals
+%% the actual length of the block and does not require extra space to
+%% round it up to the nominal block size as in traditional
+%% filesystems. Thus, if a block is half full it needs only half of the
+%% space of the full block on the local drive.
+DataNode上の各ブロックのレプリカは、ネイティブファイルシステム上では二つのファイルで表される。
+ひとつはデータそのものを含むファイルで、もうひとつはブロックのメタデータを含むファイルだ。
+メタデータの中には、データのチェックサムやタイムスタンプが格納されている。
+データファイルのサイズは実際のブロックの長さと等しくなる。
+昔ながらのファイルシステムみたいに、
+規定のブロックサイズにそろえるために余分なスペースが必要などということはない。
+したがって、ブロックの中身が半分空っぽだった場合は、
+ローカルドライブ上で必要となる容量も半分で済む。
 
-During startup each DataNode connects to the NameNode and performs a
-handshake. The purpose of the handshake is to verify the namespace ID
-and the software version of the DataNode. If either does not match
-that of the NameNode, the DataNode automatically shuts down.
+%% During startup each DataNode connects to the NameNode and performs a
+%% handshake. The purpose of the handshake is to verify the namespace ID
+%% and the software version of the DataNode. If either does not match
+%% that of the NameNode, the DataNode automatically shuts down.
+各DataNodeは、開始時にNameNodeに接続してハンドシェイクを行う。
+ハンドシェイクの目的は、名前空間IDやDataNodeのソフトウェアのバージョンを検証することだ。
+そのいずれかがNameNodeのものと一致しない場合、DataNodeは自動的に終了する。
 
-The namespace ID is assigned to the filesystem instance when it is
-formatted. The namespace ID is persistently stored on all nodes of the
-cluster. Nodes with a different namespace ID will not be able to join
-the cluster, thus protecting the integrity of the filesystem. A
-DataNode that is newly initialized and without any namespace ID is
-permitted to join the cluster and receive the cluster's namespace ID.
+%% The namespace ID is assigned to the filesystem instance when it is
+%% formatted. The namespace ID is persistently stored on all nodes of the
+%% cluster. Nodes with a different namespace ID will not be able to join
+%% the cluster, thus protecting the integrity of the filesystem. A
+%% DataNode that is newly initialized and without any namespace ID is
+%% permitted to join the cluster and receive the cluster's namespace ID.
+名前空間IDは、ファイルシステムのインスタンスに割り当てられる。
+また、名前空間IDはクラスタの全ノードに永続的に格納される。
+異なる名前空間IDのノードを同じクラスタにまとめることはできないようにして、
+ファイルシステムの整合性を守っている。新しく作った
+DataNodeでまだ名前空間IDがないものはクラスタに組み込むことができ、
+組み込んだクラスタの名前空間IDを受け取る。
 
-After the handshake the DataNode registers with the
-NameNode. DataNodes persistently store their unique storage IDs. The
-storage ID is an internal identifier of the DataNode, which makes it
-recognizable even if it is restarted with a different IP address or
-port. The storage ID is assigned to the DataNode when it registers
-with the NameNode for the first time and never changes after that.
+%% After the handshake the DataNode registers with the
+%% NameNode. DataNodes persistently store their unique storage IDs. The
+%% storage ID is an internal identifier of the DataNode, which makes it
+%% recognizable even if it is restarted with a different IP address or
+%% port. The storage ID is assigned to the DataNode when it registers
+%% with the NameNode for the first time and never changes after that.
+ハンドシェイクを終えると、DataNodeをNameNodeに登録する。
+DataNodesは、自身の一意なストレージIDを永続的に保存する。
+ストレージIDはDataNodeの内部IDで、
+別のIPアドレスやポートで立ち上げなおしたときにも認識できる。
+ストレージIDがDataNodeに割り振られるのは最初に
+NameNodeに登録したときであり、それ以降は決して変わらない。
 
-A DataNode identifies block replicas in its possession to the NameNode
-by sending a block report. A block report contains the block ID, the
-generation stamp and the length for each block replica the server
-hosts. The first block report is sent immediately after the DataNode
-registration. Subsequent block reports are sent every hour and provide
-the NameNode with an up-to-date view of where block replicas are
-located on the cluster.
+%% A DataNode identifies block replicas in its possession to the NameNode
+%% by sending a block report. A block report contains the block ID, the
+%% generation stamp and the length for each block replica the server
+%% hosts. The first block report is sent immediately after the DataNode
+%% registration. Subsequent block reports are sent every hour and provide
+%% the NameNode with an up-to-date view of where block replicas are
+%% located on the cluster.
+DataNodeは、NameNodeの持つブロックレプリカを識別するために、ブロックレポートを送信する。
+ブロックレポートの内容は、ブロックIDやタイムスタンプと、サーバーが保持する各ブロックレプリカの長さである。
+最初のブロックレポートは、DataNodeを登録した直後に送信される。
+それ以降のブロックレポートは一時間ごとに送信され、
+NameNodeの情報と、ブロックレプリカがクラスタ上のどこにあるのかの最新情報を提供する。
 
-During normal operation DataNodes send heartbeats to the NameNode to
-confirm that the DataNode is operating and the block replicas it hosts
-are available. The default heartbeat interval is three seconds. If the
-NameNode does not receive a heartbeat from a DataNode in ten minutes
-the NameNode considers the DataNode to be out of service and the block
-replicas hosted by that DataNode to be unavailable. The NameNode then
-schedules creation of new replicas of those blocks on other DataNodes.
+%% During normal operation DataNodes send heartbeats to the NameNode to
+%% confirm that the DataNode is operating and the block replicas it hosts
+%% are available. The default heartbeat interval is three seconds. If the
+%% NameNode does not receive a heartbeat from a DataNode in ten minutes
+%% the NameNode considers the DataNode to be out of service and the block
+%% replicas hosted by that DataNode to be unavailable. The NameNode then
+%% schedules creation of new replicas of those blocks on other DataNodes.
+通常の操作中は、DataNodesからNameNodeにハートビートを送信する。
+これによって、DataNodeが動作中であることや
+そこで保持するブロックレプリカが利用可能であることを確認する。
+デフォルトのハートビート間隔は3秒である。
+NameNodeがDataNodeからのハートビートを10分以上受信できなかった場合、
+NameNodeはそのDataNodeがダウンしていると判断する。
+そして、そのDataNodeが管理するブロックレプリカにはアクセスできないようにする。
+その後、そのブロックを他のDataNode上で扱うための新たなレプリカの作成スケジュールを入れる。
 
-Heartbeats from a DataNode also carry information about total storage
-capacity, fraction of storage in use, and the number of data transfers
-currently in progress. These statistics are used for the NameNode's
-block allocation and load balancing decisions.
+%% Heartbeats from a DataNode also carry information about total storage
+%% capacity, fraction of storage in use, and the number of data transfers
+%% currently in progress. These statistics are used for the NameNode's
+%% block allocation and load balancing decisions.
+DataNodeからのハートビートでは、それ以外にもさまざまな情報を運ぶ。
+ストレージの総容量や実際に使っているストレージの割合、
+そして現在進行中のデータ転送の数などである。
+これらの統計情報をもとに、NameNodeのブロック配置やロードバランシングに関する決定を下す。
 
-The NameNode does not directly send requests to DataNodes. It uses
-replies to heartbeats to send instructions to the DataNodes.  The
-instructions include commands to replicate blocks to other nodes,
-remove local block replicas, re-register and send an immediate block
-report, and shut down the node.
+%% The NameNode does not directly send requests to DataNodes. It uses
+%% replies to heartbeats to send instructions to the DataNodes.  The
+%% instructions include commands to replicate blocks to other nodes,
+%% remove local block replicas, re-register and send an immediate block
+%% report, and shut down the node.
+NameNodeからDataNodeに直接リクエストを送ることはない。
+ハートビートへの応答で、DataNodeへの指示を送信する。
+この指示に含まれるのは、他のノードへのブロックの複製や
+ローカルブロックレプリカの削除、ブロックの再登録と最新状態の報告、
+ノードのシャットダウンといったコマンドである。
 
-These commands are important for maintaining the overall system
-integrity and therefore it is critical to keep heartbeats frequent
-even on big clusters. The NameNode can process thousands of heartbeats
-per second without affecting other NameNode operations.
+%% These commands are important for maintaining the overall system
+%% integrity and therefore it is critical to keep heartbeats frequent
+%% even on big clusters. The NameNode can process thousands of heartbeats
+%% per second without affecting other NameNode operations.
+これらのコマンドは、システム全体の整合性を保つために重要となる。
+従って、大規模なクラスタであってもハートビートは頻繁に送る必要がある。
+NameNodeは、秒間数千回ものハートビートを処理しても
+その他の操作に影響を及ぼさないようになっている。
 
 \end{aosasect2}
 
