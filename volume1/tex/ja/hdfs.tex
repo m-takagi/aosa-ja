@@ -304,40 +304,75 @@ NameNodeは、秒間数千回ものハートビートを処理しても
 %% \begin{aosasect2}{HDFS Client}
 \begin{aosasect2}{HDFSクライアント}
 
-User applications access the filesystem using the HDFS client, a
-library that exports the HDFS filesystem interface.
+%% User applications access the filesystem using the HDFS client, a
+%% library that exports the HDFS filesystem interface.
+ユーザーアプリケーションからファイルシステムにアクセスするときに使うのが
+HDFSクライアントである。これは、HDFSのファイルシステムのインターフェイスを公開したライブラリだ。
 
-Like most conventional filesystems, HDFS supports operations to read,
-write and delete files, and operations to create and delete
-directories. The user references files and directories by paths in the
-namespace. The user application does not need to know that filesystem
-metadata and storage are on different servers, or that blocks have
-multiple replicas.
+%% Like most conventional filesystems, HDFS supports operations to read,
+%% write and delete files, and operations to create and delete
+%% directories. The user references files and directories by paths in the
+%% namespace. The user application does not need to know that filesystem
+%% metadata and storage are on different servers, or that blocks have
+%% multiple replicas.
+既存の大半のファイルシステムと同様、
+HDFSでもファイルの読み書きや削除をサポートしている。
+また、ディレクトリを作ったり削除したりすることもできる。
+利用者がファイルやディレクトリを指すときには、名前空間内でのパスを使う。
+アプリケーション側では、ファイルシステムのメタデータやストレージが
+どのサーバーにあるかは知らなくてもよいし、
+そのブロックが複数のレプリカを持っているかどうかなども知る必要はない。
 
-When an application reads a file, the HDFS client first asks the
-NameNode for the list of DataNodes that host replicas of the blocks of
-the file. The list is sorted by the network topology distance from the client. The client
-contacts a DataNode directly and requests the
-transfer of the desired block. When a client writes, it first asks the
-NameNode to choose DataNodes to host replicas of the first block of
-the file. The client organizes a pipeline from node-to-node and sends
-the data. When the first block is filled, the client requests new
-DataNodes to be chosen to host replicas of the next block. A new
-pipeline is organized, and the client sends the further bytes of the
-file. Choice of DataNodes for each block is likely to be
-different. The interactions among the client, the NameNode and the
-DataNodes are illustrated in \aosafigref{fig.hdfs.file}.
+%% When an application reads a file, the HDFS client first asks the
+%% NameNode for the list of DataNodes that host replicas of the blocks of
+%% the file. The list is sorted by the network topology distance from the client. The client
+%% contacts a DataNode directly and requests the
+%% transfer of the desired block. When a client writes, it first asks the
+%% NameNode to choose DataNodes to host replicas of the first block of
+%% the file. The client organizes a pipeline from node-to-node and sends
+%% the data. When the first block is filled, the client requests new
+%% DataNodes to be chosen to host replicas of the next block. A new
+%% pipeline is organized, and the client sends the further bytes of the
+%% file. Choice of DataNodes for each block is likely to be
+%% different. The interactions among the client, the NameNode and the
+%% DataNodes are illustrated in \aosafigref{fig.hdfs.file}.
+アプリケーションからファイルを読み込むときに、
+HDFSクライアントはまず最初にNameNodeに問い合わせる。
+そのファイルのブロックのレプリカを持つDataNodesのリストを得るためである。
+このリストは、クライアント側から見たネットワークトポロジー上の距離の順に並べ替えられる。
+クライアントはDataNodeに直接接触し、
+必要なブロックの転送をリクエストする。
+クライアントがファイルを書き込むときは、
+まずNameNodeに問い合わせて、そのファイルの最初のブロックのレプリカを持つ
+DataNodeを調べる。
+次にクライアントがノード間のパイプラインを構成し、データを送信する。
+最初のブロックがいっぱいになれば、
+次のブロックのレプリカを管理する新しいDataNodeをクライアントがリクエストする。
+新たなパイプラインが作られ、そしてクライアントがファイルの続きのデータを送信する。
+各ブロックで選択するDataNodeはさまざまになる。クライアントと
+NameNodeそしてDataNodesの間のやりとりを\aosafigref{fig.hdfs.file}に示す。
 
-\aosafigure[275pt]{../images/hdfs/CreateFile.eps}{HDFS Client Creates a New File}{fig.hdfs.file}
+%% \aosafigure[275pt]{../images/hdfs/CreateFile.eps}{HDFS Client Creates a New File}{fig.hdfs.file}
+\aosafigure[275pt]{../images/hdfs/CreateFile.eps}{HDFSクライアントによる新たなファイルの作成}{fig.hdfs.file}
 
-Unlike conventional filesystems, HDFS provides an API that exposes
-the locations of a file blocks.  This allows applications like the
-MapReduce framework to schedule a task to where the data are located,
-thus improving the read performance. It also allows an application to
-set the replication factor of a file. By default a file's replication
-factor is three. For critical files or files which are accessed very
-often, having a higher replication factor improves tolerance against
-faults and increases read bandwidth.
+%% Unlike conventional filesystems, HDFS provides an API that exposes
+%% the locations of a file blocks.  This allows applications like the
+%% MapReduce framework to schedule a task to where the data are located,
+%% thus improving the read performance. It also allows an application to
+%% set the replication factor of a file. By default a file's replication
+%% factor is three. For critical files or files which are accessed very
+%% often, having a higher replication factor improves tolerance against
+%% faults and increases read bandwidth.
+既存のファイルシステムとは異なる点として、
+HDFSにはファイルブロックの場所を公開するAPIが用意されている。
+これを使えば、MapReduceフレームワークなどのアプリケーションが
+データをどこに配置するかをスケジュールできるようになり、
+結果として読み込みのパフォーマンスを向上させることができる。
+また、アプリケーション側でファイルのレプリケーション係数を決めることもできる。
+デフォルトでは、ひとつのファイルのレプリケーション係数は3である。
+クリティカルなファイルや頻繁にアクセスされるファイルの場合は、
+レプリケーション係数を大きめにしておけば耐障害性が高まるし
+読み込みの帯域も大きくできる。
 
 \end{aosasect2}
 
