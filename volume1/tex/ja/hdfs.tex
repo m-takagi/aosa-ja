@@ -379,30 +379,52 @@ HDFSにはファイルブロックの場所を公開するAPIが用意されて�
 %% \begin{aosasect2}{CheckpointNode}
 \begin{aosasect2}{CheckpointNode}
 
-The NameNode in HDFS, in addition to its primary role serving client
-requests, can alternatively execute either of two other roles, either
-a CheckpointNode or a BackupNode. The role is specified at the node
-startup.
+%% The NameNode in HDFS, in addition to its primary role serving client
+%% requests, can alternatively execute either of two other roles, either
+%% a CheckpointNode or a BackupNode. The role is specified at the node
+%% startup.
+HDFSにおけるNameNodeの主要な役割は
+クライアントからのリクエストに対応することだ。
+それ以外にも、他の役割であるCheckpointNodeあるいはBackupNode
+を演じることもできる。どんな役割を担当するかは、ノードの開始時に指定する。
 
-The CheckpointNode periodically combines the existing checkpoint and
-journal to create a new checkpoint and an empty journal. The
-CheckpointNode usually runs on a different host from the NameNode
-since it has the same memory requirements as the NameNode. It
-downloads the current checkpoint and journal files from the NameNode,
-merges them locally, and returns the new checkpoint back to the
-NameNode.
+%% The CheckpointNode periodically combines the existing checkpoint and
+%% journal to create a new checkpoint and an empty journal. The
+%% CheckpointNode usually runs on a different host from the NameNode
+%% since it has the same memory requirements as the NameNode. It
+%% downloads the current checkpoint and journal files from the NameNode,
+%% merges them locally, and returns the new checkpoint back to the
+%% NameNode.
+CheckpointNodeは、既存のチェックポイントとジャーナルを定期的に結合し、
+新しいチェックポイントと空のジャーナルを作る。
+CheckpointNodeは、通常はNameNodeとは別のノードで稼働する。
+というのも、NameNodeと同程度のメモリを必要とするからである。
+CheckpointNodeは現時点のチェックポイントとジャーナルファイルを
+NameNodeからダウンロードし、ローカルでそれをマージして、
+新たなチェックポイントをNameNodeに返す。
 
-Creating periodic checkpoints is one way to protect the filesystem
-metadata. The system can start from the most recent checkpoint if all
-other persistent copies of the namespace image or journal are
-unavailable. Creating a checkpoint also lets the NameNode truncate the
-journal when the new checkpoint is uploaded to the NameNode.  HDFS
-clusters run for prolonged periods of time without restarts during
-which the journal constantly grows. If the journal grows very large,
-the probability of loss or corruption of the journal file
-increases. Also, a very large journal extends the time required to
-restart the NameNode. For a large cluster, it takes an hour to process
-a week-long journal. Good practice is to create a daily checkpoint.
+%% Creating periodic checkpoints is one way to protect the filesystem
+%% metadata. The system can start from the most recent checkpoint if all
+%% other persistent copies of the namespace image or journal are
+%% unavailable. Creating a checkpoint also lets the NameNode truncate the
+%% journal when the new checkpoint is uploaded to the NameNode.  HDFS
+%% clusters run for prolonged periods of time without restarts during
+%% which the journal constantly grows. If the journal grows very large,
+%% the probability of loss or corruption of the journal file
+%% increases. Also, a very large journal extends the time required to
+%% restart the NameNode. For a large cluster, it takes an hour to process
+%% a week-long journal. Good practice is to create a daily checkpoint.
+定期的なチェックポイントの作成は、ファイルシステムのメタデータを守るひとつの方法でもある。
+仮に名前空間イメージやジャーナルの永続コピーがすべて使えなくなったとしても、
+直近のチェックポイントからシステムを再開させることができる。
+チェックポイントを作れば、新たなチェックポイントをNameNodeに
+アップロードした時点でジャーナルを切り詰めさせることもできる。
+HDFSクラスタを再起動なしで長期間稼働させると、
+ジャーナルがどんどん大きくなっていく。サイズが巨大になると、
+ジャーナルファイルを失ったり壊してしまったりする可能性も増える。
+また、ジャーナルが巨大になるとNameNodeの再起動にも時間がかかるようになる。
+大規模なクラスタでは、一週間のジャーナルを処理するのに一時間ほどかかる。
+おすすめは、毎日チェックポイントを作っておくことだ。
 
 \end{aosasect2}
 
