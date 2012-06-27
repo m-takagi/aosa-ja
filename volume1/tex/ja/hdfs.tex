@@ -431,33 +431,56 @@ HDFSクラスタを再起動なしで長期間稼働させると、
 %% \begin{aosasect2}{BackupNode}
 \begin{aosasect2}{BackupNode}
 
-A recently introduced feature of HDFS is the BackupNode. Like a
-CheckpointNode, the BackupNode is capable of creating periodic
-checkpoints, but in addition it maintains an in-memory, up-to-date
-image of the filesystem namespace that is always synchronized with
-the state of the NameNode.
+%% A recently introduced feature of HDFS is the BackupNode. Like a
+%% CheckpointNode, the BackupNode is capable of creating periodic
+%% checkpoints, but in addition it maintains an in-memory, up-to-date
+%% image of the filesystem namespace that is always synchronized with
+%% the state of the NameNode.
+HDFSに最近導入された機能がBackupNodeだ。
+CheckpointNodeと同様に、BackupNodeにも定期的なチェックポイント作成機能がある。
+しかしそれだけでなく、インメモリで最新のファイルシステム名前空間のイメージを保持できる。
+これは、NameNodeの現状と常に同期したものとなる。
 
-The BackupNode accepts the journal stream of namespace transactions
-from the active NameNode, saves them in journal on its own storage
-directories, and applies these transactions to its own namespace image
-in memory. The NameNode treats the BackupNode as a journal store the
-same way as it treats journal files in its storage directories. If the
-NameNode fails, the BackupNode's image in memory and the checkpoint on
-disk is a record of the latest namespace state.
+%% The BackupNode accepts the journal stream of namespace transactions
+%% from the active NameNode, saves them in journal on its own storage
+%% directories, and applies these transactions to its own namespace image
+%% in memory. The NameNode treats the BackupNode as a journal store the
+%% same way as it treats journal files in its storage directories. If the
+%% NameNode fails, the BackupNode's image in memory and the checkpoint on
+%% disk is a record of the latest namespace state.
+BackupNodeは、名前空間のトランザクションのジャーナルストリームを
+アクティブなNameNodeから受け取り、それを自前のストレージディレクトリ上の
+ジャーナルに保存する。そして、そのトランザクションを、
+自身が持つインメモリの名前空間イメージに適用する。
+NameNodeはBackupNodeをジャーナルの保存場所とみなし、
+自分のストレージディレクトリにあるジャーナルファイルと同様に扱う。
+NameNodeがダウンしたときは、BackupNodeがインメモリに持つイメージと
+ディスク上のチェックポイントが最新状態の記録となる。
 
-The BackupNode can create a checkpoint without downloading checkpoint
-and journal files from the active NameNode, since it already has an
-up-to-date namespace image in its memory. This makes the checkpoint
-process on the BackupNode more efficient as it only needs to save the
-namespace into its local storage directories.
+%% The BackupNode can create a checkpoint without downloading checkpoint
+%% and journal files from the active NameNode, since it already has an
+%% up-to-date namespace image in its memory. This makes the checkpoint
+%% process on the BackupNode more efficient as it only needs to save the
+%% namespace into its local storage directories.
+BackupNodeは、アクティブなNameNodeからチェックポイントやジャーナルファイルを
+ダウンロードしなくてもチェックポイントを作ることができる。
+というのも、既に最新の名前空間イメージをメモリ上に保持しているからである。
+そのおかげでBackupNodeでのチェックポイント処理がより効率的に行える。
+名前空間の内容をローカルストレージディレクトリに保存するだけで済むからである。
 
-The BackupNode can be viewed as a read-only NameNode. It contains all
-filesystem metadata information except for block locations. It can
-perform all operations of the regular NameNode that do not involve
-modification of the namespace or knowledge of block locations. Use of
-a BackupNode provides the option of running the NameNode without
-persistent storage, delegating responsibility of persisting the
-namespace state to the BackupNode.
+%% The BackupNode can be viewed as a read-only NameNode. It contains all
+%% filesystem metadata information except for block locations. It can
+%% perform all operations of the regular NameNode that do not involve
+%% modification of the namespace or knowledge of block locations. Use of
+%% a BackupNode provides the option of running the NameNode without
+%% persistent storage, delegating responsibility of persisting the
+%% namespace state to the BackupNode.
+BackupNodeは、読み込み専用のNameNodeとして見ることもできる。
+ブロックの場所を除いたすべてのファイルシステムメタデータの情報を持っているのだ。
+名前空間の変更をする操作やブロックの場所がわからないとできない操作を除いて、
+通常のNameNodeでできる操作なら何でも実行できる。
+BackupNodeを使えば、永続ストレージなしでNameNodeを動かすという選択肢も可能となる。
+名前空間の状態を永続化させる役割をBackupNodeに委譲するというわけだ。
 
 \end{aosasect2}
 
