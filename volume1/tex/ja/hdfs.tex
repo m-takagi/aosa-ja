@@ -487,54 +487,97 @@ BackupNodeを使えば、永続ストレージなしでNameNodeを動かすと�
 %% \begin{aosasect2}{Upgrades and Filesystem Snapshots}
 \begin{aosasect2}{アップグレードおよびファイルシステムスナップショット}
 
-During software upgrades the possibility of corrupting the filesystem
-due to software bugs or human mistakes increases. The purpose of
-creating snapshots in HDFS is to minimize potential damage to the data
-stored in the system during upgrades.
+%% During software upgrades the possibility of corrupting the filesystem
+%% due to software bugs or human mistakes increases. The purpose of
+%% creating snapshots in HDFS is to minimize potential damage to the data
+%% stored in the system during upgrades.
+ソフトウェアのアップグレードのときには、バグや操作ミスなどで
+ファイルシステムが壊れてしまう可能性が高まる。
+HDFSでスナップショットをつくる目的は、アップグレードの際に
+システムに格納されたデータに与えるダメージを最小限に抑えることだ。
 
-The snapshot mechanism lets administrators persistently save the
-current state of the filesystem, so that if the upgrade results in
-data loss or corruption it is possible to rollback the upgrade and
-return HDFS to the namespace and storage state as they were at the
-time of the snapshot.
+%% The snapshot mechanism lets administrators persistently save the
+%% current state of the filesystem, so that if the upgrade results in
+%% data loss or corruption it is possible to rollback the upgrade and
+%% return HDFS to the namespace and storage state as they were at the
+%% time of the snapshot.
+スナップショットを使えば、管理者はファイルシステムの現状を永続的に保存できる。
+もしアップグレードしたせいでデータが消えてしまったり壊れてしまったりしても、
+アップグレードを取り消して名前空間とストレージをスナップショット作成時の状態に戻すことができる。
 
-The snapshot (only one can exist) is created at the cluster
-administrator's option whenever the system is started. If a snapshot
-is requested, the NameNode first reads the checkpoint and journal
-files and merges them in memory. Then it writes the new checkpoint and
-the empty journal to a new location, so that the old checkpoint and
-journal remain unchanged.
+%% The snapshot (only one can exist) is created at the cluster
+%% administrator's option whenever the system is started. If a snapshot
+%% is requested, the NameNode first reads the checkpoint and journal
+%% files and merges them in memory. Then it writes the new checkpoint and
+%% the empty journal to a new location, so that the old checkpoint and
+%% journal remain unchanged.
+スナップショットはただ一つだけ保持することができるもので、
+システムが立ち上がるときにクラスタ管理者のオプションで作られる。
+スナップショットを作るようリクエストを受けると、
+NameNodeはまずチェックポイントとジャーナルファイルを読み込んで、
+メモリ内でそれをマージする。それから、
+新たなチェックポイントと空のジャーナルを新しい場所に書き込む。
+古いチェックポイントとジャーナルを変更せずに済ませるためだ。
 
-During handshake the NameNode instructs DataNodes whether to create a
-local snapshot. The local snapshot on the DataNode cannot be created
-by replicating the directories containing the data files as this would require
-doubling the storage capacity of every DataNode on the
-cluster. Instead each DataNode creates a copy of the storage directory
-and hard links existing block files into it. When the DataNode removes
-a block it removes only the hard link, and block modifications during
-appends use the copy-on-write technique.  Thus old block replicas
-remain untouched in their old directories.
+%% During handshake the NameNode instructs DataNodes whether to create a
+%% local snapshot. The local snapshot on the DataNode cannot be created
+%% by replicating the directories containing the data files as this would require
+%% doubling the storage capacity of every DataNode on the
+%% cluster. Instead each DataNode creates a copy of the storage directory
+%% and hard links existing block files into it. When the DataNode removes
+%% a block it removes only the hard link, and block modifications during
+%% appends use the copy-on-write technique.  Thus old block replicas
+%% remain untouched in their old directories.
+ハンドシェイクの際に、ローカルスナップショットを作るかどうかの指示をNameNodeからDataNodesに出す。
+DataNode上のローカルスナップショットは、データファイルを含むディレクトリを複製して作るわけにはいかない。
+そんなことをすると、クラスタ上のすべてのDataNodeに通常の倍のストレージ容量が必要となってしまうからだ。
+そのかわりに、各DataNodeはストレージディレクトリだけをコピーして、
+既存のブロックファイルのハードリンクをそこに作成する。
+DataNodeがブロックを削除するときにはハードリンクだけを削除し、
+追記などでブロックを変更するときにはコピー・オン・ライト方式を使う。
+これで、古いブロックのレプリカはそのまま旧ディレクトリに残ることになる。
 
-The cluster administrator can choose to roll back HDFS to the snapshot
-state when restarting the system. The NameNode recovers the checkpoint
-saved when the snapshot was created. DataNodes restore the previously
-renamed directories and initiate a background process to delete block
-replicas created after the snapshot was made. Having chosen to roll
-back, there is no provision to roll forward. The cluster administrator
-can recover the storage occupied by the snapshot by commanding the
-system to abandon the snapshot; for snapshots created during upgrade,
-this finalizes the software upgrade.
+%% The cluster administrator can choose to roll back HDFS to the snapshot
+%% state when restarting the system. The NameNode recovers the checkpoint
+%% saved when the snapshot was created. DataNodes restore the previously
+%% renamed directories and initiate a background process to delete block
+%% replicas created after the snapshot was made. Having chosen to roll
+%% back, there is no provision to roll forward. The cluster administrator
+%% can recover the storage occupied by the snapshot by commanding the
+%% system to abandon the snapshot; for snapshots created during upgrade,
+%% this finalizes the software upgrade.
+クラスタ管理者は、システムを再起動するときにHDFSをスナップショットの状態に戻すことができる。
+このとき、NameNodeはスナップショット作成時に保存したチェックポイントを復元する。
+DataNodeは以前にリネームしたディレクトリを復元し、
+バックグラウンドプロセスを立ち上げて、
+スナップショットを作成した後にできたブロックレプリカを削除する。
+ロールバックを選択すると、ロールフォワードはできなくなる。
+クラスタ管理者は、スナップショットが占有していたストレージを解放させるために
+スナップショットの破棄を指示できる。アップグレードの際に作ったスナップショットについては、
+ここまですればアップグレード完了となる。
 
-System evolution may lead to a change in the format of the NameNode's
-checkpoint and journal files, or in the data representation of block
-replica files on DataNodes. The layout version identifies the data
-representation formats, and is persistently stored in the NameNode's
-and the DataNodes' storage directories. During startup each node
-compares the layout version of the current software with the version
-stored in its storage directories and automatically converts data from
-older formats to the newer ones. The conversion requires the mandatory
-creation of a snapshot when the system restarts with the new software
-layout version.
+%% System evolution may lead to a change in the format of the NameNode's
+%% checkpoint and journal files, or in the data representation of block
+%% replica files on DataNodes. The layout version identifies the data
+%% representation formats, and is persistently stored in the NameNode's
+%% and the DataNodes' storage directories. During startup each node
+%% compares the layout version of the current software with the version
+%% stored in its storage directories and automatically converts data from
+%% older formats to the newer ones. The conversion requires the mandatory
+%% creation of a snapshot when the system restarts with the new software
+%% layout version.
+システムが進化するにつれて、NameNodeのチェックポイントや
+ジャーナルファイルのフォーマットが変わる可能性がある。
+あるいは、DataNodeにおけるブロックレプリカファイルでの
+データの表現方法も変わるかもしれない。
+データの表現フォーマットを示すのがレイアウトバージョンで、
+これはNameNodeやDataNodeのストレージディレクトリに格納されている。
+各ノードは起動時に、現在のソフトウェアのレイアウトバージョンと
+自分のストレージディレクトリのレイアウトバージョンを比較する。
+そして、旧バージョンのフォーマットは自動的に新バージョンに変換する。
+この自動変換をするには、
+新しいレイアウトバージョンのソフトウェアにアップグレードして
+システムを立ち上げなおすときにスナップショットを作ることが必須となる。
 
 \end{aosasect2}
 
