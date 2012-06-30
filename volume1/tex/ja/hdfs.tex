@@ -586,108 +586,202 @@ DataNodeは以前にリネームしたディレクトリを復元し、
 %% \begin{aosasect1}{File I/O Operations and Replica Management}
 \begin{aosasect1}{ファイルI/O操作およびレプリカの管理}
 
-Of course, the whole point of a filesystem is to store data in
-files.  To understand how HDFS does this, we must look at how reading
-and writing works, and how blocks are managed.
+%% Of course, the whole point of a filesystem is to store data in
+%% files.  To understand how HDFS does this, we must look at how reading
+%% and writing works, and how blocks are managed.
+当然ながら、ファイルシステムはファイルのデータを格納できてナンボのものだ。
+それをHDFSでどう実現しているのかを理解するには、
+読み書きをどのように行っているのか、そしてブロックをどのように管理しているのかを知る必要がある。
 
 %% \begin{aosasect2}{File Read and Write}
 \begin{aosasect2}{ファイルの読み書き}
 
-An application adds data to HDFS by creating a new file and writing
-the data to it. After the file is closed, the bytes written cannot be
-altered or removed except that new data can be added to the file by
-reopening the file for append. HDFS implements a single-writer,
-multiple-reader model.
+%% An application adds data to HDFS by creating a new file and writing
+%% the data to it. After the file is closed, the bytes written cannot be
+%% altered or removed except that new data can be added to the file by
+%% reopening the file for append. HDFS implements a single-writer,
+%% multiple-reader model.
+アプリケーションからHDFSにデータを追加するときには、
+新しいファイルを作ってデータをそこに書き込む。
+いったんファイルをクローズしたら、書き込んだデータを変更したり
+削除したりすることはできない。ただし、新たなデータを追加することはできる。
+この場合は、ファイルを追記モードで再オープンする。
+HDFSで実装しているのは、シングルライター・マルチリーダーモデルである。
 
-The HDFS client that opens a file for writing is granted a lease for
-the file; no other client can write to the file.  The writing client
-periodically renews the lease by sending a heartbeat to the
-NameNode. When the file is closed, the lease is revoked. The lease
-duration is bound by a soft limit and a hard limit. Until the soft
-limit expires, the writer is certain of exclusive access to the
-file. If the soft limit expires and the client fails to close the file
-or renew the lease, another client can preempt the lease. If after the
-hard limit expires (one hour) and the client has failed to renew the
-lease, HDFS assumes that the client has quit and will automatically
-close the file on behalf of the writer, and recover the lease. The
-writer's lease does not prevent other clients from reading the file; a
-file may have many concurrent readers.
+%% The HDFS client that opens a file for writing is granted a lease for
+%% the file; no other client can write to the file.  The writing client
+%% periodically renews the lease by sending a heartbeat to the
+%% NameNode. When the file is closed, the lease is revoked. The lease
+%% duration is bound by a soft limit and a hard limit. Until the soft
+%% limit expires, the writer is certain of exclusive access to the
+%% file. If the soft limit expires and the client fails to close the file
+%% or renew the lease, another client can preempt the lease. If after the
+%% hard limit expires (one hour) and the client has failed to renew the
+%% lease, HDFS assumes that the client has quit and will automatically
+%% close the file on behalf of the writer, and recover the lease. The
+%% writer's lease does not prevent other clients from reading the file; a
+%% file may have many concurrent readers.
+HDFSクライアントがファイルを書き込み用にオープンすると、
+そのファイルへの書き込み権限がリースされる。
+その間、他のクライアントは同じファイルに書き込めない。
+書き込み側のクライアントは、ハートビートをNameNode
+に送信することによって定期的にリースを更新する。
+ファイルをクローズするときに、リースが破棄される。
+リース期間は、ソフトリミットとハードリミットによる制約を受ける。
+ソフトリミットに達するまでは、ライターはそのファイルへの排他アクセス権があるものと確信している。
+ソフトリミットを超えてからクライアントがファイルのクローズやリースの更新に失敗すると、
+別のクライアントがそのリースを横取りできるようになる。
+ハードリミット(1時間)を超えてからクライアントがファイルのクローズやリースの更新に失敗すると、
+HDFSはそのクライアントが終了したものとみなす。
+そのときはライターがファイルを自動的にクローズし、リースを解放する。
+ライターがリースを確保している間も、他のクライアントからのファイルの読み込みは可能である。
+そのため、ひとつのファイルを同時に複数のリーダーが読むこともあり得る。
 
-An HDFS file consists of blocks. When there is a need for a new block,
-the NameNode allocates a block with a unique block ID and determines a
-list of DataNodes to host replicas of the block.  The DataNodes form a
-pipeline, the order of which minimizes the total network distance from
-the client to the last DataNode. Bytes are pushed to the pipeline as a
-sequence of packets. The bytes that an application writes first buffer
-at the client side. After a packet buffer is filled (typically 64 KB),
-the data are pushed to the pipeline. The next packet can be pushed to
-the pipeline before receiving the acknowledgment for the previous
-packets.  The number of outstanding packets is limited by the
-outstanding packets window size of the client.
+%% An HDFS file consists of blocks. When there is a need for a new block,
+%% the NameNode allocates a block with a unique block ID and determines a
+%% list of DataNodes to host replicas of the block.  The DataNodes form a
+%% pipeline, the order of which minimizes the total network distance from
+%% the client to the last DataNode. Bytes are pushed to the pipeline as a
+%% sequence of packets. The bytes that an application writes first buffer
+%% at the client side. After a packet buffer is filled (typically 64 KB),
+%% the data are pushed to the pipeline. The next packet can be pushed to
+%% the pipeline before receiving the acknowledgment for the previous
+%% packets.  The number of outstanding packets is limited by the
+%% outstanding packets window size of the client.
+HDFSのファイルは複数のブロックで構成されている。
+新しいブロックが必要になると、NameNodeは新しいブロックを確保して
+一意なブロックIDを割り当て、そのブロックのレプリカを持つDataNode
+のリストを決める。DataNodeはパイプラインを形成しており、
+その並び順は、クライアントから最後のDataNodeまでの
+ネットワーク上の距離が最短になるようにする。
+バイトデータをパイプラインに流すときには、一連のパケット群として流す。
+アプリケーションから書き込むバイトデータは、まずクライアント側でバッファリングする。
+パケットバッファ(通常は64KB)がいっぱいになると、
+データをパイプラインに送り出す。
+その次のパケットをパイプラインに送り出すのは、
+前のパケットの受領通知を受け取った後になる。
+未処理のパケットの最大数は、
+クライアントの未処理パケットウィンドウのサイズまでに制限される。
 
-After data are written to an HDFS file, HDFS does not provide any
-guarantee that data are visible to a new reader until the file is
-closed. If a user application needs the visibility guarantee, it can
-explicitly call the hflush operation. Then the current packet is
-immediately pushed to the pipeline, and the hflush operation will wait
-until all DataNodes in the pipeline acknowledge the successful
-transmission of the packet. All data written before the hflush
-operation are then certain to be visible to readers.
+%% After data are written to an HDFS file, HDFS does not provide any
+%% guarantee that data are visible to a new reader until the file is
+%% closed. If a user application needs the visibility guarantee, it can
+%% explicitly call the hflush operation. Then the current packet is
+%% immediately pushed to the pipeline, and the hflush operation will wait
+%% until all DataNodes in the pipeline acknowledge the successful
+%% transmission of the packet. All data written before the hflush
+%% operation are then certain to be visible to readers.
+データがHDFSのファイルに書き込まれても、
+そのファイルをクローズするまではリーダーから見えることが保証されない。
+アプリケーション側で見えるようになることを保証したければ、
+hflushを明示的に呼べばよい。そうすれば、
+現在のパケットが即時にパイプラインに送られる。
+そして、パイプライン内のすべてのDataNodeがパケットの送信に成功
+したことを確認するまで待ち続ける。
+これで、hflushより前に書き込まれたすべてのデータは
+確実にリーダーから見えるようになる。
 
-\aosafigureTop[300pt]{../images/hdfs/Pipeline.pdf}{Data Pipeline While Writing a Block}{fig.hdfs.pipe}
+%% \aosafigureTop[300pt]{../images/hdfs/Pipeline.pdf}{Data Pipeline While Writing a Block}{fig.hdfs.pipe}
+\aosafigureTop[300pt]{../images/hdfs/Pipeline.eps}{ブロックを書き込むときのデータパイプライン}{fig.hdfs.pipe}
 
-If no error occurs, block construction goes through three stages as
-shown in \aosafigref{fig.hdfs.pipe} illustrating a pipeline of three
-DataNodes (DN) and a block of five packets.  In the picture, bold
-lines represent data packets, dashed lines represent acknowledgment
-messages, and thin lines represent control messages to setup and close
-the pipeline. Vertical lines represent activity at the client and the
-three DataNodes where time proceeds from top to bottom.  From
-\code{t0} to \code{t1} is the pipeline setup stage. The interval
-\code{t1} to \code{t2} is the data streaming stage, where \code{t1} is
-the time when the first data packet gets sent and \code{t2} is the
-time that the acknowledgment to the last packet gets received. Here an
-hflush operation transmits \code{packet 2}.  The hflush indication
-travels with the packet data and is not a separate operation. The
-final interval \code{t2} to \code{t3} is the pipeline close stage for
-this block.
+%% If no error occurs, block construction goes through three stages as
+%% shown in \aosafigref{fig.hdfs.pipe} illustrating a pipeline of three
+%% DataNodes (DN) and a block of five packets.  In the picture, bold
+%% lines represent data packets, dashed lines represent acknowledgment
+%% messages, and thin lines represent control messages to setup and close
+%% the pipeline. Vertical lines represent activity at the client and the
+%% three DataNodes where time proceeds from top to bottom.  From
+%% \code{t0} to \code{t1} is the pipeline setup stage. The interval
+%% \code{t1} to \code{t2} is the data streaming stage, where \code{t1} is
+%% the time when the first data packet gets sent and \code{t2} is the
+%% time that the acknowledgment to the last packet gets received. Here an
+%% hflush operation transmits \code{packet 2}.  The hflush indication
+%% travels with the packet data and is not a separate operation. The
+%% final interval \code{t2} to \code{t3} is the pipeline close stage for
+%% this block.
+何もエラーが発生しなければ、ブロックの作成は3つのステージを経て行われる。
+\aosafigref{fig.hdfs.pipe}にその様子を示した。
+3つのDataNode(DN)と5つのパケットからなるブロックのパイプラインである。
+図中の太線で示されているのがデータパケット、破線は確認メッセージ、
+そして細線はパイプラインの準備や終了用の制御メッセージとなる。
+縦線がクライアントと各DataNodeで発生するアクティビティを表し、
+時間の経過とともに上から下へと流れていく。
+\code{t0}から\code{t1}までが、パイプラインの準備ステージだ。
+\code{t1}から\code{t2}までがデータストリーミングステージで、
+\code{t1}が最初のデータパケットの送信時刻、
+そして\code{t2}が最終パケットの受信確認時刻となる。
+またこのとき、hflush命令を\code{packet 2}で送っている。
+hflushの指示はパケットデータとともに流れ、個別の命令とはならない。
+最後の\code{t2}から\code{t3}までが、このブロックのパイプライン終了ステージである。
 
-In a cluster of thousands of nodes, failures of a node (most commonly
-storage faults) are daily occurrences. A replica stored on a DataNode
-may become corrupted because of faults in memory, disk, or network.
-HDFS generates and stores checksums for each data block of an HDFS
-file. Checksums are verified by the HDFS client while reading to help
-detect any corruption caused either by client, DataNodes, or
-network. When a client creates an HDFS file, it computes the checksum
-sequence for each block and sends it to a DataNode along with the
-data. A DataNode stores checksums in a metadata file separate from the
-block's data file. When HDFS reads a file, each block's data and
-checksums are shipped to the client. The client computes the checksum
-for the received data and verifies that the newly computed checksums
-matches the checksums it received. If not, the client notifies the
-NameNode of the corrupt replica and then fetches a different replica
-of the block from another DataNode.
+%% In a cluster of thousands of nodes, failures of a node (most commonly
+%% storage faults) are daily occurrences. A replica stored on a DataNode
+%% may become corrupted because of faults in memory, disk, or network.
+%% HDFS generates and stores checksums for each data block of an HDFS
+%% file. Checksums are verified by the HDFS client while reading to help
+%% detect any corruption caused either by client, DataNodes, or
+%% network. When a client creates an HDFS file, it computes the checksum
+%% sequence for each block and sends it to a DataNode along with the
+%% data. A DataNode stores checksums in a metadata file separate from the
+%% block's data file. When HDFS reads a file, each block's data and
+%% checksums are shipped to the client. The client computes the checksum
+%% for the received data and verifies that the newly computed checksums
+%% matches the checksums it received. If not, the client notifies the
+%% NameNode of the corrupt replica and then fetches a different replica
+%% of the block from another DataNode.
+何千ものノードからなるクラスタでは、どれかひとつのノードに障害が発生する
+(たいていはストレージ障害)なんてことは日常茶飯事だ。
+DataNodeに格納されているレプリカは、メモリやディスクあるいはネットワークの障害
+などのせいで壊れる可能性がある。
+HDFSでは、HDFSファイルの各データブロックのチェックサムを計算して保存する。
+HDFSクライアントがチェックサムを検証し、クライアントやDataNodeあるいはネットワークの障害
+によるデータの破壊を発見しやすくする。
+クライアントがHDFSファイルを作るときには、各ブロックのチェックサムを計算して、
+それをデータとともにDataNodeに送信する。
+DataNodeではチェックサムをメタデータファイルに保存して、ブロックのデータファイルとは別にする。
+HDFSがファイルを読み込むときには、各ブロックのデータとチェックサムをクライアントに送る。
+クライアントは受け取ったデータのチェックサムを計算し、
+その結果が実際に受け取ったチェックサムと一致することを確かめる。
+もし一致しなければ、そのレプリカのNameNodeを通知する。
+そして、同じブロックの別のレプリカを別のDataNodeから取得する。
 
-When a client opens a file to read, it fetches the list of blocks and
-the locations of each block replica from the NameNode. The locations
-of each block are ordered by their distance from the reader. When
-reading the content of a block, the client tries the closest replica
-first. If the read attempt fails, the client tries the next replica in
-sequence. A read may fail if the target DataNode is unavailable, the
-node no longer hosts a replica of the block, or the replica is found
-to be corrupt when checksums are tested.
+%% When a client opens a file to read, it fetches the list of blocks and
+%% the locations of each block replica from the NameNode. The locations
+%% of each block are ordered by their distance from the reader. When
+%% reading the content of a block, the client tries the closest replica
+%% first. If the read attempt fails, the client tries the next replica in
+%% sequence. A read may fail if the target DataNode is unavailable, the
+%% node no longer hosts a replica of the block, or the replica is found
+%% to be corrupt when checksums are tested.
+読み込みたいファイルをクライアントがオープンするときには、
+ブロックのリストを取得して、各ブロックのレプリカの場所をNameNodeから取得する。
+各ブロックの場所は、リーダーからの距離の順になっている。
+ブロックの内容を読むときには、一番近いレプリカから順に読もうと試みる。
+読み込めなければ、リスト上でその次にあるレプリカからの読み込みを試みる。
+読み込みが失敗するのは、DataNodeに到達できなかったり
+そのノードが対象ブロックのレプリカを持っていなかったり
+見つかったレプリカがチェックサムの検証に失敗したりといった場合だ。
 
-HDFS permits a client to read a file that is open for writing. When
-reading a file open for writing, the length of the last block still
-being written is unknown to the NameNode. In this case, the client
-asks one of the replicas for the latest length before starting to read
-its content.
+%% HDFS permits a client to read a file that is open for writing. When
+%% reading a file open for writing, the length of the last block still
+%% being written is unknown to the NameNode. In this case, the client
+%% asks one of the replicas for the latest length before starting to read
+%% its content.
+HDFSでは、書き込み用にオープンされているファイルでも別のクライアントから読み込める。
+書き込み用にオープンされているファイルを読み込みときは、
+現在書き込み中の最後のブロックの長さはNameNodeからはわからない。
+そんな場合は、クライアントがいずれかのレプリカに最新の長さを問い合わせてから
+その内容を読み始める。
 
-The design of HDFS I/O is particularly optimized for batch processing
-systems, like MapReduce, which require high throughput for sequential
-reads and writes. Ongoing efforts will improve read/write response
-time for applications that require real-time data streaming or random
-access.
+%% The design of HDFS I/O is particularly optimized for batch processing
+%% systems, like MapReduce, which require high throughput for sequential
+%% reads and writes. Ongoing efforts will improve read/write response
+%% time for applications that require real-time data streaming or random
+%% access.
+HDFSのI/Oの設計はMapReduceのようなバッチ処理システムに最適化されており、
+シーケンシャルリード/ライトについては高いスループットを要求される。
+リアルタイムのデータストリーミングやランダムアクセスを必要とするアプリケーション向けに、
+読み書きのレスポンスタイムを改善するための作業は今でも続いている。
 
 \end{aosasect2}
 
