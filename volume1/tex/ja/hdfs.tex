@@ -786,70 +786,120 @@ HDFSのI/Oの設計はMapReduceのようなバッチ処理システムに最適�
 \end{aosasect2}
 
 %% \begin{aosasect2}{Block Placement}
-\begin{aosasect2}{Block Placement}
+\begin{aosasect2}{ブロックの配置}
 
-For a large cluster, it may not be practical to connect all nodes in a
-flat topology. A common practice is to spread the nodes across
-multiple racks. Nodes of a rack share a switch, and rack switches are
-connected by one or more core switches. Communication between two
-nodes in different racks has to go through multiple switches. In most
-cases, network bandwidth between nodes in the same rack is greater
-than network bandwidth between nodes in different racks.
-\aosafigref{fig.hdfs.clus} describes a cluster with two racks, each of
-which contains three nodes.
+%% For a large cluster, it may not be practical to connect all nodes in a
+%% flat topology. A common practice is to spread the nodes across
+%% multiple racks. Nodes of a rack share a switch, and rack switches are
+%% connected by one or more core switches. Communication between two
+%% nodes in different racks has to go through multiple switches. In most
+%% cases, network bandwidth between nodes in the same rack is greater
+%% than network bandwidth between nodes in different racks.
+%% \aosafigref{fig.hdfs.clus} describes a cluster with two racks, each of
+%% which contains three nodes.
+大規模なクラスタでは、すべてのノードをフラットなトポロジーでつなげるのは非現実的だ。
+よくある方法は、複数のラックにまたがってノードを展開する方法である。
+ひとつのラック上のノード群はスイッチを共有し、ラックのスイッチがひとつあるいは複数の
+コアスイッチと接続される。異なるラック上にあるふたつのノード間の通信は、
+複数のスイッチを経由する必要がある。
+多くの場合、同一ラック内のノード間のほうが異なるラックの場合よりもネットワーク帯域が広い。
+\aosafigref{fig.hdfs.clus}はふたつのラックからなるクラスタの例で、
+それぞれのラックに3ノードずつ含まれている。
 
-\aosafigure[300pt]{../images/hdfs/Cluster.eps}{Cluster Topology}{fig.hdfs.clus}
+%% \aosafigure[300pt]{../images/hdfs/Cluster.eps}{Cluster Topology}{fig.hdfs.clus}
+\aosafigure[300pt]{../images/hdfs/Cluster.eps}{クラスタのトポロジー}{fig.hdfs.clus}
 
-HDFS estimates the network bandwidth between two nodes by their
-distance. The distance from a node to its parent node is assumed to be
-one. A distance between two nodes can be calculated by summing the
-distances to their closest common ancestor.  A shorter distance
-between two nodes means greater bandwidth they can use to transfer
-data.
+%% HDFS estimates the network bandwidth between two nodes by their
+%% distance. The distance from a node to its parent node is assumed to be
+%% one. A distance between two nodes can be calculated by summing the
+%% distances to their closest common ancestor.  A shorter distance
+%% between two nodes means greater bandwidth they can use to transfer
+%% data.
+HDFSは、ふたつのノード間のネットワーク帯域の見積もりを、
+両者の距離に基づいて行う。あるノードからその親ノードへまでの距離を1として、
+ふたつのノードの距離は一番近い共通の祖先からの距離の合計で求める。
+ノード間の距離が短いほど、データの転送により多くの帯域を使えることを意味する。
 
-HDFS allows an administrator to configure a script that returns a
-node's rack identification given a node's address. The NameNode is the
-central place that resolves the rack location of each DataNode. When a
-DataNode registers with the NameNode, the NameNode runs the configured
-script to decide which rack the node belongs to. If no such a script
-is configured, the NameNode assumes that all the nodes belong to a
-default single rack.
+%% HDFS allows an administrator to configure a script that returns a
+%% node's rack identification given a node's address. The NameNode is the
+%% central place that resolves the rack location of each DataNode. When a
+%% DataNode registers with the NameNode, the NameNode runs the configured
+%% script to decide which rack the node belongs to. If no such a script
+%% is configured, the NameNode assumes that all the nodes belong to a
+%% default single rack.
+HDFSの管理者は、ノードのアドレスを指定すればそのノードのラック情報を返すような
+スクリプトを用意できる。NameNodeが中心となって、各DataNodeのラックの場所を解決する。
+DataNodeをNameNodeに登録するときに、NameNodeがそのスクリプトを実行し、
+ノードが所属するラックを決める。スクリプトを準備していない場合は、
+NameNodeはすべてのノードがデフォルトの単一ラックに属しているものとみなす。
 
-The placement of replicas is critical to HDFS data reliability and
-read/write performance. A good replica placement policy should improve
-data reliability, availability, and network bandwidth
-utilization. Currently HDFS provides a configurable block placement
-policy interface so that the users and researchers can experiment and
-test alternate policies that are optimal for their applications.
+%% The placement of replicas is critical to HDFS data reliability and
+%% read/write performance. A good replica placement policy should improve
+%% data reliability, availability, and network bandwidth
+%% utilization. Currently HDFS provides a configurable block placement
+%% policy interface so that the users and researchers can experiment and
+%% test alternate policies that are optimal for their applications.
+レプリカをどこに配置するかは、HDFSのデータの信頼性や
+読み書きのパフォーマンスを考えると重要である。
+配置ポリシーをうまく指定できればデータの信頼性や可用性があがるし、
+ネットワーク帯域もうまく活用できる。
+現在HDFSは、ブロック配置ポリシー設定用のインターフェイスを提供している。
+これを使えば、ユーザーや研究者がいろいろなポリシーを試して
+自分たちのアプリケーションに最適なポリシーを設定できるようになる。
 
-The default HDFS block placement policy provides a tradeoff between
-minimizing the write cost, and maximizing data reliability,
-availability and aggregate read bandwidth. When a new block is
-created, HDFS places the first replica on the node where the writer is
-located. The second and the third replicas are placed on two different
-nodes in a different rack. The rest are placed on random nodes with
-restrictions that no more than one replica is placed at any one node
-and no more than two replicas are placed in the same rack, if
-possible. The choice to place the second and third replicas on a
-different rack better distributes the block replicas for a single file
-across the cluster. If the first two replicas were placed on the same
-rack, for any file, two-thirds of its block replicas would be on the
-same rack.
+%% The default HDFS block placement policy provides a tradeoff between
+%% minimizing the write cost, and maximizing data reliability,
+%% availability and aggregate read bandwidth. When a new block is
+%% created, HDFS places the first replica on the node where the writer is
+%% located. The second and the third replicas are placed on two different
+%% nodes in a different rack. The rest are placed on random nodes with
+%% restrictions that no more than one replica is placed at any one node
+%% and no more than two replicas are placed in the same rack, if
+%% possible. The choice to place the second and third replicas on a
+%% different rack better distributes the block replicas for a single file
+%% across the cluster. If the first two replicas were placed on the same
+%% rack, for any file, two-thirds of its block replicas would be on the
+%% same rack.
+デフォルトのHDFSブロック配置ポリシーは、
+書き込みのコストを最小化することと
+データの信頼性や可用性の最大化や読み込み帯域の集約とのトレードオフとなる。
+新しいブロックを作成する場合、HDFSはノードの最初のレプリカをライターのある場所に配置する。
+第二、第三のレプリカは、別のラックにあるそれぞれ別のノードに配置する。
+残りのレプリカはランダムなノードに配置する。ただし、
+同一ノード上に複数のレプリカは配置しないし、
+同一ラック上にも最大で二つまでのレプリカしか配置しないようにする。
+第二、第三のレプリカを別のラックに配置することで、あるひとつのファイルの
+レプリカがクラスタをまたがってうまく分散させられるようになる。
+もし最初の二つのレプリカが同じラックに入ってしまうと、
+どのファイルに対してもブロックレプリカの2/3が同じラックにあることになってしまう。
 
-After all target nodes are selected, nodes are organized as a pipeline
-in the order of their proximity to the first replica. Data are pushed
-to nodes in this order. For reading, the NameNode first checks if the
-client's host is located in the cluster. If yes, block locations are
-returned to the client in the order of its closeness to the
-reader. The block is read from DataNodes in this preference order.
+%% After all target nodes are selected, nodes are organized as a pipeline
+%% in the order of their proximity to the first replica. Data are pushed
+%% to nodes in this order. For reading, the NameNode first checks if the
+%% client's host is located in the cluster. If yes, block locations are
+%% returned to the client in the order of its closeness to the
+%% reader. The block is read from DataNodes in this preference order.
+すべてのターゲットノードが選べたら、ノード群をパイプライン化する。
+その順番は、最初のレプリカに近い順となる。
+データはこの順でノードに送られていく。
+読み込みの場合、NameNodeはまずクライアントのホストがそのクラスタ内にあるかどうかを調べる。
+ある場合は、ブロックの場所をクライアントに返す。その順番は、リーダーに近い順となる。
+この順に従って、ブロックをDataNodeから読み込む。
 
-This policy reduces the inter-rack and inter-node write traffic and
-generally improves write performance. Because the chance of a rack
-failure is far less than that of a node failure, this policy does not
-impact data reliability and availability guarantees. In the usual case
-of three replicas, it can reduce the aggregate network bandwidth used
-when reading data since a block is placed in only two unique racks
-rather than three.
+%% This policy reduces the inter-rack and inter-node write traffic and
+%% generally improves write performance. Because the chance of a rack
+%% failure is far less than that of a node failure, this policy does not
+%% impact data reliability and availability guarantees. In the usual case
+%% of three replicas, it can reduce the aggregate network bandwidth used
+%% when reading data since a block is placed in only two unique racks
+%% rather than three.
+このポリシーに従えば、ラック間やノード間の書き込みトラフィックを軽減でき、
+一般に書き込みのパフォーマンスが向上する。
+ラックに障害が発生する可能性はノードの障害よりもはるかに低いので、
+このポリシーはデータの信頼性や可用性にはあまり影響を及ぼさない。
+三つのレプリカを持つ通常の場合、このポリシーを使えばデータ読み込み時の
+ネットワーク帯域を集約できる。というのも、あるブロックのある場所が
+どこか二つのラックに絞れるからである。
 
 \end{aosasect2}
 
