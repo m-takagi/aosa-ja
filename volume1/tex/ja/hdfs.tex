@@ -906,135 +906,225 @@ NameNodeはすべてのノードがデフォルトの単一ラックに属して
 %% \begin{aosasect2}{Replication Management}
 \begin{aosasect2}{レプリケーションの管理}
 
-The NameNode endeavors to ensure that each block always has the
-intended number of replicas. The NameNode detects that a block has
-become under- or over-replicated when a block report from a DataNode
-arrives. When a block becomes over replicated, the NameNode chooses a
-replica to remove. The NameNode will prefer not to reduce the number
-of racks that host replicas, and secondly prefer to remove a replica
-from the DataNode with the least amount of available disk space. The
-goal is to balance storage utilization across DataNodes without
-reducing the block's availability.
+%% The NameNode endeavors to ensure that each block always has the
+%% intended number of replicas. The NameNode detects that a block has
+%% become under- or over-replicated when a block report from a DataNode
+%% arrives. When a block becomes over replicated, the NameNode chooses a
+%% replica to remove. The NameNode will prefer not to reduce the number
+%% of racks that host replicas, and secondly prefer to remove a replica
+%% from the DataNode with the least amount of available disk space. The
+%% goal is to balance storage utilization across DataNodes without
+%% reducing the block's availability.
+NameNodeは、各ブロックが常に十分な数のレプリカを確保できているように努める。
+あるブロックのレプリカが少なすぎたり多すぎたりしないかどうかを、
+NameNodeはDataNodeからのブロックレポートで判断する。
+あるブロックのレプリカが多すぎる場合、NameNodeはどのレプリカを削除するかを選択する。
+レプリカをホストしているラックの数をできるだけ減らさないことを第一の前提とし、
+そのうえでディスクの残容量がいちばん少ないDataNodeのレプリカから削除していく。
+目標は、DataNode間でのストレージ使用料のバランスをとりつつ
+ブロックの可用性を落とさないようにすることだ。
 
-When a block becomes under-replicated, it is put in the replication
-priority queue. A block with only one replica has the highest
-priority, while a block with a number of replicas that is greater than
-two thirds of its replication factor has the lowest priority. A
-background thread periodically scans the head of the replication queue
-to decide where to place new replicas. Block replication follows a
-similar policy as that of new block placement. If the number of
-existing replicas is one, HDFS places the next replica on a different
-rack.  In case that the block has two existing replicas, if the two
-existing replicas are on the same rack, the third replica is placed on
-a different rack; otherwise, the third replica is placed on a
-different node in the same rack as an existing replica. Here the goal
-is to reduce the cost of creating new replicas.
+%% When a block becomes under-replicated, it is put in the replication
+%% priority queue. A block with only one replica has the highest
+%% priority, while a block with a number of replicas that is greater than
+%% two thirds of its replication factor has the lowest priority. A
+%% background thread periodically scans the head of the replication queue
+%% to decide where to place new replicas. Block replication follows a
+%% similar policy as that of new block placement. If the number of
+%% existing replicas is one, HDFS places the next replica on a different
+%% rack.  In case that the block has two existing replicas, if the two
+%% existing replicas are on the same rack, the third replica is placed on
+%% a different rack; otherwise, the third replica is placed on a
+%% different node in the same rack as an existing replica. Here the goal
+%% is to reduce the cost of creating new replicas.
+ブロックが少なくなりすぎると、レプリケーションの優先キューに投入される。
+レプリカがひとつしかないブロックが最優先であり、
+レプリケーション係数の2/3より多いレプリカがあるブロックは最も優先度が低くなる。
+バックグラウンドスレッドが定期的にレプリケーションキューの先頭をスキャンし、
+新たなレプリカを作るかどうかを決める。
+ブロックのレプリカを作るときには、新たなブロックを配置するときと同様のポリシーに従う。
+もし既存のレプリカの数がひとつだけなら、HDFSは次のレプリカを別のラック上に作る。
+既存のレプリカがふたつある場合は、もしそれらが同じラック上にあれば
+三番目のレプリカを別のラック上に配置する。そうでない場合は、
+三番目のレプリカを既存のレプリカと同一ラック上の別のノードに配置する。
+ここでの目標は、新たなレプリカの作成コストを削減することだ。
 
-The NameNode also makes sure that not all replicas of a block are
-located on one rack. If the NameNode detects that a block's replicas
-end up at one rack, the NameNode treats the block as mis-replicated
-and replicates the block to a different rack using the same block
-placement policy described above. After the NameNode receives the
-notification that the replica is created, the block becomes
-over-replicated. The NameNode then will decides to remove an old
-replica because the over-replication policy prefers not to reduce the
-number of racks.
+%% The NameNode also makes sure that not all replicas of a block are
+%% located on one rack. If the NameNode detects that a block's replicas
+%% end up at one rack, the NameNode treats the block as mis-replicated
+%% and replicates the block to a different rack using the same block
+%% placement policy described above. After the NameNode receives the
+%% notification that the replica is created, the block becomes
+%% over-replicated. The NameNode then will decides to remove an old
+%% replica because the over-replication policy prefers not to reduce the
+%% number of racks.
+また、NameNodeは、全レプリカが同一ラック上に配置されることがないようにもする。
+あるブロックのレプリカがすべて同じラック上にあることを検出すると、
+NameNodeはそのブロックを「レプリケーションできていない」とみなし、
+先ほどと同様のポリシーに基づいて別のラック上にレプリカを作成する。
+レプリカができたという通知をNameNodeが受け取ったら、
+そのブロックはレプリカが多すぎる状態になる。
+そこで、NameNodeは古いレプリカのひとつを削除する。
+多すぎるレプリカへの対応ポリシーに基づいて、ラック数が減らないようにするためである。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Balancer}
 \begin{aosasect2}{バランサー}
 
-HDFS block placement strategy does not take into account DataNode disk
-space utilization. This is to avoid placing new---more likely to be
-referenced---data at a small subset of the DataNodes with a lot of
-free storage. Therefore data might not always be placed uniformly
-across DataNodes. Imbalance also occurs when new nodes are added to
-the cluster.
+%% HDFS block placement strategy does not take into account DataNode disk
+%% space utilization. This is to avoid placing new---more likely to be
+%% referenced---data at a small subset of the DataNodes with a lot of
+%% free storage. Therefore data might not always be placed uniformly
+%% across DataNodes. Imbalance also occurs when new nodes are added to
+%% the cluster.
+HDFSのブロック配置戦略では、DataNodeのディスク利用状況は考慮しない。
+これは、新しいデータ---つまり、より参照されやすいデータ---を
+大量の空き領域があるDataNodeのごく一部に配置されてしまわないようにするためだ。
+そのため、データが各DataNodeにまんべんなく配置されるとは限らない。
+また、新たなノードがクラスタに追加されたときにも不均衡が生じる。
 
-The balancer is a tool that balances disk space usage on an HDFS
-cluster. It takes a threshold value as an input parameter, which is a
-fraction between 0 and 1. A cluster is balanced if, for each DataNode,
-the utilization of the node\footnote{Defined as the ratio of used
-space at the node to total capacity of the node.} differs from the
-utilization of the whole cluster\footnote{Defined as the ratio of used
-space in the cluster to total capacity of the cluster.} by no more
-than the threshold value.
+%% The balancer is a tool that balances disk space usage on an HDFS
+%% cluster. It takes a threshold value as an input parameter, which is a
+%% fraction between 0 and 1. A cluster is balanced if, for each DataNode,
+%% the utilization of the node\footnote{Defined as the ratio of used
+%% space at the node to total capacity of the node.} differs from the
+%% utilization of the whole cluster\footnote{Defined as the ratio of used
+%% space in the cluster to total capacity of the cluster.} by no more
+%% than the threshold value.
+バランサーは、HDFSクラスタ上のディスク使用量のバランスをとるためのツールである。
+0から1までの間の小数で表した閾値を、入力として受け取る。
+クラスタのバランスが取れているとみなすのは、クラスタ内の各DataNodeについて、
+そのノードでの利用率\footnote{ノードの全容量に対する利用中の容量の比率。}
+とクラスタ全体での利用率\footnote{クラスタの総容量に対する利用中の容量の比率。}
+との差が閾値を超えないときである。
 
-The tool is deployed as an application program that can be run by the
-cluster administrator. It iteratively moves replicas from DataNodes
-with higher utilization to DataNodes with lower utilization. One key
-requirement for the balancer is to maintain data availability. When
-choosing a replica to move and deciding its destination, the balancer
-guarantees that the decision does not reduce either the number of
-replicas or the number of racks.
+%% The tool is deployed as an application program that can be run by the
+%% cluster administrator. It iteratively moves replicas from DataNodes
+%% with higher utilization to DataNodes with lower utilization. One key
+%% requirement for the balancer is to maintain data availability. When
+%% choosing a replica to move and deciding its destination, the balancer
+%% guarantees that the decision does not reduce either the number of
+%% replicas or the number of racks.
+このツールはアプリケーションプログラムとして配布されており、
+クラスタの管理者が実行することができる。
+実行すると、使用率の高いDataNodeから使用率の低いDataNode
+へとレプリカを移動させる。バランサーでポイントとなる要件のひとつは、
+データの可用性を保つことである。移動させたいレプリカを選んで
+その移動先を見つけるときにも、それによってレプリカ数や
+ラック数が減らないことを保証する。
 
-The balancer optimizes the balancing process by minimizing the
-inter-rack data copying. If the balancer decides that a replica A
-needs to be moved to a different rack and the destination rack happens
-to have a replica B of the same block, the data will be copied from
-replica B instead of replica A.
+%% The balancer optimizes the balancing process by minimizing the
+%% inter-rack data copying. If the balancer decides that a replica A
+%% needs to be moved to a different rack and the destination rack happens
+%% to have a replica B of the same block, the data will be copied from
+%% replica B instead of replica A.
+バランサーは、その処理を最適化するために、
+ラックをまたがるデータコピーを最小限に抑える。
+レプリカAを別のラックに移動させる必要があると判断したときに、
+移動先のラックにもし同じブロックのレプリカBが存在すれば、
+レプリカAではなくレプリカBからデータをコピーする。
 
-A configuration parameter limits the bandwidth consumed by rebalancing
-operations. The higher the allowed bandwidth, the faster a cluster can
-reach the balanced state, but with greater competition with
-application processes.
+%% A configuration parameter limits the bandwidth consumed by rebalancing
+%% operations. The higher the allowed bandwidth, the faster a cluster can
+%% reach the balanced state, but with greater competition with
+%% application processes.
+設定パラメータで、バランシング操作で使う帯域を制限できる。
+利用できる帯域を高めに設定すると、バランスのとれた状態に素早く持ち込める。
+しかしそのぶん、アプリケーションの処理に影響が及んでしまう。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Block Scanner}
 \begin{aosasect2}{ブロックスキャナー}
 
-Each DataNode runs a block scanner that periodically scans its block
-replicas and verifies that stored checksums match the block data. In
-each scan period, the block scanner adjusts the read bandwidth in
-order to complete the verification in a configurable period. If a
-client reads a complete block and checksum verification succeeds, it
-informs the DataNode. The DataNode treats it as a verification of the
-replica.
+%% Each DataNode runs a block scanner that periodically scans its block
+%% replicas and verifies that stored checksums match the block data. In
+%% each scan period, the block scanner adjusts the read bandwidth in
+%% order to complete the verification in a configurable period. If a
+%% client reads a complete block and checksum verification succeeds, it
+%% informs the DataNode. The DataNode treats it as a verification of the
+%% replica.
+各DataNodeではブロックスキャナーが動作している。
+これは、定期的にブロックのレプリカをスキャンし、
+保存されているチェックサムがブロックのデータと一致するかを調べる。
+スキャン時には読み込みの帯域を調節し、
+設定した期間で検証を終えられるようにする。
+あるクライアントがどれかのブロック全体を読み込んでチェックサムの検証に成功すると、
+それがDataNodeに伝えられる。
+そしてDataNodeでは、そのレプリカが検証されたものとみなす。
 
-The verification time of each block is stored in a human-readable log
-file. At any time there are up to two files in the top-level DataNode
-directory, the current and previous logs. New verification times are
-appended to the current file. Correspondingly, each DataNode has an
-in-memory scanning list ordered by the replica's verification time.
+%% The verification time of each block is stored in a human-readable log
+%% file. At any time there are up to two files in the top-level DataNode
+%% directory, the current and previous logs. New verification times are
+%% appended to the current file. Correspondingly, each DataNode has an
+%% in-memory scanning list ordered by the replica's verification time.
+各ブロックをいつ検証したのかという情報は、可読形式でログファイルに記録される。
+DataNodeのトップレベルディレクトリに、現在のログと前回のログの
+ふたつのファイルが存在する。新たに検証をすると、その時刻が現在のログファイルに追記される。
+それに対応して、各DataNodeにはインメモリのスキャンリストがあり、
+これはレプリカの検証時刻順で並んでいる。
 
-Whenever a read client or a block scanner detects a corrupt block, it
-notifies the NameNode. The NameNode marks the replica as corrupt, but
-does not schedule deletion of the replica immediately. Instead, it
-starts to replicate a good copy of the block. Only when the good
-replica count reaches the replication factor of the block the corrupt
-replica is scheduled to be removed. This policy aims to preserve data
-as long as possible. So even if all replicas of a block are corrupt,
-the policy allows the user to retrieve its data from the corrupt
-replicas.
+%% Whenever a read client or a block scanner detects a corrupt block, it
+%% notifies the NameNode. The NameNode marks the replica as corrupt, but
+%% does not schedule deletion of the replica immediately. Instead, it
+%% starts to replicate a good copy of the block. Only when the good
+%% replica count reaches the replication factor of the block the corrupt
+%% replica is scheduled to be removed. This policy aims to preserve data
+%% as long as possible. So even if all replicas of a block are corrupt,
+%% the policy allows the user to retrieve its data from the corrupt
+%% replicas.
+クライアントからの読み込みやブロックスキャナーのスキャンでブロックの破損が見つかると、
+それがNameNodeに通知される。NameNodeはそのレプリカが壊れているとマークするが、
+すぐにはそのレプリカを削除しない。その代わりに、まずそのブロックの壊れていないコピーを複製する。
+正常なレプリカの数がブロックのレプリケーション係数に達してから、
+壊れたレプリカの削除をする。このポリシーは、データをできるだけ長く永続させることを狙ったものである。
+仮にすべてのレプリカが壊れていたとしても、
+このポリシーにしておけば、
+壊れたレプリカからユーザーがデータを取得できるようになる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Decommissioning}
 \begin{aosasect2}{廃止措置}
 
-The cluster administrator specifies list of nodes to be
-decommissioned.  Once a DataNode is marked for decommissioning, it
-will not be selected as the target of replica placement, but it will
-continue to serve read requests. The NameNode starts to schedule
-replication of its blocks to other DataNodes. Once the NameNode
-detects that all blocks on the decommissioning DataNode are
-replicated, the node enters the decommissioned state. Then it can be
-safely removed from the cluster without jeopardizing any data
-availability.
+%% The cluster administrator specifies list of nodes to be
+%% decommissioned.  Once a DataNode is marked for decommissioning, it
+%% will not be selected as the target of replica placement, but it will
+%% continue to serve read requests. The NameNode starts to schedule
+%% replication of its blocks to other DataNodes. Once the NameNode
+%% detects that all blocks on the decommissioning DataNode are
+%% replicated, the node enters the decommissioned state. Then it can be
+%% safely removed from the cluster without jeopardizing any data
+%% availability.
+クラスタ管理者が、廃止予定のノードのリストを指定する。
+あるDataNodeが廃止予定とマークされると、
+もうそのノードはレプリカの配置先として選ばれなくなる。
+しかし、読み込みリクエストへの対応は続行する。
+そしてNameNodeは、廃止予定のノードにあるブロックのレプリカを
+他のDataNodeに移し始める。
+すべてのブロックが他のDataNodeにレプリケートできたことを確認した時点で、
+そのノードは廃止状態となる。
+廃止状態のノードは、データの可用性に一切影響を及ぼさず安全に削除できる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Inter-Cluster Data Copy}
 \begin{aosasect2}{クラスタ間データコピー}
 
-When working with large datasets, copying data into and out of a HDFS
-cluster is daunting.  HDFS provides a tool called DistCp for large
-inter/intra-cluster parallel copying. It is a MapReduce job; each of
-the map tasks copies a portion of the source data into the destination
-filesystem. The MapReduce framework automatically handles parallel
-task scheduling, error detection and recovery.
+%% When working with large datasets, copying data into and out of a HDFS
+%% cluster is daunting.  HDFS provides a tool called DistCp for large
+%% inter/intra-cluster parallel copying. It is a MapReduce job; each of
+%% the map tasks copies a portion of the source data into the destination
+%% filesystem. The MapReduce framework automatically handles parallel
+%% task scheduling, error detection and recovery.
+大規模なデータセットでは、HDFSクラスタへのデータのコピー
+（あるいはHDFSクラスタからのデータのコピー）は手強い作業である。
+HDFSにはDistCpというツールが用意されており、クラスタ内/クラスタ間での
+大規模な並列コピーに使える。
+これはMapReduceジョブである。
+個々のマップタスクが、ソースデータの一部をコピー先のファイルシステムにコピーする。
+MapReduceフレームワークが、並列タスクスケジューリングやエラーの検出そしてリカバリーを自動的に処理する。
 
 \end{aosasect2}
 
