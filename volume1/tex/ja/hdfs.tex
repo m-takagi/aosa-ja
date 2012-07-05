@@ -1455,34 +1455,57 @@ NameNodeを真に分散型の実装にしたりといった計画もある。
 %% \begin{aosasect1}{Lessons Learned}
 \begin{aosasect1}{教訓}
 
-A very small team was able to build the Hadoop filesystem and make it
-stable and robust enough to use it in production.  A large part of the
-success was due to the very simple architecture: replicated blocks,
-periodic block reports and central metadata server. Avoiding the full
-POSIX semantics also helped. Although keeping the entire metadata in
-memory limited the scalability of the namespace, it made the NameNode
-very simple: it avoids the complex locking of typical filesystems. The
-other reason for Hadoop's success was to quickly use the system for
-production at Yahoo!, as it was rapidly and incrementally
-improved. The filesystem is very robust and the NameNode rarely fails;
-indeed most of the down time is due to software upgrades. Only
-recently have failover solutions (albeit manual) emerged
+%% A very small team was able to build the Hadoop filesystem and make it
+%% stable and robust enough to use it in production.  A large part of the
+%% success was due to the very simple architecture: replicated blocks,
+%% periodic block reports and central metadata server. Avoiding the full
+%% POSIX semantics also helped. Although keeping the entire metadata in
+%% memory limited the scalability of the namespace, it made the NameNode
+%% very simple: it avoids the complex locking of typical filesystems. The
+%% other reason for Hadoop's success was to quickly use the system for
+%% production at Yahoo!, as it was rapidly and incrementally
+%% improved. The filesystem is very robust and the NameNode rarely fails;
+%% indeed most of the down time is due to software upgrades. Only
+%% recently have failover solutions (albeit manual) emerged
+Hadoopファイルシステムを開発したのはとても小さなチームで、
+彼らがシステムを安定させ、実運用に耐える頑健性を実現した。
+その成功の大半は、非常にシンプルなアーキテクチャに起因する。
+ブロックのレプリケート、定期的なブロックレポート、
+そして中央管理型のメタデータサーバーなどといったものだ。
+POSIXの仕様を完全に実現しようとはしなかったことも助けとなった。
+メタデータ全体をメモリ内に保持するために名前空間のスケーラビリティに制約が生じるが、
+そのおかげでNameNodeがとてもシンプルになった。
+ふつうのファイルシステムにありがちな、複雑なロックの問題を回避できたのだ。
+Hadoopの成功にはそれ以外にも理由がある。
+早いうちからYahoo!の本番環境に投入されたこともそのひとつで、
+素早くインクリメンタルな改良に貢献した。
+このファイルシステムは非常に頑健で、NameNodeの障害はめったに発生しない。
+実際、ダウンタイムの大半はソフトウェアのアップグレードによるものである。
+フェイルオーバーのソリューション(手動だけどね)が登場したのも、つい最近のことだった。
 
-Many have been surprised by the choice of Java in building a scalable
-filesystem. While Java posed challenges for scaling the NameNode due
-to its object memory overhead and garbage collection, Java has been
-responsible to the robustness of the system; it has avoided
-corruption due to pointer or memory management bugs.
+%% Many have been surprised by the choice of Java in building a scalable
+%% filesystem. While Java posed challenges for scaling the NameNode due
+%% to its object memory overhead and garbage collection, Java has been
+%% responsible to the robustness of the system; it has avoided
+%% corruption due to pointer or memory management bugs.
+スケーラブルなファイルシステムをJavaで作るという選択に驚いた人も多かっただろう。
+確かにJavaでNameNodeをスケールさせるのは難しかった。オブジェクトメモリのオーバーヘッドや
+ガベージコレクションがその原因だ。しかし、Javaを選んだおかげで
+頑健性を確保できた。ポインタやメモリ管理のバグに悩まされることがなくなったのだ。
 
 \end{aosasect1}
 
 %% \begin{aosasect1}{Acknowledgment}
 \begin{aosasect1}{謝辞}
 
-We thank Yahoo!\ for investing in Hadoop and continuing to
-make it available as open source; 80\% of the HDFS and MapReduce code
-was developed at Yahoo! We thank all Hadoop committers and
-collaborators for their valuable contributions.
+%% We thank Yahoo!\ for investing in Hadoop and continuing to
+%% make it available as open source; 80\% of the HDFS and MapReduce code
+%% was developed at Yahoo! We thank all Hadoop committers and
+%% collaborators for their valuable contributions.
+Yahoo!によるHadoopへの投資に感謝する。
+また、Hadoopをオープンソースで公開し続けてくれていることにも感謝する。
+HDFSやMapReduceのコードの80\%はYahoo!が開発したものだ。
+すべてのHadoopコミッターやその他の協力者からの貢献にも感謝する。
 
 \end{aosasect1}
 
