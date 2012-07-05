@@ -1,7 +1,8 @@
 \begin{aosachapter}{Python Packaging}{s:packaging}{Tarek Ziad\'{e}}
 %% Based on EN-Revision r375
 
-\begin{aosasect1}{Introduction}
+%% \begin{aosasect1}{Introduction}
+\begin{aosasect1}{はじめに}
 
 There are two schools of thought when it comes to installing
 applications.  The first, common to Windows and Mac OS X, is that
@@ -56,7 +57,8 @@ call ourselves the Fellowship of the Packaging, and this chapter
 describes the problems we have been trying to fix, and what our
 solution looks like.
 
-\begin{aosabox}{Terminology}
+%% \begin{aosabox}{Terminology}
+\begin{aosabox}{用語}
 
 In Python a \emph{package} is a directory containing Python
 files. Python files are called \emph{modules}.  That definition makes
@@ -74,7 +76,8 @@ release as something like a tarball or zip file.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Burden of the Python Developer}
+%% \begin{aosasect1}{The Burden of the Python Developer}
+\begin{aosasect1}{Python開発者の苦悩}
 
 Most Python programmers want their programs to be usable in any
 environment.  They also usually want to use a mix of standard Python
@@ -160,7 +163,8 @@ code, and make everyone happy?
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Current Architecture of Packaging}
+%% \begin{aosasect1}{The Current Architecture of Packaging}
+\begin{aosasect1}{現在のパッケージングのアーキテクチャ}
 
 The \code{Distutils} package that comes with the Python standard
 library is riddled with the problems described above.  Since it's the
@@ -180,7 +184,8 @@ development of \code{Distutils2} from the same code base, without
 worrying too much about backward compatibility.  To understand what
 changed and why, let's have a closer look at \code{Distutils}.
 
-\begin{aosasect2}{Distutils Basics and Design Flaws}
+%% \begin{aosasect2}{Distutils Basics and Design Flaws}
+\begin{aosasect2}{Distutilsの基本とその設計ミス}
 \label{sec.packaging.flaws}
 
 \code{Distutils} contains commands, each of which is a class with a
@@ -278,7 +283,8 @@ script can easily cause confusion.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Metadata and PyPI}
+%% \begin{aosasect2}{Metadata and PyPI}
+\begin{aosasect2}{MetadataとPyPI}
 
 When \code{Distutils} builds a distribution, it creates a
 \code{Metadata} file that follows the standard described in
@@ -381,7 +387,8 @@ that it is platform-specific.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Architecture of PyPI}
+%% \begin{aosasect2}{Architecture of PyPI}
+\begin{aosasect2}{PyPIのアーキテクチャ}
 
 \aosafigure[250pt]{../images/packaging/pypi-workflow.eps}{PyPI Workflow}{fig.packaging.workflow}
 
@@ -391,7 +398,8 @@ work.  Source or binary distributions can be uploaded and added to an
 existing project, and then downloaded for installation or study.  PyPI
 also offers web services that can be used by tools like installers.
 
-\begin{aosasect3}{Registering Projects and Uploading Distributions}
+%% \begin{aosasect3}{Registering Projects and Uploading Distributions}
+\begin{aosasect3}{プロジェクトの登録と配布物のアップロード}
 
 Registering a project to PyPI is done with the \code{Distutils}
 \code{register} command.  It builds a POST request containing the
@@ -427,7 +435,8 @@ It's also possible to point users to another location via the
 
 \end{aosasect3}
 
-\begin{aosasect3}{Querying PyPI}
+%% \begin{aosasect3}{Querying PyPI}
+\begin{aosasect3}{PyPIへの問い合わせ}
 
 Besides the HTML pages PyPI publishes for web users, it provides two
 services that tools can use to browse the content: the Simple Index
@@ -556,7 +565,8 @@ all static data about a project.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Architecture of a Python Installation}
+%% \begin{aosasect2}{Architecture of a Python Installation}
+\begin{aosasect2}{Python Installationのアーキテクチャ}
 
 If you install a Python project using \code{python setup.py install},
 \code{Distutils}---which is included in the standard library---will
@@ -596,12 +606,14 @@ barely mentions it.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Setuptools, Pip and the Like}
+%% \begin{aosasect2}{Setuptools, Pip and the Like}
+\begin{aosasect2}{Setuptools、PipそしてLike}
 
 As mentioned in the introduction, some projects tried to fix some of
 the problems with \code{Distutils}, with varying degrees of success.
 
-\begin{aosasect3}{The Dependencies Issue}
+%% \begin{aosasect3}{The Dependencies Issue}
+\begin{aosasect3}{依存関係の問題}
 
 PyPI allowed developers to publish Python projects that could include
 several modules organized into Python packages. But at the same time,
@@ -646,7 +658,8 @@ still suffers from other problems:
 
 \end{aosasect3}
 
-\begin{aosasect3}{The Uninstall Issue}
+%% \begin{aosasect3}{The Uninstall Issue}
+\begin{aosasect3}{アンインストールの問題}
 
 \code{Setuptools} did not provide an uninstaller, even though its
 custom metadata could have contained a file listing the installed
@@ -676,7 +689,8 @@ flavours of metadata for each installed project:
 
 \end{aosasect2}
 
-\begin{aosasect2}{What About Data Files?}
+%% \begin{aosasect2}{What About Data Files?}
+\begin{aosasect2}{データファイルとは?}
 
 In \code{Distutils}, data files can be installed anywhere on the
 system.  If you define some package data files in \code{setup.py}
@@ -733,14 +747,16 @@ did not improve this.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Improved Standards}
+%% \begin{aosasect1}{Improved Standards}
+\begin{aosasect1}{標準規約の改良}
 
 So we ended up with with a mixed up and confused packaging
 environment, where everything is driven by a single Python module,
 with incomplete metadata and no way to describe everything a project
 contains.  Here's what we're doing to make things better.
 
-\begin{aosasect2}{Metadata}
+%% \begin{aosasect2}{Metadata}
+\begin{aosasect2}{メタデータ}
 
 The first step is to fix our \code{Metadata} standard.  PEP~345
 defines a new version that includes:
@@ -755,7 +771,8 @@ defines a new version that includes:
 
 \end{aosaitemize}
 
-\begin{aosasect3}{Version}
+%% \begin{aosasect3}{Version}
+\begin{aosasect3}{バージョン}
 
 One goal of the metadata standard is to make sure that all tools that
 operate on Python projects are able to classify them the same
@@ -828,7 +845,8 @@ that don't follow PEP~386.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Dependencies}
+%% \begin{aosasect3}{Dependencies}
+\begin{aosasect3}{依存関係}
 
 PEP~345 defines three new fields that replace PEP~314 \code{Requires},
 \code{Provides}, and \code{Obsoletes}. Those fields are
@@ -868,7 +886,8 @@ Obsoletes-Dist: OldName
 
 \end{aosasect3}
 
-\begin{aosasect3}{Environment Markers}
+%% \begin{aosasect3}{Environment Markers}
+\begin{aosasect3}{環境マーカー}
 
 An environment marker is a marker that can be added at the end of a
 field after a semicolon to add a condition about the execution
@@ -901,7 +920,8 @@ use this marker are:
 
 \end{aosasect2}
 
-\begin{aosasect2}{What's Installed?}
+%% \begin{aosasect2}{What's Installed?}
+\begin{aosasect2}{何がインストールされるのか?}
 
 Having a single installation format shared among all Python tools is
 mandatory for interoperability. If we want Installer A to detect that
@@ -978,7 +998,8 @@ tools, it will be added to the PEP.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Architecture of Data Files}
+%% \begin{aosasect2}{Architecture of Data Files}
+\begin{aosasect2}{データファイルのアーキテクチャ}
 
 As described earlier, we need to let the packager decide where to put
 data files during installation without breaking the developer's
@@ -986,7 +1007,8 @@ code. At the same time, the developer must be able to work with data
 files without having to worry about their location.  Our solution is
 the usual one: indirection.
 
-\begin{aosasect3}{Using Data Files}
+%% \begin{aosasect3}{Using Data Files}
+\begin{aosasect3}{データファイルの利用}
 
 Suppose your \code{MPTools} application needs to work with a
 configuration file.  The developer will put that file in a Python
@@ -1041,7 +1063,8 @@ in-place and added in the lookup paths for \code{pkgutil}.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Declaring Data Files}
+%% \begin{aosasect3}{Declaring Data Files}
+\begin{aosasect3}{データファイルの宣言}
 
 In practice, a project can define where data files should land by
 defining a mapper in their \code{setup.cfg} file.  A mapper is a
@@ -1073,7 +1096,8 @@ files.
 
 \end{aosasect2}
 
-\begin{aosasect2}{PyPI Improvements}
+%% \begin{aosasect2}{PyPI Improvements}
+\begin{aosasect2}{PyPIの改良}
 
 I said earlier that PyPI was effectively a single point of
 failure. PEP~380 addresses this problem by defining a mirroring
@@ -1108,7 +1132,8 @@ mirroring protocol itself is more complex than a simple rsync because
 we wanted to keep downloads statistics accurate and provide minimal
 security.
 
-\begin{aosasect3}{Synchronization}
+%% \begin{aosasect3}{Synchronization}
+\begin{aosasect3}{同期処理}
 
 Mirrors must reduce the amount of data transferred between the central
 server and the mirror. To achieve that, they \emph{must} use the
@@ -1125,7 +1150,8 @@ to the current date.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Statistics Propagation}
+%% \begin{aosasect3}{Statistics Propagation}
+\begin{aosasect3}{統計情報の伝搬}
 
 When you download a release from any of the mirrors, the protocol
 ensures that the download hit is transmitted to the master PyPI
@@ -1144,7 +1170,8 @@ up-to-date at least once a day.
 
 \end{aosasect3}
 
-\begin{aosasect3}{Mirror Authenticity}
+%% \begin{aosasect3}{Mirror Authenticity}
+\begin{aosasect3}{信頼性のミラー}
 
 With any distributed mirroring system, clients may want to verify that
 the mirrored copies are authentic.  Some of the possible threats
@@ -1217,7 +1244,8 @@ be signed by the CACert authority.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Implementation Details}
+%% \begin{aosasect1}{Implementation Details}
+\begin{aosasect1}{実装の詳細}
 
 The implementation of most of the improvements described in the previous
 section are taking place in \code{Distutils2}.  The \code{setup.py}
@@ -1289,9 +1317,11 @@ These APIs are the basis for some neat \code{Distutils2} features:
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons learned}
+%% \begin{aosasect1}{Lessons learned}
+\begin{aosasect1}{教訓}
 
-\begin{aosasect2}{It's All About PEPs}
+%% \begin{aosasect2}{It's All About PEPs}
+\begin{aosasect2}{PEPこそがすべて}
 
 Changing an architecture as wide and complex as Python packaging 
 needs to be carefully done by changing standards through a
@@ -1323,7 +1353,8 @@ change.
 
 \end{aosasect2}
 
-\begin{aosasect2}{A Package that Enters the Standard Library Has One Foot in the Grave}
+%% \begin{aosasect2}{A Package that Enters the Standard Library Has One Foot in the Grave}
+\begin{aosasect2}{標準ライブラリ入りは死への第一歩}
 
 I am paraphrasing Guido van Rossum in the section title, but that's
 one aspect of the batteries-included philosophy of Python that 
@@ -1347,7 +1378,8 @@ project first, unless the standard library is released on its own at some point.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Backward Compatibility}
+%% \begin{aosasect2}{Backward Compatibility}
+\begin{aosasect2}{後方互換性}
 
 Changing the way packaging works in Python is a very long process: the
 Python ecosystem contains so many projects based on older packaging
@@ -1377,7 +1409,8 @@ original \code{Distutils} by converting their metadata on the fly.
 
 \end{aosasect1}
 
-\begin{aosasect1}{References and Contributions}
+%% \begin{aosasect1}{References and Contributions}
+\begin{aosasect1}{参考文献と謝辞}
 
 Some sections in this paper were directly taken from the various PEP
 documents we wrote for packaging. You can find the original documents
