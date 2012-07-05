@@ -1133,174 +1133,320 @@ MapReduceフレームワークが、並列タスクスケジューリングや�
 %% \begin{aosasect1}{Practice at Yahoo!}
 \begin{aosasect1}{Yahoo!における実例}
 
-Large HDFS clusters at Yahoo!\ include about 4000 nodes. A typical
-cluster node has two quad core Xeon processors running at 2.5~GHz,
-4--12 directly attached SATA drives (holding two terabytes each), 24~Gbyte of
-RAM, and a 1-gigabit Ethernet connection.  Seventy percent of the disk
-space is allocated to HDFS\@. The remainder is reserved for the
-operating system (Red Hat Linux), logs, and space to spill the output
-of map tasks (MapReduce intermediate data are not stored in HDFS).
+%% Large HDFS clusters at Yahoo!\ include about 4000 nodes. A typical
+%% cluster node has two quad core Xeon processors running at 2.5~GHz,
+%% 4--12 directly attached SATA drives (holding two terabytes each), 24~Gbyte of
+%% RAM, and a 1-gigabit Ethernet connection.  Seventy percent of the disk
+%% space is allocated to HDFS\@. The remainder is reserved for the
+%% operating system (Red Hat Linux), logs, and space to spill the output
+%% of map tasks (MapReduce intermediate data are not stored in HDFS).
+Yahoo!の大規模HDFSクラスタは、約4000ノードで構成されている。
+標準的なクラスタノードのハードウェアは、2.5~GHzのクアッドコアXeonプロセッサを2台搭載し、
+4--12本のSATAドライブを直結(各2TB)、RAMは24GB、そして1ギガビットのEthernet接続がある。
+ディスク領域の7割がHDFS用に割り当てられており、
+残りの領域は、OS(Red Hat Linux)やログ、そしてMapタスクでの出力用の領域である
+(MapReduceの中間データは、HDFSに格納しない)。
 
-Forty nodes in a single rack share an IP switch. The rack switches are
-connected to each of eight core switches. The core switches provide
-connectivity between racks and to out-of-cluster resources. For each
-cluster, the NameNode and the BackupNode hosts are specially
-provisioned with up to 64 GB RAM; application tasks are never assigned
-to those hosts. In total, a cluster of 4000 nodes has 11 PB
-(petabytes; 1000 terabytes) of storage available as blocks that are
-replicated three times yielding a net 3.7 PB of storage for user
-applications. Over the years that HDFS has been in use, the hosts
-selected as cluster nodes have benefited from improved
-technologies. New cluster nodes always have faster processors, bigger
-disks and larger RAM\@. Slower, smaller nodes are retired or relegated
-to clusters reserved for development and testing of Hadoop.
+%% Forty nodes in a single rack share an IP switch. The rack switches are
+%% connected to each of eight core switches. The core switches provide
+%% connectivity between racks and to out-of-cluster resources. For each
+%% cluster, the NameNode and the BackupNode hosts are specially
+%% provisioned with up to 64 GB RAM; application tasks are never assigned
+%% to those hosts. In total, a cluster of 4000 nodes has 11 PB
+%% (petabytes; 1000 terabytes) of storage available as blocks that are
+%% replicated three times yielding a net 3.7 PB of storage for user
+%% applications. Over the years that HDFS has been in use, the hosts
+%% selected as cluster nodes have benefited from improved
+%% technologies. New cluster nodes always have faster processors, bigger
+%% disks and larger RAM\@. Slower, smaller nodes are retired or relegated
+%% to clusters reserved for development and testing of Hadoop.
+ひとつのラックに40ノードが格納されており、これらがひとつのIPスイッチを共有する。
+ラックのスイッチは、8台あるコアスイッチのいずれかと接続される。
+コアスイッチは、ラック群をクラスタ外のリソースと接続できるようにするものである。
+それぞれのクラスタで、NameNodeとBackupNodeのホストは特別な設定になっており、
+最大で64GBのRAMを積んでいる。アプリケーションのタスクが
+これらのホストに割り振られることは決してない。全体的に見ると、
+4000ノードのクラスタでブロックとして使えるストレージは11PB(ペタバイト; 1000TB)である。
+三重にレプリケートされているので、アプリケーションから使えるストレージは3.7PBということになる。
+長年HDFSを使ってきて、クラスタノード用に選択するホストも
+技術の進歩の恩恵を受けている。新しいクラスタノードは
+いつもこれまでよりも高速なプロセッサを搭載しているし、
+ディスクも大きければRAMも多い。
+昔からある低速で少容量のノードは引退させることもあるし、
+Hadoopの開発やテスト用のクラスタに転用することもある。
 
-On an example large cluster (4000 nodes), there are about 65 million
-files and 80 million blocks. As each block typically is replicated
-three times, every data node hosts 60 000 block replicas. Each day,
-user applications will create two million new files on the
-cluster. The 40 000 nodes in Hadoop clusters at Yahoo!\ provide 40 PB
-of on-line data storage.
+%% On an example large cluster (4000 nodes), there are about 65 million
+%% files and 80 million blocks. As each block typically is replicated
+%% three times, every data node hosts 60 000 block replicas. Each day,
+%% user applications will create two million new files on the
+%% cluster. The 40 000 nodes in Hadoop clusters at Yahoo!\ provide 40 PB
+%% of on-line data storage.
+例として取り上げた大規模クラスタ(4000ノード)で扱っているのは、
+約6500万のファイルと8000万のブロックである。
+各ブロックは一般に三度レプリケートされるので、すべてのデータノードが
+約60,000ブロックのレプリカを保持することになる。
+ユーザーアプリケーションは、毎日約200万のファイルを
+クラスタ上に新しく作る。Yahoo!のHadoopクラスタにある
+40,000ノードが、オンラインデータストレージとして40PBを提供する。
 
-Becoming a key component of Yahoo!'s technology suite meant tackling
-technical problems that are the difference between being a research
-project and being the custodian of many petabytes of corporate data.
-Foremost are issues of robustness and durability of data. But also
-important are economical performance, provisions for resource sharing
-among members of the user community, and ease of administration by the
-system operators.
+%% Becoming a key component of Yahoo!'s technology suite meant tackling
+%% technical problems that are the difference between being a research
+%% project and being the custodian of many petabytes of corporate data.
+%% Foremost are issues of robustness and durability of data. But also
+%% important are economical performance, provisions for resource sharing
+%% among members of the user community, and ease of administration by the
+%% system operators.
+Yahoo!のテクノロジー群の中で重要な位置を占めるようになるということは、
+さまざまな技術的問題に取り組むことを意味する。
+研究プロジェクトのひとつであることとペタバイト級の業務データを管理することには違いがあるのだ。
+真っ先に課題となるのが、データの安定性と永続性である。
+しかしそれ以外にも重要なことがある。
+コストパフォーマンス、ユーザーコミュニティのメンバー間での
+リソース共有の仕組み、そしてシステムの運用担当者による管理のしやすさなどである。
 
 %% \begin{aosasect2}{Durability of Data}
 \begin{aosasect2}{データの永続性}
 
-Replication of data three times is a robust guard against loss of data
-due to uncorrelated node failures. It is unlikely Yahoo!\ has ever lost
-a block in this way; for a large cluster, the probability of losing a
-block during one year is less than 0.005. The key understanding is
-that about 0.8 percent of nodes fail each month. (Even if the node is
-eventually recovered, no effort is taken to recover data it may have
-hosted.) So for the sample large cluster as described above, a node or
-two is lost each day. That same cluster will re-create the 60 000
-block replicas hosted on a failed node in about two
-minutes: re-replication is fast because it is a parallel problem that
-scales with the size of the cluster. The probability of several nodes
-failing within two minutes such that all replicas of some block are
-lost is indeed small.
+%% Replication of data three times is a robust guard against loss of data
+%% due to uncorrelated node failures. It is unlikely Yahoo!\ has ever lost
+%% a block in this way; for a large cluster, the probability of losing a
+%% block during one year is less than 0.005. The key understanding is
+%% that about 0.8 percent of nodes fail each month. (Even if the node is
+%% eventually recovered, no effort is taken to recover data it may have
+%% hosted.) So for the sample large cluster as described above, a node or
+%% two is lost each day. That same cluster will re-create the 60 000
+%% block replicas hosted on a failed node in about two
+%% minutes: re-replication is fast because it is a parallel problem that
+%% scales with the size of the cluster. The probability of several nodes
+%% failing within two minutes such that all replicas of some block are
+%% lost is indeed small.
+データを三重にレプリケーションすることで、
+相関性のないノード障害によるデータのロストに対する強力な守りとなる。
+Yahoo!では、今までこのパターンでデータを失ったことはない。
+大規模なクラスタで、1年の間にひとつのブロックを失う確率は
+0.005未満だ。
+知っておくべきなのは、毎月約0.8パーセントのノードに障害が発生するということだ
+(そのノードを最終的にリカバーすることになっても、そこで管理していたデータの復旧に手間をかけることはない)。
+つまり、先ほど例に出した大規模クラスタだと、
+毎日ひとつかふたつのノードを失うことになる。
+このクラスタでは、障害が発生したノード上にあった60,000ブロックレプリカの再作成を
+約2分で行う。再レプリケーションが高速に行えるのは、それがクラスタのサイズに対応する問題だからである。
+2分の間に複数のノードで同時に障害が発生し、どれかひとつのブロックの全レプリカが失われる
+という確率はごく小さい。
 
-Correlated failure of nodes is a different threat. The most commonly
-observed fault in this regard is the failure of a rack or core switch.
-HDFS can tolerate losing a rack switch (each block has a replica on
-some other rack). Some failures of a core switch can effectively
-disconnect a slice of the cluster from multiple racks, in which case
-it is probable that some blocks will become unavailable. In either
-case, repairing the switch restores unavailable replicas to the
-cluster. Another kind of correlated failure is the accidental or
-deliberate loss of electrical power to the cluster. If the loss of
-power spans racks, it is likely that some blocks will become
-unavailable. But restoring power may not be a remedy because one-half
-to one percent of the nodes will not survive a full power-on restart.
-Statistically, and in practice, a large cluster will lose a handful of
-blocks during a power-on restart.
+%% Correlated failure of nodes is a different threat. The most commonly
+%% observed fault in this regard is the failure of a rack or core switch.
+%% HDFS can tolerate losing a rack switch (each block has a replica on
+%% some other rack). Some failures of a core switch can effectively
+%% disconnect a slice of the cluster from multiple racks, in which case
+%% it is probable that some blocks will become unavailable. In either
+%% case, repairing the switch restores unavailable replicas to the
+%% cluster. Another kind of correlated failure is the accidental or
+%% deliberate loss of electrical power to the cluster. If the loss of
+%% power spans racks, it is likely that some blocks will become
+%% unavailable. But restoring power may not be a remedy because one-half
+%% to one percent of the nodes will not survive a full power-on restart.
+%% Statistically, and in practice, a large cluster will lose a handful of
+%% blocks during a power-on restart.
+相関性のあるノードの障害は、また別の脅威となる。
+この種の障害で最もよくあるのが、ラックあるいはコアスイッチの障害である。
+HDFSはラックスイッチを失っても耐えられるようになっている
+(各ブロックのレプリカを、どこか別のラック上に保持している)。
+コアスイッチの障害は、複数のラックにまたがるクラスタの一部を
+事実上切り離してしまうことになる。そんな場合は
+いくつかのブロックが利用できなくなる可能性がある。
+いずれにせよ、スイッチを復旧させれば
+利用できなかったレプリカをクラスタに復元できる。
+それ以外に関連のある障害としては、
+クラスタへの電源の停電(アクシデントによるものも計画的なものも含む)がある。
+複数のラックが停電すると、おそらくいくつかのブロックは使えなくなるだろう。
+しかし、電源が復旧したからといってそれで元通りになるとは限らない。
+0.5パーセントから1パーセントのノードは、電源オンからの起動でうまく立ち上がらない。
+統計的でも、実際の経験上でも、大規模なクラスタで電源オンからやり直したときには
+ごく少数のブロックを失ってしまうことが知られている。
 
-In addition to total failures of nodes, stored data can be corrupted
-or lost. The block scanner scans all blocks in a large cluster each
-fortnight and finds about 20 bad replicas in the process. Bad replicas
-are replaced as they are discovered.
+%% In addition to total failures of nodes, stored data can be corrupted
+%% or lost. The block scanner scans all blocks in a large cluster each
+%% fortnight and finds about 20 bad replicas in the process. Bad replicas
+%% are replaced as they are discovered.
+ノード自体の障害に加えて、ノードに格納されているデータも破壊されたり失ったりすることがある。
+ブロックスキャナーが大規模クラスタの全ブロックを二週間おきにスキャンし、
+毎回20前後の不良レプリカを見つけている。不良レプリカは、
+検出された時点でリプレイスされる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Features for Sharing HDFS}
 \begin{aosasect2}{HDFSの共有機能}
 
-As the use of HDFS has grown, the filesystem itself has had to
-introduce means to share the resource among a large number of diverse users. 
-The first such feature was a permissions framework closely
-modeled on the Unix permissions scheme for file and directories. In
-this framework, files and directories have separate access permissions
-for the owner, for other members of the user group associated with the
-file or directory, and for all other users. The principle differences
-between Unix (POSIX) and HDFS are that ordinary files in HDFS have
-neither execute permissions nor sticky bits.
+%% As the use of HDFS has grown, the filesystem itself has had to
+%% introduce means to share the resource among a large number of diverse users. 
+%% The first such feature was a permissions framework closely
+%% modeled on the Unix permissions scheme for file and directories. In
+%% this framework, files and directories have separate access permissions
+%% for the owner, for other members of the user group associated with the
+%% file or directory, and for all other users. The principle differences
+%% between Unix (POSIX) and HDFS are that ordinary files in HDFS have
+%% neither execute permissions nor sticky bits.
+HDFSの利用が増えるにつれて、ファイルシステム自体にもリソースの共有手段を
+導入する必要が出てきた。さまざまな数多くのユーザー間での共有だ。
+最初に用意された機能はパーミッションフレームワークで、
+これはUnixのファイルやディレクトリのパーミッションと似た仕組みだった。
+このフレームワークでは、ファイルやディレクトリにそれぞれ個別のアクセス権を設定する。
+所有者用のアクセス権、ファイルやディレクトリに関連付けられたユーザーグループ用のアクセス権、
+そして他のすべてのユーザー用のアクセス権である。
+Unix (POSIX)のパーミッションとHDFSのパーミッションの違いは、
+HDFSにおける通常のファイルには実行権限やスティッキービットが存在しないという点だ。
 
-In the earlier version of HDFS, user identity was weak: you were who
-your host said you are. When accessing HDFS, the application client
-simply queries the local operating system for user identity and group
-membership. In the new framework, the application client must present
-to the name system credentials obtained from a trusted
-source. Different credential administrations are possible; the initial
-implementation uses Kerberos.  The user application can use the same
-framework to confirm that the name system also has a trustworthy
-identity. And the name system also can demand credentials from each of
-the data nodes participating in the cluster.
+%% In the earlier version of HDFS, user identity was weak: you were who
+%% your host said you are. When accessing HDFS, the application client
+%% simply queries the local operating system for user identity and group
+%% membership. In the new framework, the application client must present
+%% to the name system credentials obtained from a trusted
+%% source. Different credential administrations are possible; the initial
+%% implementation uses Kerberos.  The user application can use the same
+%% framework to confirm that the name system also has a trustworthy
+%% identity. And the name system also can demand credentials from each of
+%% the data nodes participating in the cluster.
+初期のバージョンのHDFSでは、ユーザーの身元確認が弱点だった。
+アクセス元のホストが主張する身元情報をそのまま受け入れるしかできなかったのだ。
+HDFSにアクセスするときに、クライアントアプリケーションが
+ローカルのOSに対してユーザーやグループの情報を問い合わせていた。
+新しいフレームワークの場合、
+クライアントアプリケーションは信頼できるソースから取得した認証情報を使う必要がある。
+認証管理にはさまざまな方式を利用でき、初期状態の実装ではKerberosを使っている。
+ユーザーアプリケーションは、同じフレームワークを使えば、
+信頼できる認証情報を持っているかどうかを確認できる。
+また、クラスタに参加する各データノードへの認証を要求することもできる。
 
-The total space available for data storage is set by the number of
-data nodes and the storage provisioned for each node. Early experience
-with HDFS demonstrated a need for some means to enforce the resource
-allocation policy across user communities. Not only must fairness of
-sharing be enforced, but when a user application might involve
-thousands of hosts writing data, protection against applications
-inadvertently exhausting resources is also important. For HDFS,
-because the system metadata are always in RAM, the size of the
-namespace (number of files and directories) is also a finite
-resource. To manage storage and namespace resources, each directory
-may be assigned a quota for the total space occupied by files in the
-sub-tree of the namespace beginning at that directory. A separate
-quota may also be set for the total number of files and directories in
-the sub-tree.
+%% The total space available for data storage is set by the number of
+%% data nodes and the storage provisioned for each node. Early experience
+%% with HDFS demonstrated a need for some means to enforce the resource
+%% allocation policy across user communities. Not only must fairness of
+%% sharing be enforced, but when a user application might involve
+%% thousands of hosts writing data, protection against applications
+%% inadvertently exhausting resources is also important. For HDFS,
+%% because the system metadata are always in RAM, the size of the
+%% namespace (number of files and directories) is also a finite
+%% resource. To manage storage and namespace resources, each directory
+%% may be assigned a quota for the total space occupied by files in the
+%% sub-tree of the namespace beginning at that directory. A separate
+%% quota may also be set for the total number of files and directories in
+%% the sub-tree.
+データストレージとして使える容量の総計は、
+データノードの数と各ノードに用意されたストレージで決まる。
+HDFSを使い始めたころの経験からわかったのが、
+ユーザーコミュニティをまたがるリソース配置ポリシーを
+何らかの手段で設定できるようにする必要性だった。
+公平に共有させることも大切だが、それだけではない。
+ユーザーのアプリケーションが何千ものホストにデータを書き込む場合、
+そのアプリケーションがリソースを食いつぶしてしまわないようにすることも重要だ。
+HDFSの場合、システムのメタデータが常にRAM上に存在するので、名前空間のサイズ
+(ファイルやディレクトリの数)もまた有限なリソースとなる。
+ストレージや名前空間のリソースを管理するために、
+各ディレクトリに容量制限を課すこともできる。
+そのディレクトリ配下の名前空間のサブツリーで
+ファイルを保存するための総容量で制限する。
+それ以外にも、
+サブツリー内に格納できるファイルやディレクトリの総数を制限することもできる。
 
-While the architecture of HDFS presumes most applications will stream
-large data sets as input, the MapReduce programming framework can have
-a tendency to generate many small output files (one from each reduce
-task) further stressing the namespace resource. As a convenience, a
-directory sub-tree can be collapsed into a single Hadoop Archive
-file. A HAR file is similar to a familiar tar, JAR, or Zip file, but
-filesystem operations can address the individual files within the
-archive, and a HAR file can be used transparently as the input to a
-MapReduce job.
+%% While the architecture of HDFS presumes most applications will stream
+%% large data sets as input, the MapReduce programming framework can have
+%% a tendency to generate many small output files (one from each reduce
+%% task) further stressing the namespace resource. As a convenience, a
+%% directory sub-tree can be collapsed into a single Hadoop Archive
+%% file. A HAR file is similar to a familiar tar, JAR, or Zip file, but
+%% filesystem operations can address the individual files within the
+%% archive, and a HAR file can be used transparently as the input to a
+%% MapReduce job.
+HDFSのアーキテクチャは、大半のアプリケーションが入力として
+大規模なデータセットを流し込むということを前提としている。
+一方、MapReduceプログラミングフレームワークには、
+小さめのファイルを大量に(Reduceタスクの数と同じだけ)
+生成するという傾向がある。
+これは、名前空間のリソースにとってはさらなるストレスとなる。
+利便性を考慮して、ディレクトリのサブツリーを
+単一のHadoop Archive(HAR)ファイルにまとめることもできる。
+HARファイルは、おなじみのtarやJARあるいはZipファイルと似たようなものだが、
+ファイルシステム上の操作でアーカイブ内の個別のファイルを扱える。
+また、HARファイルをMapReduceジョブへの入力として透過的に使うこともできる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Scaling and HDFS Federation}
 \begin{aosasect2}{スケーリングおよびHDFS Federation}
 
-Scalability of the NameNode has been a key struggle
-\cite{bib:shvachko:hdfs}.  Because the NameNode keeps all the
-namespace and block locations in memory, the size of the NameNode heap
-limits the number of files and also the number of blocks
-addressable. This also limits the total cluster storage that can be
-supported by the NameNode. Users are encouraged to create larger
-files, but this has not happened since it would require changes in
-application behavior. Furthermore, we are seeing new classes of
-applications for HDFS that need to store a large number of small
-files. Quotas were added to manage the usage, and an archive tool has
-been provided, but these do not fundamentally address the
-scalability problem.
+%% Scalability of the NameNode has been a key struggle
+%% \cite{bib:shvachko:hdfs}.  Because the NameNode keeps all the
+%% namespace and block locations in memory, the size of the NameNode heap
+%% limits the number of files and also the number of blocks
+%% addressable. This also limits the total cluster storage that can be
+%% supported by the NameNode. Users are encouraged to create larger
+%% files, but this has not happened since it would require changes in
+%% application behavior. Furthermore, we are seeing new classes of
+%% applications for HDFS that need to store a large number of small
+%% files. Quotas were added to manage the usage, and an archive tool has
+%% been provided, but these do not fundamentally address the
+%% scalability problem.
+NameNodeのスケーラビリティは、これまでずっと課題であった\cite{bib:shvachko:hdfs}。
+NameNodeはすべての名前空間やブロックの場所をメモリに保持するので、
+NameNodeのヒープサイズのせいで扱えるファイル数に制約が出てしまい、
+アドレス可能なブロック数にも制約が出てしまう。
+同じ理由で、NameNodeがサポートできるクラスタストレージの総容量も限られる。
+ユーザーは、より大きなファイルを作るよう求められる。しかし、
+そのためにはアプリケーションの振る舞いを変更しないといけないので、
+なかなかそうはならない。
+さらに、最近のHDFS用アプリケーションの中には、
+小さいファイルを大量に格納しないといけないものも出てきている。
+使用量を管理するために制限機能が追加されたし、アーカイブツールも用意した。
+しかしこれらを使っても、スケーラビリティの問題への本質的な対策にはならない。
 
-A new feature allows multiple independent namespaces (and NameNodes)
-to share the physical storage within a cluster. Namespaces use blocks
-grouped under a Block Pool. Block pools are analogous to logical units (LUNs) in a SAN
-storage system and a namespace with its pool of blocks is analogous to
-a filesystem volume.
+%% A new feature allows multiple independent namespaces (and NameNodes)
+%% to share the physical storage within a cluster. Namespaces use blocks
+%% grouped under a Block Pool. Block pools are analogous to logical units (LUNs) in a SAN
+%% storage system and a namespace with its pool of blocks is analogous to
+%% a filesystem volume.
+新機能として、複数の独立した名前空間(およびNameNodes)でクラスタ内の物理ストレージを共有できるようにした。
+名前空間が、ブロックプールの配下にまとめられたブロックを使うようにするものだ。
+ブロックプールとはSANストレージシステムにおける論理ユニット(LUN)みたいなもので、
+名前空間でブロックプールを使うのはファイルシステムボリュームのようなものだ。
 
-This approach offers a number of advantages besides scalability: it
-can isolate namespaces of different applications improving the overall
-availability of the cluster. Block pool abstraction allows other
-services to use the block storage with perhaps a different namespace
-structure. We plan to explore other approaches to scaling such as
-storing only partial namespace in memory, and truly distributed
-implementation of the NameNode.
+%% This approach offers a number of advantages besides scalability: it
+%% can isolate namespaces of different applications improving the overall
+%% availability of the cluster. Block pool abstraction allows other
+%% services to use the block storage with perhaps a different namespace
+%% structure. We plan to explore other approaches to scaling such as
+%% storing only partial namespace in memory, and truly distributed
+%% implementation of the NameNode.
+この手法には、スケーラビリティを確保する上で数々の利点がある。
+異なるアプリケーションで使う名前空間を分離でき、クラスタの全体的な可用性を向上できるのだ。
+ブロックプールによる抽象化のおかげで、ブロックストレージを使う他のサービスでは
+別の名前空間構造を使えるようになる。
+スケーリングのために他の手法も模索しており、
+たとえばメモリ内に保持するのを名前空間の一部だけにしたり
+NameNodeを真に分散型の実装にしたりといった計画もある。
 
-Applications prefer to continue using a single namespace. Namespaces
-can be mounted to create such a unified view. A client-side mount
-table provide an efficient way to do that, compared to a server-side
-mount table: it avoids an RPC to the central mount table and is also
-tolerant of its failure. The simplest approach is to have shared
-cluster-wide namespace; this can be achieved by giving the same
-client-side mount table to each client of the cluster. Client-side
-mount tables also allow applications to create a private namespace
-view. This is analogous to the per-process namespaces that are used to
-deal with remote execution in distributed systems
-\cite{bib:pike:names,bib:radia:naming,bib:radia:naming2}.
+%% Applications prefer to continue using a single namespace. Namespaces
+%% can be mounted to create such a unified view. A client-side mount
+%% table provide an efficient way to do that, compared to a server-side
+%% mount table: it avoids an RPC to the central mount table and is also
+%% tolerant of its failure. The simplest approach is to have shared
+%% cluster-wide namespace; this can be achieved by giving the same
+%% client-side mount table to each client of the cluster. Client-side
+%% mount tables also allow applications to create a private namespace
+%% view. This is analogous to the per-process namespaces that are used to
+%% deal with remote execution in distributed systems
+%% \cite{bib:pike:names,bib:radia:naming,bib:radia:naming2}.
+アプリケーションは、単一の名前空間を使いたがるので、
+名前空間をマウントして統一したビューを作ることもできる。
+それを効率的に行うには、クライアント側のマウントテーブルのほうが
+サーバー側のマウントテーブルより向いている。
+サーバー側に中央マウントテーブルを置く場合に比べてリモートプロシージャ呼び出しを回避できるし、
+耐障害性も高い。一番シンプルな手法は、クラスタ全体で名前空間を共有することだ。
+これを実現するには、クラスタ内の各クライアントに共通のクライアント側マウントテーブルを配布する。
+このマウントテーブルでは、各アプリケーションがプライベートな名前空間ビューを作れるようにもなっている。
+これは、分散システム内でのリモート実行をするためのプロセス単位の名前空間のようなものだ
+\cite{bib:pike:names,bib:radia:naming,bib:radia:naming2}。
 
 \end{aosasect2}
 
