@@ -4,73 +4,138 @@
 %% \begin{aosasect1}{Introduction}
 \begin{aosasect1}{はじめに}
 
-There are two schools of thought when it comes to installing
-applications.  The first, common to Windows and Mac OS X, is that
-applications should be self-contained, and their installation should
-not depend on anything else.  This philosophy simplifies the
-management of applications: each application is its own standalone
-``appliance'', and installing and removing them should not disturb the
-rest of the OS\@.  If the application needs an uncommon library, that
-library is included in the application's distribution.
+%% There are two schools of thought when it comes to installing
+%% applications.  The first, common to Windows and Mac OS X, is that
+%% applications should be self-contained, and their installation should
+%% not depend on anything else.  This philosophy simplifies the
+%% management of applications: each application is its own standalone
+%% ``appliance'', and installing and removing them should not disturb the
+%% rest of the OS\@.  If the application needs an uncommon library, that
+%% library is included in the application's distribution.
+アプリケーションのインストールに関しては、ふたつの派閥がある。
+ひとつは、「アプリケーション単体で完結させる」派だ。WindowsやMac OS X
+で主流な考え方で、インストールのときに他の何かに依存するようではいけないというものだ。
+この思想に従えば、アプリケーションの管理はシンプルになる。
+各アプリケーションがそれ単体で動く``アプライアンス製品''で、
+インストールやアンインストールをしてもOSには何ら影響を及ぼさない。
+もしそのアプリケーションが特殊なライブラリを使うのなら、
+ライブラリ自体もアプリケーションの配布物に含めることになる。
 
-The second school, which is the norm for Linux-based systems, treats
-software as a collection of small self-contained units called
-\emph{packages}. Libraries are bundled into packages, any given
-library package might depend on other packages.
-Installing an application might involve finding and installing
-particular versions of dozens of other libraries.  These dependencies
-are usually fetched from a central repository that contains thousands
-of packages.  This philosophy is why Linux distributions use complex
-package management systems like \code{dpkg} and \code{RPM} to track
-dependencies and prevent installation of two applications that use
-incompatible versions of the same library.
+%% The second school, which is the norm for Linux-based systems, treats
+%% software as a collection of small self-contained units called
+%% \emph{packages}. Libraries are bundled into packages, any given
+%% library package might depend on other packages.
+%% Installing an application might involve finding and installing
+%% particular versions of dozens of other libraries.  These dependencies
+%% are usually fetched from a central repository that contains thousands
+%% of packages.  This philosophy is why Linux distributions use complex
+%% package management systems like \code{dpkg} and \code{RPM} to track
+%% dependencies and prevent installation of two applications that use
+%% incompatible versions of the same library.
+もう一方の派閥は
+「ソフトウェアとは、完結した小さな\emph{パッケージ}の集合体である」派で、
+これはLinuxベースのシステムで主流である。ライブラリもパッケージとして同梱し、
+そのライブラリパッケージが他のパッケージに依存する可能性もある。
+何かのアプリケーションをインストールする際には、
+何十個もの他のライブラリについて特定のバージョンを探してインストールする
+ということだってある。こういった依存情報の取得は
+中央リポジトリから取得することが多く、このリポジトリに
+何千ものパッケージがまとまっている。
+この思想があって、Linuxディストリビューションはそれぞれ複雑なパッケージ管理システム
+(\code{dpkg}や\code{RPM}など)を使っている。
+依存関係を追跡したり、同一ライブラリの互換性がない複数バージョン使う
+アプリケーションの共存を防いだりなどといったことを行う。
 
-There are pros and cons to each approach.  Having a highly modular
-system where every piece can be updated or replaced makes management
-easier, because each library is present in a single place, and all
-applications that use it benefit when it is updated.  For instance, a
-security fix in a particular library will reach all applications that
-use it at once, whereas if an application ships with its own library,
-that security fix will be more complex to deploy, especially if
-different applications use different versions of the library.
+%% There are pros and cons to each approach.  Having a highly modular
+%% system where every piece can be updated or replaced makes management
+%% easier, because each library is present in a single place, and all
+%% applications that use it benefit when it is updated.  For instance, a
+%% security fix in a particular library will reach all applications that
+%% use it at once, whereas if an application ships with its own library,
+%% that security fix will be more complex to deploy, especially if
+%% different applications use different versions of the library.
+どちらの手法にだって、利点もあれば欠点もある。
+高度にモジュール化されたシステムで、すべてのパーツを個別に更新したり入れ替えたり
+できるようにしておけば、管理は楽になる。各ライブラリは一か所にしか存在せず、
+ライブラリを更新すればそれを使うすべてのアプリケーションがその恩恵を受けられるからである。
+たとえば、何かのライブラリにセキュリティフィックスを適用すれば、
+そのライブラリを使っているすべてのアプリケーションにその修正がいきわたる。
+一方、各アプリケーションがライブラリ群を同梱して出荷する形式の場合、
+セキュリティフィックスの適用がより複雑になる。
+特に、さまざまなアプリケーションが同じライブラリの異なるバージョンを使っている場合などが大変だ。
 
-But that modularity is seen as a drawback by some developers, because
-they're not in control of their applications and dependencies.  It is
-easier for them to provide a standalone software appliance to be sure
-that the application environment is stable and not subject to
-``dependency hell'' during system upgrades.
+%% But that modularity is seen as a drawback by some developers, because
+%% they're not in control of their applications and dependencies.  It is
+%% easier for them to provide a standalone software appliance to be sure
+%% that the application environment is stable and not subject to
+%% ``dependency hell'' during system upgrades.
+しかし、そんなモジュール方式も、人によっては欠点だと感じることがある。
+というのも、アプリケーションや依存関係をきちんと管理できなくなるからだ。
+そんな人たちにとっては、単体で完結したソフトウェア製品を提供して
+安定した環境を保証されるほうが安心する。システムの更新のときにも
+「依存地獄」に悩まされずに済むからである。
 
-Self-contained applications also make the developer's life easier when
-she needs to support several operating systems.  Some projects go so
-far as to release portable applications that remove \emph{any}
-interaction with the hosting system by working in a self-contained
-directory, even for log files.
+%% Self-contained applications also make the developer's life easier when
+%% she needs to support several operating systems.  Some projects go so
+%% far as to release portable applications that remove \emph{any}
+%% interaction with the hosting system by working in a self-contained
+%% directory, even for log files.
+自己完結方式のアプリケーションは、
+複数のOSへのインストールに対応するのにも楽である。
+プロジェクトによっては、完全にポータブルなアプリケーションをリリースすることもある。
+導入先のシステムとの間のやりとりを\emph{一切}せずに
+自分のディレクトリの中だけで動作するというものだ。
+ログファイルでさえもこのディレクトリの中で完結する。
 
-Python's packaging system was intended to make the second
-philosophy---multiple dependencies for each install---as developer-,
-admin-, packager-, and user-friendly as possible. Unfortunately it had
-(and has) a variety of flaws which caused or allowed all kinds of
-problems: unintuitive version schemes, mishandled data files,
-difficulty re-packaging, and more.  Three years ago I and a group of
-other Pythoneers decided to reinvent it to address these problems.  We
-call ourselves the Fellowship of the Packaging, and this chapter
-describes the problems we have been trying to fix, and what our
-solution looks like.
+%% Python's packaging system was intended to make the second
+%% philosophy---multiple dependencies for each install---as developer-,
+%% admin-, packager-, and user-friendly as possible. Unfortunately it had
+%% (and has) a variety of flaws which caused or allowed all kinds of
+%% problems: unintuitive version schemes, mishandled data files,
+%% difficulty re-packaging, and more.  Three years ago I and a group of
+%% other Pythoneers decided to reinvent it to address these problems.  We
+%% call ourselves the Fellowship of the Packaging, and this chapter
+%% describes the problems we have been trying to fix, and what our
+%% solution looks like.
+Pythonのパッケージングシステムは、後者の思想(インストールごとに複数の依存関係が生じるもの)
+に基づいて作られており、開発者にも管理者にもパッケージ作成者にも利用者にも
+可能な限り使いやすくしようとしている。残念ながらさまざまな不具合があって、
+考えうる限りのいろんな問題がこれまでに発生してきた(というか、今もなお発生している)。
+「バージョンスキーマがわかりにくい」「データファイルの処理を間違える」
+「パッケージの再作成が難しい」などなど。
+三年前、私を含むPython開発者グループは、
+これらの課題に対応すべく新たな仕組みの開発に乗り出し、
+「パッケージングの仲間」を名乗った。
+\footnote{訳注: ``the Fellowship of the Packaging''。
+元ネタは『指輪物語』の``The Fellowship of the Ring''か。}
+本章では、私たちがこれまでに解決しようとした問題や
+どんなふうに問題を解決したのかを解説する。
 
 %% \begin{aosabox}{Terminology}
 \begin{aosabox}{用語}
 
-In Python a \emph{package} is a directory containing Python
-files. Python files are called \emph{modules}.  That definition makes
-the usage of the word ``package'' a bit vague since it is also used by
-many systems to refer to a \emph{release} of a project.
+%% In Python a \emph{package} is a directory containing Python
+%% files. Python files are called \emph{modules}.  That definition makes
+%% the usage of the word ``package'' a bit vague since it is also used by
+%% many systems to refer to a \emph{release} of a project.
+Pythonの世界では、\emph{パッケージ}といえばPythonファイルを含むディレクトリのことである。
+Pythonファイルのことは\emph{モジュール}と呼ぶ。そんなこともあって、
+``パッケージ''という言葉を使うときには少し曖昧な感じになってしまう。
+というのも、多くのシステムではプロジェクトの\emph{リリース}
+のこともパッケージと呼ぶからである。
 
-Python developers themselves are sometimes vague about this.  One way
-to remove this ambiguity is to use the term ``Python packages'' when
-we talk about a directory containing Python modules.  The term
-``release'' is used to define one version of a project, and the term
-``distribution'' defines a source or a binary distribution of a
-release as something like a tarball or zip file.
+%% Python developers themselves are sometimes vague about this.  One way
+%% to remove this ambiguity is to use the term ``Python packages'' when
+%% we talk about a directory containing Python modules.  The term
+%% ``release'' is used to define one version of a project, and the term
+%% ``distribution'' defines a source or a binary distribution of a
+%% release as something like a tarball or zip file.
+Python開発者ですら、ときどき混乱することがある。
+紛らわしさを排除する方法のひとつは、Pythonモジュールを含むディレクトリを指すときには
+「Pythonパッケージ」と言うようにすることだ。
+「リリース」は何かのプロジェクトのひとつのバージョンを表す用語として使い、
+あるリリースのソースあるいはバイナリをtarやzipでまとめたもののことを
+「ディストリビューション(配布物)」と呼ぶことにする。
 
 \end{aosabox}
 
