@@ -144,87 +144,158 @@ Python開発者ですら、ときどき混乱することがある。
 %% \begin{aosasect1}{The Burden of the Python Developer}
 \begin{aosasect1}{Python開発者の苦悩}
 
-Most Python programmers want their programs to be usable in any
-environment.  They also usually want to use a mix of standard Python
-libraries and system-dependent libraries.  But unless you package your
-application separately for every existing packaging system, you are
-doomed to provide Python-specific releases---a Python-specific release
-is a release aimed to be installed within a Python installation no
-matter what the underlying Operating System is---and hope that:
+%% Most Python programmers want their programs to be usable in any
+%% environment.  They also usually want to use a mix of standard Python
+%% libraries and system-dependent libraries.  But unless you package your
+%% application separately for every existing packaging system, you are
+%% doomed to provide Python-specific releases---a Python-specific release
+%% is a release aimed to be installed within a Python installation no
+%% matter what the underlying Operating System is---and hope that:
+Pythonプログラマーなら誰だって、自分のプログラムをいろんな環境で使えるようにしたいものだ。
+また、標準のPythonrライブラリとシステム依存のライブラリを組み合わせて使いたいことも多い。
+しかし、既存のすべてのパッケージングシステム用にそれぞれ個別のパッケージを作るのでもなければ、
+Python用のリリース---つまり、
+OSが何であるかにかかわらず、Pythonをインストールした環境に導入することを狙いとしたリリース
+---を作って、後はこんなことを願うしかなくなる。
 
 \begin{aosaitemize}
 
-  \item packagers for every target system will be able to repackage
-  your work,
+  %% \item packagers for every target system will be able to repackage
+  %% your work,
+  \item すべての対象システムのパッケージ担当者が、個別のシステム用にパッケージを作り直せるようにする
 
-  \item the dependencies you have will themselves be repackaged in
-  every target system, and
+  %% \item the dependencies you have will themselves be repackaged in
+  %% every target system, and
+  \item 依存関係も、すべての対象システムで再パッケージできるようにする
 
-  \item system dependencies will be clearly described.
+  %% \item system dependencies will be clearly described.
+  \item システムの依存関係をきちんと表せる
 
 \end{aosaitemize}
 
-Sometimes, this is simply impossible.  For example, Plone (a
-full-fledged Python-powered CMS) uses hundreds of small pure Python
-libraries that are not always available as packages in every packaging
-system out there.  This means that Plone \emph{must} ship everything
-that it needs in a portable application. To do this, it uses
-\code{zc.buildout}, which collects all its dependencies and creates a
-portable application that will run on any system within a single
-directory. It is effectively a binary release, since any piece of C
-code will be compiled in place.
+%% Sometimes, this is simply impossible.  For example, Plone (a
+%% full-fledged Python-powered CMS) uses hundreds of small pure Python
+%% libraries that are not always available as packages in every packaging
+%% system out there.  This means that Plone \emph{must} ship everything
+%% that it needs in a portable application. To do this, it uses
+%% \code{zc.buildout}, which collects all its dependencies and creates a
+%% portable application that will run on any system within a single
+%% directory. It is effectively a binary release, since any piece of C
+%% code will be compiled in place.
+そもそもそんなことは不可能だという場合もある。
+たとえばPlone(Python製の本格的なCMS)は、
+ピュアPythonの小さなライブラリを何百も使っている。
+いま出回っている各種パッケージングシステムで、
+これらのライブラリがすべてパッケージ化されているとは限らない。
+つまりPloneの場合は、必要なものをすべて同梱して
+それ単体で機能するアプリケーションに\emph{せざるを得ない}ということだ。
+そのために、Ploneでは\code{zc.buildout}を使っている。
+これは、すべての依存情報を収集してポータブルなアプリケーションを作り、
+そのディレクトリ単体だけであらゆるシステムで実行できるようにする仕組みだ。
+これは事実上、バイナリリリースに等しい。
+Cのコードもすべてコンパイル済みだからである。
 
-This is a big win for developers: they just have to describe their
-dependencies using the Python standards described below
-and use \code{zc.buildout} to
-release their application.  But as discussed earlier, this type of
-release sets up a fortress within the system, which most Linux sysadmins
-will hate.  Windows admins won't mind, but those managing
-CentOS or Debian will, because those systems base their management on
-the assumption that every file in the system is registered,
-classified, and known to admin tools.
+%% This is a big win for developers: they just have to describe their
+%% dependencies using the Python standards described below
+%% and use \code{zc.buildout} to
+%% release their application.  But as discussed earlier, this type of
+%% release sets up a fortress within the system, which most Linux sysadmins
+%% will hate.  Windows admins won't mind, but those managing
+%% CentOS or Debian will, because those systems base their management on
+%% the assumption that every file in the system is registered,
+%% classified, and known to admin tools.
+この方式は、開発者にとっては大勝利と言えるだろう。
+後述するPythonの標準規格にしたがって依存関係を記述しておきさえすれば、あとは
+\code{zc.buildout}を使えばアプリケーションをリリースできるのだから。
+しかし、先述のとおり、この形式のリリースは
+システムの中に要塞を構築するのに等しい。
+たいていのLinuxシステム管理者は、この方式を嫌うだろう。
+Windowsの管理者は別に気にしないかもしれない。でも
+CentOSやDebianの管理者にとっては一大事だ。
+というのも彼らにとっては、システム上のすべてのファイルが
+ベースとなる管理システムに登録されていることが前提であり、
+すべてのファイルを管理ツールで管理できることが前提だからである。
 
-Those admins will want to repackage your application according to
-their own standards.  The question we need to answer is, ``Can Python
-have a packaging system that can be automatically translated into
-other packaging systems?''  If so, one application or library can be
-installed on any system without requiring extra packaging work.  Here,
-``automatically'' doesn't necessarily mean that the work should be
-fully done by a script: \code{RPM} or \code{dpkg} packagers will tell
-you that's impossible---they always need to add some specifics in the
-projects they repackage.  They'll also tell you that they
-often have a hard time re-packaging a piece of code because its
-developers were not aware of a few basic packaging rules.
+%% Those admins will want to repackage your application according to
+%% their own standards.  The question we need to answer is, ``Can Python
+%% have a packaging system that can be automatically translated into
+%% other packaging systems?''  If so, one application or library can be
+%% installed on any system without requiring extra packaging work.  Here,
+%% ``automatically'' doesn't necessarily mean that the work should be
+%% fully done by a script: \code{RPM} or \code{dpkg} packagers will tell
+%% you that's impossible---they always need to add some specifics in the
+%% projects they repackage.  They'll also tell you that they
+%% often have a hard time re-packaging a piece of code because its
+%% developers were not aware of a few basic packaging rules.
+彼らは、あなたの作ったアプリケーションを自分たちの流儀に沿ってパッケージしなおそうとするかもしれない。
+ここで問われるのは
+「Pythonで、他のパッケージングシステムにも自動変換できるようなパッケージングシステムって作れないの?」
+ということだ。もしそれが実現できれば、
+特に追加作業をしなくてもひとつのアプリケーションやライブラリをあらゆるシステムにインストールできるようになる。
+ここで言う「自動化」は、必ずしもすべての作業をスクリプトで済ませるということではない。
+\code{RPM}や\code{dpkg}のパッケージを作っている人に聞いてみよう。
+そんなの不可能だってことがわかるはずだ。
+彼らはいつも、パッケージを作り直すときにちょっとした手作業が必要になっている。
+あと、こんなことも教えてくれるだろう。
+「何かコードをパッケージしなおすってのは大変なんだよ。だって、
+開発者ときたら、パッケージングのときのお約束なんてこれっぽっちも気にしないんだから」
 
-Here's one example of what you can do to annoy packagers using the
-existing Python packaging system: release a library called
-``MathUtils'' with the version name ``Fumanchu''.  The brilliant
-mathematician who wrote the library have found it amusing to use
-his cats' names for his project versions.  But how can a packager know
-that ``Fumanchu'' is his second cat's name, and that the first one was
-called ``Phil'', so that the ``Fumanchu'' version comes after the
-``Phil'' one?
+%% Here's one example of what you can do to annoy packagers using the
+%% existing Python packaging system: release a library called
+%% ``MathUtils'' with the version name ``Fumanchu''.  The brilliant
+%% mathematician who wrote the library have found it amusing to use
+%% his cats' names for his project versions.  But how can a packager know
+%% that ``Fumanchu'' is his second cat's name, and that the first one was
+%% called ``Phil'', so that the ``Fumanchu'' version comes after the
+%% ``Phil'' one?
+既存のPythonパッケージングシステムを使うパッケージャーを困らせる方法をひとつ教えよう。
+``MathUtils''という名前のライブラリの、バージョン``Fumanchu''リリースするんだ。
+どこかの賢い数学者がライブラリを書いたときに、
+「バージョン番号のかわりに、うちの飼い猫の名前を順番につけていこう。イケてるよね？」
+とでも思ったんでしょうなあ。
+実は``Fumanchu''っていうのは二番目の猫の名前で、最初の猫は``Phil''だったんだ。
+つまり、``Fumanchu''は``Phil''の次のバージョンなんだけど、
+そんなことパッケージャーが知るわけがない。
 
-This may sound extreme, but it can happen with today's tools and
-standards.  The worst thing is that tools like \code{easy\_install} or
-\code{pip} use their own non-standard registry to keep track of
-installed files, and will sort the ``Fumanchu'' and ``Phil'' versions
-alphanumerically.
+%% This may sound extreme, but it can happen with today's tools and
+%% standards.  The worst thing is that tools like \code{easy\_install} or
+%% \code{pip} use their own non-standard registry to keep track of
+%% installed files, and will sort the ``Fumanchu'' and ``Phil'' versions
+%% alphanumerically.
+いくらなんでも極端すぎると思うかもしれないが、いまどきのツールや標準規約を
+使っていると、十分起こり得ることだ。
+最悪なのは、\code{easy\_install}や\code{pip}といったツールが
+それぞれ非標準のレジストリを自前で持っており、
+インストールしたファイルをそこで管理しているってことだ。
+そこでは、``Fumanchu''や``Phil''といったバージョン名はアルファベット順に並んでしまう。
 
-Another problem is how to handle data files.  For example, what if
-your application uses an SQLite database?  If you put it inside your
-package directory, your application might fail because the system
-forbids you to write in that part of the tree.  Doing this will
-also compromise the assumptions Linux systems make about where
-application data is for backups (\code{/var}).
+%% Another problem is how to handle data files.  For example, what if
+%% your application uses an SQLite database?  If you put it inside your
+%% package directory, your application might fail because the system
+%% forbids you to write in that part of the tree.  Doing this will
+%% also compromise the assumptions Linux systems make about where
+%% application data is for backups (\code{/var}).
+もうひとつ問題がある。データファイルの扱いをどうするかということだ。
+たとえば、もしあなたのアプリケーションでSQLiteデータベースを使うとしたらどうだろう?
+もしパッケージディレクトリの中にデータベースを置いたら、アプリケーションはうまく動かないかもしれない。
+アプリケーションを実行する人には、ツリー内のその部分に対する書き込み権限がないかもしれないからだ。
+それだけでなく、Linuxシステムでの前提も崩してしまう。Linuxシステム上では、
+バックアップ対象になるアプリケーションのデータを\code{/var}に置くことになっているのだ。
 
-In the real world, system administrators need to be able to place your
-files where they want without breaking your application, and you need
-to tell them what those files are.  So let's rephrase the question: is
-it possible to have a packaging system in Python that can provide all
-the information needed to repackage an application with any
-third-party packaging system out there without having to read the
-code, and make everyone happy?
+%% In the real world, system administrators need to be able to place your
+%% files where they want without breaking your application, and you need
+%% to tell them what those files are.  So let's rephrase the question: is
+%% it possible to have a packaging system in Python that can provide all
+%% the information needed to repackage an application with any
+%% third-party packaging system out there without having to read the
+%% code, and make everyone happy?
+実際には、システム管理者がアプリケーションのファイルを好きなところに
+置けるようにする必要がある。それでアプリケーションが動かなくなることがあってはならず、
+アプリケーションのファイルがどこにあるかを管理者に伝えなければならない。
+そこで、先ほどの質問をこう言い換えてみよう。
+「Pythonで、こんなパッケージングシステムは実現可能だろうか?
+サードパーティのパッケージングシステムがパッケージを作り直すときに、
+わざわざアプリケーションのコードを追う必要がなく、みんなが幸せになれるようなシステムを」
 
 \end{aosasect1}
 
