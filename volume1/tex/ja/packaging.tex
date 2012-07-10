@@ -302,40 +302,67 @@ CentOSやDebianの管理者にとっては一大事だ。
 %% \begin{aosasect1}{The Current Architecture of Packaging}
 \begin{aosasect1}{現在のパッケージングのアーキテクチャ}
 
-The \code{Distutils} package that comes with the Python standard
-library is riddled with the problems described above.  Since it's the
-standard, people either live with it and its flaws, or use more
-advanced tools like \code{Setuptools}, which add features on the top of it,
-or \code{Distribute}, a fork of \code{Setuptools}. There's also \code{Pip},
-a more advanced installer, that relies on \code{Setuptools}.
+%% The \code{Distutils} package that comes with the Python standard
+%% library is riddled with the problems described above.  Since it's the
+%% standard, people either live with it and its flaws, or use more
+%% advanced tools like \code{Setuptools}, which add features on the top of it,
+%% or \code{Distribute}, a fork of \code{Setuptools}. There's also \code{Pip},
+%% a more advanced installer, that relies on \code{Setuptools}.
+\code{Distutils}パッケージがPython標準ライブラリとして組み込まれている。
+これは、先述の問題たちに対応するために用意された。
+標準で組み込まれているので、問題はあるけれどもそれを使っているという人もいる。
+あるいは、もっとよくできた\code{Setuptools}などのツールを使う人もいる。
+これは\code{Distutils}に機能を追加したものだ。
+あるいは、\code{Setuptools}のフォークである\code{Distribute}という選択肢もある。
+さらに、もっと高機能なインストーラーとして\code{Pip}
+も存在する。これは\code{Setuptools}に依存している。
 
-However, these newer tools are all based on \code{Distutils} and inherit its
-problems.  Attempts were made to fix \code{Distutils} in place, but
-the code is so deeply used by other tools that any change to it, even
-its internals, is a potential regression in the whole Python packaging
-ecosystem.
+%% However, these newer tools are all based on \code{Distutils} and inherit its
+%% problems.  Attempts were made to fix \code{Distutils} in place, but
+%% the code is so deeply used by other tools that any change to it, even
+%% its internals, is a potential regression in the whole Python packaging
+%% ecosystem.
+しかし、これらのツールはすべて\code{Distutils}をベースにしたものであり、
+その問題点も引き継いでいる。\code{Distutils}自体を改善しようという動きもあったが、
+他のツールがあまりにもそのコードに依存しすぎていたので、
+内部のコードをほんの少し変更するだけでもPythonpパッケージの世界を破滅させてしまう恐れがあった。
 
-We therefore decided to freeze \code{Distutils} and start the
-development of \code{Distutils2} from the same code base, without
-worrying too much about backward compatibility.  To understand what
-changed and why, let's have a closer look at \code{Distutils}.
+%% We therefore decided to freeze \code{Distutils} and start the
+%% development of \code{Distutils2} from the same code base, without
+%% worrying too much about backward compatibility.  To understand what
+%% changed and why, let's have a closer look at \code{Distutils}.
+そこで私たちは、\code{Distutils}の開発を停止して、同じコードベースで\code{Distutils2}
+の開発を新たに始めた。これで後方互換性を気にせずに済む。
+何を変えたのか、なぜ変えたのか。それを理解するために、まずは\code{Distutils}
+について詳しく見ていこう。
 
 %% \begin{aosasect2}{Distutils Basics and Design Flaws}
 \begin{aosasect2}{Distutilsの基本とその設計ミス}
 \label{sec.packaging.flaws}
 
-\code{Distutils} contains commands, each of which is a class with a
-\code{run} method that can be called with some options.  \code{Distutils}
-also provides a \code{Distribution} class that contains global values
-every command can look at.
+%% \code{Distutils} contains commands, each of which is a class with a
+%% \code{run} method that can be called with some options.  \code{Distutils}
+%% also provides a \code{Distribution} class that contains global values
+%% every command can look at.
+\code{Distutils}に含まれるコマンド群はどれも、\code{run}メソッドを持つクラスである。
+いろんなオプションを指定して呼べる。
+\code{Distutils}では\code{Distribution}クラスも提供しており、
+ここに格納されているグローバルな値は全コマンドから参照できる。
 
-To use \code{Distutils}, a developer adds a single Python module to a
-project, conventionally called \code{setup.py}. This module contains a
-call to \code{Distutils}' main entry point: the \code{setup} function.  This
-function can take many options, which are held by a
-\code{Distribution} instance and used by commands.  Here's an example
-that defines a few standard options like the name and version of the
-project, and a list of modules it contains:
+%% To use \code{Distutils}, a developer adds a single Python module to a
+%% project, conventionally called \code{setup.py}. This module contains a
+%% call to \code{Distutils}' main entry point: the \code{setup} function.  This
+%% function can take many options, which are held by a
+%% \code{Distribution} instance and used by commands.  Here's an example
+%% that defines a few standard options like the name and version of the
+%% project, and a list of modules it contains:
+\code{Distutils}を使いたい開発者は、自分のプロジェクトにPythonモジュールをひとつ
+追加すればよい。慣例的に、名前は\code{setup.py}とすることになっている。
+このモジュールで、\code{Distutils}のエントリポイントである\code{setup}関数を呼び出す。
+この関数にはいろんなオプションを指定できる。指定したオプションは、\code{Distribution}
+で保持してコマンドから使えるようになる。ひとつ例を示そう。
+ここでは、標準的なオプションをいくつか定義している。
+プロジェクトの名前とバージョン、そして含まれるモジュールの一覧だ。
 
 \pagebreak
 
@@ -345,62 +372,90 @@ from distutils.core import setup
 setup(name='MyProject', version='1.0', py_modules=['mycode.py'])
 \end{verbatim}
 
-\noindent This module can then be used to run \code{Distutils} commands like
-\code{sdist}, which creates a source distribution in an archive and
-places it in a \code{dist} directory:
+%% \noindent This module can then be used to run \code{Distutils} commands like
+%% \code{sdist}, which creates a source distribution in an archive and
+%% places it in a \code{dist} directory:
+\noindent
+このモジュールを使えば\code{Distutils}のコマンドを実行できる。
+たとえば\code{sdist}は、ソースディストリビューションをアーカイブして\code{dist}ディレクトリに置く。
 
 \begin{verbatim}
 $ python setup.py sdist
 \end{verbatim}
 
-\noindent Using the same script, you can install the project using the
-\code{install} command:
+%% \noindent Using the same script, you can install the project using the
+%% \code{install} command:
+\noindent
+同じスクリプトを使って、\code{install}コマンドでこのプロジェクトをインストールすることもできる。
 
 \begin{verbatim}
 $ python setup.py install
 \end{verbatim}
 
-\code{Distutils} provides other commands such as:
+%% \code{Distutils} provides other commands such as:
+\code{Distutils}には、それ以外にもこんなコマンドがある。
 
 \begin{aosaitemize}
 
-  \item \code{upload} to upload a distribution into an online repository.
+  %% \item \code{upload} to upload a distribution into an online repository.
+  \item \code{upload}…ディストリビューションをオンラインリポジトリにアップロードする。
 
-  \item \code{register} to register the metadata of a project in an online
-  repository without necessary uploading a distribution,
+  %% \item \code{register} to register the metadata of a project in an online
+  %% repository without necessary uploading a distribution,
+  \item \code{register}…プロジェクトのメタデータをオンラインリポジトリに登録する。
+  このときに必ずしもディストリビューションをアップロードする必要はない。
 
-  \item \code{bdist} to creates a binary distribution, and
+  %% \item \code{bdist} to creates a binary distribution, and
+  \item \code{bdist}…バイナリディストリビューションを作成する。
 
-  \item \code{bdist\_msi} to create a \code{.msi} file for Windows.
+  %% \item \code{bdist\_msi} to create a \code{.msi} file for Windows.
+  \item \code{bdist\_msi}…Windows用の\code{.msi}ファイルを作成する。
 
 \end{aosaitemize}
 
+%% \noindent
+%% It will also let you get information about the project via other
+%% command line options.
 \noindent
-It will also let you get information about the project via other
-command line options.
+また、プロジェクトに関する情報をコマンドラインオプションで取得することもできる。
 
-So installing a project or getting information about it is always done
-by invoking \code{Distutils} through this file. For example, to find
-out the name of the project:
+%% So installing a project or getting information about it is always done
+%% by invoking \code{Distutils} through this file. For example, to find
+%% out the name of the project:
+つまり、このプロジェクトをインストールしたり情報を調べたりといった作業は、
+ぜんぶこのファイルを使って\code{Distutils}経由で行える。
+たとえば、プロジェクトの名前を調べるには次のようにする。
 
 \begin{verbatim}
 $ python setup.py --name
 MyProject
 \end{verbatim}
 
-\noindent \code{setup.py} is therefore how everyone interacts with the project,
-whether to build, package, publish, or install it. The developer
-describes the content of his project through options passed to a
-function, and uses that file for all his packaging tasks. The file is
-also used by installers to install the project on a target system.
+%% \noindent \code{setup.py} is therefore how everyone interacts with the project,
+%% whether to build, package, publish, or install it. The developer
+%% describes the content of his project through options passed to a
+%% function, and uses that file for all his packaging tasks. The file is
+%% also used by installers to install the project on a target system.
+\noindent
+つまり\code{setup.py}は、プロジェクトに関して何かをしたいときに常に
+間に入るものだということだ。ビルドからパッケージ作成、公開、インストールに至るまですべてである。
+開発者はプロジェクトの内容を関数へのオプションで指定し、
+また、このファイルを使ってパッケージ作成の作業もこなす。
+このファイルはまた、導入先のシステムでプロジェクトをインストールするときにも使われる。
 
+%% \aosafigure[300pt]{../images/packaging/setup-py.eps}{Setup}{fig.packaging.setup}
 \aosafigure[300pt]{../images/packaging/setup-py.eps}{Setup}{fig.packaging.setup}
 
-Having a single Python module used for packaging, releasing,
-\emph{and} installing a project is one of \code{Distutils}' main
-flaws.  For example, if you want to get the \code{name} from the \code{lxml}
-project, \code{setup.py} will do a lot of things besides returning a
-simple string as expected:
+%% Having a single Python module used for packaging, releasing,
+%% \emph{and} installing a project is one of \code{Distutils}' main
+%% flaws.  For example, if you want to get the \code{name} from the \code{lxml}
+%% project, \code{setup.py} will do a lot of things besides returning a
+%% simple string as expected:
+たったひとつのPythonモジュールでパッケージ作成やらリリースやら
+\emph{挙句の果てには}インストールまでさせてしまう、というのが
+\code{Distutils}の問題のひとつだ。
+たとえば\code{lxml}プロジェクトの名前を取得したいとしよう。
+\code{setup.py}は、単に名前を文字列で返す以外にもいろんなことをする。
 
 \begin{verbatim}
 $ python setup.py --name
@@ -411,11 +466,17 @@ Using build configuration of libxslt 1.1.26
 Building against libxml2/libxslt in the following directory: /usr/lib/lxml
 \end{verbatim}
 
-\noindent It might even fail to work on some projects, since
-developers make the assumption that \code{setup.py} is used only to
-install, and that other \code{Distutils} features are only used by
-them during development.  The multiple roles of the \code{setup.py}
-script can easily cause confusion.
+%% \noindent It might even fail to work on some projects, since
+%% developers make the assumption that \code{setup.py} is used only to
+%% install, and that other \code{Distutils} features are only used by
+%% them during development.  The multiple roles of the \code{setup.py}
+%% script can easily cause confusion.
+\noindent
+場合によってはこれがうまく動かないかもしれない。
+「\code{setup.py}なんて、インストールのときにしか使わないよね」
+と思いこんだ開発者が、それ以外の\code{Distutils}の機能を
+ユーザーが使うとは想定していないような場合がある。
+\code{setup.py}にいろんな役割を持たせてしまうのは混乱のもとだ。
 
 \end{aosasect2}
 
