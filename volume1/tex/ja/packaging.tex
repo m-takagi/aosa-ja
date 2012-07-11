@@ -483,54 +483,85 @@ Building against libxml2/libxslt in the following directory: /usr/lib/lxml
 %% \begin{aosasect2}{Metadata and PyPI}
 \begin{aosasect2}{MetadataとPyPI}
 
-When \code{Distutils} builds a distribution, it creates a
-\code{Metadata} file that follows the standard described in
-PEP~314\footnote{The Python Enhancement Proposals, or PEPs, that we
-refer to are summarized at the end of this chapter}.  It contains a
-static version of all the usual metadata, like the name of the project
-or the version of the release.  The main metadata fields are:
+%% When \code{Distutils} builds a distribution, it creates a
+%% \code{Metadata} file that follows the standard described in
+%% PEP~314\footnote{The Python Enhancement Proposals, or PEPs, that we
+%% refer to are summarized at the end of this chapter}.  It contains a
+%% static version of all the usual metadata, like the name of the project
+%% or the version of the release.  The main metadata fields are:
+\code{Distutils}は、ディストリビューションを作るときに\code{Metadata}
+ファイルも作る。これは、PEP~314
+\footnote{Python Enhancement Proposals(本章ではPEPと略する)については、
+本章の最後にまとめる}
+で指定された標準規約に従うものである。
+その中に含まれるのは通常のメタデータ、たとえばプロジェクト名や
+リリースのバージョンなどである。主要なフィールドを以下に示す。
 
 \begin{aosaitemize}
 
-  \item \code{Name}: The name of the project.
+  %% \item \code{Name}: The name of the project.
+  \item \code{Name}: プロジェクト名。
 
-  \item \code{Version}: The version of the release.
+  %% \item \code{Version}: The version of the release.
+  \item \code{Version}: リリースのバージョン。
 
-  \item \code{Summary}: A one-line description.
+  %% \item \code{Summary}: A one-line description.
+  \item \code{Summary}: 一行にまとめた説明。
 
-  \item \code{Description}: A detailed description.
+  %% \item \code{Description}: A detailed description.
+  \item \code{Description}: 詳しい説明。
 
-  \item \code{Home-Page}: The URL of the project.
+  %% \item \code{Home-Page}: The URL of the project.
+  \item \code{Home-Page}: プロジェクトのURL。
 
-  \item \code{Author}: The author name.
+  %% \item \code{Author}: The author name.
+  \item \code{Author}: 作者名。
 
-  \item \code{Classifiers}: Classifiers for the project. Python provides a list
-  of classifiers for the license, the maturity of the release (beta,
-  alpha, final), etc.
+  %% \item \code{Classifiers}: Classifiers for the project. Python provides a list
+  %% of classifiers for the license, the maturity of the release (beta,
+  %% alpha, final), etc.
+  \item \code{Classifiers}: プロジェクトの分類。
+  使える分類の一覧はPythonが用意しており、たとえばライセンスや
+  リリースの成熟度(beta、alpha、final)などを指定できる。
 
-  \item \code{Requires}, \code{Provides}, and \code{Obsoletes}:
-  Used to define dependencies with modules.
+  %% \item \code{Requires}, \code{Provides}, and \code{Obsoletes}:
+  %% Used to define dependencies with modules.
+  \item \code{Requires}、\code{Provides}、\code{Obsoletes}: モジュールの依存関係。
 
 \end{aosaitemize}
 
+%% \noindent
+%% These fields are for the most part easy to map to equivalents in other
+%% packaging systems.
 \noindent
-These fields are for the most part easy to map to equivalents in other
-packaging systems.
+これらの項目の大半は、他のパッケージシステムにも同様なものが用意されているので簡単に対応できる。
 
-The Python Package Index (PyPI)\footnote{Formerly known as the
-CheeseShop.}, a central repository of packages like CPAN, is able to
-register projects and publish releases via \code{Distutils}'
-\code{register} and \code{upload} commands.  \code{register} builds
-the \code{Metadata} file and sends it to PyPI, allowing people and
-tools---like installers---to browse them via web pages or via web
-services.
+%% The Python Package Index (PyPI)\footnote{Formerly known as the
+%% CheeseShop.}, a central repository of packages like CPAN, is able to
+%% register projects and publish releases via \code{Distutils}'
+%% \code{register} and \code{upload} commands.  \code{register} builds
+%% the \code{Metadata} file and sends it to PyPI, allowing people and
+%% tools---like installers---to browse them via web pages or via web
+%% services.
+Python Package Index (PyPI)\footnote{かつてCheeseShopと呼ばれていたもの。}は、
+CPANのようにパッケージを取りまとめた中央リポジトリである。
+ここにプロジェクトを登録したりリリースを公開したりするには
+\code{Distutils}の\code{register}コマンドや\code{upload}コマンドを使えばよい。
+\code{register}は、\code{Metadata}ファイルを構築してPyPIに送信する。
+これで、利用者やツール(インストーラなど)がそのパッケージを
+(ウェブページやウェブサービス経由で)見つけられるようになる。
 
-\aosafigure[400pt]{../images/packaging/pypi.eps}{The PyPI Repository}{fig.packaging.pypi}
+%% \aosafigure[400pt]{../images/packaging/pypi.eps}{The PyPI Repository}{fig.packaging.pypi}
+\aosafigure[400pt]{../images/packaging/pypi.eps}{PyPIリポジトリ}{fig.packaging.pypi}
 
-You can browse projects by \code{Classifiers}, and get the author name
-and project URL\@.  Meanwhile, \code{Requires} can be used to define
-dependencies on Python modules.  The \code{requires} option can be
-used to add a \code{Requires} metadata element to the project:
+%% You can browse projects by \code{Classifiers}, and get the author name
+%% and project URL\@.  Meanwhile, \code{Requires} can be used to define
+%% dependencies on Python modules.  The \code{requires} option can be
+%% used to add a \code{Requires} metadata element to the project:
+\code{Classifiers}にもとづいてプロジェクトを閲覧し、
+その作者名やプロジェクトのURLを取得することができる。
+一方、\code{Requires}を使えばPythonモジュールとの依存関係を定義できる。
+\code{requires}オプションを使って、プロジェクトに\code{Requires}メタデータ要素を追加できる。
 
 \begin{verbatim}
 from distutils.core import setup
@@ -538,21 +569,36 @@ from distutils.core import setup
 setup(name='foo', version='1.0', requires=['ldap'])
 \end{verbatim}
 
-Defining a dependency on the \code{ldap} module is purely declarative:
-no tools or installers ensure that such a module exists.  This would be
-satisfactory if Python defined requirements at the module level
-through a \code{require} keyword like Perl does.  Then it would
-just be a matter of the installers browsing the dependencies at PyPI
-and installing them; that's basically what CPAN does.  But that's not
-possible in Python since a module named \code{ldap} can exist in any
-Python project. Since \code{Distutils} allows people to release
-projects that can contain several packages and modules, this metadata
-field is not useful at all.
+%% Defining a dependency on the \code{ldap} module is purely declarative:
+%% no tools or installers ensure that such a module exists.  This would be
+%% satisfactory if Python defined requirements at the module level
+%% through a \code{require} keyword like Perl does.  Then it would
+%% just be a matter of the installers browsing the dependencies at PyPI
+%% and installing them; that's basically what CPAN does.  But that's not
+%% possible in Python since a module named \code{ldap} can exist in any
+%% Python project. Since \code{Distutils} allows people to release
+%% projects that can contain several packages and modules, this metadata
+%% field is not useful at all.
+\code{ldap}モジュールに対する依存関係の定義は純粋に宣言的なものであり、
+インストーラーやツールでそのモジュールの存在を保証できるわけではない。
+Pythonが依存関係をモジュールレベルで定義できるのなら、これでも十分だ。
+そう、ちょうどPerlの\code{require}キーワードみたいにね。
+そうすれば、インストーラーは単にPyPIで依存情報を確認してそれをインストールするだけになる。
+CPANがやっているのは、基本的にそういうことだ。
+でもPythonではそれができない。というのも、\code{ldap}
+という名前のモジュールはあらゆるPythonプロジェクトに存在する可能性があるからである。
+\code{Distutils}では複数のパッケージやモジュールを含むプロジェクトをリリースできるので、
+このメタデータフィールドはまったく使い物にならない。
 
-Another flaw of \code{Metadata} files is that they are created by a
-Python script, so they are specific to the platform they are executed
-in.  For example, a project that provides features specific to Windows
-could define its \code{setup.py} as:
+%% Another flaw of \code{Metadata} files is that they are created by a
+%% Python script, so they are specific to the platform they are executed
+%% in.  For example, a project that provides features specific to Windows
+%% could define its \code{setup.py} as:
+\code{Metadata}ファイルには、それ以外の問題もある。
+このファイルはPythonスクリプトで作られるので、
+スクリプトを実行したプラットフォーム専用のものになってしまうのだ。
+たとえば、Windows専用の機能を提供するプロジェクトでは、\code{setup.py}
+で次のような定義をすることになるだろう。
 
 \begin{verbatim}
 from distutils.core import setup
@@ -560,9 +606,13 @@ from distutils.core import setup
 setup(name='foo', version='1.0', requires=['win32com'])
 \end{verbatim}
 
-\noindent But this assumes that the project only works under Windows, even if it
-provides portable features.  One way to solve this is to make the
-\code{requires} option specific to Windows:
+%% \noindent But this assumes that the project only works under Windows, even if it
+%% provides portable features.  One way to solve this is to make the
+%% \code{requires} option specific to Windows:
+\noindent
+しかしこれでは、たとえ実際には他のプラットフォームでも同じ機能が使える場合でも、
+このプロジェクトはWindowsでしか動かないということになってしまう。
+ひとつの解決策として、Windowsの場合だけ\code{requires}オプションを指定するという方法もある。
 
 \begin{verbatim}
 from distutils.core import setup
@@ -575,12 +625,20 @@ else:
     setup(name='foo', version='1.0')
 \end{verbatim}
 
-\noindent This actually makes the issue worse. Remember, the script is used to
-build source archives that are then released to the world via PyPI.
-This means that the static \code{Metadata} file sent to PyPI is
-dependent on the platform that was used to compile it.  In other
-words, there is no way to indicate statically in the metadata field
-that it is platform-specific.
+%% \noindent This actually makes the issue worse. Remember, the script is used to
+%% build source archives that are then released to the world via PyPI.
+%% This means that the static \code{Metadata} file sent to PyPI is
+%% dependent on the platform that was used to compile it.  In other
+%% words, there is no way to indicate statically in the metadata field
+%% that it is platform-specific.
+\noindent
+しかし、そんなことをすれば問題はさらに悪化する。
+思い出してみよう。このスクリプトは、PyPI経由で世に送り出すための
+ソースアーカイブを作るときにも使うものだった。
+つまり、PyPIに送られる\code{Metadata}ファイルは、
+コンパイルしたプラットフォームに依存するものになってしまう。
+つまり、プラットフォームによって値が異なるようなメタデータフィールドを
+用意するのは不可能だということである。
 
 \end{aosasect2}
 
