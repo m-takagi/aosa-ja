@@ -645,25 +645,39 @@ else:
 %% \begin{aosasect2}{Architecture of PyPI}
 \begin{aosasect2}{PyPIのアーキテクチャ}
 
-\aosafigure[250pt]{../images/packaging/pypi-workflow.eps}{PyPI Workflow}{fig.packaging.workflow}
+%% \aosafigure[250pt]{../images/packaging/pypi-workflow.eps}{PyPI Workflow}{fig.packaging.workflow}
+\aosafigure[250pt]{../images/packaging/pypi-workflow.eps}{PyPIのワークフロー}{fig.packaging.workflow}
 
-As indicated earlier, PyPI is a central index of Python projects where
-people can browse existing projects by category or register their own
-work.  Source or binary distributions can be uploaded and added to an
-existing project, and then downloaded for installation or study.  PyPI
-also offers web services that can be used by tools like installers.
+%% As indicated earlier, PyPI is a central index of Python projects where
+%% people can browse existing projects by category or register their own
+%% work.  Source or binary distributions can be uploaded and added to an
+%% existing project, and then downloaded for installation or study.  PyPI
+%% also offers web services that can be used by tools like installers.
+先述のとおり、PyPIはPythonのプロジェクトをまとめた索引である。
+カテゴリを指定してプロジェクトを探したり、自分のプロジェクトを登録したりできる。
+ソースディストリビューションやバイナリディストリビューションをアップロードして
+プロジェクトに追加すれば、それを他の人がダウンロードしてインストールできるようになる。
+PyPIはウェブサービスも提供しており、インストーラなどのツールはこのサービスを利用する。
 
 %% \begin{aosasect3}{Registering Projects and Uploading Distributions}
-\begin{aosasect3}{プロジェクトの登録と配布物のアップロード}
+\begin{aosasect3}{プロジェクトの登録とディストリビューションのアップロード}
 
-Registering a project to PyPI is done with the \code{Distutils}
-\code{register} command.  It builds a POST request containing the
-metadata of the project, whatever its version is.  The request
-requires an Authorization header, as PyPI uses Basic Authentication to
-make sure every registered project is associated with a user that has
-first registered with PyPI\@.  Credentials are kept in the local
-\code{Distutils} configuration or typed in the prompt every time a
-\code{register} command is invoked.  An example of its use is:
+%% Registering a project to PyPI is done with the \code{Distutils}
+%% \code{register} command.  It builds a POST request containing the
+%% metadata of the project, whatever its version is.  The request
+%% requires an Authorization header, as PyPI uses Basic Authentication to
+%% make sure every registered project is associated with a user that has
+%% first registered with PyPI\@.  Credentials are kept in the local
+%% \code{Distutils} configuration or typed in the prompt every time a
+%% \code{register} command is invoked.  An example of its use is:
+プロジェクトをPyPIに登録するには、\code{Distutils}の\code{register}コマンドを使う。
+このコマンドは、プロジェクトのメタデータやバージョンを含むPOSTリクエストを作る。
+このリクエストにはAuthorizationヘッダが必要となる。
+というのもPyPIは、最初にプロジェクトを登録した人と同一ユーザーであるかどうかを
+確認するためにベーシック認証を使っているからである。
+認証情報はローカルの\code{Distutils}の設定に保存することもできるし、
+\code{register}コマンドを実行するたびに入力することもできる。
+使い方は、次のようになる。
 
 \begin{verbatim}
 $ python setup.py register
@@ -672,9 +686,14 @@ Registering MPTools to http://pypi.python.org/pypi
 Server response (200): OK
 \end{verbatim}
 
-\noindent Each registered project gets a web page with an HTML version of the
-metadata, and packagers can upload distributions to PyPI using
-\code{upload}:
+%% \noindent Each registered project gets a web page with an HTML version of the
+%% metadata, and packagers can upload distributions to PyPI using
+%% \code{upload}:
+\noindent
+プロジェクトを登録すると、そのプロジェクト用のウェブページに
+メタデータのHTMLバージョンが表示される。
+ディストリビューションをPyPIにアップロードするには
+\code{upload}を使う。
 
 \begin{verbatim}
 $ python setup.py sdist upload
@@ -685,21 +704,30 @@ Submitting dist/mopytools-0.1.tar.gz to http://pypi.python.org/pypi
 Server response (200): OK
 \end{verbatim}
 
-It's also possible to point users to another location via the
-\code{Download-URL} metadata field rather than uploading files directly to PyPI.
+%% It's also possible to point users to another location via the
+%% \code{Download-URL} metadata field rather than uploading files directly to PyPI.
+ファイルを直接PyPIにアップロードするかわりに、
+別の場所を使うよう指定することもできる。その場合は、
+メタデータの\code{Download-URL}フィールドを指定する。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Querying PyPI}
 \begin{aosasect3}{PyPIへの問い合わせ}
 
-Besides the HTML pages PyPI publishes for web users, it provides two
-services that tools can use to browse the content: the Simple Index
-protocol and the XML-RPC APIs.
+%% Besides the HTML pages PyPI publishes for web users, it provides two
+%% services that tools can use to browse the content: the Simple Index
+%% protocol and the XML-RPC APIs.
+PyPIは、ウェブ経由での利用者向けにHTMLページを作るだけでなく、
+ふたつのサービスも提供する。Simple Indexプロトコルと
+XML-RPC APIだ。
 
-The Simple Index protocol starts at
-\url{http://pypi.python.org/simple/}, a plain HTML page that contains
-relative links to every registered project:
+%% The Simple Index protocol starts at
+%% \url{http://pypi.python.org/simple/}, a plain HTML page that contains
+%% relative links to every registered project:
+Simple Indexプロトコルは\url{http://pypi.python.org/simple/}
+から始まるプレーンなHTMLページで、登録されている全プロジェクトへの
+相対リンクを含む。
 
 \begin{verbatim}
 <html><head><title>Simple Index</title></head><body>
@@ -717,24 +745,33 @@ relative links to every registered project:
 </body></html>
 \end{verbatim}
 
-\noindent For example, the MPTools project has a \code{MPTools/} link, which
-means that the project exists in the index.  The site it points at
-contains a list of all the links related to the project:
+%% \noindent For example, the MPTools project has a \code{MPTools/} link, which
+%% means that the project exists in the index.  The site it points at
+%% contains a list of all the links related to the project:
+\noindent
+たとえばMPToolsプロジェクトには\code{MPTools/}というリンクがある。
+これは、そのプロジェクトがインデックスに存在することを意味する。
+リンク先のサイトに、そのプロジェクトに関連するすべてのリンクが含まれる。
 
 \begin{aosaitemize}
 
-  \item links for every distribution stored at PyPI
+  %% \item links for every distribution stored at PyPI
+  \item PyPI に格納されているすべてのディストリビューションへのリンク
 
-  \item links for every Home URL defined in the \code{Metadata}, for
-  each version of the project registered
+  %% \item links for every Home URL defined in the \code{Metadata}, for
+  %% each version of the project registered
+  \item 登録されている各バージョンについての、\code{Metadata}で定義されたすべてのホームURL
 
-  \item links for every Download-URL defined in the \code{Metadata}, for
-  each version as well.
+  %% \item links for every Download-URL defined in the \code{Metadata}, for
+  %% each version as well.
+  \item 同じく登録されている各バージョンについての、\code{Metadata}で定義されたすべてのダウンロードURL
 
 \end{aosaitemize}
 
+%% \noindent
+%% The page for MPTools contains:
 \noindent
-The page for MPTools contains:
+MPToolsのページの内容は、このようになる。
 
 \begin{verbatim}
 <html><head><title>Links for MPTools</title></head>
@@ -744,30 +781,53 @@ The page for MPTools contains:
 </body></html>
 \end{verbatim}
 
+%% \noindent
+%% Tools like installers that want to find distributions of a project can
+%% look for it in the index page, or simply check if
+%% \url{http://pypi.python.org/simple/PROJECT_NAME/} exists.
 \noindent
-Tools like installers that want to find distributions of a project can
-look for it in the index page, or simply check if
-\url{http://pypi.python.org/simple/PROJECT_NAME/} exists.
+インストーラなどのツールがプロジェクトのディストリビューションを探したいときは、
+インデックスページを調べるか、あるいは単に\url{http://pypi.python.org/simple/PROJECT_NAME/}
+が存在するかどうかを調べればよい。
 
-This protocol has two main limitations.  First, PyPI is a single
-server right now, and while people usually have local copies of its
-content, we have experienced several downtimes in the past two years
-that have paralyzed developers that are constantly working with
-installers that browse PyPI to get all the dependencies a project
-requires when it is built. For instance, building a Plone application
-will generate several hundreds queries at PyPI to get all the required
-bits, so PyPI may act as a single point of failure.
+%% This protocol has two main limitations.  First, PyPI is a single
+%% server right now, and while people usually have local copies of its
+%% content, we have experienced several downtimes in the past two years
+%% that have paralyzed developers that are constantly working with
+%% installers that browse PyPI to get all the dependencies a project
+%% requires when it is built. For instance, building a Plone application
+%% will generate several hundreds queries at PyPI to get all the required
+%% bits, so PyPI may act as a single point of failure.
+このプロトコルには、ふたつの大きな制限がある。
+まず第一に、PyPIは現時点では単一のサーバーで運用しているということ。
+多くの人はそのコンテンツをローカルにコピーしているが、
+過去二年間にも何度かPyPIがダウンすることがあった。
+そのたびに、PyPIを見てプロジェクトの依存関係を解決する
+インストーラが使えなくなって開発者を混乱させていた。
+たとえば、Ploneアプリケーションをビルドするときには
+PyPIへの問い合わせが数百件単位で発生する。
+必要なパッケージを取得するためである。
+つまり、PyPIが単一障害点となる可能性があるわけだ。
 
-Second, when the distributions are not stored at PyPI and a
-Download-URL link is provided in the Simple Index page, installers
-have to follow that link and hope that the location will be up and
-will really contain the release. These indirections weakens any Simple
-Index-based process.
+%% Second, when the distributions are not stored at PyPI and a
+%% Download-URL link is provided in the Simple Index page, installers
+%% have to follow that link and hope that the location will be up and
+%% will really contain the release. These indirections weakens any Simple
+%% Index-based process.
+そして第二に、ディストリビューションをPyPIに格納せずに
+Simple IndexページでDownload-URLのリンクを提供している場合、
+インストーラはそのリンクをたどることになる。
+その場所が正常稼働中なのか、そこにブツが本当にあるのかを気にしながら。
+こういった回り道が、Simple Indexベースのすべての処理の弱点となる。
 
-The Simple Index protocol's goal is to give to installers a list of
-links they can use to install a project. The project metadata is not
-published there; instead, there are XML-RPC methods to get extra
-information about registered projects:
+%% The Simple Index protocol's goal is to give to installers a list of
+%% links they can use to install a project. The project metadata is not
+%% published there; instead, there are XML-RPC methods to get extra
+%% information about registered projects:
+Simple Indexプロトコルの目標は、あるプロジェクトのインストールに
+使うリンクの一覧をインストーラに渡すことだ。そのため、プロジェクトの
+メタデータは公開されていない。そのかわりにXML-RPCを使って、
+登録したプロジェクトに関する追加情報を取得できる。
 
 \begin{verbatim}
 >>> import xmlrpclib
@@ -807,14 +867,22 @@ information about registered projects:
 'version': '0.1'}
 \end{verbatim}
 
-\noindent The issue with this approach is that some of the data that the XML-RPC
-APIs are publishing could have been stored as static files and
-published in the Simple Index page to simplify the work of client
-tools.  That would also avoid the extra work PyPI has to do to handle
-those queries.  It's fine to have non-static data like the number of
-downloads per distribution published in a specialized web service, but
-it does not make sense to have to use two different services to get
-all static data about a project.
+%% \noindent The issue with this approach is that some of the data that the XML-RPC
+%% APIs are publishing could have been stored as static files and
+%% published in the Simple Index page to simplify the work of client
+%% tools.  That would also avoid the extra work PyPI has to do to handle
+%% those queries.  It's fine to have non-static data like the number of
+%% downloads per distribution published in a specialized web service, but
+%% it does not make sense to have to use two different services to get
+%% all static data about a project.
+\noindent
+この手法の問題は、XML-RPC APIで公開しているデータの中には、
+静的ファイルとして格納してSimple Indexページで公開することもできるものがあるという点だ。
+そのほうが、クライアントツールの作業量を減らせる。
+また、問い合わせに対応するPyPI側としても、そうしておけば余計な手間を省ける。
+公開したディストリビューションごとのダウンロード数など、変化するデータは
+ウェブサービスで公開するのに適している。
+しかし、プロジェクトに関する静的なデータを二種類の異なる方法で公開するのは意味がない。
 
 \end{aosasect3}
 
