@@ -891,91 +891,150 @@ Simple Indexプロトコルの目標は、あるプロジェクトのインス�
 %% \begin{aosasect2}{Architecture of a Python Installation}
 \begin{aosasect2}{Python Installationのアーキテクチャ}
 
-If you install a Python project using \code{python setup.py install},
-\code{Distutils}---which is included in the standard library---will
-copy the files onto your system.
+%% If you install a Python project using \code{python setup.py install},
+%% \code{Distutils}---which is included in the standard library---will
+%% copy the files onto your system.
+Pythonのプロジェクトを\code{python setup.py install}でインストールすると、
+標準ライブラリの\code{Distutils}がファイルをシステム上にコピーする。
 
 \begin{aosaitemize}
 
-  \item \emph{Python packages} and modules will land in the Python
-  directory that is loaded when the interpreter starts: under the
-  latest Ubuntu they will wind up in
-  \code{/usr/local/lib/python2.6/dist\-packages/} and under Fedora in
-  \code{/usr/local/lib/python2.6/sites-packages/}.
+  %% \item \emph{Python packages} and modules will land in the Python
+  %% directory that is loaded when the interpreter starts: under the
+  %% latest Ubuntu they will wind up in
+  %% \code{/usr/local/lib/python2.6/dist\-packages/} and under Fedora in
+  %% \code{/usr/local/lib/python2.6/sites-packages/}.
+  \item \emph{Pythonパッケージ}やモジュールはPythonのディレクトリに配置され、
+  インタプリタの起動時に読み込まれる。最新のUbuntuなら
+  \code{/usr/local/lib/python2.6/dist\-packages/}だし、Fedoraなら
+  \code{/usr/local/lib/python2.6/sites-packages/}だ。
 
-  \item \emph{Data files} defined in a project can land anywhere
-  on the system.
+  %% \item \emph{Data files} defined in a project can land anywhere
+  %% on the system.
+  \item プロジェクトで定義している\emph{データファイル}は
+  システム上のどこにでも置ける。
 
-  \item The \emph{executable script} will land in a \code{bin} directory
-  on the system. Depending on the platform, this could be
-  \code{/usr/local/bin} or in a bin directory specific to the Python
-  installation.
+  %% \item The \emph{executable script} will land in a \code{bin} directory
+  %% on the system. Depending on the platform, this could be
+  %% \code{/usr/local/bin} or in a bin directory specific to the Python
+  %% installation.
+  \item \emph{実行可能スクリプト}は、システム上の\code{bin}ディレクトリに配置する。
+  その場所はプラットフォームによって異なり、\code{/usr/local/bin}
+  になるかもしれないし、Pythonのインストール先にある\code{bin}ディレクトリかもしれない。
 
 \end{aosaitemize}
 
-Ever since Python~2.5, the metadata file is copied alongside the modules
-and packages as \code{project\-version.egg-info}. For example, the
-\code{virtualenv} project could have a
-\code{virtualenv-1.4.9.egg\-info} file.  These metadata files can be
-considered a database of installed projects, since it's possible to
-iterate over them and build a list of projects with their versions.
-However, the \code{Distutils} installer does not record the list of
-files it installs on the system.  In other words, there is no way to
-remove all files that were copied in the system.  This is a shame
-since the \code{install} command has a \code{--record} option that can
-be used to record all installed files in a text file. However, this
-option is not used by default and \code{Distutils}' documentation
-barely mentions it.
+%% Ever since Python~2.5, the metadata file is copied alongside the modules
+%% and packages as \code{project\-version.egg-info}. For example, the
+%% \code{virtualenv} project could have a
+%% \code{virtualenv-1.4.9.egg\-info} file.  These metadata files can be
+%% considered a database of installed projects, since it's possible to
+%% iterate over them and build a list of projects with their versions.
+%% However, the \code{Distutils} installer does not record the list of
+%% files it installs on the system.  In other words, there is no way to
+%% remove all files that were copied in the system.  This is a shame
+%% since the \code{install} command has a \code{--record} option that can
+%% be used to record all installed files in a text file. However, this
+%% option is not used by default and \code{Distutils}' documentation
+%% barely mentions it.
+Python~2.5以降は、メタデータファイルもモジュールやパッケージとともにコピーされる
+ようになった。ファイル名は\code{project\-version.egg-info}となる。
+たとえば\code{virtualenv}プロジェクトの場合は\code{virtualenv-1.4.9.egg\-info}
+のようになる。このメタデータファイルは、インストール済みのプロジェクトについてのデータベースと
+考えられる。というのも、メタデータファイルを順に読んでいけば
+プロジェクトとそのバージョンの一覧を作れるからである。
+しかし、\code{Distutils}のインストーラはシステム上にインストールしたファイルの一覧をどこにも記録しない。
+つまり、いったんコピーしたファイルをアンインストールしようと思ってもできないということになる。
+情けない話だね。
+\code{install}コマンドには\code{--record}っていうオプションがあって、
+これを使えばインストールしたファイルの一覧をテキストファイルに残せるのに。
+このオプションは標準では使われていないし、\code{Distutils}
+のドキュメントにもほとんど説明がない。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Setuptools, Pip and the Like}
-\begin{aosasect2}{Setuptools、PipそしてLike}
+\begin{aosasect2}{SetuptoolsやPipなど}
 
-As mentioned in the introduction, some projects tried to fix some of
-the problems with \code{Distutils}, with varying degrees of success.
+%% As mentioned in the introduction, some projects tried to fix some of
+%% the problems with \code{Distutils}, with varying degrees of success.
+最初に説明したとおり、\code{Distutils}の問題点を解決しようという
+プロジェクトがいくつか存在する。それにどの程度成功したかは、プロジェクトによってさまざまだ。
 
 %% \begin{aosasect3}{The Dependencies Issue}
 \begin{aosasect3}{依存関係の問題}
 
-PyPI allowed developers to publish Python projects that could include
-several modules organized into Python packages. But at the same time,
-projects could define module-level dependencies via \code{Require}.
-Both ideas are reasonable, but their combination is not.
+%% PyPI allowed developers to publish Python projects that could include
+%% several modules organized into Python packages. But at the same time,
+%% projects could define module-level dependencies via \code{Require}.
+%% Both ideas are reasonable, but their combination is not.
+PyPIでは、複数のモジュールをひとつのPythonパッケージにまとめた
+プロジェクトを公開できる。一方、
+あるプロジェクトに対してモジュールレベルの依存関係を\code{Require}で定義することもできる。
+どちらも合理的だが、二つの方法を組み合わせるのはよくない。「まぜるな危険」だ。
 
-The right thing to do was to have project-level dependencies, which is
-exactly what \code{Setuptools} added as a feature on the top of
-\code{Distutils}.  It also provided a script called
-\code{easy\_install} to automatically fetch and install dependencies
-by looking for them on PyPI\@.  In practice, module-level dependency was
-never really used, and people jumped on \code{Setuptools}' extensions.
-But since these features were added in options specific to
-\code{Setuptools}, and ignored by \code{Distutils} or PyPI,
-\code{Setuptools} effectively created its own standard and became a
-hack on a top of a bad design.
+%% The right thing to do was to have project-level dependencies, which is
+%% exactly what \code{Setuptools} added as a feature on the top of
+%% \code{Distutils}.  It also provided a script called
+%% \code{easy\_install} to automatically fetch and install dependencies
+%% by looking for them on PyPI\@.  In practice, module-level dependency was
+%% never really used, and people jumped on \code{Setuptools}' extensions.
+%% But since these features were added in options specific to
+%% \code{Setuptools}, and ignored by \code{Distutils} or PyPI,
+%% \code{Setuptools} effectively created its own standard and became a
+%% hack on a top of a bad design.
+ほんとうにやるべきことは、プロジェクトレベルの依存関係を定義することだった。
+まさにそれをやろうとしたのが\code{Setuptools}で、これは
+\code{Distutils}にプロジェクトレベルの依存管理機能を追加したものである。
+\code{easy\_install}というスクリプトも付属し、PyPI
+経由で自動的に依存関係を取得してインストールできるようにした。
+実際のところ、モジュールレベルの依存関係が使われることはなく、
+人はみな\code{Setuptools}の拡張機能に飛びついた。
+しかし、所詮は\code{Setuptools}でしか使えないオプションであり、
+\code{Distutils}やPyPIには無視されていた。
+事実上、\code{Setuptools}は独自規格を作ってしまったということになる。
+もともとイケてない設計のところに無理やり手を入れて、ね。
 
-\code{easy\_install} therefore needs to download the archive of the
-project and run its \code{setup.py} script again to get the metadata
-it needs, and it has to do this again for every dependency. The
-dependency graph is built bit by bit after each download.
+%% \code{easy\_install} therefore needs to download the archive of the
+%% project and run its \code{setup.py} script again to get the metadata
+%% it needs, and it has to do this again for every dependency. The
+%% dependency graph is built bit by bit after each download.
+\code{easy\_install}はどうしているのかというと、
+まずプロジェクトのアーカイブをダウンロードし、その\code{setup.py}
+を実行してメタデータを取得する。そして、その情報を見て依存関係を取得する。
+このように、依存グラフを少しずつ取得してはダウンロードをするという流れになる。
 
-Even if the new metadata was accepted by PyPI and browsable online,
-\code{easy\_install} would still need to download all archives
-because, as said earlier, metadata published at PyPI is specific to
-the platform that was used to upload it, which can differ from the
-target platform.  But this ability to install a project and its
-dependencies was good enough in 90\% of the cases and was a great
-feature to have. So \code{Setuptools} became widely used, although it
-still suffers from other problems:
+%% Even if the new metadata was accepted by PyPI and browsable online,
+%% \code{easy\_install} would still need to download all archives
+%% because, as said earlier, metadata published at PyPI is specific to
+%% the platform that was used to upload it, which can differ from the
+%% target platform.  But this ability to install a project and its
+%% dependencies was good enough in 90\% of the cases and was a great
+%% feature to have. So \code{Setuptools} became widely used, although it
+%% still suffers from other problems:
+新しいメタデータがPyPIに登録されてオンラインで見えるようになっても、
+\code{easy\_install}はアーカイブ全体をダウンロードする必要がある。
+というのも、先述のとおり、PyPIに公開されるメタデータは
+それをアップロードしたプラットフォーム専用のものであり、
+インストール先のプラットフォームとは異なる可能性があるからだ。
+しかし、あるプロジェクトとその依存関係をインストールできるという機能は
+たいていの場合は必要十分なものだったし、あるべき機能だった。
+そのため\code{Setuptools}は広くつかわれるようになったが、
+まだ問題は残っていた。
 
 \begin{aosaitemize}
 
-  \item If a dependency install fails, there is no rollback and the
-  system can end up in a broken state.
+  %% \item If a dependency install fails, there is no rollback and the
+  %% system can end up in a broken state.
+  \item 依存パッケージのインストールに失敗したときにロールバックする手段がなく、
+  システムが中途半端な状態になってしまう可能性がある。
 
-  \item The dependency graph is built on the fly during installation, so
-  if a dependency conflict is encountered the system can end up in a
-  broken state as well.
+  %% \item The dependency graph is built on the fly during installation, so
+  %% if a dependency conflict is encountered the system can end up in a
+  %% broken state as well.
+  \item インストールを進めながらその場で徐々に依存グラフを構築していくので、
+  途中で依存関係の衝突が見つかったらそこでインストールが止まってしまう。
+  このときも、システムが中途半端な状態になってしまう。
 
 \end{aosaitemize}
 
@@ -984,27 +1043,41 @@ still suffers from other problems:
 %% \begin{aosasect3}{The Uninstall Issue}
 \begin{aosasect3}{アンインストールの問題}
 
-\code{Setuptools} did not provide an uninstaller, even though its
-custom metadata could have contained a file listing the installed
-files.  \code{Pip}, on the other hand, extended \code{Setuptools}'
-metadata to record installed files, and is therefore able to
-uninstall.  But that's yet another custom set of metadata, which means
-that a single Python installation may contain up to four different
-flavours of metadata for each installed project:
+%% \code{Setuptools} did not provide an uninstaller, even though its
+%% custom metadata could have contained a file listing the installed
+%% files.  \code{Pip}, on the other hand, extended \code{Setuptools}'
+%% metadata to record installed files, and is therefore able to
+%% uninstall.  But that's yet another custom set of metadata, which means
+%% that a single Python installation may contain up to four different
+%% flavours of metadata for each installed project:
+\code{Setuptools}にはアンインストーラが存在しない。
+インストールするファイルの一覧をカスタムメタデータとして持たせることもできるというのに。
+一方\code{Pip}は、\code{Setuptools}のメタデータを拡張して
+インストールしたファイルを記録できるようして、
+アンインストールができるようになった。
+しかし、これまたMetadataの亜種である。ということは、
+Pythonのプロジェクトをインストールすると、ひとつのプロジェクトに対して
+最大四種類のメタデータが存在することになってしまう。
 
 \begin{aosaitemize}
 
-  \item \code{Distutils}' \code{egg-info}, which is a single metadata
-  file.
+  %% \item \code{Distutils}' \code{egg-info}, which is a single metadata
+  %% file.
+  \item \code{Distutils}の\code{egg-info}。これは単一のメタデータファイル。
 
-  \item \code{Setuptools}' \code{egg-info}, which is a directory
-  containing the metadata and extra \code{Setuptools} specific
-  options.
+  %% \item \code{Setuptools}' \code{egg-info}, which is a directory
+  %% containing the metadata and extra \code{Setuptools} specific
+  %% options.
+  \item \code{Setuptools}の\code{egg-info}。これはディレクトリで、
+  メタデータのほかに\code{Setuptools}専用のオプションが追加されている。
 
-  \item \code{Pip}'s \code{egg-info}, which is an extended version of
-  the previous.
+  %% \item \code{Pip}'s \code{egg-info}, which is an extended version of
+  %% the previous.
+  \item \code{Pip}の\code{egg-info}。これは\code{Setuptools}
+  のメタデータをさらに拡張したもの。
 
-  \item Whatever the hosting packaging system creates.
+  %% \item Whatever the hosting packaging system creates.
+  \item インストール先のシステムのパッケージ管理システムが作るもの。
 
 \end{aosaitemize}
 
@@ -1015,9 +1088,11 @@ flavours of metadata for each installed project:
 %% \begin{aosasect2}{What About Data Files?}
 \begin{aosasect2}{データファイルとは?}
 
-In \code{Distutils}, data files can be installed anywhere on the
-system.  If you define some package data files in \code{setup.py}
-script like this:
+%% In \code{Distutils}, data files can be installed anywhere on the
+%% system.  If you define some package data files in \code{setup.py}
+%% script like this:
+\code{Distutils}では、データファイルはシステム上の好きなところにインストールできる。
+何かのパッケージのデータファイルを\code{setup.py}で次のように定義したとしよう。
 
 \begin{verbatim}
 setup(...,
@@ -1027,13 +1102,18 @@ setup(...,
   )
 \end{verbatim}
 
-\noindent then all files with the \code{.dat} extension in the \code{mypkg}
-project will be included in the distribution and eventually installed
-along with the Python modules in the Python installation.
+%% \noindent then all files with the \code{.dat} extension in the \code{mypkg}
+%% project will be included in the distribution and eventually installed
+%% along with the Python modules in the Python installation.
+\noindent
+このとき、\code{mypkg}プロジェクトで拡張子が\code{.dat}のファイルがすべて
+ディストリビューションに含まれ、インストール時にはPythonモジュールと同じ場所にインストールされる。
 
-For data files that need to be installed outside the Python distribution, 
-there's another option that stores files in the archive but puts them in defined
-locations:
+%% For data files that need to be installed outside the Python distribution, 
+%% there's another option that stores files in the archive but puts them in defined
+%% locations:
+Pythonディストリビューションとは別の場所にインストールする必要のあるデータファイル
+用には、別のオプションがある。アーカイブ内のファイルを、指定した場所に配置するためのオプションだ。
 
 \begin{verbatim}
 setup(...,
@@ -1043,28 +1123,41 @@ setup(...,
     )
 \end{verbatim}
 
+%% \noindent
+%% This is terrible news for OS packagers for several reasons:
 \noindent
-This is terrible news for OS packagers for several reasons:
+これ、OSのパッケージャにとっては悪夢のように聞こえるだろう。だって、
 
 \begin{aosaitemize}
 
-  \item Data files are not part of the metadata, so packagers need to read
-  \code{setup.py} and sometimes dive into the project's code.
+  %% \item Data files are not part of the metadata, so packagers need to read
+  %% \code{setup.py} and sometimes dive into the project's code.
+  \item データファイルはメタデータに含まれないので、パッケージャは
+  \code{setup.py}を読んだりプロジェクトのコードを追ったりしなければいけない。
 
-  \item The developer should not be the one deciding where data files
-  should land on a target system.
+  %% \item The developer should not be the one deciding where data files
+  %% should land on a target system.
+  \item 個々のシステムでデータファイルをどこに置くかなんて、開発者に決めさせることじゃないよね。
 
-  \item There are no categories for these data files: images, \code{man}
-  pages, and everything else are all treated the same way.
+  %% \item There are no categories for these data files: images, \code{man}
+  %% pages, and everything else are all treated the same way.
+  \item データファイルをカテゴリ分けできない。画像も\code{man}ページもその他のデータも、
+  みんな同じ扱いになってしまう。
 
 \end{aosaitemize}
 
-A packager who needs to repackage a project with such a file has no
-choice but to patch the \code{setup.py} file so that it works as
-expected for her platform.  To do that, she must review the code
-and change every line that uses those files, since the developer made
-an assumption about their location.  \code{Setuptools} and \code{Pip}
-did not improve this.
+%% A packager who needs to repackage a project with such a file has no
+%% choice but to patch the \code{setup.py} file so that it works as
+%% expected for her platform.  To do that, she must review the code
+%% and change every line that uses those files, since the developer made
+%% an assumption about their location.  \code{Setuptools} and \code{Pip}
+%% did not improve this.
+そんなファイルを含むプロジェクトを再パッケージしようとしたパッケージャは、
+\code{setup.py}ファイルに手を入れて自分のプラットフォームでも動くようにする以外の道がない。
+\code{setup.py}ファイルに手を入れるには、コードを追って
+データファイルを使っているすべての場所を変更しないといけない。
+というのも、開発者はデータがその場所にあるという前提でコードを書いているからである。
+\code{Setuptools}や\code{Pip}を使ったところで状況は変わらない。
 
 \end{aosasect2}
 
