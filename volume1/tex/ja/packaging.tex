@@ -1166,85 +1166,119 @@ setup(...,
 %% \begin{aosasect1}{Improved Standards}
 \begin{aosasect1}{標準規約の改良}
 
-So we ended up with with a mixed up and confused packaging
-environment, where everything is driven by a single Python module,
-with incomplete metadata and no way to describe everything a project
-contains.  Here's what we're doing to make things better.
+%% So we ended up with with a mixed up and confused packaging
+%% environment, where everything is driven by a single Python module,
+%% with incomplete metadata and no way to describe everything a project
+%% contains.  Here's what we're doing to make things better.
+というわけで、いろんなパッケージング環境が混在するややこしい状態を何とかすることにした。
+ひとつのPythonモジュールですべての作業をこなしたり、メタデータが不完全だったり、
+プロジェクトの内容を完全に記述する方法がなかったり、そんなのはもういやだ。
+そこで私たちが何をどう改善したのかをまとめた。
 
 %% \begin{aosasect2}{Metadata}
 \begin{aosasect2}{メタデータ}
 
-The first step is to fix our \code{Metadata} standard.  PEP~345
-defines a new version that includes:
+%% The first step is to fix our \code{Metadata} standard.  PEP~345
+%% defines a new version that includes:
+まず最初に取り組んだのは、\code{Metadata}の標準規格を修正することだった。
+PEP~345で定義した新しいバージョンには以下の内容が含まれる。
 
 \begin{aosaitemize}
 
-  \item a saner way to define versions
+  %% \item a saner way to define versions
+  \item まともな方法でのバージョン定義
 
-  \item project-level dependencies
+  %% \item project-level dependencies
+  \item プロジェクトレベルの依存関係
 
-  \item a static way to define platform-specific values
+  %% \item a static way to define platform-specific values
+  \item プラットフォーム固有の値を静的に定義する方法
 
 \end{aosaitemize}
 
 %% \begin{aosasect3}{Version}
 \begin{aosasect3}{バージョン}
 
-One goal of the metadata standard is to make sure that all tools that
-operate on Python projects are able to classify them the same
-way. For versions, it means that every tool should be able to know
-that ``1.1'' comes after ``1.0''. But if project have custom
-versioning schemes, this becomes much harder.
+%% One goal of the metadata standard is to make sure that all tools that
+%% operate on Python projects are able to classify them the same
+%% way. For versions, it means that every tool should be able to know
+%% that ``1.1'' comes after ``1.0''. But if project have custom
+%% versioning schemes, this becomes much harder.
+メタデータの標準化のひとつの目標は、Pythonプロジェクトを扱うすべてのツールが
+同じ方法でメタデータを扱えるようにすることだ。バージョン番号に関して言うと、
+バージョン``1.1''のほうが``1.0''より新しいということを
+すべてのツールがわかるようにしなければいけない。
+でも、プロジェクトによってバージョンの表し方が異なると、とたんにこの目標は困難になる。
 
-The only way to ensure consistent versioning is to publish a standard
-that projects will have to follow.  The scheme we chose is a
-classical sequence-based scheme.  As defined in PEP~386, its format
-is:
+%% The only way to ensure consistent versioning is to publish a standard
+%% that projects will have to follow.  The scheme we chose is a
+%% classical sequence-based scheme.  As defined in PEP~386, its format
+%% is:
+バージョンの表し方を統一する唯一の方法は、標準規格を公開してそれに従わせることだ。
+私たちが選んだのは、昔ながらの連番ベースの方式だった。
+PEP~386で定義したとおり、その書式は次のようになる。
 
 \begin{verbatim}
 N.N[.N]+[{a|b|c|rc}N[.N]+][.postN][.devN]
 \end{verbatim}
 
-\noindent where:
+%% \noindent where:
+\noindent
+ここで、
 
 \begin{aosaitemize}
 
-  \item \emph{N} is an integer. You can use as many Ns as you want and
-  separate them by dots, as long as there are at least two
-  (MAJOR.MINOR).
+  %% \item \emph{N} is an integer. You can use as many Ns as you want and
+  %% separate them by dots, as long as there are at least two
+  %% (MAJOR.MINOR).
+  \item \emph{N}は整数値。
+  ドットで区切って好きなだけNをつなげることができる。ただし、少なくともふたつ(MAJOR.MINOR)以上は必要。
 
-  \item \emph{a}, \emph{b}, \emph{c} and \emph{rc} are \emph{alpha},
-  \emph{beta} and \emph{release candidate} markers. They are followed
-  by an integer. Release candidates have two markers because we wanted
-  the scheme to be compatible with Python, which uses \emph{rc}. But
-  we find \emph{c} simpler.
+  %% \item \emph{a}, \emph{b}, \emph{c} and \emph{rc} are \emph{alpha},
+  %% \emph{beta} and \emph{release candidate} markers. They are followed
+  %% by an integer. Release candidates have two markers because we wanted
+  %% the scheme to be compatible with Python, which uses \emph{rc}. But
+  %% we find \emph{c} simpler.
+  \item \emph{a}、\emph{b}、\emph{c}および\emph{rc}は、それぞれ\emph{alpha}、\emph{beta}、\emph{リリース候補}を表すマーク。
+  その後に数字を続ける。リリース候補を表すマークが\emph{c}と\emph{rc}の二種類あるのは、Python自身が\emph{rc}
+  を使っていることに合わせたものである。私たちは、\emph{c}のほうがよりシンプルだと考える。
 
-  \item \emph{dev} followed by a number is a dev marker.
+  %% \item \emph{dev} followed by a number is a dev marker.
+  \item \emph{dev}の後に数字を続けて、開発版を表す。
 
-  \item \emph{post} followed by a number is a post-release marker.
+  %% \item \emph{post} followed by a number is a post-release marker.
+  \item \emph{post}の後に数字を続けて、ポストリリース版を表す。
 
 \end{aosaitemize}
 
+%% \noindent
+%% Depending on the project release process, dev or post markers can be used for
+%% all intermediate versions between two final releases. Most process use
+%% dev markers.
 \noindent
-Depending on the project release process, dev or post markers can be used for
-all intermediate versions between two final releases. Most process use
-dev markers.
+プロジェクトのリリース手順によっては、最終版の二つのリリースの間にある中間バージョンに対して
+devあるいはpostを使える。たいていのプロジェクトではdevを使っている。
 
 \pagebreak
 
-Following this scheme, PEP~386 defines a strict ordering:
+%% Following this scheme, PEP~386 defines a strict ordering:
+この方針に則って、PEP~386では厳密な順番を定義している。
 
 \begin{aosaitemize}
 
+  %% \item alpha {\textless} beta {\textless} rc {\textless} final
   \item alpha {\textless} beta {\textless} rc {\textless} final
 
-  \item dev {\textless} non-dev {\textless} post, where non-dev can be a alpha, beta,
-  rc or final
+  %% \item dev {\textless} non-dev {\textless} post, where non-dev can be a alpha, beta,
+  %% rc or final
+  \item dev {\textless} non-dev {\textless} post、ここでnon-devとはalpha、beta、rcあるいはfinalを指す
 
 \end{aosaitemize}
 
+%% \noindent
+%% Here's a full ordering example:
 \noindent
-Here's a full ordering example:
+例を示そう。
 
 \begin{verbatim}
 1.0a1 < 1.0a2.dev456 < 1.0a2 < 1.0a2.1.dev456
@@ -1253,30 +1287,42 @@ Here's a full ordering example:
       < 1.0.post456.dev34 < 1.0.post456
 \end{verbatim}
 
+%% \noindent
+%% The goal of this scheme is to make it easy for other packaging systems
+%% to translate Python projects' versions into their own schemes.  PyPI
+%% now rejects any projects that upload PEP~345 metadata with version numbers
+%% that don't follow PEP~386.
 \noindent
-The goal of this scheme is to make it easy for other packaging systems
-to translate Python projects' versions into their own schemes.  PyPI
-now rejects any projects that upload PEP~345 metadata with version numbers
-that don't follow PEP~386.
+この方針の目標は、他のパッケージングシステムがPythonのプロジェクトのバージョンを自分たちの管理する方式に変換しやすくすることだ。
+今やPyPIは、PEP~345のメタデータをアップロードしたときに
+PEP~386に従わないバージョン番号をつけているプロジェクトを拒否するようになった。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Dependencies}
 \begin{aosasect3}{依存関係}
 
-PEP~345 defines three new fields that replace PEP~314 \code{Requires},
-\code{Provides}, and \code{Obsoletes}. Those fields are
-\code{Requires-Dist}, \code{Provides-Dist}, and \code{Obsoletes-Dist},
-and can be used multiple times in the metadata.
+%% PEP~345 defines three new fields that replace PEP~314 \code{Requires},
+%% \code{Provides}, and \code{Obsoletes}. Those fields are
+%% \code{Requires-Dist}, \code{Provides-Dist}, and \code{Obsoletes-Dist},
+%% and can be used multiple times in the metadata.
+PEP~345では新たに三種類のフィールドを定義した。PEP~314の\code{Requires}、\code{Provides}そして\code{Obsoletes}
+に取って代わるものだ。その名は\code{Requires-Dist}、\code{Provides-Dist}そして
+\code{Obsoletes-Dist}で、メタデータの中で複数回使える。
 
-For \code{Requires-Dist}, each entry contains a string naming some
-other \code{Distutils} project required by this distribution.  The
-format of a requirement string is identical to that of a
-\code{Distutils} project name (e.g., as found in the \code{Name} field)
-optionally followed by a version declaration within parentheses.
-These \code{Distutils} project names should correspond to names as
-found at PyPI, and version declarations must follow the rules
-described in PEP~386. Some example are:
+%% For \code{Requires-Dist}, each entry contains a string naming some
+%% other \code{Distutils} project required by this distribution.  The
+%% format of a requirement string is identical to that of a
+%% \code{Distutils} project name (e.g., as found in the \code{Name} field)
+%% optionally followed by a version declaration within parentheses.
+%% These \code{Distutils} project names should correspond to names as
+%% found at PyPI, and version declarations must follow the rules
+%% described in PEP~386. Some example are:
+\code{Requires-Dist}では、このディストリビューションが必要とする他の\code{Distutils}
+プロジェクトの名前を文字列で指定する。文字列の書式は\code{Distutils}のプロジェクト名
+(つまり\code{Name}フィールドにあるもの)と同じで、その後に続けて括弧内にバージョンを宣言できる。
+\code{Distutils}のプロジェクト名はPyPIで探すときの名前に対応し、バージョンの宣言方法は
+PEP~386のルールに従う。いくつか例を示す。
 
 \begin{verbatim}
 Requires-Dist: pkginfo
@@ -1284,17 +1330,24 @@ Requires-Dist: PasteDeploy
 Requires-Dist: zope.interface (>3.5.0)
 \end{verbatim}
 
-\noindent \code{Provides-Dist} is used to define extra names contained in the
-project.  It's useful when a project wants to merge with another
-project. For example the ZODB project can include the
-\code{transaction} project and state:
+%% \noindent \code{Provides-Dist} is used to define extra names contained in the
+%% project.  It's useful when a project wants to merge with another
+%% project. For example the ZODB project can include the
+%% \code{transaction} project and state:
+\noindent
+\code{Provides-Dist}は、このプロジェクトに含まれる追加の名前を定義する。
+あるプロジェクトを別のプロジェクトと混ぜたい場合に有用だ。
+たとえばZODBプロジェクトには\code{transaction}プロジェクトを含めることができ、
+その場合は次のように宣言する。
 
 \begin{verbatim}
 Provides-Dist: transaction
 \end{verbatim}
 
-\noindent \code{Obsoletes-Dist} is useful to mark another project as an obsolete
-version:
+%% \noindent \code{Obsoletes-Dist} is useful to mark another project as an obsolete
+%% version:
+\noindent
+\code{Obsoletes-Dist}は、別のプロジェクトを非推奨扱いにできる。
 
 \begin{verbatim}
 Obsoletes-Dist: OldName
@@ -1305,9 +1358,11 @@ Obsoletes-Dist: OldName
 %% \begin{aosasect3}{Environment Markers}
 \begin{aosasect3}{環境マーカー}
 
-An environment marker is a marker that can be added at the end of a
-field after a semicolon to add a condition about the execution
-environment.  Some examples are:
+%% An environment marker is a marker that can be added at the end of a
+%% field after a semicolon to add a condition about the execution
+%% environment.  Some examples are:
+環境マーカーは、フィールドの最後にセミコロンに続けて追加するマークで、
+実行環境に関する条件を指定する。いくつか例を示す。
 
 \begin{verbatim}
 Requires-Dist: pywin32 (>1.0); sys.platform == 'win32'
@@ -1317,11 +1372,15 @@ Requires-Dist: bar; python_version == '2.4' or python_version == '2.5'
 Requires-External: libxslt; 'linux' in sys.platform
 \end{verbatim}
 
-The micro-language for environment markers is deliberately kept simple
-enough for non-Python programmers to understand: it compares strings
-with the \code{==} and \code{in} operators (and their opposites), and
-allows the usual Boolean combinations.  The fields in PEP~345 that can
-use this marker are:
+%% The micro-language for environment markers is deliberately kept simple
+%% enough for non-Python programmers to understand: it compares strings
+%% with the \code{==} and \code{in} operators (and their opposites), and
+%% allows the usual Boolean combinations.  The fields in PEP~345 that can
+%% use this marker are:
+環境マーカー用のマイクロ言語は、意図的にシンプルにしている。Pythonプログラマー
+以外にも理解してもらえるようにするためだ。文字列は\code{==}演算子と\code{in}
+演算子(そしてそれぞれの逆の演算子)で比較し、通常の論理演算子が使える。
+PEP~345のフィールドの中でこのマーカーが使えるものは、次のとおりである。
 
 \begin{aosaitemize}
   \item \code{Requires-Python}
