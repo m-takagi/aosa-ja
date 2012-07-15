@@ -1396,80 +1396,134 @@ PEP~345のフィールドの中でこのマーカーが使えるものは、次�
 \end{aosasect2}
 
 %% \begin{aosasect2}{What's Installed?}
-\begin{aosasect2}{何がインストールされるのか?}
+\begin{aosasect2}{何がインストールされたのか?}
 
-Having a single installation format shared among all Python tools is
-mandatory for interoperability. If we want Installer A to detect that
-Installer B has previously installed project Foo, they both need to
-share and update the same database of installed projects.
+%% Having a single installation format shared among all Python tools is
+%% mandatory for interoperability. If we want Installer A to detect that
+%% Installer B has previously installed project Foo, they both need to
+%% share and update the same database of installed projects.
+単一のインストール形式を、すべてのPythonツール群で共有する。
+相互運用性を確保するためには、これが必須である。
+たとえば、インストーラーBが以前にプロジェクトFooをインストールしたという事実を
+インストーラーAで検出できるようにしたければ、インストールされたプロジェクトの
+情報を同じデータベースで共有しなければいけない。
 
-Of course, users should ideally use a single installer in their
-system, but they may want to switch to a newer installer that has
-specific features. For instance, Mac OS X ships \code{Setuptools}, so
-users automatically have the \code{easy\_install} script. If they
-want to switch to a newer tool, they will need it to be backward
-compatible with the previous one.
+%% Of course, users should ideally use a single installer in their
+%% system, but they may want to switch to a newer installer that has
+%% specific features. For instance, Mac OS X ships \code{Setuptools}, so
+%% users automatically have the \code{easy\_install} script. If they
+%% want to switch to a newer tool, they will need it to be backward
+%% compatible with the previous one.
+もちろん、あれこれ使わずにひとつのインストーラーで揃えるのが理想ではある。
+でも、目新しい機能を搭載した新しいインストーラーが登場したら、つい使ってしまいたくなるものだ。
+たとえば、Mac OS Xには標準で\code{Setuptools}が含まれているので、ユーザーは
+自動的に\code{easy\_install}スクリプトを使えるようになる。
+ユーザーが新しいツールを使おうと思ったら、以前のツールとの互換性が必要となる。
 
-Another problem when using a Python installer on a platform that has a
-packaging system like RPM is that there is no way to inform the system
-that a project is being installed. What's worse, even if the Python
-installer could somehow ping the central packaging system, we would
-need to have a mapping between the Python metadata and the system
-metadata. The name of the project, for instance, may be different for
-each. That can occur for several reasons. The most common one is 
-a conflict name: another project outside the Python land already uses
-the same name for the RPM. Another cause is that the name used include
-a \code{python} prefix that breaks the convention of the platform.
-For example, if you name your project \code{foo-python}, there are high
-chances that the Fedora RPM will be called \code{python-foo}.
+%% Another problem when using a Python installer on a platform that has a
+%% packaging system like RPM is that there is no way to inform the system
+%% that a project is being installed. What's worse, even if the Python
+%% installer could somehow ping the central packaging system, we would
+%% need to have a mapping between the Python metadata and the system
+%% metadata. The name of the project, for instance, may be different for
+%% each. That can occur for several reasons. The most common one is 
+%% a conflict name: another project outside the Python land already uses
+%% the same name for the RPM. Another cause is that the name used include
+%% a \code{python} prefix that breaks the convention of the platform.
+%% For example, if you name your project \code{foo-python}, there are high
+%% chances that the Fedora RPM will be called \code{python-foo}.
+別の問題もある。RPMなどのパッケージ管理システムを持つプラットフォームで
+Pythonインストーラーを使ったときに、何かのプロジェクトがインストールされたことを
+システム側に伝える方法がないのだ。さらに悪いことに、
+たとえPythonインストーラー側から何らかの方法でシステムのパッケージ管理システム
+に通知できたとしても、Pythonのメタデータとシステムのメタデータの間で
+マッピングが必要となる。たとえばプロジェクト名ひとつとっても
+お互い違うこともある。その理由はいくつかあって、
+いちばんありがちなのは名前の衝突だ。Python界とは無関係の別のプロジェクトが、
+そのプロジェクトと同じ名前のRPMを作っている場合などである。
+それ以外にあり得るのは、\code{python}のプレフィックスを含む名前が
+プラットフォーム側の命名規約と衝突してしまうという例だ。
+たとえば\code{foo-python}というプロジェクトを作ったとしよう。
+FedoraのRPMなら、高い確率でそれは\code{python-foo}という名前になるだろう。
 
-One way to avoid this problem is to leave the global Python
-installation alone, managed by the central packaging system, and work
-in an isolated environment.  Tools like \code{Virtualenv} allows this.
+%% One way to avoid this problem is to leave the global Python
+%% installation alone, managed by the central packaging system, and work
+%% in an isolated environment.  Tools like \code{Virtualenv} allows this.
+この問題を回避する方法のひとつは、システム全体で使うPythonの環境は
+システムのパッケージングシステムにまかせておいて、それとは別に隔離した環境で作業することだ。
+\code{Virtualenv}のようなツールを使えば、それができる。
 
-In any case, we do need to have a single installation format in Python
-because interoperability is also a concern for other packaging systems
-when they install themselves Python projects.  Once a third-party 
-packaging system has registered a newly installed project in its 
-own database on the system, it needs to generate the right metadata 
-for the Python installaton itself, so projects appear to be installed 
-to Python installers or any APIs that query the Python installation.
+%% In any case, we do need to have a single installation format in Python
+%% because interoperability is also a concern for other packaging systems
+%% when they install themselves Python projects.  Once a third-party 
+%% packaging system has registered a newly installed project in its 
+%% own database on the system, it needs to generate the right metadata 
+%% for the Python installaton itself, so projects appear to be installed 
+%% to Python installers or any APIs that query the Python installation.
+いずれにせよ、Pythonの世界でのインストーラーのフォーマットを統一する必要がある。
+だって、他のパッケージングシステムがPythonのプロジェクトをインストールするときにも、
+相互運用性は重要になるからだ。サードパーティのパッケージングシステムが
+新しいPythonプロジェクトをインストールして自前のデータベースに登録したら、
+何とかしてPython自身に正しいメタデータを伝える必要がある。
+そうすれば、Pythonインストーラー(あるいはPythonプロジェクトのインストール状態を
+調べる何らかのAPI)からもそのプロジェクトがインストールされたことがわかるようになる。
 
-The metadata mapping issue can be addressed in that case: since an RPM
-knows which Python projects it wraps, it can generate the proper
-Python-level metadata. For instance, it knows that
-\code{python26-webob} is called \code{WebOb} in the PyPI ecosystem.
+%% The metadata mapping issue can be addressed in that case: since an RPM
+%% knows which Python projects it wraps, it can generate the proper
+%% Python-level metadata. For instance, it knows that
+%% \code{python26-webob} is called \code{WebOb} in the PyPI ecosystem.
+メタデータのマッピングができれば、こんなときにも対応できる。
+RPMは自身が管理するPythonプロジェクトを知っているので、
+そこから適切なPythonメタデータを生成できるようになるのだ。
+たとえば、\code{python26-webob}はPyPIの世界では\code{WebOb}と呼ばれているといったマッピングだ。
 
-Back to our standard: PEP~376 defines a standard for installed
-packages whose format is quite similar to those used by
-\code{Setuptools} and \code{Pip}.  This structure is a directory with
-a \code{dist-info} extension that contains:
+%% Back to our standard: PEP~376 defines a standard for installed
+%% packages whose format is quite similar to those used by
+%% \code{Setuptools} and \code{Pip}.  This structure is a directory with
+%% a \code{dist-info} extension that contains:
+さて、標準化の話題に戻る。PEP~376では、インストール済みパッケージの標準フォーマットを定義した。
+\code{Setuptools}や\code{Pip}で使っているフォーマットと似た形式である。
+拡張子\code{dist-info}のディレクトリに、このような内容を含める。
 
 \begin{aosaitemize}
 
-  \item \code{METADATA}: the metadata, as described in PEP~345, PEP~314
-  and PEP~241.
+  %% \item \code{METADATA}: the metadata, as described in PEP~345, PEP~314
+  %% and PEP~241.
+  \item \code{METADATA}: PEP~345、PEP~314およびPEP~241で記されたメタデータ。
 
-  \item \code{RECORD}: the list of installed files in a csv-like format.
+  %% \item \code{RECORD}: the list of installed files in a csv-like format.
+  \item \code{RECORD}: インストールされたファイルの一覧をcsv風の書式で表したもの。
 
-  \item \code{INSTALLER}: the name of the tool used to install the
-  project.
+  %% \item \code{INSTALLER}: the name of the tool used to install the
+  %% project.
+  \item \code{INSTALLER}: このプロジェクトをインストールするときに使ったツールの名前。
 
-  \item \code{REQUESTED}: the presence of this file indicates that the
-  project installation was explicitly requested (i.e., not installed
-  as a dependency).
+  %% \item \code{REQUESTED}: the presence of this file indicates that the
+  %% project installation was explicitly requested (i.e., not installed
+  %% as a dependency).
+  \item \code{REQUESTED}: このファイルが存在すれば、そのプロジェクトは明示的にインストールされたものだということを表す
+             (依存関係を満たすために自動的にインストールされた場合は、このファイルは存在しない)。
 
 \end{aosaitemize}
 
+%% \noindent
+%% Once all tools out there understand this format, we'll be able to
+%% manage projects in Python without depending on a particular installer
+%% and its features.  Also, since PEP~376 defines the metadata as a
+%% directory, it will be easy to add new files to extend it.  As a matter
+%% of fact, a new metadata file called \code{RESOURCES}, described in the
+%% next section, might be added in a near future without modifying
+%% PEP~376. Eventually, if this new file turns out to be useful for all
+%% tools, it will be added to the PEP.
 \noindent
-Once all tools out there understand this format, we'll be able to
-manage projects in Python without depending on a particular installer
-and its features.  Also, since PEP~376 defines the metadata as a
-directory, it will be easy to add new files to extend it.  As a matter
-of fact, a new metadata file called \code{RESOURCES}, described in the
-next section, might be added in a near future without modifying
-PEP~376. Eventually, if this new file turns out to be useful for all
-tools, it will be added to the PEP.
+すべてのツールがこのフォーマットに対応するようになれば、
+特定のインストーラーやその機能に頼らずにPythonのプロジェクトを管理できるようになる。
+また、PEP~376ではメタデータをディレクトリとして定義しているので、
+メタデータを拡張するときにも単に新しいファイルを追加するだけで済む。
+実際、次のセクションで解説する新たなメタデータファイル\code{RESOURCES}
+は、近い将来に追加される予定だ。これを追加してもPEP~376には手を加えない。
+最終的にこのファイルがすべてのツールにとって有用だとわかれば、
+そのときにPEPに追加されることだろう。
 
 \end{aosasect2}
 
