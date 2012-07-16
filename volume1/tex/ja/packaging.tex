@@ -1530,18 +1530,24 @@ RPMは自身が管理するPythonプロジェクトを知っているので、
 %% \begin{aosasect2}{Architecture of Data Files}
 \begin{aosasect2}{データファイルのアーキテクチャ}
 
-As described earlier, we need to let the packager decide where to put
-data files during installation without breaking the developer's
-code. At the same time, the developer must be able to work with data
-files without having to worry about their location.  Our solution is
-the usual one: indirection.
+%% As described earlier, we need to let the packager decide where to put
+%% data files during installation without breaking the developer's
+%% code. At the same time, the developer must be able to work with data
+%% files without having to worry about their location.  Our solution is
+%% the usual one: indirection.
+先述の通り、インストール時のデータファイルの置き場所はパッケージャーが自由に決められるようにする必要がある。
+そして、どこに置いても開発者の書いたコードが動くようにもしなければいけない。
+同時に、開発者も、データファイルの置き場所がどこであるかを意識せずに作業できるようでなければいけない。
+そこで私たちがどうしたか。よくある手段、つまり間接参照だ。
 
 %% \begin{aosasect3}{Using Data Files}
 \begin{aosasect3}{データファイルの利用}
 
-Suppose your \code{MPTools} application needs to work with a
-configuration file.  The developer will put that file in a Python
-package and use \code{\_\_file\_\_} to reach it:
+%% Suppose your \code{MPTools} application needs to work with a
+%% configuration file.  The developer will put that file in a Python
+%% package and use \code{\_\_file\_\_} to reach it:
+\code{MPTools}アプリケーションで設定ファイルが必要になったとする。開発者は設定ファイルをPython
+パッケージの中に置き、\code{\_\_file\_\_}で参照しようとするだろう。
 
 \begin{verbatim}
 import os
@@ -1550,16 +1556,26 @@ here = os.path.dirname(__file__)
 cfg = open(os.path.join(here, 'config', 'mopy.cfg'))
 \end{verbatim}
 
-\noindent This implies that configuration files are installed like code, and
-that the developer \emph{must} place it alongside her code: in this
-example, in a subdirectory called \code{config}.
+%% \noindent This implies that configuration files are installed like code, and
+%% that the developer \emph{must} place it alongside her code: in this
+%% example, in a subdirectory called \code{config}.
+\noindent
+これは、設定ファイルがコードと同じようにインストールされており、かつ開発者が
+設定ファイルをコードと同じ場所に\emph{置かないといけない}ということを前提としている。
+この例では\code{config}というディレクトリがあるものと見なしている。
 
-The new architecture of data files we have designed
-uses the project tree as the root
-of all files, and allows access to any file in the tree, whether it is
-located in a Python package or a simple directory.  This allowed
-developers to create a dedicated directory for data files and access
-them using \code{pkgutil.open}:
+%% The new architecture of data files we have designed
+%% uses the project tree as the root
+%% of all files, and allows access to any file in the tree, whether it is
+%% located in a Python package or a simple directory.  This allowed
+%% developers to create a dedicated directory for data files and access
+%% them using \code{pkgutil.open}:
+データファイルの新たなアーキテクチャを設計する際には、このように考えた。
+プロジェクトツリーをすべてのファイルのルートとして使い、
+ツリー内のすべてのファイルに対して、
+Pythonパッケージであっても単純なディレクトリであってもアクセスできるようにした。
+これで、開発者はデータファイル専用のディレクトリを作れるようになり、そこに\code{pkgutil.open}
+でアクセスできるようになったのだ。
 
 \begin{verbatim}
 import os
@@ -1569,38 +1585,56 @@ import pkgutil
 cfg = pkgutil.open('MPTools', 'config/mopy.cfg')
 \end{verbatim}
 
-\noindent \code{pkgutil.open} looks for the project metadata and see if it
-contains a \code{RESOURCES} file. This is a simple map of files to
-locations that the system may contain:
+%% \noindent \code{pkgutil.open} looks for the project metadata and see if it
+%% contains a \code{RESOURCES} file. This is a simple map of files to
+%% locations that the system may contain:
+\noindent
+\code{pkgutil.open}は、プロジェクトのメタデータを読んで\code{RESOURCES}ファイルが含まれているかどうかを調べる。
+このファイルは、システムに含まれるファイルの場所をまとめたシンプルなマップだ。
 
 \begin{verbatim}
 config/mopy.cfg {confdir}/{distribution.name}
 \end{verbatim}
 
-\noindent Here the \code{{confdir}} variable points to the
-system's configuration directory, and \code{{distribution.name}}
-contains the name of the Python project as found in the metadata.
+%% \noindent Here the \code{{confdir}} variable points to the
+%% system's configuration directory, and \code{{distribution.name}}
+%% contains the name of the Python project as found in the metadata.
+\noindent
+ここで、\code{{confdir}}が指すのはシステムの設定ディレクトリであり、
+\code{{distribution.name}}に含まれるのはメタデータに書かれたPythonプロジェクト名である。
 
-\aosafigure[300pt]{../images/packaging/find-file.eps}{Finding a File}{fig.packaging.findfile}
+%% \aosafigure[300pt]{../images/packaging/find-file.eps}{Finding a File}{fig.packaging.findfile}
+\aosafigure[300pt]{../images/packaging/find-file.eps}{ファイルを探す流れ}{fig.packaging.findfile}
 
-As long as this \code{RESOURCES} metadata file is created at
-installation time, the API will find the location of \code{mopy.cfg}
-for the developer.  And since \code{config/mopy.cfg} is the path
-relative to the project tree, it means that we can also offer a
-development mode where the metadata for the project are generated
-in-place and added in the lookup paths for \code{pkgutil}.
+%% As long as this \code{RESOURCES} metadata file is created at
+%% installation time, the API will find the location of \code{mopy.cfg}
+%% for the developer.  And since \code{config/mopy.cfg} is the path
+%% relative to the project tree, it means that we can also offer a
+%% development mode where the metadata for the project are generated
+%% in-place and added in the lookup paths for \code{pkgutil}.
+インストール時に\code{RESOURCES}ファイルを作っておきさえすれば、
+このAPIが\code{mopy.cfg}の場所を見つけてくれるようになる。
+また、\code{config/mopy.cfg}はプロジェクトのツリーからの相対パスなので、
+開発モードも用意できる。開発モードのときにはプロジェクトのメタデータをその場で生成し、
+\code{pkgutil}用の検索パスを追加すればよい。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Declaring Data Files}
 \begin{aosasect3}{データファイルの宣言}
 
-In practice, a project can define where data files should land by
-defining a mapper in their \code{setup.cfg} file.  A mapper is a
-list of \code{(glob-style pattern, target)} tuples. Each pattern
-points to one of several files in the project tree, while the target
-is an installation path that may contain variables in brackets.  For
-example, \code{MPTools}'s \code{setup.cfg} could look like this:
+%% In practice, a project can define where data files should land by
+%% defining a mapper in their \code{setup.cfg} file.  A mapper is a
+%% list of \code{(glob-style pattern, target)} tuples. Each pattern
+%% points to one of several files in the project tree, while the target
+%% is an installation path that may contain variables in brackets.  For
+%% example, \code{MPTools}'s \code{setup.cfg} could look like this:
+実際には、データファイルをどこに配置するのかはプロジェクトで定義できる。
+\code{setup.cfg}ファイルでマッパーを定義すればよい。
+マッパーというのは、\code{(glob-style pattern, target)}からなるタプルのリストである。
+各パターンがプロジェクトツリー内のいずれかのファイルを指し、
+ターゲットにはインストール先のパスを指定する。このパスには、ブラケットで囲んだ変数を含めることができる。
+たとえば\code{MPTools}の\code{setup.cfg}は次のようになる。
 
 \begin{verbatim}
 [files]
@@ -1609,17 +1643,26 @@ resources =
         images/*.jpg    {datadir}/{application.name}/
 \end{verbatim}
 
+%% \noindent
+%% The \code{sysconfig} module will provide and document a specific list
+%% of variables that can be used, and default values for each platform.
+%% For example \code{{confdir}} is \code{/etc} on Linux.  Installers can
+%% therefore use this mapper in conjunction with \code{sysconfig} at
+%% installation time to know where the files should be placed.
+%% Eventually, they will generate the \code{RESOURCES} file mentioned
+%% earlier in the installed metadata so \code{pkgutil} can find back the
+%% files.
 \noindent
-The \code{sysconfig} module will provide and document a specific list
-of variables that can be used, and default values for each platform.
-For example \code{{confdir}} is \code{/etc} on Linux.  Installers can
-therefore use this mapper in conjunction with \code{sysconfig} at
-installation time to know where the files should be placed.
-Eventually, they will generate the \code{RESOURCES} file mentioned
-earlier in the installed metadata so \code{pkgutil} can find back the
-files.
+\code{sysconfig}モジュールが、ここで使える変数の一覧やそのドキュメントを提供しており、
+各プラットフォームでのデフォルト値も設定している。
+たとえば、Linux上での\code{{confdir}}のデフォルトは\code{/etc}となる。
+インストーラーは、このマッパーと\code{sysconfig}を組み合わせれば
+ファイルの配置先を知ることができる。
+最終的には先述の\code{RESOURCES}ファイルを生成してメタデータに含めるので、
+\code{pkgutil}が後からデータファイルを見つけられるようになる。
 
-\aosafigure[300pt]{../images/packaging/installer.eps}{Installer}{fig.packaging.installer}
+%% \aosafigure[300pt]{../images/packaging/installer.eps}{Installer}{fig.packaging.installer}
+\aosafigure[300pt]{../images/packaging/installer.eps}{インストーラー}{fig.packaging.installer}
 
 \end{aosasect3}
 
