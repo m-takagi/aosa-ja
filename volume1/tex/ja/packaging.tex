@@ -1671,25 +1671,38 @@ resources =
 %% \begin{aosasect2}{PyPI Improvements}
 \begin{aosasect2}{PyPIの改良}
 
-I said earlier that PyPI was effectively a single point of
-failure. PEP~380 addresses this problem by defining a mirroring
-protocol so that users can fall back to alternative servers when PyPI
-is down. The goal is to allow members of the community to run mirrors
-around the world.
+%% I said earlier that PyPI was effectively a single point of
+%% failure. PEP~380 addresses this problem by defining a mirroring
+%% protocol so that users can fall back to alternative servers when PyPI
+%% is down. The goal is to allow members of the community to run mirrors
+%% around the world.
+先述のとおり、PyPIは事実上の単一障害点だった。
+PEP~380では、この問題に対応するためにミラーリングプロトコルを導入し、
+PyPIが落ちているときに他の代替サーバーにフォールバックできるようにした。
+その狙いは、コミュニティのメンバーが世界中でミラーを稼働させられるようにすることだ。
 
-\aosafigure[250pt]{../images/packaging/mirroring.eps}{Mirroring}{fig.packaging.mirroring}
+%% \aosafigure[250pt]{../images/packaging/mirroring.eps}{Mirroring}{fig.packaging.mirroring}
+\aosafigure[250pt]{../images/packaging/mirroring.eps}{ミラーリング}{fig.packaging.mirroring}
 
-The mirror list is provided as a list of host names of the form
-\code{X.pypi.python.org}, where \code{X} is in the sequence
-\code{a,b,c,...,aa,ab,...}.  \code{a.pypi.python.org} is the master
-server and mirrors start with b. A CNAME record
-\code{last.pypi.python.org} points to the last host name so clients
-that are using PyPI can get the list of the mirrors by looking at the
-CNAME.
+%% The mirror list is provided as a list of host names of the form
+%% \code{X.pypi.python.org}, where \code{X} is in the sequence
+%% \code{a,b,c,...,aa,ab,...}.  \code{a.pypi.python.org} is the master
+%% server and mirrors start with b. A CNAME record
+%% \code{last.pypi.python.org} points to the last host name so clients
+%% that are using PyPI can get the list of the mirrors by looking at the
+%% CNAME.
+ミラーリストの形式は、\code{X.pypi.python.org}形式のホスト名のリストとなる。
+ここで\code{X}は、\code{a,b,c,...,aa,ab,...}のようなシーケンスである。
+\code{a.pypi.python.org}がマスターサーバーで、ミラーはbから始まる。
+CNAMEレコード\code{last.pypi.python.org}は最後のホスト名を指しているので、
+PyPIを使うクライアントは、このCNAMEを見ればミラー一覧を取得できる。
 
-For example, this call tells use that the last mirror is
-\code{h.pypi.python.org}, meaning that PyPI currently has 6 mirrors (b
-through h):
+%% For example, this call tells use that the last mirror is
+%% \code{h.pypi.python.org}, meaning that PyPI currently has 6 mirrors (b
+%% through h):
+たとえば次の結果を見ると、最後のミラーが\code{h.pypi.python.org}
+であることがわかる。つまり、この時点でPyPIには六つのミラー
+(bからh)があるということだ。
 
 \begin{verbatim}
 >>> import socket
@@ -1697,118 +1710,185 @@ through h):
 'h.pypi.python.org'
 \end{verbatim}
 
-\noindent Potentially, this protocol allows clients to redirect requests to the
-nearest mirror by localizing the mirrors by their IPs, and also fall
-back to the next mirror if a mirror or the master server is down.  The
-mirroring protocol itself is more complex than a simple rsync because
-we wanted to keep downloads statistics accurate and provide minimal
-security.
+%% \noindent Potentially, this protocol allows clients to redirect requests to the
+%% nearest mirror by localizing the mirrors by their IPs, and also fall
+%% back to the next mirror if a mirror or the master server is down.  The
+%% mirroring protocol itself is more complex than a simple rsync because
+%% we wanted to keep downloads statistics accurate and provide minimal
+%% security.
+\noindent
+将来的に、このプロトコルを使ってクライアントから一番近いミラーへとリクエストをリダイレクト
+できるようにする可能性もある。IPアドレスを元に近場のミラーを探し、
+もしそのミラーあるいはマスターがダウンしていれば次のミラーを探すといった流れだ。
+ミラーリングプロトコル自体は単純なrsyncよりは複雑なものだ。
+というのも、ダウンロードの統計情報を正確に記録したり
+最低限のセキュリティを確保したりしたかったからである。
 
 %% \begin{aosasect3}{Synchronization}
 \begin{aosasect3}{同期処理}
 
-Mirrors must reduce the amount of data transferred between the central
-server and the mirror. To achieve that, they \emph{must} use the
-\code{changelog} PyPI XML-RPC call, and only refetch the packages that
-have been changed since the last time.  For each package P, they
-\emph{must} copy documents \code{/simple/P/} and \code{/serversig/P}.
+%% Mirrors must reduce the amount of data transferred between the central
+%% server and the mirror. To achieve that, they \emph{must} use the
+%% \code{changelog} PyPI XML-RPC call, and only refetch the packages that
+%% have been changed since the last time.  For each package P, they
+%% \emph{must} copy documents \code{/simple/P/} and \code{/serversig/P}.
+ミラーリング環境では、中央サーバーとミラーとの間でのデータ転送量を軽減する必要がある。
+そのため、ミラーではPyPIのXML-RPCコール\code{changelog}を使わないといけない。
+そして、前回以降で変更があったパッケージだけを再取得するのだ。
+ひとつのパッケージPに対してドキュメント\code{/simple/P/}および\code{/serversig/P}もコピーする必要がある。
 
-If a package is deleted on the central server, they \emph{must} delete
-the package and all associated files. To detect modification of
-package files, they may cache the file's ETag, and may request
-skipping it using the \code{If-None-Match} header.  Once the
-synchronization is over, the mirror changes its \code{/last-modified}
-to the current date.
+%% If a package is deleted on the central server, they \emph{must} delete
+%% the package and all associated files. To detect modification of
+%% package files, they may cache the file's ETag, and may request
+%% skipping it using the \code{If-None-Match} header.  Once the
+%% synchronization is over, the mirror changes its \code{/last-modified}
+%% to the current date.
+パッケージが中央サーバーから削除されたら、
+そのパッケージおよびすべての関連ファイルを削除する必要がある。
+パッケージの内容が変更されたかどうかを検出するために、ファイルのETagをキャッシュする。
+そして、\code{If-None-Match}ヘッダーを使ってリクエストをスキップすることもある。
+同期が完了したら、ミラーは自身の\code{/last-modified}を現在日時に設定する。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Statistics Propagation}
 \begin{aosasect3}{統計情報の伝搬}
 
-When you download a release from any of the mirrors, the protocol
-ensures that the download hit is transmitted to the master PyPI
-server, then to other mirrors.  Doing this ensures that people or
-tools browsing PyPI to find out how many times a release was downloaded
-will get a value summed across all mirrors.
+%% When you download a release from any of the mirrors, the protocol
+%% ensures that the download hit is transmitted to the master PyPI
+%% server, then to other mirrors.  Doing this ensures that people or
+%% tools browsing PyPI to find out how many times a release was downloaded
+%% will get a value summed across all mirrors.
+どこかのミラーから何かのリリースをダウンロードすると、ミラーリングプロトコルは
+ダウンロードがあったことをPyPIマスターサーバーに送信し、そしてそれが他のミラーにも伝搬する。
+こうすることで、PyPIを見れば、あるリリースが全部で何回ダウンロードされたのかという情報を
+全ミラーの合計値で取得できるようになる。
 
-Statistics are grouped into daily and weekly CSV files in the
-\code{stats} directory at the central PyPI itself.  Each mirror needs
-to provide a \code{local-stats} directory that contains its own
-statistics. Each file provides the number of downloads for each
-archive, grouped by use agents.  The central server visits mirrors
-daily to collect those statistics, and merge them back into the global
-\code{stats} directory, so each mirror must keep \code{/local-stats}
-up-to-date at least once a day.
+%% Statistics are grouped into daily and weekly CSV files in the
+%% \code{stats} directory at the central PyPI itself.  Each mirror needs
+%% to provide a \code{local-stats} directory that contains its own
+%% statistics. Each file provides the number of downloads for each
+%% archive, grouped by use agents.  The central server visits mirrors
+%% daily to collect those statistics, and merge them back into the global
+%% \code{stats} directory, so each mirror must keep \code{/local-stats}
+%% up-to-date at least once a day.
+統計情報は日次および週次でCSVファイルにまとめられ、
+PyPIの中央サーバーの\code{stats}ディレクトリに置かれている。
+各ミラーサーバーは、\code{local-stats}というディレクトリを用意して
+自分のサーバーに関する統計情報を置かなければいけない。
+各ファイルに含まれる内容はアーカイブごとのダウンロード回数で、
+利用したエージェントごとにそれをまとめている。
+中央サーバーは各ミラーの統計情報を日に一度収集し、それをグローバルな
+\code{stats}ディレクトリに取りまとめる。
+つまり、ミラー側は少なくとも日に一度のペースで\code{/local-stats}
+を最新に更新しておく必要がある。
 
 \end{aosasect3}
 
 %% \begin{aosasect3}{Mirror Authenticity}
 \begin{aosasect3}{信頼性のミラー}
 
-With any distributed mirroring system, clients may want to verify that
-the mirrored copies are authentic.  Some of the possible threats
-include:
+%% With any distributed mirroring system, clients may want to verify that
+%% the mirrored copies are authentic.  Some of the possible threats
+%% include:
+あらゆる分散ミラーリングシステムに共通する問題がある。
+クライアント側から、ミラーの内容が本物かどうかを調べたくなるということだ。
+分散ミラーリングシステムで考えられる脅威には、このようなものがある。
 
 \begin{aosaitemize}
 
-  \item the central index may be compromised
+  %% \item the central index may be compromised
+  \item 中央インデックスが攻撃を受ける
 
-  \item the mirrors might be tampered with
+  %% \item the mirrors might be tampered with
+  \item ミラーが改ざんされる
 
-  \item a man-in-the-middle attack between the central index and the end
-  user, or between a mirror and the end user
+  %% \item a man-in-the-middle attack between the central index and the end
+  %% user, or between a mirror and the end user
+  \item 中央インデックスとエンドユーザー、あるいはミラーとエンドユーザーの間での中間者攻撃
 
 \end{aosaitemize}
 
+%% \noindent
+%% To detect the first attack, package authors need to sign their
+%% packages using PGP keys, so that users can verify that the package
+%% comes from the author they trust.  The mirroring protocol itself only
+%% addresses the second threat, though some attempt is made to detect
+%% man-in-the-middle attacks.
 \noindent
-To detect the first attack, package authors need to sign their
-packages using PGP keys, so that users can verify that the package
-comes from the author they trust.  The mirroring protocol itself only
-addresses the second threat, though some attempt is made to detect
-man-in-the-middle attacks.
+最初のパターンの攻撃を検出するには、パッケージの作者がPGP鍵で
+パッケージに署名する必要がある。そうすれば、そのパッケージが
+本当に作者の作ったものであるかをユーザーが検証できるようになる。
+ミラーリングプロトコルで対応できるのは二番目の脅威だけであるが、
+中間者攻撃に対応するための試みもとられている。
 
-The central index provides a DSA key at the URL \code{/serverkey}, in
-the PEM format as generated by \code{openssl dsa -pubout}\footnote{I.e.,
-RFC 3280 SubjectPublicKeyInfo,
-with the algorithm 1.3.14.3.2.12.}. This URL must not be mirrored,
-and clients must fetch the official \code{serverkey} from PyPI
-directly, or use the copy that came with the PyPI client
-software. Mirrors should still download the key so that they can
-detect a key rollover.
+%% The central index provides a DSA key at the URL \code{/serverkey}, in
+%% the PEM format as generated by \code{openssl dsa -pubout}\footnote{I.e.,
+%% RFC 3280 SubjectPublicKeyInfo,
+%% with the algorithm 1.3.14.3.2.12.}. This URL must not be mirrored,
+%% and clients must fetch the official \code{serverkey} from PyPI
+%% directly, or use the copy that came with the PyPI client
+%% software. Mirrors should still download the key so that they can
+%% detect a key rollover.
+中央インデックスはURL \code{/serverkey}でDSA鍵を提供していつ。
+これはPEMフォーマットで、\code{openssl dsa -pubout}
+\footnote{RFC 3280 SubjectPublicKeyInfo, with the algorithm 1.3.14.3.2.12.}
+で生成したものだ。このURLは決してミラーしてはいけない。クライアントは、
+PyPIから直接取得した公式の\code{serverkey}か、PyPIクライアントソフトウェアに
+付属するそのコピーを利用する。ミラー側は、このキーをダウンロードしておかなければいけない。
+これを使って、キーの改変を検出する。
 
-For each package, a mirrored signature is provided at
-\code{/serversig/package}.  This is the DSA signature of the parallel
-URL \code{/simple/package}, in DER form, using SHA-1 with
-DSA\footnote{I.e., as a RFC 3279 Dsa-Sig-Value, created by algorithm
-  1.2.840.10040.4.3.}.
+%% For each package, a mirrored signature is provided at
+%% \code{/serversig/package}.  This is the DSA signature of the parallel
+%% URL \code{/simple/package}, in DER form, using SHA-1 with
+%% DSA\footnote{I.e., as a RFC 3279 Dsa-Sig-Value, created by algorithm
+%%   1.2.840.10040.4.3.}.
+各パッケージについて、ミラーされたシグネチャを\code{/serversig/package}で提供する。
+これは、対応するURL \code{/simple/package}のDSAシグネチャをDER形式で表したもので、
+SHA-1とDSA\footnote{RFC 3279 Dsa-Sig-Value, created by algorithm   1.2.840.10040.4.3.}
+を使っている。
 
-Clients using a mirror need to perform the following steps to verify a
-package:
+%% Clients using a mirror need to perform the following steps to verify a
+%% package:
+ミラーを使うクライアントは、次の手順でパッケージを検証しなければいけない。
 
 \begin{enumerate}
 
-  \item Download the \code{/simple} page, and compute its SHA-1 hash.
+  %% \item Download the \code{/simple} page, and compute its SHA-1 hash.
+  \item \code{/simple}をダウンロードし、そのSHA-1ハッシュを計算する。
 
-  \item Compute the DSA signature of that hash.
+  %% \item Compute the DSA signature of that hash.
+  \item そのハッシュのDSAシグネチャを計算する。
 
-  \item Download the corresponding \code{/serversig}, and compare it
-  byte for byte with the value computed in step 2.
+  %% \item Download the corresponding \code{/serversig}, and compare it
+  %% byte for byte with the value computed in step 2.
+  \item 対応する\code{/serversig}をダウンロードし、先ほど計算した値とバイト単位で比較する。
 
-  \item Compute and verify (against the \code{/simple} page) the MD5
-  hashes of all files they download from the mirror.
+  %% \item Compute and verify (against the \code{/simple} page) the MD5
+  %% hashes of all files they download from the mirror.
+  \item ミラーからダウンロードしたすべてのファイルについて、そのMD5ハッシュを計算して
+  (\code{/simple}ページに対して)検証する。
 
 \end{enumerate}
 
-Verification is not needed when downloading from central index, and
-clients should not do it to reduce the computation overhead.
+%% Verification is not needed when downloading from central index, and
+%% clients should not do it to reduce the computation overhead.
+中央インデックスからダウンロードする場合は検証は不要なので、
+計算のオーバーヘッドを減らすためにも、そんな場合はむしろ検証すべきではない。
 
-About once a year, the key will be replaced with a new one. Mirrors
-will have to re-fetch all \code{/serversig} pages. Clients using
-mirrors need to find a trusted copy of the new server key. One way to
-obtain one is to download it from
-\url{https://pypi.python.org/serverkey}.  To detect man-in-the-middle
-attacks, clients need to verify the SSL server certificate, which will
-be signed by the CACert authority.
+%% About once a year, the key will be replaced with a new one. Mirrors
+%% will have to re-fetch all \code{/serversig} pages. Clients using
+%% mirrors need to find a trusted copy of the new server key. One way to
+%% obtain one is to download it from
+%% \url{https://pypi.python.org/serverkey}.  To detect man-in-the-middle
+%% attacks, clients need to verify the SSL server certificate, which will
+%% be signed by the CACert authority.
+ほぼ一年に一度の頻度で、キーを新しいものと交換する。そのときは、
+各ミラーが\code{/serversig}ページをすべて取り直す必要がある。
+ミラーを使うクライアントも、新しいキーの信頼できるコピーを取得しないといけない。
+キーを取得する方法のひとつは、\url{https://pypi.python.org/serverkey}からのダウンロードだ。
+中間者攻撃を検出するために、クライアントはSSLサーバー証明書を検証しなければいけない。
+この証明書は認証局により署名されている。
 
 \end{aosasect3}
 

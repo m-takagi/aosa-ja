@@ -20,7 +20,7 @@ llvm.tex            Masugata Seiji                              ?
 makingsoftware.tex  TAKAGI Masahiro <matakagi@gmail.com>      100
 mercurial.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
 nosql.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
-packaging.tex       TAKAGI Masahiro <matakagi@gmail.com>       75
+packaging.tex       TAKAGI Masahiro <matakagi@gmail.com>       85
 riak.tex            Kazuya Sakakiahra <kazuya@violentlyhappy.org>  0
 selenium.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
 sendmail.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
