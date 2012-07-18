@@ -1,18 +1,30 @@
 \begin{aosachapter}{SnowFlock}{s:snowflock}{Roy Bryant and Andr\'e{s} Lagar-Cavilla}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r272
 
-Cloud computing provides an attractively affordable computing
-platform.  Instead of buying and configuring a physical server, with
-all the associated time, effort and up front costs, users can rent
-``servers'' in the cloud with a few mouse clicks for
-less than 10 cents per hour. Cloud providers keep their costs low by
-providing virtual machines (VMs) instead of physical computers. The
-key enabler is the virtualization software, called a virtual machine
-monitor (VMM), that emulates a physical machine. Users are safely
-isolated in their ``guest'' VMs, and are blissfully unaware that they
-typically share the physical machine (``host'') with many others.
+%% Cloud computing provides an attractively affordable computing
+%% platform.  Instead of buying and configuring a physical server, with
+%% all the associated time, effort and up front costs, users can rent
+%% ``servers'' in the cloud with a few mouse clicks for
+%% less than 10 cents per hour. Cloud providers keep their costs low by
+%% providing virtual machines (VMs) instead of physical computers. The
+%% key enabler is the virtualization software, called a virtual machine
+%% monitor (VMM), that emulates a physical machine. Users are safely
+%% isolated in their ``guest'' VMs, and are blissfully unaware that they
+%% typically share the physical machine (``host'') with many others.
+クラウドコンピューティングは、お手頃な価格で魅力的な計算プラットフォームを提供してくれる。
+物理的なサーバーを購入して設定するのには時間や手間もかかるし、初期費用も必要だ。
+クラウドコンピューティングなら、クラウドにある「サーバー」を簡単にレンタルできる。
+マウスを何度かクリックするだけだし、一時間あたりのコストは10セントに満たない。
+クラウド事業者がこんなに安価でサーバーを提供できている理由は、
+物理的なコンピューターではなく仮想マシン(VM)を使っているからだ。
+それを実現する肝となるのが仮想化ソフトウェアで、これは仮想マシンモニター(VMM)
+と呼ばれている。物理的なマシンをエミュレートする仕組みだ。
+各ユーザーはそれぞれ安全に隔離された「ゲスト」VMを利用する。
+ふつうは複数のゲストが一台の物理マシン(「ホスト」)を共有しているのだが、
+ありがたいことにユーザーはそれを気にせずに済む。
 
-\begin{aosasect1}{Introducing SnowFlock}
+%% \begin{aosasect1}{Introducing SnowFlock}
+\begin{aosasect1}{SnowFlockのご紹介}
 
 Clouds are a boon to agile organizations. With physical servers, users
 are relegated to waiting impatiently while others (slowly) approve the
@@ -76,7 +88,8 @@ parent, they reach their peak performance sooner.
 
 \end{aosasect1}
 
-\begin{aosasect1}{VM Cloning}
+%% \begin{aosasect1}{VM Cloning}
+\begin{aosasect1}{VMのクローニング}
 
 As the name suggests, VM clones are (nearly) identical to their parent
 VM\@. There are actually some minor but necessary differences to avoid
@@ -141,7 +154,8 @@ eager VM cloning.
 
 \end{aosasect1}
 
-\begin{aosasect1}{SnowFlock's Approach}
+%% \begin{aosasect1}{SnowFlock's Approach}
+\begin{aosasect1}{SnowFlockの手法}
 
 SnowFlock implements VM cloning with a primitive called ``VM Fork'',
 which is like a standard Unix \code{fork}, but with a few
@@ -221,7 +235,8 @@ VMs. There are six main components.
 
 \end{aosaitemize}
 
-\aosafigure{../images/snowflock/drawing.pdf}{SnowFlock VM Replication Architecture}{fig.snowflock.arch}
+%% \aosafigure{../images/snowflock/drawing.pdf}{SnowFlock VM Replication Architecture}{fig.snowflock.arch}
+\aosafigure{../images/snowflock/drawing.pdf}{SnowFlock VMレプリケーションのアーキテクチャ}{fig.snowflock.arch}
 
 Pictorially speaking, \aosafigref{fig.snowflock.arch} depicts the
 process of cloning a VM, showing the the four main steps: (1)
@@ -250,10 +265,12 @@ that cooperate to achieve instantaneous and efficient cloning. All
 the pieces we will describe fit together as shown in
 \aosafigref{fig.snowflock.components}.
 
-\aosafigure{../images/snowflock/drawing-arch.eps}{Software Components of SnowFlock}{fig.snowflock.components}
+%% \aosafigure{../images/snowflock/drawing-arch.eps}{Software Components of SnowFlock}{fig.snowflock.components}
+\aosafigure{../images/snowflock/drawing-arch.eps}{SnowFlockのソフトウェアコンポーネント}{fig.snowflock.components}
 
 \end{aosasect1}
 
+%% \begin{aosasect1}{Architectural VM Descriptor}
 \begin{aosasect1}{Architectural VM Descriptor}
 
 The key design decision for SnowFlock is to postpone the replication
@@ -288,14 +305,16 @@ advantage of the opportunities for optimization it presents.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Parent-Side Components}
+%% \begin{aosasect1}{Parent-Side Components}
+\begin{aosasect1}{親側のコンポーネント}
 
 Once a VM is cloned it becomes a parent for its children or
 clones.  Like all responsible parents, it needs to look out for the
 well-being of its descendants. It does so by setting up a set of
 services that provision memory and disk state to cloned VMs on demand.
 
-\begin{aosasect2}{Memserver Process}
+%% \begin{aosasect2}{Memserver Process}
+\begin{aosasect2}{Memserverプロセス}
 
 When the architectural descriptor is created, the VM is stopped in its
 tracks throughout the process. This is so the VM memory state settles;
@@ -333,7 +352,8 @@ processes.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Multicasting with Mcdist}
+%% \begin{aosasect2}{Multicasting with Mcdist}
+\begin{aosasect2}{Mcdistによるマルチキャスト}
 
 Clones are typically afflicted with an existential syndrome known as
 ``fate determinism.'' We expect clones to be created for a single
@@ -386,7 +406,8 @@ Three optimizations specific to SnowFlock are included in \code{mcdist}:
 
 \end{aosasect2}
 
-\begin{aosasect2}{Virtual Disk}
+%% \begin{aosasect2}{Virtual Disk}
+\begin{aosasect2}{仮想ディスク}
 
 SnowFlock clones, due to their short life span and fate determinism,
 rarely use their disk. The virtual disk for a SnowFlock VM houses the
@@ -413,7 +434,8 @@ which is deleted once the clone is destroyed.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Clone-Side Components}
+%% \begin{aosasect1}{Clone-Side Components}
+\begin{aosasect1}{クローン側のコンポーネント}
 
 Clones are hollow shells when they are created from an architectural
 descriptor, so like everybody else, they need a lot of help from their
@@ -421,7 +443,8 @@ parents to grow up: the children VMs move out and immediately call
 home whenever they notice something they need is missing, asking their
 parent to send it over right away.
 
-\begin{aosasect2}{Memtap Process}
+%% \begin{aosasect2}{Memtap Process}
+\begin{aosasect2}{Memtapプロセス}
 
 Attached to each clone after creation, the \code{memtap} process is the
 lifeline of a clone. It maps all of the memory of the clone and fills
@@ -467,6 +490,7 @@ and the appropriate bitmap bits are set.
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{Clever Clones Avoid Unnecessary Fetches}
 \begin{aosasect2}{Clever Clones Avoid Unnecessary Fetches}
 
 We just mentioned that the page presence bitmap is visible to the
@@ -495,13 +519,15 @@ advantageous.
 
 \end{aosasect1}
 
-\begin{aosasect1}{VM Cloning Application Interface}
+%% \begin{aosasect1}{VM Cloning Application Interface}
+\begin{aosasect1}{VMクローニングアプリケーションのインターフェイス}
 
 So far we have focused on the internals of cloning a VM
 efficiently. As much fun as solipsistic systems can be, we need to
 turn our attention to those who will use the system: applications.
 
-\begin{aosasect2}{API Implementation}
+%% \begin{aosasect2}{API Implementation}
+\begin{aosasect2}{APIの実装}
 
 VM Cloning is offered to the application via the simple SnowFlock API,
 depicted in \aosafigref{fig.snowflock.cloningapi}. Cloning is
@@ -597,7 +623,8 @@ suitable software such as Sun Grid Engine or Platform EGO.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Necessary Mutations}
+%% \begin{aosasect2}{Necessary Mutations}
+\begin{aosasect2}{欠かせない変化}
 
 After cloning, most of the cloned VM's processes have no idea that
 they are no longer the parent, and that they are now running in a
@@ -663,7 +690,8 @@ directives, router VM coordinates, filtering rules, etc.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Conclusion}
+%% \begin{aosasect1}{Conclusion}
+\begin{aosasect1}{結論}
 
 By tweaking the Xen hypervisor and lazily transferring the VM's state,
 SnowFlock can produce dozens of clones of a running VM in a few
