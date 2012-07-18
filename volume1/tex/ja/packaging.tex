@@ -1899,13 +1899,18 @@ SHA-1とDSA\footnote{RFC 3279 Dsa-Sig-Value, created by algorithm   1.2.840.1004
 %% \begin{aosasect1}{Implementation Details}
 \begin{aosasect1}{実装の詳細}
 
-The implementation of most of the improvements described in the previous
-section are taking place in \code{Distutils2}.  The \code{setup.py}
-file is not used anymore, and a project is completely described in
-\code{setup.cfg}, a static \code{.ini}-like file.  By doing this, we
-make it easier for packagers to change the behavior of a project
-installation without having to deal with Python code.  Here's an
-example of such a file:
+%% The implementation of most of the improvements described in the previous
+%% section are taking place in \code{Distutils2}.  The \code{setup.py}
+%% file is not used anymore, and a project is completely described in
+%% \code{setup.cfg}, a static \code{.ini}-like file.  By doing this, we
+%% make it easier for packagers to change the behavior of a project
+%% installation without having to deal with Python code.  Here's an
+%% example of such a file:
+これまでに説明してきた改良のほとんどの実装は、\code{Distutils2}で行った。
+\code{setup.py}ファイルを使うのはやめて、プロジェクトの設定を完全に\code{setup.cfg}
+に移行した。これは、\code{.ini}風の静的なファイルである。
+こうすることで、パッケージャがプロジェクトのインストール方法を変更するときにも
+Pythonのコードをいじる必要がなくなった。\code{setup.cfg}の例を次に示す。
 
 \begin{verbatim}
 [metadata]
@@ -1937,34 +1942,50 @@ resources =
     etc/mopytools.cfg {confdir}/mopytools
 \end{verbatim}
 
-\noindent \code{Distutils2} use this configuration file to:
+%% \noindent \code{Distutils2} use this configuration file to:
+\noindent
+\code{Distutils2}は、この設定ファイルを使って次のことを行う。
 
 \begin{aosaitemize}
 
-  \item generate \code{META-1.2} metadata files that can be used for various
-  actions, like registering at PyPI.
+  %% \item generate \code{META-1.2} metadata files that can be used for various
+  %% actions, like registering at PyPI.
+  \item メタデータファイル\code{META-1.2}の生成。
+  このファイルは、PyPIへの登録などのさまざまな作業に使える。
 
-  \item run any package management command, like \code{sdist}.
+  %% \item run any package management command, like \code{sdist}.
+  \item 任意のパッケージ管理コマンド(\code{sdist}など)の実行。
 
-  \item install a \code{Distutils2}-based project.
+  %% \item install a \code{Distutils2}-based project.
+  \item \code{Distutils2}ベースのプロジェクトのインストール。
 
 \end{aosaitemize}
 
+%% \noindent
+%% \code{Distutils2} also implements \code{VERSION} via its \code{version}
+%% module.
 \noindent
-\code{Distutils2} also implements \code{VERSION} via its \code{version}
-module.
+\code{Distutils2}では\code{VERSION}も実装している。
+これは\code{version}モジュールを利用したものだ。
 
-The \code{INSTALL-DB} implementation will find its way to the standard library
-in Python 3.3 and will be in the \code{pkgutil} module. In the
-interim, a version of this module exists in \code{Distutils2} for
-immediate use.  The provided APIs will let us browse an installation
-and know exactly what's installed.
+%% The \code{INSTALL-DB} implementation will find its way to the standard library
+%% in Python 3.3 and will be in the \code{pkgutil} module. In the
+%% interim, a version of this module exists in \code{Distutils2} for
+%% immediate use.  The provided APIs will let us browse an installation
+%% and know exactly what's installed.
+\code{INSTALL-DB}の実装はPython 3.3で標準ライブラリ入りする見込みで、
+\code{pkgutil}モジュールに入ることになる。今のところは\code{Distutils2}
+に入っているが、暫定的なものである。ここで提供するAPIを使えば、
+インストールされたものを閲覧して何がインストールされたのかを知ることができる。
 
-These APIs are the basis for some neat \code{Distutils2} features:
+%% These APIs are the basis for some neat \code{Distutils2} features:
+これらのAPIを使って、\code{Distutils2}のこんなイケてる機能を提供している。
 
 \begin{aosaitemize}
-  \item installer/uninstaller
-  \item dependency graph view of installed projects
+  %% \item installer/uninstaller
+  \item インストーラー/アンインストーラー
+  %% \item dependency graph view of installed projects
+  \item インストールされたプロジェクトに関する依存グラフの表示
 \end{aosaitemize}
 
 \end{aosasect1}
@@ -1975,86 +1996,142 @@ These APIs are the basis for some neat \code{Distutils2} features:
 %% \begin{aosasect2}{It's All About PEPs}
 \begin{aosasect2}{PEPこそがすべて}
 
-Changing an architecture as wide and complex as Python packaging 
-needs to be carefully done by changing standards through a
-PEP process. And changing or adding a new PEP takes in my
-experience around a year.
+%% Changing an architecture as wide and complex as Python packaging 
+%% needs to be carefully done by changing standards through a
+%% PEP process. And changing or adding a new PEP takes in my
+%% experience around a year.
+Pythonパッケージングのように大規模で複雑なアーキテクチャを変更するには、
+細心の注意を要する。PEPプロセスを経て、標準規約を変更することになる。
+経験上、PEPを変更したり新たに追加したりするには一年はかかる。
 
-One mistake the community made along the way was to deliver tools 
-that solved some issues by extending the Metadata and the way Python 
-applications were installed without trying to change the impacted 
-PEPs.
+%% One mistake the community made along the way was to deliver tools 
+%% that solved some issues by extending the Metadata and the way Python 
+%% applications were installed without trying to change the impacted 
+%% PEPs.
+これまでにコミュニティが犯した過ちのひとつが、
+既存のMetadataを拡張して問題を解決しようとしたことだ。
+Pythonのアプリケーションをインストールする方法を、
+PEPを変更することなしに変えてしまったのだ。
 
-In other words, depending on the tool you used, the standard library
-\code{Distutils} or \code{Setuptools}, applications were installed
-differently. The problems were solved for one part of the community 
-that used these new tools, but added more problems for the rest of 
-the world.
-OS Packagers for instance, had to face several Python standards:
-the official documented standard and the de-facto standard imposed by 
-\code{Setuptools}.
+%% In other words, depending on the tool you used, the standard library
+%% \code{Distutils} or \code{Setuptools}, applications were installed
+%% differently. The problems were solved for one part of the community 
+%% that used these new tools, but added more problems for the rest of 
+%% the world.
+%% OS Packagers for instance, had to face several Python standards:
+%% the official documented standard and the de-facto standard imposed by 
+%% \code{Setuptools}.
+言い換えると、使っているツールが何かによって、
+標準ライブラリ\code{Distutils}あるいは\code{Setuptools}のどちらを使っているかによって、
+アプリケーションのインストール方法が違ってくるということだ。
+新しいツールを使っている一部の人たちは問題を解決できたが、
+その他大勢の人たちにとっては新たな問題が増えただけだった。
+たとえばOSのパッケージャーは、複数のPython標準規格に対応することが必要になった。
+公式に文書化されている標準と、\code{Setuptools}が広めた
+デファクトスタンダードの二種類である。
 
-But in the meantime, \code{Setuptols} had the opportunity to experiment
-in a realistic scale (the whole community) some innovations in a
-very fast pace, and the feedback was invaluable. We were able to 
-write down new PEPs with more confidence in what worked and what did not,
-and maybe it would have been impossible to do so differently.
-So it's all about detecting when some third-party tools are contributing
-innovations that are solving problems and that should ignite a PEP
-change.
+%% But in the meantime, \code{Setuptols} had the opportunity to experiment
+%% in a realistic scale (the whole community) some innovations in a
+%% very fast pace, and the feedback was invaluable. We were able to 
+%% write down new PEPs with more confidence in what worked and what did not,
+%% and maybe it would have been impossible to do so differently.
+%% So it's all about detecting when some third-party tools are contributing
+%% innovations that are solving problems and that should ignite a PEP
+%% change.
+しかしその一方で\code{Setuptools}には、
+現実的な規模(コミュニティ全体)での実験をする機会が与えられた。
+そのおかげで短期間に革新が進んだし、貴重なフィードバックが得られた。
+新たにPEPを書きおろすときにも何が動いて何が動かないのか確信を持てたし、
+他のやり方ではこれほどうまくいかなかっただろう。
+もし何かのツールが革新を引き起こそうとしているのなら、
+あわせてPEPも変更すべきだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{A Package that Enters the Standard Library Has One Foot in the Grave}
 \begin{aosasect2}{標準ライブラリ入りは死への第一歩}
 
-I am paraphrasing Guido van Rossum in the section title, but that's
-one aspect of the batteries-included philosophy of Python that 
-impacts a lot our efforts.
+%% I am paraphrasing Guido van Rossum in the section title, but that's
+%% one aspect of the batteries-included philosophy of Python that 
+%% impacts a lot our efforts.
+このセクションのタイトルは、Guido van Rossumの声を言い換えたものだ。
+しかしこれもまたPythonの「バッテリー入り」思想の一面であり、
+私たちの取り組みに大きな影響を及ぼしている。
 
-\code{Distutils} is part of the standard library and \code{Distutils2} 
-will soon be. A package that's in the standard library is very hard to 
-make evolve. There are of course deprecation processes, where you can kill 
-or change an API after 2 minor versions of Python. But once an API is 
-published, it's going to stay there for years.
+%% \code{Distutils} is part of the standard library and \code{Distutils2} 
+%% will soon be. A package that's in the standard library is very hard to 
+%% make evolve. There are of course deprecation processes, where you can kill 
+%% or change an API after 2 minor versions of Python. But once an API is 
+%% published, it's going to stay there for years.
+\code{Distutils}は標準ライブラリに組み込まれており、
+\code{Distutils2}も間もなくその仲間入りする。
+いったん標準パッケージに入ってしまうと、そこからさらに成長させることはとても難しくなる。
+もちろん廃止手順もあって、Pythonのマイナーリリース2回ぶんの間に
+APIの変更や廃止もできるようになっている。
+しかし、いったんAPIを公開してしまえば、少なくとも数年間は存在し続けるだろう。
 
-So any change you make in a package in the standard library that is 
-not a bug fix, is a potential disturbance for the eco-system. So when 
-you're doing important changes, you have to create a new package.
+%% So any change you make in a package in the standard library that is 
+%% not a bug fix, is a potential disturbance for the eco-system. So when 
+%% you're doing important changes, you have to create a new package.
+そのため、標準ライブラリのパッケージに対してバグ修正以外の変更をしようとすると、
+Pythonの世界に混乱を引き起こす可能性がある。
+大きな変更をするなら、新たなパッケージを作る必要がある。
 
-I've learned it the hard way with \code{Distutils} since I had to eventually
-revert all the changes I had done in it for more that a year and create
-\code{Distutils2}. In the future, if our standards change again in a drastic 
-way, there are high chances that we will start a standalone \code{Distutils3}
-project first, unless the standard library is released on its own at some point.
+%% I've learned it the hard way with \code{Distutils} since I had to eventually
+%% revert all the changes I had done in it for more that a year and create
+%% \code{Distutils2}. In the future, if our standards change again in a drastic 
+%% way, there are high chances that we will start a standalone \code{Distutils3}
+%% project first, unless the standard library is released on its own at some point.
+\code{Distutils}でさんざん苦労したおかげで私は学習した。
+結局、一年がかりの変更をすべて取り消して、新たに\code{Distutils2}
+を作るはめになった。もしまた標準が劇的に変わるようなことがあれば、
+どこかで標準ライブラリがリリースされない限りは
+\code{Distutils3}プロジェクトを始めることになるだろう。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Backward Compatibility}
 \begin{aosasect2}{後方互換性}
 
-Changing the way packaging works in Python is a very long process: the
-Python ecosystem contains so many projects based on older packaging
-tools that there is and will be a lot of resistance to change.
-(Reaching consensus on some of the topics discussed in this chapter
-took several years, rather than the few months I originally
-expected.)  As with Python 3, it will take years before all projects
-switch to the new standard.
+%% Changing the way packaging works in Python is a very long process: the
+%% Python ecosystem contains so many projects based on older packaging
+%% tools that there is and will be a lot of resistance to change.
+%% (Reaching consensus on some of the topics discussed in this chapter
+%% took several years, rather than the few months I originally
+%% expected.)  As with Python 3, it will take years before all projects
+%% switch to the new standard.
+Pythonでのパッケージングの方法を変更するのはとても長い道のりである。
+Pythonの世界には、古いパッケージングツールを使っているプロジェクトも多数存在する。
+そんな中での変更には、抵抗も多いだろう
+(本章でとりあげたようなトピックについての合意に達するのにも、結局は数年がかりだった。
+最初は数カ月で済むものだと思っていたのに)。Python 3の時点で
+すべてのプロジェクトが新たな標準規格に移行するには数年かかるだろう。
 
-That's why everything we are doing has to be backward-compatible with 
-all previous tools, installations and standards, which makes the 
-implementation of \code{Distutils2} a wicked problem.
+%% That's why everything we are doing has to be backward-compatible with 
+%% all previous tools, installations and standards, which makes the 
+%% implementation of \code{Distutils2} a wicked problem.
+そのため、私たちの試みはすべて、これまでのツールやインストール方法
+との後方互換を保つ必要があった。そのおかげで\code{Distutils2}
+の実装は苦しいものとなった。
 
-For example, if a project that uses the new standards depends on 
-another project that don't use them yet, we can't stop the installation
-process by telling the end-user that the dependency is in an unknown 
-format!
+%% For example, if a project that uses the new standards depends on 
+%% another project that don't use them yet, we can't stop the installation
+%% process by telling the end-user that the dependency is in an unknown 
+%% format!
+たとえば、新しい標準に従っているプロジェクトがまだそれに対応していない
+別のプロジェクトに依存している場合、「依存関係が不明な状態だ」
+としてインストールを止めることができなくなってしまう。
 
-For example, the \code{INSTALL-DB} implementation contains compatibility code 
-to browse projects installed by the original \code{Distutils},
-\code{Pip}, \code{Distribute}, or \code{Setuptools}.
-\code{Distutils2} is also able to install projects created by the
-original \code{Distutils} by converting their metadata on the fly.
+%% For example, the \code{INSTALL-DB} implementation contains compatibility code 
+%% to browse projects installed by the original \code{Distutils},
+%% \code{Pip}, \code{Distribute}, or \code{Setuptools}.
+%% \code{Distutils2} is also able to install projects created by the
+%% original \code{Distutils} by converting their metadata on the fly.
+たとえば\code{INSTALL-DB}の実装には互換性を維持するためのコードが含まれており、
+元々の\code{Distutils}や\code{Pip}、\code{Distribute}そして\code{Setuptools}
+でインストールされたプロジェクトも閲覧できるようになっている。
+\code{Distutils2}も同様で、\code{Distutils}で作ったプロジェクトもインストールできる
+ようになっている。旧形式のメタデータをその場で変換しているのだ。
 
 \end{aosasect2}
 
@@ -2064,9 +2141,11 @@ original \code{Distutils} by converting their metadata on the fly.
 %% \begin{aosasect1}{References and Contributions}
 \begin{aosasect1}{参考文献と謝辞}
 
-Some sections in this paper were directly taken from the various PEP
-documents we wrote for packaging. You can find the original documents
-at \url{http://python.org}:
+%% Some sections in this paper were directly taken from the various PEP
+%% documents we wrote for packaging. You can find the original documents
+%% at \url{http://python.org}:
+本章のいくつかのセクションは、私たちが書いたPEPドキュメントをそのまま引用したものである。
+原文は\url{http://python.org}にある。
 
 \begin{aosaitemize}
   \item PEP 241: Metadata for Python Software Packages 1.0: \url{http://python.org/peps/pep-0214.html}
@@ -2077,13 +2156,19 @@ at \url{http://python.org}:
   \item PEP 386: Changing the version comparison module in Distutils: \url{http://python.org/peps/pep-0386.html}
 \end{aosaitemize}
 
-I would like to thank all the people that are working on packaging;
-you will find their name in every PEP I've mentioned. I would also
-like to give a special thank to all members of The Fellowship of the
-Packaging.  Also, thanks to Alexis Metaireau, Toshio Kuratomi, Holger
-Krekel and Stefane Fermigier for their feedback on this chapter.
+%% I would like to thank all the people that are working on packaging;
+%% you will find their name in every PEP I've mentioned. I would also
+%% like to give a special thank to all members of The Fellowship of the
+%% Packaging.  Also, thanks to Alexis Metaireau, Toshio Kuratomi, Holger
+%% Krekel and Stefane Fermigier for their feedback on this chapter.
+パッケージングにかかわるすべての人たちに感謝する。
+本章で取り上げたすべてのPEPに、君たちの名前が見つかるはずだ。
+「パッケージングの仲間」のメンバーにも感謝する。
+また、Alexis MetaireauやToshio Kuratomi、Holger Krekel、Stefane Fermigierにも感謝する。
+この文章に関するフィードバックをいただいた。
 
-The projects that were discussed in this chapter are:
+%% The projects that were discussed in this chapter are:
+本章で取り上げたプロジェクトを最後にまとめる。
 
 \begin{aosaitemize}
   \item \code{Distutils}: \url{http://docs.python.org/distutils}
