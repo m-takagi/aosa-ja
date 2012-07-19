@@ -26,65 +26,125 @@
 %% \begin{aosasect1}{Introducing SnowFlock}
 \begin{aosasect1}{SnowFlockのご紹介}
 
-Clouds are a boon to agile organizations. With physical servers, users
-are relegated to waiting impatiently while others (slowly) approve the
-server purchase, place the order, ship the server, and install and
-configure the Operating System (OS) and application stacks. Instead of
-waiting weeks for others to deliver, the cloud user retains control of
-the process and can create a new, standalone server in minutes.
+%% Clouds are a boon to agile organizations. With physical servers, users
+%% are relegated to waiting impatiently while others (slowly) approve the
+%% server purchase, place the order, ship the server, and install and
+%% configure the Operating System (OS) and application stacks. Instead of
+%% waiting weeks for others to deliver, the cloud user retains control of
+%% the process and can create a new, standalone server in minutes.
+クラウドは、アジャイルな組織にとってはとてもありがたいものである。
+物理サーバーの場合を考えてみよう。
+まずサーバー購入の稟議書を書いて承認を得て(これ、時間がかかるよね)、
+それから発注。そして、サーバーが発送されてきたら
+OSやアプリケーションをインストールして設定をする。
+その間、実際のユーザーはずっと待ち続けることになる。
+クラウドを使えば、実際に使えるようになるまで何週間も待たされることもない。
+新しいスタンドアロンのサーバーを、ほんの数分あれば自分の手で作れるのだ。
 
-Unfortunately, few cloud servers stand alone.  Driven by the quick
-instantiation and pay-per-use model, cloud servers are typically
-members of a variable pool of similarly configured servers performing
-dynamic and scalable tasks related to parallel computing, data mining,
-or serving web pages.  Because they repeatedly boot new instances from
-the same, static template, commercial clouds fail to fully deliver on
-the promise of true on-demand computation. After instantiating the
-server, the cloud user must still manage cluster membership and broker
-the addition of new servers.
+%% Unfortunately, few cloud servers stand alone.  Driven by the quick
+%% instantiation and pay-per-use model, cloud servers are typically
+%% members of a variable pool of similarly configured servers performing
+%% dynamic and scalable tasks related to parallel computing, data mining,
+%% or serving web pages.  Because they repeatedly boot new instances from
+%% the same, static template, commercial clouds fail to fully deliver on
+%% the promise of true on-demand computation. After instantiating the
+%% server, the cloud user must still manage cluster membership and broker
+%% the addition of new servers.
+残念ながら、それ単体でやっていけるクラウドサーバーはほとんどない。
+お手軽インストールの従量課金モデルということもあって、
+クラウドサーバーは一般的に、
+同じように設定されたサーバー群の一員となることが多い。
+これらを使って、並列コンピューティングやデータマイグレーション
+そしてウェブページの提供などの動的かつスケーラブルな作業をこなすことになる。
+同じ静的テンプレートから新たなインスタンスを繰り返し起動することになるので、
+商用クラウドサービスでは真のオンデマンド利用を保証することができない。
+いったんサーバーのインスタンスを作ったら、クラスタのメンバー管理をしたり
+ブローカーに新たなサーバーを追加したりといった作業が必要となる。
 
-SnowFlock addresses these issues with VM Cloning, our proposed cloud
-API call. In the same way that application code routinely invokes OS
-services through a syscall interface, it could now also invoke cloud
-services through a similar interface. With SnowFlock's VM Cloning,
-resource allocation, cluster management, and application logic can be
-interwoven programmatically and dealt with as a single logical
-operation.
+%% SnowFlock addresses these issues with VM Cloning, our proposed cloud
+%% API call. In the same way that application code routinely invokes OS
+%% services through a syscall interface, it could now also invoke cloud
+%% services through a similar interface. With SnowFlock's VM Cloning,
+%% resource allocation, cluster management, and application logic can be
+%% interwoven programmatically and dealt with as a single logical
+%% operation.
+SnowFlockは、これらの問題に対応するためにVM Cloningを利用する。
+このときに使うのは、私たちが提案するクラウドAPIだ。
+アプリケーションのコードがごく普通にシステムコールを使って
+OSのサービスを起動するのと同じく、
+SnowFlockも同様のインターフェイスでクラウドサービスを起動できるようになったのだ。
+SnowFlockのVM Cloningやリソース割り当て、クラスタ管理、
+アプリケーションのロジックなどをプログラムで取りまとめられるようになり、
+単一の論理操作として扱えるようになった。
 
-The VM Cloning call instantiates multiple cloud servers that are
-identical copies of the originating parent VM up to the point of
-cloning. Logically, clones inherit all the state of their parent,
-including OS- and application-level caches. Further, clones are
-automatically added to an internal private network, thus effectively
-joining a dynamically scalable cluster. New computation resources,
-encapsulated as identical VMs, can be created on-the-fly and can be
-dynamically leveraged as needed.
+%% The VM Cloning call instantiates multiple cloud servers that are
+%% identical copies of the originating parent VM up to the point of
+%% cloning. Logically, clones inherit all the state of their parent,
+%% including OS- and application-level caches. Further, clones are
+%% automatically added to an internal private network, thus effectively
+%% joining a dynamically scalable cluster. New computation resources,
+%% encapsulated as identical VMs, can be created on-the-fly and can be
+%% dynamically leveraged as needed.
+VM Cloningをコールすると、クローニングの時点での親VMとまったく同じ内容で
+複数のクラウドサーバーのインスタンスを作成する。
+論理的に、これらのクローンは親のすべての状態を引き継ぐ。OSレベルだけでなく
+アプリケーションレベルのキャッシュも含めてである。さらに、
+クローンが自動的に内部のプライベートネットワークに追加されるので、
+動的でスケーラブルなクラスタにうまく参加できるようになる。
+個別のVMにまとめた新たな計算機リソースをその場で作れ、
+必要に応じて動的に活用できる。
 
-To be of practical use, VM cloning has to be applicable, efficient,
-and fast. In this chapter we will describe how SnowFlock's
-implementation of VM Cloning can be effectively interwoven in several
-different programming models and frameworks, how it can be implemented
-to keep application runtime and provider overhead to a minimum, and
-how it can be used to create dozens of new VMs in five seconds or
-less.
+%% To be of practical use, VM cloning has to be applicable, efficient,
+%% and fast. In this chapter we will describe how SnowFlock's
+%% implementation of VM Cloning can be effectively interwoven in several
+%% different programming models and frameworks, how it can be implemented
+%% to keep application runtime and provider overhead to a minimum, and
+%% how it can be used to create dozens of new VMs in five seconds or
+%% less.
+現実的に使えるレベルにするには、ただVMのクローンができるだけではなく、
+十分に効率的かつ高速でなければならない。本章ではSnowFlockにおける
+VM Cloningの実装を取り上げる。
+さまざまなプログラミングモデルやフレームワークをひとつにまとめ、
+アプリケーションのランタイムやプロバイダーのオーバーヘッドを最小限に抑え、
+何十もの新たなVMを5秒とかからずに作れるようにした、その方法を説明する。
 
-With an API for the programmatic control of VM Cloning with bindings
-in C, C++, Python and Java, SnowFlock is extremely flexible and
-versatile.  We've successfully used SnowFlock in prototype
-implementations of several, quite different, systems.  In parallel
-computation scenarios, we've achieved excellent results by explicitly
-cloning worker VMs that cooperatively distribute the load across many
-physical hosts. For parallel applications that use the Message Passing
-Interface (MPI) and typically run on a cluster of dedicated servers,
-we modified the MPI startup manager to provide unmodified applications
-with good performance and much less overhead by provisioning a fresh
-cluster of clones on demand for each run. Finally, in a quite
-different use case, we used SnowFlock to improve the efficiency and
-performance of elastic servers.  Today's cloud-based elastic servers
-boot new, cold workers as needed to service spikes in demand. By
-cloning a running VM instead, SnowFlock brings new workers on line 20
-times faster, and because clones inherit the warm buffers of their
-parent, they reach their peak performance sooner.
+%% With an API for the programmatic control of VM Cloning with bindings
+%% in C, C++, Python and Java, SnowFlock is extremely flexible and
+%% versatile.  We've successfully used SnowFlock in prototype
+%% implementations of several, quite different, systems.  In parallel
+%% computation scenarios, we've achieved excellent results by explicitly
+%% cloning worker VMs that cooperatively distribute the load across many
+%% physical hosts. For parallel applications that use the Message Passing
+%% Interface (MPI) and typically run on a cluster of dedicated servers,
+%% we modified the MPI startup manager to provide unmodified applications
+%% with good performance and much less overhead by provisioning a fresh
+%% cluster of clones on demand for each run. Finally, in a quite
+%% different use case, we used SnowFlock to improve the efficiency and
+%% performance of elastic servers.  Today's cloud-based elastic servers
+%% boot new, cold workers as needed to service spikes in demand. By
+%% cloning a running VM instead, SnowFlock brings new workers on line 20
+%% times faster, and because clones inherit the warm buffers of their
+%% parent, they reach their peak performance sooner.
+VM Cloningをプログラムで制御するためのAPIを提供しており、
+CやC++、PythonそしてJavaのバインディングも用意されている。
+そのおかげで、SnowFlockは極めて柔軟で幅広く使えるものになっている。
+私たちはこれまでに、SnowFlockをつかってさまざまなシステムのプロトタイプ実装を成功させてきた。
+並列処理を要する場面では、多数の物理ホストに対する負荷分散を考慮して
+ワーカーVMのクローン先を明示的に選ぶようにして、すばらしい結果を達成した。
+Message Passing Interface (MPI)を扱う並列アプリケーションで、
+専用サーバーのクラスタ環境で実行されることが多いというものがあった。
+このときは、MPIスタートアップマネージャーに手を加えることで、
+アプリケーション側を一切変更せずによりよいパフォーマンスと
+より低いオーバーヘッドを実現した。クローンによる未使用のクラスタを、
+実行時にオンデマンドで配布できるようにしたのだ。
+最後にもうひとつ紹介しよう。今までの例とはかなり違う使い方だが、
+SnowFlockを使って、伸縮自在なサーバー群(elastic servers)の効率とパフォーマンスを改善したのだ。
+いまどきのクラウドベースの伸縮自在なサーバー群は、
+サービスの利用量が急増した場合に必要に応じて新たなワーカーを起動するようになっている。
+そうではなく、稼働中のVMをクローンすることで、SnowFlockは
+新たなワーカーの立ち上げを20倍も高速化した。
+また、クローンは稼働中の親サーバーのバッファーも引き継ぐので、
+まっさらなサーバーを立ち上げるのに比べてより高速にフル稼働状態に持ち込める。
 
 \end{aosasect1}
 
