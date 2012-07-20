@@ -151,66 +151,121 @@ SnowFlockを使って、伸縮自在なサーバー群(elastic servers)の効率
 %% \begin{aosasect1}{VM Cloning}
 \begin{aosasect1}{VMのクローニング}
 
-As the name suggests, VM clones are (nearly) identical to their parent
-VM\@. There are actually some minor but necessary differences to avoid
-issues such as MAC address collisions, but we'll come back to that
-later. To create a clone, the entire local disk and memory state must
-be made available, which brings us to the first major design tradeoff:
-should we copy that state up-front or on demand?
+%% As the name suggests, VM clones are (nearly) identical to their parent
+%% VM\@. There are actually some minor but necessary differences to avoid
+%% issues such as MAC address collisions, but we'll come back to that
+%% later. To create a clone, the entire local disk and memory state must
+%% be made available, which brings us to the first major design tradeoff:
+%% should we copy that state up-front or on demand?
+その名が示す通り、VMのクローンは親VMとほぼ同じものである。
+ただ、実際には必要最小限の相違点がある。MACアドレスの衝突みたいな問題を回避するためだ。
+それについては後で説明する。
+クローンを作るということは、ローカルディスク全体とメモリの状態をコピーして使えるようにするということだ。
+ここで、設計上の最初のトレードオフに直面する。
+状態のコピーは事前に行うべきだろうか。それともその場でオンデマンドで行うべきだろうか。
 
-The simplest way to achieve VM cloning is to adapt the standard VM
-``migration'' capability.  Typically, migration is used when a running
-VM needs to be moved to a different host, such as when the host
-becomes overloaded or must be brought down for maintenance. Because
-the VM is purely software, it can be encapsulated in a data file that
-can then be copied to a new, more appropriate host, where it picks up
-execution after a brief interruption. To accomplish this,
-off-the-shelf VMMs create a file containing a ``checkpoint'' of the VM,
-including its local filesystem, memory image, virtual CPU (VCPU)
-registers, etc. In migration, the newly booted copy replaces the
-original, but the process can be altered to produce a clone while
-leaving the original running. In this ``eager'' process, the entire VM
-state is transferred up front, which provides the best initial
-performance, because the entire state of the VM is in place when
-execution begins.  The disadvantage of eager replication is that the
-laborious process of copying the entire VM must happen before
-execution can begin, which significantly slows instantiation.
+%% The simplest way to achieve VM cloning is to adapt the standard VM
+%% ``migration'' capability.  Typically, migration is used when a running
+%% VM needs to be moved to a different host, such as when the host
+%% becomes overloaded or must be brought down for maintenance. Because
+%% the VM is purely software, it can be encapsulated in a data file that
+%% can then be copied to a new, more appropriate host, where it picks up
+%% execution after a brief interruption. To accomplish this,
+%% off-the-shelf VMMs create a file containing a ``checkpoint'' of the VM,
+%% including its local filesystem, memory image, virtual CPU (VCPU)
+%% registers, etc. In migration, the newly booted copy replaces the
+%% original, but the process can be altered to produce a clone while
+%% leaving the original running. In this ``eager'' process, the entire VM
+%% state is transferred up front, which provides the best initial
+%% performance, because the entire state of the VM is in place when
+%% execution begins.  The disadvantage of eager replication is that the
+%% laborious process of copying the entire VM must happen before
+%% execution can begin, which significantly slows instantiation.
+VMクローニングを実現するためのいちばんシンプルな方法は、
+標準的な「マイグレーション」機能を使うことだ。
+マイグレーションの使いどころとして一般的なのは、稼働中のVMを別のホストへの移動だ。
+今のホストでは負荷に耐えられなくなっただとか、今のホストのメンテナンスで
+電源断が発生するなどという場合に利用する。
+VMは純粋にソフトウェアなので、ひとつのデータファイルにまとめることができる。
+そのファイルを新しいホストにコピーして、少し手を加えた後で起動することになる。
+これを実現するために、既製のVMMはVMの「チェックポイント」を含めたファイルを作る。
+ローカルファイルシステムの状態やメモリのイメージ、仮想CPU(VCPU)のレジスタの状態なども
+含めたファイルである。マイグレーションのときは、
+元のVMのかわりに新たなコピーを起動する。ただ、起動プロセスの途中で
+クローンを作る処理に入り、元のVMは稼働したままにしておく。
+この「貪欲な」手順では、VM全体の状態を事前に転送する。そうすることで、
+初期パフォーマンスを最大化している。というのも、
+VM全体の状態が実行開始時にそろっているからだ。
+この方式のレプリケーションの弱点は、VM全体のコピーという
+手間のかかる作業をしてからでないと実行開始できないということ。
+つまり、インスタンスを作るのにとても時間がかかるということだ。
 
-The other extreme, adopted by SnowFlock, is ``lazy'' state
-replication.  Instead of copying everything the VM might ever need,
-SnowFlock transfers only the vital bits needed to begin execution, and
-transfers state later, only when the clone needs it. This has two
-advantages.  First, it minimizes the instantiation latency by doing as
-little work as possible up front. Second, it increases the efficiency
-by copying only the state that is actually used by the clone. The
-yield of this benefit, of course, depends on the clone's behavior, but
-few applications access every page of memory and every file in the
-local filesystem.
+%% The other extreme, adopted by SnowFlock, is ``lazy'' state
+%% replication.  Instead of copying everything the VM might ever need,
+%% SnowFlock transfers only the vital bits needed to begin execution, and
+%% transfers state later, only when the clone needs it. This has two
+%% advantages.  First, it minimizes the instantiation latency by doing as
+%% little work as possible up front. Second, it increases the efficiency
+%% by copying only the state that is actually used by the clone. The
+%% yield of this benefit, of course, depends on the clone's behavior, but
+%% few applications access every page of memory and every file in the
+%% local filesystem.
+SnowFlockが採用したのは、それとは正反対の「怠惰な」手順による状態のレプリケーションだ。
+VMが必要とするであろうすべての内容をコピーするのではなく、
+SnowFlockは起動するために最低限必要なものだけをとりあえず転送する。
+その他の部分については、クローン側で必要となったときになってはじめて転送する。
+この方式には二つの利点がある。
+まず、起動にかかる時間が最短になるということ。事前に必要な処理が限られているからである。
+次に、効率がよくなるということ。クローンが実際に使う状態だけをコピーするからである。
+後者の利点が得られるかどうかは、もちろんクローンの状態に依存する。
+しかし、メモリの全ページにアクセスしたりローカルファイルシステム上の
+全ファイルにアクセスしたりするようなアプリケーションなどほとんど存在しない。
 
-However, the benefits of lazy replication aren't free. Because the
-state transfer is postponed until the last moment, the clone is left
-waiting for state to arrive before it can continue execution. This
-This situation parallels swapping of memory to disk in time-shared workstation:
-applications are blocked waiting for state to be fetched from a high latency source.
-In the case of SnowFlock, the
-blocking somewhat degrades the clone's performance; the severity of
-the slowdown depends on the application.  For high performance
-computing applications we've found this degradation has little impact,
-but a cloned database server may perform poorly at first. It should be
-noted that this is a transient effect: within a few minutes, most of
-the necessary state has been transferred and the clone's performance
-matches that of the parent.
+%% However, the benefits of lazy replication aren't free. Because the
+%% state transfer is postponed until the last moment, the clone is left
+%% waiting for state to arrive before it can continue execution. This
+%% This situation parallels swapping of memory to disk in time-shared workstation:
+%% applications are blocked waiting for state to be fetched from a high latency source.
+%% In the case of SnowFlock, the
+%% blocking somewhat degrades the clone's performance; the severity of
+%% the slowdown depends on the application.  For high performance
+%% computing applications we've found this degradation has little impact,
+%% but a cloned database server may perform poorly at first. It should be
+%% noted that this is a transient effect: within a few minutes, most of
+%% the necessary state has been transferred and the clone's performance
+%% matches that of the parent.
+とはいえ、怠惰なレプリケーションが万能なわけではなく、それなりの代償を払うことになる。
+状態の転送を最後の最後まで先送りにするので、実行し続けるためには転送が完了するまで待たなければいけない。
+この状況は、時分割方式のワークステーションでメモリをディスクにスワップさせるときに似ている。
+レイテンシーの高いところから状態を取得してくるまでアプリケーションの処理がブロックされてしまうのだ。
+SnowFlockの場合、このブロックによってクローンのパフォーマンスが多少落ちる。
+このスローダウンがどの程度の影響を及ぼすかは、アプリケーションによって異なる。
+高性能計算アプリケーションに関しては、この問題の影響はほとんどないことが経験上わかっている。
+しかし、データベースサーバーをクローンした場合などは出だしのパフォーマンスが
+不十分になるだろう。注意すべきなのは、これはあくまでも一時的な問題だということだ。
+数分もすれば必要な状態の大半は転送し終えるので、
+クローンのパフォーマンスは親と同じ程度になる。
 
-As an aside, if you're well versed in VMs, you're likely wondering if
-the optimizations used by ``live'' migration are useful here. Live
-migration is optimized to shorten the interval between the original
-VM's suspension and the resumption of execution by the new copy.  To
-accomplish this, the Virtual Machine Monitor (VMM) pre-copies the VM's state while the original
-is still running, so that after suspending it, only the recently
-changed pages need to be transferred. This technique does not affect
-the interval between the migration request and the time the copy
-begins execution, and so would not reduce the instantiation latency of
-eager VM cloning.
+%% As an aside, if you're well versed in VMs, you're likely wondering if
+%% the optimizations used by ``live'' migration are useful here. Live
+%% migration is optimized to shorten the interval between the original
+%% VM's suspension and the resumption of execution by the new copy.  To
+%% accomplish this, the Virtual Machine Monitor (VMM) pre-copies the VM's state while the original
+%% is still running, so that after suspending it, only the recently
+%% changed pages need to be transferred. This technique does not affect
+%% the interval between the migration request and the time the copy
+%% begins execution, and so would not reduce the instantiation latency of
+%% eager VM cloning.
+余談だが、VMに詳しい人ならこう思うかもしれない。
+「そんなときって、ライブマイグレーションの最適化機能が使えるんじゃないの？」
+ライブマイグレーションの最適化とは、元のVMを停止してから新たなコピーを
+起動するまでのインターバルを短縮することである。
+これを実現するには、元のVMが動いている間に
+Virtual Machine Monitor (VMM)がVMの状態をコピーすればよい。
+これで、元のVMを停止したときには直近で変更があったページだけを転送すればいいことになる。
+ただ、このテクニックを使ったところで、マイグレーションのリクエストから
+コピーが立ち上がるまでの所要時間は変わらない。そのため、
+貪欲なVMクローニングにおけるインスタンス作成時間の短縮には役立たない。
 
 \end{aosasect1}
 
