@@ -272,113 +272,178 @@ Virtual Machine Monitor (VMM)がVMの状態をコピーすればよい。
 %% \begin{aosasect1}{SnowFlock's Approach}
 \begin{aosasect1}{SnowFlockの手法}
 
-SnowFlock implements VM cloning with a primitive called ``VM Fork'',
-which is like a standard Unix \code{fork}, but with a few
-important differences.  First, rather than duplicating a single
-process, VM Fork duplicates an entire VM, including all of memory, all
-processes and virtual devices, and the local filesystem.  Second,
-instead of producing a single copy running on the same physical host,
-VM Fork can simultaneously spawn many copies in parallel. Finally, VMs
-can be forked to distinct physical servers, letting you quickly
-increase your cloud footprint as needed.
+%% SnowFlock implements VM cloning with a primitive called ``VM Fork'',
+%% which is like a standard Unix \code{fork}, but with a few
+%% important differences.  First, rather than duplicating a single
+%% process, VM Fork duplicates an entire VM, including all of memory, all
+%% processes and virtual devices, and the local filesystem.  Second,
+%% instead of producing a single copy running on the same physical host,
+%% VM Fork can simultaneously spawn many copies in parallel. Finally, VMs
+%% can be forked to distinct physical servers, letting you quickly
+%% increase your cloud footprint as needed.
+SnowFlockは、VMのクローニングを「VMフォーク」というプリミティブで実装している。
+これは標準的なUnixの\code{fork}と似ているが、重要な違いがいくつかある。
+まず、Unixの\code{fork}は単一のプロセスを複製するが、VMフォークの場合はVM全体を複製する。
+メモリやプロセスや仮想デバイス、そしてローカルファイルシステムの状態も含めて複製するのだ。
+次に、Unixの\code{fork}は同じ物理ホスト上にコピーをひとつ作るだけだが、
+VMフォークの場合は複数のコピーを並列で作成できる。
+最後に、VMフォークは別のサーバー上に作ることもできる。
+これを利用すれば、クラウド上でのフットプリントを必要に応じて拡大できる。
 
-The following concepts are key to SnowFlock:
+%% The following concepts are key to SnowFlock:
+SnowFlockの鍵となるのが、これらの概念だ。
 
 \begin{aosaitemize}
 
-  \item Virtualization: The VM encapsulates the computation
-  environment, making clouds and machine cloning possible.
+  %% \item Virtualization: The VM encapsulates the computation
+  %% environment, making clouds and machine cloning possible.
+  \item 仮想化：VMが計算環境をカプセル化することで、クラウドを作ったりマシンをクローンしたりできるようにする。
 
-  \item Lazy Propagation: The VM state isn't copied until it's needed,
-  so clones come alive in a few seconds.
+  %% \item Lazy Propagation: The VM state isn't copied until it's needed,
+  %% so clones come alive in a few seconds.
+  \item 緩やかな伝搬：VMの状態は、必要になるまでコピーしない。そうすることで、クローンを数秒で立ち上げられるようにする。
 
-  \item Multicast: Clone siblings have similar needs in terms of VM
-  state. With multicast, dozens of clones start running as quickly
-  as one.
+  %% \item Multicast: Clone siblings have similar needs in terms of VM
+  %% state. With multicast, dozens of clones start running as quickly
+  %% as one.
+  \item マルチキャスト：クローンした兄弟たちは、VMの状態が同じになっていなければいけない。
+  マルチキャストを使えば、何十ものクローンをすばやく稼働させることができる。
 
-  \item Page Faults: When a clone tries to use missing memory, it
-  faults and triggers a request to the parent. The clone's execution
-  is blocked until the needed page arrives.
+  %% \item Page Faults: When a clone tries to use missing memory, it
+  %% faults and triggers a request to the parent. The clone's execution
+  %% is blocked until the needed page arrives.
+  \item ページフォルト：まだクローン側に存在しないメモリを使おうとしたときは、
+  処理を止めて親にリクエストをしなければならない。クローンの実行は、必要なページが届くまでブロックする。
 
-  \item Copy on Write (CoW): By taking a copy of its memory and disk
-  pages before overwriting them, the parent VM can continue to run
-  while preserving a frozen copy of its state for use by the clones.
+  %% \item Copy on Write (CoW): By taking a copy of its memory and disk
+  %% pages before overwriting them, the parent VM can continue to run
+  %% while preserving a frozen copy of its state for use by the clones.
+  \item コピーオンライト (CoW)：メモリやディスクスペースのコピーを取ってから上書きする。
+  これで、親VMが処理を続けつつ、それ以前の状態のコピーをクローンが使えるようになる。
 
 \end{aosaitemize}
 
-We've implemented SnowFlock using the Xen virtualization system, so
-it's useful to introduce some Xen-specific terminology for clarity. In
-a Xen environment, the VMM is called the hypervisor, and VMs are
-called domains. On each physical machine (host), there is a privileged
-domain, called ``domain 0'' (dom0), that has full access to the host
-and its physical devices, and can be used to control additional guest, or ``user'',
-VMs that are called ``domain U'' (domU).
+%% We've implemented SnowFlock using the Xen virtualization system, so
+%% it's useful to introduce some Xen-specific terminology for clarity. In
+%% a Xen environment, the VMM is called the hypervisor, and VMs are
+%% called domains. On each physical machine (host), there is a privileged
+%% domain, called ``domain 0'' (dom0), that has full access to the host
+%% and its physical devices, and can be used to control additional guest, or ``user'',
+%% VMs that are called ``domain U'' (domU).
+SnowFlockの実装にはXenを利用した。ここで、Xen特有の用語を念のために紹介しておこう。
+Xenの環境ではVMMのことをハイパーバイザと呼び、一方VMのことをドメインと呼ぶ。
+物理マシン(ホスト)ごとに特権ドメイン``domain 0'' (dom0)があり、これはホストとその物理デバイスに対する
+完全なアクセス権を持つ。また、この特権ドメインを使ってゲスト(あるいは``user'')VMを作ることができる。
+このドメインのことを``domain U'' (domU)と呼ぶ。
 
-In broad strokes, SnowFlock consists of a set of modifications to the
-Xen hypervisor that enable it to smoothly recover when missing
-resources are accessed, and a set of supporting processes and systems
-that run in dom0 and cooperatively transfer the missing VM state, and
-some optional modifications to the OS executing inside clone
-VMs. There are six main components.
+%% In broad strokes, SnowFlock consists of a set of modifications to the
+%% Xen hypervisor that enable it to smoothly recover when missing
+%% resources are accessed, and a set of supporting processes and systems
+%% that run in dom0 and cooperatively transfer the missing VM state, and
+%% some optional modifications to the OS executing inside clone
+%% VMs. There are six main components.
+Xenハイパーバイザに手を加えて、存在しないリソースへのアクセスがあったときのリカバーをスムーズに行えるようにしたもの。
+dom0上で稼働するサポートプロセス群で、存在しないVMの状態を転送するもの。
+クローンVM内で実行されるOSに対する修正。
+簡単にまとめると、これらがSnowFlockを構成する。
+主要なコンポーネントは次の六つだ。
 
 \begin{aosaitemize}
 
-  \item VM Descriptor: This small object is used to seed the clone,
-  and holds the bare-bones skeleton of the VM as needed to begin
-  execution.  It lacks the guts and muscle needed to perform any
-  useful work.
+  %% \item VM Descriptor: This small object is used to seed the clone,
+  %% and holds the bare-bones skeleton of the VM as needed to begin
+  %% execution.  It lacks the guts and muscle needed to perform any
+  %% useful work.
+  \item VM Descriptor：この小さなオブジェクトを使って
+  クローンの種をまき、VMのベアボーンを保持して必要に応じて実行開始できるようにする。
+  実際の作業をするために必要な馬力はない。
 
-  \item Multicast Distribution System (\code{mcdist}): This
-  parent-side system efficiently distributes the VM state
-  information simultaneously to all clones.
+  %% \item Multicast Distribution System (\code{mcdist}): This
+  %% parent-side system efficiently distributes the VM state
+  %% information simultaneously to all clones.
+  \item Multicast Distribution System (\code{mcdist})：
+  これは親側のシステムで、VMの状態に関する情報をすべてのクローンに対して
+  効率的に同時分散させる。
 
-  \item Memory Server Process: This parent-side process maintains a
-  frozen copy of the parent's state, and makes it available to all
-  clones on demand through \code{mcdist}.
+  %% \item Memory Server Process: This parent-side process maintains a
+  %% frozen copy of the parent's state, and makes it available to all
+  %% clones on demand through \code{mcdist}.
+  \item Memory Server Process：
+  これは親側のプロセスで、親の状態のコピーを管理する。そして、すべてのクローンに対して
+  必要に応じて\code{mcdist}経由で提供する。
 
-  \item Memtap Process: This clone-side process acts on the clone's
-  behalf, and communicates with the memory server to request pages
-  that are needed but missing.
+  %% \item Memtap Process: This clone-side process acts on the clone's
+  %% behalf, and communicates with the memory server to request pages
+  %% that are needed but missing.
+  \item Memtap Process：
+  これはクライアント側のプロセスで、クライアントの代わりに働く。
+  メモリーサーバーと通信をして、まだ存在しないが必要になったページについてのリクエストを出す。
 
-  \item Clone Enlightenment: The guest kernel running inside the
-  clones can alleviate the on-demand transfer of VM state by
-  providing hints to the VMM\@. This is optional but highly desirable
-  for efficiency.
+  %% \item Clone Enlightenment: The guest kernel running inside the
+  %% clones can alleviate the on-demand transfer of VM state by
+  %% providing hints to the VMM\@. This is optional but highly desirable
+  %% for efficiency.
+  \item Clone Enlightenment：
+  クローンの中で動くゲストカーネルは、オンデマンドでのVM状態の転送を緩和するために
+  VMMにヒントを提供できる。これは必須ではないが、効率を考えるとかなりおすすめだ。
 
-  \item Control Stack: Daemons run on each physical host to
-  orchestrate the other components and manage the SnowFlock parent and clone VMs.
+  %% \item Control Stack: Daemons run on each physical host to
+  %% orchestrate the other components and manage the SnowFlock parent and clone VMs.
+  \item Control Stack：
+  各物理ホスト上で動くデーモンで、他のコンポーネントをとりまとめる役割を果たす。
+  SnowFlockの親とクローンVMを管理する。
 
 \end{aosaitemize}
 
 %% \aosafigure{../images/snowflock/drawing.pdf}{SnowFlock VM Replication Architecture}{fig.snowflock.arch}
-\aosafigure{../images/snowflock/drawing.pdf}{SnowFlock VMレプリケーションのアーキテクチャ}{fig.snowflock.arch}
+\aosafigure{../images/snowflock/drawing.eps}{SnowFlock VMレプリケーションのアーキテクチャ}{fig.snowflock.arch}
 
-Pictorially speaking, \aosafigref{fig.snowflock.arch} depicts the
-process of cloning a VM, showing the the four main steps: (1)
-suspending the parent VM to produce an architectural descriptor; (2)
-distributing this descriptor to all target hosts; (3) initiating
-clones that are mostly empty state-wise; and (4) propagating state
-on-demand. The figure also depicts the use of multicast distribution
-with \code{mcdist}, and fetch avoidance via guest enlightenment.
+%% Pictorially speaking, \aosafigref{fig.snowflock.arch} depicts the
+%% process of cloning a VM, showing the the four main steps: (1)
+%% suspending the parent VM to produce an architectural descriptor; (2)
+%% distributing this descriptor to all target hosts; (3) initiating
+%% clones that are mostly empty state-wise; and (4) propagating state
+%% on-demand. The figure also depicts the use of multicast distribution
+%% with \code{mcdist}, and fetch avoidance via guest enlightenment.
+図で説明しよう。\aosafigref{fig.snowflock.arch}はVMのクローン手順を表した図で、
+四つの主要な手順を示している。(1) 親VMをサスペンドしてアーキテクチャディスクリプタを作り、
+(2) このディスクリプタをすべてのターゲットホストに配布し、
+(3) ほぼ空っぽの状態のクローンを立ち上げ、
+(4) オンデマンドで状態を伝搬させる。
+この図は、\code{mcdist}によるマルチキャスト分散や
+ゲストのClone Enlightenmentによるヒントの提供も示している。
 
-If you're interested in trying SnowFlock, it's available in two
-flavors.  The documentation and open source code for the original
-University of Toronto SnowFlock research project are
-available\footnote{\url{http://sysweb.cs.toronto.edu/projects/1}}
-If you'd prefer to take
-the industrial-strength version for a spin, a free, non-commercial
-license is available from GridCentric 
-Inc.\footnote{\url{http://www.gridcentriclabs.com/architecture-of-open-source-applications}}
-Because SnowFlock includes changes to the hypervisor and requires
-access to dom0, installing SnowFlock requires privileged access on the
-host machines. For that reason, you'll need to use your own hardware,
-and won't be able to try it out as a user in a commercial cloud
-environment such as Amazon's EC2.
+%% If you're interested in trying SnowFlock, it's available in two
+%% flavors.  The documentation and open source code for the original
+%% University of Toronto SnowFlock research project are
+%% available\footnote{\url{http://sysweb.cs.toronto.edu/projects/1}}
+%% If you'd prefer to take
+%% the industrial-strength version for a spin, a free, non-commercial
+%% license is available from GridCentric 
+%% Inc.\footnote{\url{http://www.gridcentriclabs.com/architecture-of-open-source-applications}}
+%% Because SnowFlock includes changes to the hypervisor and requires
+%% access to dom0, installing SnowFlock requires privileged access on the
+%% host machines. For that reason, you'll need to use your own hardware,
+%% and won't be able to try it out as a user in a commercial cloud
+%% environment such as Amazon's EC2.
+SnowFlockを試してみようと思ったら、選択肢は次の二種類だ。
+まずは、ドキュメントつきのオープンソースのコード。これがオリジナルで、トロント大学のSnowFlock研究プロジェクト
+\footnote{\url{http://sysweb.cs.toronto.edu/projects/1}}
+で公開されている。ちょっと実運用で試してみたいのでそれに耐えるバージョンが欲しいという場合は、
+フリーで非商用のライセンスのものがGridCentric  Inc.
+\footnote{\url{http://www.gridcentriclabs.com/architecture-of-open-source-applications}}
+から公開されている。
+SnowFlockはハイパーバイザに手を入れているしdom0にアクセスする必要もあるので、
+SnowFlockをインストールするにはホストマシンの特権アカウントが必要だ。
+そのため、試すなら自分のハードウェアで使う必要があるだろう。
+Amazon EC2などの商用クラウド環境で、ユーザーレベルで試すことはできない。
 
-Throughout the next few sections we'll describe the different pieces
-that cooperate to achieve instantaneous and efficient cloning. All
-the pieces we will describe fit together as shown in
-\aosafigref{fig.snowflock.components}.
+%% Throughout the next few sections we'll describe the different pieces
+%% that cooperate to achieve instantaneous and efficient cloning. All
+%% the pieces we will describe fit together as shown in
+%% \aosafigref{fig.snowflock.components}.
+この後のセクションでは、即座に効率的なクローンを実現するための各パーツについて説明する。
+ここで説明するすべてのパーツが\aosafigref{fig.snowflock.components}で示すように組み合わさることになる。
 
 %% \aosafigure{../images/snowflock/drawing-arch.eps}{Software Components of SnowFlock}{fig.snowflock.components}
 \aosafigure{../images/snowflock/drawing-arch.eps}{SnowFlockのソフトウェアコンポーネント}{fig.snowflock.components}
