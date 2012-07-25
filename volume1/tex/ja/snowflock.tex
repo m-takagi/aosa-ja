@@ -406,7 +406,7 @@ dom0上で稼働するサポートプロセス群で、存在しないVMの状�
 %% on-demand. The figure also depicts the use of multicast distribution
 %% with \code{mcdist}, and fetch avoidance via guest enlightenment.
 図で説明しよう。\aosafigref{fig.snowflock.arch}はVMのクローン手順を表した図で、
-四つの主要な手順を示している。(1) 親VMをサスペンドしてアーキテクチャディスクリプタを作り、
+四つの主要な手順を示している。(1) 親VMをサスペンドして構造ディスクリプタを作り、
 (2) このディスクリプタをすべてのターゲットホストに配布し、
 (3) ほぼ空っぽの状態のクローンを立ち上げ、
 (4) オンデマンドで状態を伝搬させる。
@@ -451,37 +451,60 @@ Amazon EC2などの商用クラウド環境で、ユーザーレベルで試す�
 \end{aosasect1}
 
 %% \begin{aosasect1}{Architectural VM Descriptor}
-\begin{aosasect1}{Architectural VM Descriptor}
+\begin{aosasect1}{VM構造ディスクリプタ}
 
-The key design decision for SnowFlock is to postpone the replication
-of VM state to a lazy runtime operation. In other words, copying the
-memory of a VM is a late binding operation, allowing for many
-opportunities for optimization.
+%% The key design decision for SnowFlock is to postpone the replication
+%% of VM state to a lazy runtime operation. In other words, copying the
+%% memory of a VM is a late binding operation, allowing for many
+%% opportunities for optimization.
+SnowFlockにおける設計上の重要な決断が、
+VMの状態のコピーを先送りにして実行時に行うようにしたことだ。
+言い換えると、VMのメモリのコピーを遅延束縛操作にして、
+最適化できる余地を増やしたということである。
 
-The first step to carry out this design decision is the generation of
-an architectural descriptor of the VM state. This is the seed that
-will be used to create clone VMs. It contains the bare minimum
-necessary to create a VM and make it schedulable. As the name implies,
-this bare minimum consists of data structures needed by the underlying
-architectural specification.  In the case of SnowFlock, the
-architecture is a combination of Intel x86 processor requirements and
-Xen requirements. The architectural descriptor thus contains data
-structures such as page tables, virtual registers, device metadata,
-wallclock timestamps, etc. We refer the interested reader to~\cite{bib:snowflocktocs}
-for an in-depth description of the contents of the
-architectural descriptor.
+%% The first step to carry out this design decision is the generation of
+%% an architectural descriptor of the VM state. This is the seed that
+%% will be used to create clone VMs. It contains the bare minimum
+%% necessary to create a VM and make it schedulable. As the name implies,
+%% this bare minimum consists of data structures needed by the underlying
+%% architectural specification.  In the case of SnowFlock, the
+%% architecture is a combination of Intel x86 processor requirements and
+%% Xen requirements. The architectural descriptor thus contains data
+%% structures such as page tables, virtual registers, device metadata,
+%% wallclock timestamps, etc. We refer the interested reader to~\cite{bib:snowflocktocs}
+%% for an in-depth description of the contents of the
+%% architectural descriptor.
+この決断を実行するための第一歩が、VMの状態を表す構造ディスクリプタの生成だ。
+これが、クローンVMを作るときに使う種となる。
+ディスクリプタには、VMを作るために最低限必要な内容だけが含まれており、
+VMの作成予定を立てて実行できるようになっている。
+その名の通り、必要最低限な内容とは、基盤となる構造を作るために必要なデータである。
+SnowFlockの場合の構造とは、Intel x86プロセッサとXenだ。
+したがって、構造ディスクリプタの内容は、
+ページテーブルや仮想レジスタ、デバイスのメタデータ、時計のタイムスタンプなどといったデータとなる。
+構造ディスクリプタの内容に関する詳細な情報に関しては
+~\cite{bib:snowflocktocs}を参考にした。
 
-An architectural descriptor has three important properties: First, it
-can be created in little time; 200 milliseconds is not
-uncommon. Second, it is small, typically three orders of magnitude
-smaller than the memory allocation of the originating VM (1 MB for a 1
-GB VM). And third, a clone VM can be created from a descriptor in less
-than a second (typically 800 milliseconds).
+%% An architectural descriptor has three important properties: First, it
+%% can be created in little time; 200 milliseconds is not
+%% uncommon. Second, it is small, typically three orders of magnitude
+%% smaller than the memory allocation of the originating VM (1 MB for a 1
+%% GB VM). And third, a clone VM can be created from a descriptor in less
+%% than a second (typically 800 milliseconds).
+構造ディスクリプタには、三つの重要な特徴がある。
+まず、短時間で作れること。200ミリ秒で作れるというのも珍しいことではない。
+次に、小さいこと。一般的には、元のVMのメモリ割り当て量よりも桁が三つくらい少なくなる。
+つまり、メモリ1GBのVMなら、1MB程度になる。
+最後に、ディスクリプタからのクローンVMの作成が一秒未満で終わること。一般的には800ミリ秒程度になる。
 
-The catch, of course, is that the cloned VMs are missing most of their
-memory state by the time they are created from the descriptor. The
-following sections explain how we solve this problem---and how we take
-advantage of the opportunities for optimization it presents.
+%% The catch, of course, is that the cloned VMs are missing most of their
+%% memory state by the time they are created from the descriptor. The
+%% following sections explain how we solve this problem---and how we take
+%% advantage of the opportunities for optimization it presents.
+もちろん問題もあって、ディスクリプタからVMをクローンした直後の時点では、
+メモリの状態がほとんど存在しない状態になる。その問題をいかにして解決するのか。
+それをこの後のセクションで解説する。これはまた、最適化のチャンスをいかに活用するのか、
+という説明でもある。
 
 \end{aosasect1}
 
