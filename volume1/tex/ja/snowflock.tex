@@ -363,7 +363,7 @@ dom0上で稼働するサポートプロセス群で、存在しないVMの状�
   %% information simultaneously to all clones.
   \item Multicast Distribution System (\code{mcdist})：
   これは親側のシステムで、VMの状態に関する情報をすべてのクローンに対して
-  効率的に同時分散させる。
+  効率的に同時配信する。
 
   %% \item Memory Server Process: This parent-side process maintains a
   %% frozen copy of the parent's state, and makes it available to all
@@ -511,99 +511,168 @@ SnowFlockの場合の構造とは、Intel x86プロセッサとXenだ。
 %% \begin{aosasect1}{Parent-Side Components}
 \begin{aosasect1}{親側のコンポーネント}
 
-Once a VM is cloned it becomes a parent for its children or
-clones.  Like all responsible parents, it needs to look out for the
-well-being of its descendants. It does so by setting up a set of
-services that provision memory and disk state to cloned VMs on demand.
+%% Once a VM is cloned it becomes a parent for its children or
+%% clones.  Like all responsible parents, it needs to look out for the
+%% well-being of its descendants. It does so by setting up a set of
+%% services that provision memory and disk state to cloned VMs on demand.
+あるVMのクローンを作ると、元のVMはそのクローン(子ども)たちの親になる。
+親っていうのは、自分の子どもたちの面倒を見なきゃいけないものだ。
+そのため、いくつかのサービスを用意して、
+子どもたちからメモリやディスク状態の配布要求があったときに応えられるようにする。
 
 %% \begin{aosasect2}{Memserver Process}
 \begin{aosasect2}{Memserverプロセス}
 
-When the architectural descriptor is created, the VM is stopped in its
-tracks throughout the process. This is so the VM memory state settles;
-before actually pausing a VM and descheduling from execution,
-internal OS drivers quiesce into a state from which clones can
-reconnect to the external world in their new enclosing VMs. We take
-advantage of this quiescent state to create a ``memory server'',
-or \code{memserver}.
+%% When the architectural descriptor is created, the VM is stopped in its
+%% tracks throughout the process. This is so the VM memory state settles;
+%% before actually pausing a VM and descheduling from execution,
+%% internal OS drivers quiesce into a state from which clones can
+%% reconnect to the external world in their new enclosing VMs. We take
+%% advantage of this quiescent state to create a ``memory server'',
+%% or \code{memserver}.
+構造ディスクリプタを作る間は、VMがいったん停止する。
+これは、VMの状態を安定させるためである。実際にVMを止めて
+実行スケジュールから外す前に、内部OSドライバーが休止状態に入る。
+クローン側では、新たなVMでこの状態から外界との接続を再開できる。
+この休止状態を活用するために作ったのが「メモリサーバー」。またの名を\code{memserver}という。
 
-The memory server will provide all clones with the bits of memory they
-need from the parent. Memory is propagated at the granularity of an
-x86 memory page (4 kbytes). In its simplest form, the memory server sits
-waiting for page requests from clones, and serves one page at a time,
-one clone at a time.
+%% The memory server will provide all clones with the bits of memory they
+%% need from the parent. Memory is propagated at the granularity of an
+%% x86 memory page (4 kbytes). In its simplest form, the memory server sits
+%% waiting for page requests from clones, and serves one page at a time,
+%% one clone at a time.
+メモリサーバーは、すべてのクローンに対して必要に応じて親からメモリを与える役割を果たす。
+その粒度は、x86のメモリページ(4kバイト)と同じ単位だ。
+最も単純な形式だと、メモリサーバーはクローンからのリクエストを待ち受けて、
+一つのクローンに対して一度に1ページずつメモリを与える。
 
-However, this is the very same memory the parent VM needs to use to
-keep executing. If we would allow the parent to just go ahead and
-modify this memory, we would serve corrupted memory contents to clone
-VMs: the memory served would be different from that at the point of
-cloning, and clones would be mightily confused. In kernel hacking
-terms, this is a sure recipe for stack traces.
+%% However, this is the very same memory the parent VM needs to use to
+%% keep executing. If we would allow the parent to just go ahead and
+%% modify this memory, we would serve corrupted memory contents to clone
+%% VMs: the memory served would be different from that at the point of
+%% cloning, and clones would be mightily confused. In kernel hacking
+%% terms, this is a sure recipe for stack traces.
+しかし、ここで分け与えるメモリは、親VMの実行に必要なメモリとまったく同じものだ。
+親側でのメモリの内容も変わり続けるので、もしそれをそのままクローンに与えてしまうと
+壊れた状態のメモリを渡すことになるかもしれない。
+クローン側で期待しているのはクローンを作った時点のメモリの状態なのに、
+実際にやってきた内容はそれとは違う。クローンはきっと戸惑うだろう。
+カーネルハックの世界だと、これはきっと「スタックトレースを出すための確実な方法」
+ってことになる。
 
-To circumvent this problem, a classical OS notion comes to the rescue:
-Copy-on-Write, or CoW memory. By enlisting the aid of the Xen
-hypervisor, we can remove writing privileges from all pages of memory
-in the parent VM\@. When the parent actually tries to modify one page, a
-hardware page fault is triggered.  Xen knows why this happened, and
-makes a copy of the page. The parent VM is allowed to write to the original
-page and continue execution, while the memory server is told to use
-the copy, which is kept read-only. In this manner, the memory state at the point of cloning
-remains frozen so that clones are not confused, while the parent is
-able to proceed with execution. The overhead of CoW is minimal:
-similar mechanisms are used by Linux, for example, when creating new
-processes.
+%% To circumvent this problem, a classical OS notion comes to the rescue:
+%% Copy-on-Write, or CoW memory. By enlisting the aid of the Xen
+%% hypervisor, we can remove writing privileges from all pages of memory
+%% in the parent VM\@. When the parent actually tries to modify one page, a
+%% hardware page fault is triggered.  Xen knows why this happened, and
+%% makes a copy of the page. The parent VM is allowed to write to the original
+%% page and continue execution, while the memory server is told to use
+%% the copy, which is kept read-only. In this manner, the memory state at the point of cloning
+%% remains frozen so that clones are not confused, while the parent is
+%% able to proceed with execution. The overhead of CoW is minimal:
+%% similar mechanisms are used by Linux, for example, when creating new
+%% processes.
+この問題を回避するための助けとなったのが、昔ながらのOSにある概念である
+コピーオンライト(CoW)メモリだ。Xenハイパーバイザの助けを得れば、
+親VMのメモリ内のすべてのページに対する書き込み権限を削除できる。
+こうすれば、親がどこかのページを書き換えようとしたときに
+ハードウェアページフォルトが発生するようになる。
+Xenはなぜそうなったのかを知っているので、そのページのコピーを作る。
+コピーが終われば、親VMは本来のページへの書き込みを認められて処理を続行できる。
+一方メモリサーバーには、今後はコピーの方を使うように伝えてコピーのほうを読み込み専用にする。
+この方式を使えば、クローンした時点でのメモリの状態が残ったままになるので
+クローン側で混乱することがなくなる。その一方、親は親で処理を続けられるのだ。
+CoWによるオーバーヘッドはわずかなものだ。
+実際、たとえばLinuxで新たなプロセスを作るときにも同じ手順が使われている。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Multicasting with Mcdist}
 \begin{aosasect2}{Mcdistによるマルチキャスト}
 
-Clones are typically afflicted with an existential syndrome known as
-``fate determinism.'' We expect clones to be created for a single
-purpose: for example, to align X chains of DNA against a segment Y of
-a database. Further, we expect a set of clones to be created so that
-all siblings do the same, perhaps aligning the same X chains against
-different segments of the database, or aligning different chains
-against the same segment Y\@. Clones will thus clearly exhibit a great
-amount of temporal locality in their memory accesses: they will use
-the same code and large portions of common data.
+%% Clones are typically afflicted with an existential syndrome known as
+%% ``fate determinism.'' We expect clones to be created for a single
+%% purpose: for example, to align X chains of DNA against a segment Y of
+%% a database. Further, we expect a set of clones to be created so that
+%% all siblings do the same, perhaps aligning the same X chains against
+%% different segments of the database, or aligning different chains
+%% against the same segment Y\@. Clones will thus clearly exhibit a great
+%% amount of temporal locality in their memory accesses: they will use
+%% the same code and large portions of common data.
+クローンは一般的に、いわゆる「運命決定論」という症状に苦しめられている。
+私たちは、クローンは何かひとつの目的のために作られるものだと考えている。
+たとえば、X本のDNA鎖をデータベースのセグメントYに割り当てるといったものだ。
+さらに、複数のクローンをつくったときには、それぞれのクローンが同じことをするものと考える。
+たとえば同じ鎖Xをデータベースのさまざまなセグメントに割り当てたり、
+それぞれ別々の鎖を同じセグメントYに割り当てたりといったものだ。
+したがって、クローンたちのメモリアクセスは時間局所性が大きくなることは明白だ。
+同じようなコードを使い、大部分は同じようなデータを扱うことになる。
 
-We exploit the opportunities for temporal locality through \code{mcdist}, our
-own multicast distribution system tailored to SnowFlock. Mcdist uses
-IP multicast to simultaneously distribute the same packet to a set of
-receivers. It takes advantage of network hardware parallelism to
-decrease the load on the memory server. By sending a reply to all
-clones on the first request for a page, each clone's requests act as a
-prefetch for its siblings, because of their similar memory access
-patterns.
+%% We exploit the opportunities for temporal locality through \code{mcdist}, our
+%% own multicast distribution system tailored to SnowFlock. Mcdist uses
+%% IP multicast to simultaneously distribute the same packet to a set of
+%% receivers. It takes advantage of network hardware parallelism to
+%% decrease the load on the memory server. By sending a reply to all
+%% clones on the first request for a page, each clone's requests act as a
+%% prefetch for its siblings, because of their similar memory access
+%% patterns.
+そこで、その時間局所性を活用するために\code{mcdist}を使う。
+これは、SnowFlockにあわせて自作したマルチキャスト配信システムである。
+mcdistは、IPマルチキャストを使って同じパケットを複数の受信者に同時配信する。
+ネットワークハードウェアの並列性を活用して、メモリサーバーへの負荷を軽減する。
+あるページへの最初のリクエストに対しての応答を全クローンに向けて行うことで、
+各クローンからのリクエストがその兄弟たちへのプリフェッチとして機能するようになる。
+兄弟たちのメモリアクセスパターンは似たようなものだからである。
 
-Unlike other multicast systems, \code{mcdist} does not have to be reliable,
-does not have to deliver packets in an ordered manner, and does not
-have to atomically deliver a reply to all intended
-receivers. Multicast is strictly an optimization, and delivery need
-only be ensured to the clone explicitly requesting a page. The design
-is thus elegantly simple: the server simply multicasts responses,
-while clients time-out if they have not received a reply for a
-request, and retry the request.
+%% Unlike other multicast systems, \code{mcdist} does not have to be reliable,
+%% does not have to deliver packets in an ordered manner, and does not
+%% have to atomically deliver a reply to all intended
+%% receivers. Multicast is strictly an optimization, and delivery need
+%% only be ensured to the clone explicitly requesting a page. The design
+%% is thus elegantly simple: the server simply multicasts responses,
+%% while clients time-out if they have not received a reply for a
+%% request, and retry the request.
+他のマルチキャストシステムとは違い、
+\code{mcdist}には信頼性は要求されないし
+順序どおりにパケットを配送する必要もない。
+また、すべての受信者に対してアトミックに応答を返す必要もない。
+ここでのマルチキャストは厳密に言えば最適化であり、
+確実に配送しないといけないのは明示的にページを要求したクローンに対してだけだ。
+そのため、すっきりとシンプルな設計にした。
+サーバー側は単に応答をマルチキャストするだけ。
+クライアント側は、もしリクエストに対する応答がなければタイムアウトして、
+リクエストを再送する。
 
-Three optimizations specific to SnowFlock are included in \code{mcdist}:
+%% Three optimizations specific to SnowFlock are included in \code{mcdist}:
+SnowFlockのための最適化として、次の三つが\code{mcdist}に仕込まれている。
 
 \begin{aosaitemize}
 
-  \item Lockstep Detection: When temporal locality does happen,
-  multiple clones request the same page in very close
-  succession. The \code{mcdist} server ignores all but the first of such
-  requests.
+  %% \item Lockstep Detection: When temporal locality does happen,
+  %% multiple clones request the same page in very close
+  %% succession. The \code{mcdist} server ignores all but the first of such
+  %% requests.
+  \item 連続リクエストの検出：
+  時間局所性が発生すると、複数のクローンがほぼ同時に同じページをリクエストすることになる。
+  \code{mcdist}サーバーは、そんな場合に最初のリクエストだけを受け付けてその他を無視する。
 
-  \item Flow Control: Receivers piggyback their receive rate on
-  requests.  The server throttles its sending rate to a weighted
-  average of the clients' receive rate. Otherwise, receivers will be
-  drowned by too many pages sent by an eager server.
+  %% \item Flow Control: Receivers piggyback their receive rate on
+  %% requests.  The server throttles its sending rate to a weighted
+  %% average of the clients' receive rate. Otherwise, receivers will be
+  %% drowned by too many pages sent by an eager server.
+  \item フロー制御：
+  受信者は、リクエストと同時に受信レートを送る。
+  サーバー側では、送信レートを調整してクライアントの受信レートに対する重み付けをする。
+  そうしないと、サーバーから大量のページが送られてきてクライアントが処理しきれなくなるだろう。
 
-  \item End Game: When the server has sent most pages, it falls back
-    to unicast responses. Most requests at this point are retries, and
-    thus blasting a page through the wire to all clones is
-    unnecessary.
+  %% \item End Game: When the server has sent most pages, it falls back
+  %%   to unicast responses. Most requests at this point are retries, and
+  %%   thus blasting a page through the wire to all clones is
+  %%   unnecessary.
+  \item 試合終了：
+  サーバーが大半のページを配信し終えたら、ユニキャスト方式に移行する。
+  この時点ではリクエストの大半が再送要求になるので、
+  全クローンに対してページを送りつけなくてもいいからである。
 
 \end{aosaitemize}
 
@@ -612,26 +681,46 @@ Three optimizations specific to SnowFlock are included in \code{mcdist}:
 %% \begin{aosasect2}{Virtual Disk}
 \begin{aosasect2}{仮想ディスク}
 
-SnowFlock clones, due to their short life span and fate determinism,
-rarely use their disk. The virtual disk for a SnowFlock VM houses the
-root partition with binaries, libraries and configuration files. Heavy
-data processing is done through suitable filesystems such as HDFS
-(\aosachapref{s:hdfs}) or PVFS\@. Thus, when SnowFlock clones decide
-to read from their root disk, they typically have their requests
-satisfied by the kernel filesystem page cache.
+%% SnowFlock clones, due to their short life span and fate determinism,
+%% rarely use their disk. The virtual disk for a SnowFlock VM houses the
+%% root partition with binaries, libraries and configuration files. Heavy
+%% data processing is done through suitable filesystems such as HDFS
+%% (\aosachapref{s:hdfs}) or PVFS\@. Thus, when SnowFlock clones decide
+%% to read from their root disk, they typically have their requests
+%% satisfied by the kernel filesystem page cache.
+SnowFlockのクローンは、
+(生存期間が短めであることや、生存決定論のせいもあって)
+めったにディスクを使うことがない。
+SnowFlock VMの仮想ディスクはルートパーティションを保持し、
+バイナリやライブラリそして設定ファイルを扱う。重たいデータ処理などは、
+HDFS (\aosachapref{s:hdfs})やPVFSなどのそれに適したファイルシステムを使って行う。
+したがって、SnowFlockのクローンがルートディスクから読み込もうとしたときには、
+カーネルのファイルシステムのページキャッシュを満たすリクエストをすることになる。
 
-Having said that, we still need to provide access to the virtual disk
-for clones, in the rare instance that such access is needed. We
-adopted the path of least resistance here, and implemented the disk by
-closely following the memory replication design. First, the state of
-the disk is frozen at the time of cloning. The parent VM keeps using
-its disk in a CoW manner: writes are sent to a separate location in
-backing storage, while the view of the disk clones expect remains
-immutable.  Second, disk state is multicast to all clones, using
-\code{mcdist}, with the same 4 KB page granularity, and under the same
-expectations of temporal locality. Third, replicated disk state for a
-clone VM is strictly transient: it is stored in a sparse flat file
-which is deleted once the clone is destroyed.
+%% Having said that, we still need to provide access to the virtual disk
+%% for clones, in the rare instance that such access is needed. We
+%% adopted the path of least resistance here, and implemented the disk by
+%% closely following the memory replication design. First, the state of
+%% the disk is frozen at the time of cloning. The parent VM keeps using
+%% its disk in a CoW manner: writes are sent to a separate location in
+%% backing storage, while the view of the disk clones expect remains
+%% immutable.  Second, disk state is multicast to all clones, using
+%% \code{mcdist}, with the same 4 KB page granularity, and under the same
+%% expectations of temporal locality. Third, replicated disk state for a
+%% clone VM is strictly transient: it is stored in a sparse flat file
+%% which is deleted once the clone is destroyed.
+それでもなお、クローンから仮想ディスクへのアクセスはできるようにしておく必要がある。
+ごくまれにでも、そんなアクセスが必要となる場合があるからである。
+私たちが選んだのは一番抵抗の少ない方法で、
+ディスクの実装をメモリのレプリケーション設定にできるだけ近づけるようにした。
+まず、クローンするときにはディスクの状態をいったん固める。
+つまり、親VMでディスクを使うときにはCoW方式で行う。
+ディスクへの書き込みは別の場所に保存されるということだ。
+というのも、クローン側からはクローンした時点でのディスクの状態が見えてほしいからである。
+次に、ディスクの状態は\code{mcdist}を使って全クローンにマルチキャストする。
+メモリと同様に4 KB単位の粒度で、時間局所性に関しても同じように考える。
+最後に、クローンVMに複製されたディスクの状態は永続させない。
+ディスクの状態はまばらなフラットファイルに格納され、クローンが破棄されるとともに削除される。
 
 \end{aosasect2}
 
