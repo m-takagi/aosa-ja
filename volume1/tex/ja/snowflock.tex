@@ -729,83 +729,145 @@ HDFS (\aosachapref{s:hdfs})やPVFSなどのそれに適したファイルシス�
 %% \begin{aosasect1}{Clone-Side Components}
 \begin{aosasect1}{クローン側のコンポーネント}
 
-Clones are hollow shells when they are created from an architectural
-descriptor, so like everybody else, they need a lot of help from their
-parents to grow up: the children VMs move out and immediately call
-home whenever they notice something they need is missing, asking their
-parent to send it over right away.
+%% Clones are hollow shells when they are created from an architectural
+%% descriptor, so like everybody else, they need a lot of help from their
+%% parents to grow up: the children VMs move out and immediately call
+%% home whenever they notice something they need is missing, asking their
+%% parent to send it over right away.
+クローンは、構造ディスクリプタから作成した時点では中身がない空っぽの状態だ。
+というわけで、成長するには親の助けが必要だ。家を飛び出していった子どもたちは、
+必要なものが手元にないことに気付いた時点で実家に連絡して、
+「すぐに送って！」と親にお願いする。
 
 %% \begin{aosasect2}{Memtap Process}
 \begin{aosasect2}{Memtapプロセス}
 
-Attached to each clone after creation, the \code{memtap} process is the
-lifeline of a clone. It maps all of the memory of the clone and fills
-it on demand as needed.  It enlists some crucial bits of help from the
-Xen hypervisor: access permission to the memory pages of the clones is
-turned off, and hardware faults caused by first access to a page are
-routed by the hypervisor into the \code{memtap} process.
+%% Attached to each clone after creation, the \code{memtap} process is the
+%% lifeline of a clone. It maps all of the memory of the clone and fills
+%% it on demand as needed.  It enlists some crucial bits of help from the
+%% Xen hypervisor: access permission to the memory pages of the clones is
+%% turned off, and hardware faults caused by first access to a page are
+%% routed by the hypervisor into the \code{memtap} process.
+クローンができあがるたびにそれにアタッチされるのが\code{memtap}プロセスで、
+これがクローンの命綱となる。クローンのメモリ全体をマップして、
+必要に応じてその中身を埋める役割を果たす。
+このプロセスは、Xenハイパーバイザからの助けを得て動く。
+クローンのメモリページへのアクセス権を無効にして、
+あるページへの最初のアクセスがハードウェアフォルトを起こした時点で
+ハイパーバイザが\code{memtap}プロセスに処理を回す。
 
-In its simplest incarnation, the \code{memtap} process simply asks the
-memory server for the faulting page, but there are more complicated
-scenarios as well.  First, \code{memtap} helpers use \code{mcdist}. This means that at any
-point in time, any page could arrive by virtue of having been
-requested by another clone---the beauty of asynchronous
-prefetching. Second, we allow SnowFlock VMs to be multi-processor VMs.
-There wouldn't be much fun otherwise. This means that multiple faults
-need to be handled in parallel, perhaps even for the same page.
-Third, in later versions \code{memtap} helpers can explicitly prefetch a
-batch of pages, which can arrive in any order given the lack of
-guarantees from the \code{mcdist} server.  Any of these factors could have led
-to a concurrency nightmare, and we have all of them.
+%% In its simplest incarnation, the \code{memtap} process simply asks the
+%% memory server for the faulting page, but there are more complicated
+%% scenarios as well.  First, \code{memtap} helpers use \code{mcdist}. This means that at any
+%% point in time, any page could arrive by virtue of having been
+%% requested by another clone---the beauty of asynchronous
+%% prefetching. Second, we allow SnowFlock VMs to be multi-processor VMs.
+%% There wouldn't be much fun otherwise. This means that multiple faults
+%% need to be handled in parallel, perhaps even for the same page.
+%% Third, in later versions \code{memtap} helpers can explicitly prefetch a
+%% batch of pages, which can arrive in any order given the lack of
+%% guarantees from the \code{mcdist} server.  Any of these factors could have led
+%% to a concurrency nightmare, and we have all of them.
+単純に言ってしまえば、\code{memtap}プロセスの役割は
+フォルトが発生したページの配送をメモリサーバーに依頼するだけのことだ。
+しかしそれ以外にも、もっと複雑なシナリオもある。
+まず、\code{memtap}ヘルパーは\code{mcdist}を利用する。
+つまり、他のクローンが要求したページが任意の時点で到着することがある。
+そう、非同期プリフェッチってやつだ。
+次に、SnowFlock VMをマルチプロセッサVMにすることができる。
+そうしなければ、いろんな楽しいこともできなかっただろう。
+これはつまり、複数のフォルトを並列に扱う必要があるということだ。
+場合によっては同じページが含まれるかもしれない。
+最後に、最近のバージョンの\code{memtap}ヘルパーには、
+ページ群を明示的にプリフェッチする機能がある。
+ただし、ページを取得する順序がどうなるかはわからない。
+\code{mcdist}サーバーにそれを保証する機能がないからだ。
+これらの要素はすべて同時並行性に関する悪夢を引き起こす元であり、
+実際に私たちもそれを経験した。
 
-The entire \code{memtap} design centers on a page presence bitmap. The bitmap
-is created and initialized when the architectural descriptor is
-processed to create the clone VM\@.
-The bitmap is a flat bit array sized by the number of pages the VM's memory can hold. 
-Intel processors have handy atomic
-bit mutation instructions: setting a bit, or doing a test and set, can
-happen with the guarantee of atomicity with respect to other
-processors in the same box.  This allows us to avoid
-locks in most cases, and thus to provide access to the bitmap by
-different entities in different protection domains: the Xen
-hypervisor, the \code{memtap} process, and the cloned guest kernel itself.
+%% The entire \code{memtap} design centers on a page presence bitmap. The bitmap
+%% is created and initialized when the architectural descriptor is
+%% processed to create the clone VM\@.
+%% The bitmap is a flat bit array sized by the number of pages the VM's memory can hold. 
+%% Intel processors have handy atomic
+%% bit mutation instructions: setting a bit, or doing a test and set, can
+%% happen with the guarantee of atomicity with respect to other
+%% processors in the same box.  This allows us to avoid
+%% locks in most cases, and thus to provide access to the bitmap by
+%% different entities in different protection domains: the Xen
+%% hypervisor, the \code{memtap} process, and the cloned guest kernel itself.
+\code{memtap}の全体的な設計の中心となるのが、ページの存在を表すビットマップだ。
+このビットマップを作って初期化するのは、構造ディスクリプタがクローンVMを作るときである。
+このビットマップは一次元のビット配列で、VMのメモリが保持できるページ数と同じだけのサイズになる。
+Intelプロセッサには、便利なアトミックビット操作インストラクションが用意されている。
+ビットを立てたり、状態を調べてから設定したりといった操作が、
+同じマシン内の他のプロセッサに対してアトミックに行えることが保証されるのだ。
+そのおかげで、大半の場合にロックを回避でき、
+別の保護ドメインにある別のエンティティ
+(Xenハイパーバイザや\code{memtap}プロセス、そしてクローンしたゲストのカーネル自身など)
+からのビットマップへのアクセスもできるようになる。
 
-When Xen handles a hardware page fault due to a first access to a
-page, it uses the bitmap to decide whether it needs to alert
-\code{memtap}. It also uses the bitmap to enqueue multiple faulting virtual
-processors as dependent on the same absent page. Memtap buffers pages
-as they arrive.  When its buffer is full or an explicitly requested
-page arrives, the VM is paused, and the bitmap is used to discard any
-duplicate pages that have arrived but are already present. Any
-remaining pages that are needed are then copied into the VM memory,
-and the appropriate bitmap bits are set.
+%% When Xen handles a hardware page fault due to a first access to a
+%% page, it uses the bitmap to decide whether it needs to alert
+%% \code{memtap}. It also uses the bitmap to enqueue multiple faulting virtual
+%% processors as dependent on the same absent page. Memtap buffers pages
+%% as they arrive.  When its buffer is full or an explicitly requested
+%% page arrives, the VM is paused, and the bitmap is used to discard any
+%% duplicate pages that have arrived but are already present. Any
+%% remaining pages that are needed are then copied into the VM memory,
+%% and the appropriate bitmap bits are set.
+あるページへの最初のアクセスで発生したハードウェアページフォルトをXenが処理するときに、
+このビットマップを使って\code{memtap}に通知するかどうかを判断する。
+また、同じくこのビットマップを使って、
+複数の仮想プロセッサが同じページでフォルトを起こしている場合にキューに入れたりする。
+Memtapは、到着したページをバッファに格納する。
+バッファがいっぱいになったり明示的にリクエストしたページが届いたりしたときは
+VMを一時停止させ、ビットマップを使って不要なページを破棄する。
+不要なページとは、重複して届いたけれど既に存在するようなページのことだ。
+残りのページは必要なものなのでVMのメモリ内にコピーし、
+それに合わせてビットマップ上の適切なビットを立てる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Clever Clones Avoid Unnecessary Fetches}
-\begin{aosasect2}{Clever Clones Avoid Unnecessary Fetches}
+\begin{aosasect2}{無駄なフェッチを回避する賢いクローン}
 
-We just mentioned that the page presence bitmap is visible to the
-kernel running inside the clone, and that no locks are needed to
-modify it. This gives clones a powerful ``enlightenment'' tool: they can prevent the
-fetching of pages by modifying the bitmap and pretending they are
-present. This is extremely useful performance-wise, and safe to do
-when pages will be completely overwritten before they are used.
+%% We just mentioned that the page presence bitmap is visible to the
+%% kernel running inside the clone, and that no locks are needed to
+%% modify it. This gives clones a powerful ``enlightenment'' tool: they can prevent the
+%% fetching of pages by modifying the bitmap and pretending they are
+%% present. This is extremely useful performance-wise, and safe to do
+%% when pages will be completely overwritten before they are used.
+先ほど言ったとおり、ページビットマップはクローン内で稼働中のカーネルからも見えており、
+ビットマップを変更するときにロックは不要だ。これは、クローンにとって非常に強力な
+``enlightenment''ツールとなる。ビットマップをいじって特定のページが存在するように見せかければ、
+そのページをフェッチさせないようにできるのだ。
+これはパフォーマンス的に極めて有用で、
+ページを使う前に完全に上書きしてしまうようなときにも安全に行える。
 
-There happens to be a very common situation when this happens and
-fetches can be avoided. All memory allocations in the kernel (using
-\code{vmalloc}, \code{kzalloc}, \code{get\_free\_page},
-user-space \code{brk}, and the like) are ultimately
-handled by the kernel page allocator. Typically pages are requested by
-intermediate allocators which manage finer-grained chunks: the slab
-allocator, the glibc malloc allocator for a user-space process,
-etc. However, whether allocation is explicit or implicit,
-one key semantic implication
-always holds true: no one cares about what the page contained,
-because its contents will be arbitrarily overwritten. Why
-fetch such a page, then? There is no reason to do so, and empirical
-experience shows that avoiding such fetches is tremendously
-advantageous.
+%% There happens to be a very common situation when this happens and
+%% fetches can be avoided. All memory allocations in the kernel (using
+%% \code{vmalloc}, \code{kzalloc}, \code{get\_free\_page},
+%% user-space \code{brk}, and the like) are ultimately
+%% handled by the kernel page allocator. Typically pages are requested by
+%% intermediate allocators which manage finer-grained chunks: the slab
+%% allocator, the glibc malloc allocator for a user-space process,
+%% etc. However, whether allocation is explicit or implicit,
+%% one key semantic implication
+%% always holds true: no one cares about what the page contained,
+%% because its contents will be arbitrarily overwritten. Why
+%% fetch such a page, then? There is no reason to do so, and empirical
+%% experience shows that avoiding such fetches is tremendously
+%% advantageous.
+このような状況になってフェッチを回避するようなことは非常によくある話だ。
+カーネル内でのすべてのメモリ確保(\code{vmalloc}や\code{kzalloc}、\code{get\_free\_page}、ユーザー空間での\code{brk}など)
+は、結局のところカーネルのページアロケータが処理する。
+一般的に、ページをリクエストするのは中間アロケータで、ここではよりきめ細やかな塊を管理する。
+slabアロケータ、そしてユーザー空間プロセス用のglibc mallocアロケータなどである。
+しかし、明示的なアロケーションであっても暗黙のアロケーションであっても、これだけは常に正しい。
+そのページに何が含まれるかなんて、誰も気にしない。ページの内容なんてどうにでも上書きできるからだ。
+じゃあなぜそんなページをフェッチするんだって？
+理由なんかない。経験上、そんなページのフェッチは回避するのが大いに有用なのだ。
 
 \end{aosasect2}
 

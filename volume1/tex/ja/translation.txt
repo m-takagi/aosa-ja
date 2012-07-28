@@ -24,7 +24,7 @@ packaging.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
 riak.tex            Kazuya Sakakiahra <kazuya@violentlyhappy.org>  0
 selenium.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
 sendmail.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
-snowflock.tex       TAKAGI Masahiro <matakagi@gmail.com>       55
+snowflock.tex       TAKAGI Masahiro <matakagi@gmail.com>       70
 socialcalc.tex
 telepathy.tex
 thousandparsec.tex
