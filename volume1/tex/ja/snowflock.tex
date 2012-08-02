@@ -876,169 +876,269 @@ slabアロケータ、そしてユーザー空間プロセス用のglibc malloc�
 %% \begin{aosasect1}{VM Cloning Application Interface}
 \begin{aosasect1}{VMクローニングアプリケーションのインターフェイス}
 
-So far we have focused on the internals of cloning a VM
-efficiently. As much fun as solipsistic systems can be, we need to
-turn our attention to those who will use the system: applications.
+%% So far we have focused on the internals of cloning a VM
+%% efficiently. As much fun as solipsistic systems can be, we need to
+%% turn our attention to those who will use the system: applications.
+ここまでは、VMを効率的にクローンするための内部構造に焦点を合わせてきた。
+自分たちの世界にだけ浸っているわけにもいかないので、
+ここらでシステムを使う側にも目を向けよう。アプリケーション側の視点で話を進める。
 
 %% \begin{aosasect2}{API Implementation}
 \begin{aosasect2}{APIの実装}
 
-VM Cloning is offered to the application via the simple SnowFlock API,
-depicted in \aosafigref{fig.snowflock.cloningapi}. Cloning is
-basically a two-stage process. You first request an allocation for the
-clone instances, although due to the system policies that are in effect, that
-allocation may be smaller than requested.  Second, you use the
-allocation to clone your VM\@.  A key assumption is that your VM focuses
-on a single operation.  VM Cloning is appropriate for
-single-application VMs such as a web server or a render farm
-component.  If you have a hundred-process desktop environment in which
-multiple applications concurrently call VM cloning, you're headed for
-chaos.
+%% VM Cloning is offered to the application via the simple SnowFlock API,
+%% depicted in \aosafigref{fig.snowflock.cloningapi}. Cloning is
+%% basically a two-stage process. You first request an allocation for the
+%% clone instances, although due to the system policies that are in effect, that
+%% allocation may be smaller than requested.  Second, you use the
+%% allocation to clone your VM\@.  A key assumption is that your VM focuses
+%% on a single operation.  VM Cloning is appropriate for
+%% single-application VMs such as a web server or a render farm
+%% component.  If you have a hundred-process desktop environment in which
+%% multiple applications concurrently call VM cloning, you're headed for
+%% chaos.
+VMクローニングをアプリケーションから行うには、シンプルなSnowFlock APIを使う。
+\aosafigref{fig.snowflock.cloningapi}に示すようなものだ。
+クローニングは基本的には二段階のプロセスである。
+まず最初に、クローンインスタンス用の割り当てを要求する。
+しかし、システムのポリシーが原因で、要求したよりも少なめの割り当てしかもらえないこともあり得る。
+次に、割り当て分を使ってVMをクローンする。
+ここでポイントとなるのが、VMは単一の操作に注力するものだという前提である。
+VMのクローニングが適しているのは、単一用途のVMの場合である。
+ウェブサーバーやレンダリングファームなどがその一例だ。
+100プロセスのデスクトップ環境で複数のアプリケーションが同時に
+VMのクローニングをしたりなどすれば、大混乱になってしまう。
 
 \begin{table}\centering
   \begin{tabular}{ |l p{7cm}| }
     \hline
     \code{sf\_request\_ticket(n)}
     &
-    Requests an allocation for \code{n} clones.  Returns a
-    \code{ticket} describing an allocation for \code{m$\leq$n}
-    clones.
+    %% Requests an allocation for \code{n} clones.  Returns a
+    %% \code{ticket} describing an allocation for \code{m$\leq$n}
+    %% clones.
+    \code{n}個のクローン用に割り当てを要求する。
+    \code{m$\leq$n}個のクローン用の割り当てを示す\code{ticket}を返す。
     \\
 
     \code{sf\_clone(ticket)}
     &
-    Clones, using the \code{ticket} allocation. Returns the clone
-    \code{ID}, \code{0$\leq$ID{\textless}m}.
+    %% Clones, using the \code{ticket} allocation. Returns the clone
+    %% \code{ID}, \code{0$\leq$ID{\textless}m}.
+    \code{ticket}の割り当てにしたがってクローンを作る。
+    クローンの\code{ID}(\code{0$\leq$ID{\textless}m})を返す。
     \\
 
     \code{sf\_checkpoint\_parent()}
     &
-    Prepares an immutable checkpoint \code{C} of the parent VM to be
-    used for creating clones at an arbitrarily later time.
+    %% Prepares an immutable checkpoint \code{C} of the parent VM to be
+    %% used for creating clones at an arbitrarily later time.
+    親VMの、イミュータブルなチェックポイント\code{C}を作る。
+    これを使えば、その後いつでもクローンを作れるようになる。
     \\
 
     \code{sf\_create\_clones(C, ticket)}
     &
-    Same as \code{sf\_clone}, uses the checkpoint \code{C}.
-    Clones will begin execution at the point at which
-    the corresponding \code{sf\_checkpoint\_parent()} was invoked.
+    %% Same as \code{sf\_clone}, uses the checkpoint \code{C}.
+    %% Clones will begin execution at the point at which
+    %% the corresponding \code{sf\_checkpoint\_parent()} was invoked.
+    \code{sf\_clone}と同じだが、チェックポイント\code{C}を利用する。
+    対応する\code{sf\_checkpoint\_parent()}を実行した時点の状態から
+    クローンの実行が始まる。
     \\
 
     \code{sf\_exit()}
     &
-    For children \code{(1$\leq$ID{\textless}m)}, terminates
-    the child.
+    %% For children \code{(1$\leq$ID{\textless}m)}, terminates
+    %% the child.
+    子VM\code{(1$\leq$ID{\textless}m)}を終了する。
     \\
 
     \code{sf\_join(ticket)}
     &
-    For the parent \code{(ID = 0)}, blocks until all children in the
-    \code{ticket} reach their \code{sf\_exit} call.  At that point all
-    children are terminated and the \code{ticket} is discarded.
+    %% For the parent \code{(ID = 0)}, blocks until all children in the
+    %% \code{ticket} reach their \code{sf\_exit} call.  At that point all
+    %% children are terminated and the \code{ticket} is discarded.
+    \code{ticket}内のすべての子が\code{sf\_exit}を呼ぶまで、親\code{(ID = 0)}
+    をブロックする。この時点ですべての子が終了し、\code{ticket}が破棄される。
     \\
 
     \code{sf\_kill(ticket)}
     &
-    Parent only, discards \code{ticket} and immediately kills all
-    associated children.
+    %% Parent only, discards \code{ticket} and immediately kills all
+    %% associated children.
+    親限定で、\code{ticket}を破棄して関連するすべての子を終了させる。
     \\
     \hline
   \end{tabular}
-  \caption{The SnowFlock VM Cloning API}
+  %% \caption{The SnowFlock VM Cloning API}
+  \caption{SnowFlock VMクローニングAPI}
   \label{fig.snowflock.cloningapi}
 \end{table}
 
-The API simply marshals messages and posts them to the XenStore, a
-shared-memory low-throughput interface used by Xen for control plane
-transactions. A SnowFlock Local Daemon (SFLD) executes on the
-hypervisor and listens for such requests. Messages are unmarshalled,
-executed, and requests posted back.
+%% The API simply marshals messages and posts them to the XenStore, a
+%% shared-memory low-throughput interface used by Xen for control plane
+%% transactions. A SnowFlock Local Daemon (SFLD) executes on the
+%% hypervisor and listens for such requests. Messages are unmarshalled,
+%% executed, and requests posted back.
+このAPIは、単にメッセージをマーシャルしてXenStoreにポストするだけである。
+XenStoreとは共有メモリの低スループットインターフェイスで、Xenがプレーンなトランザクションを制御するために使っている。
+SnowFlock Local Daemon (SFLD)がハイパーバイザ上で稼働し、このリクエストを待ち受ける。
+受けとったメッセージをアンマーシャルして実行し、リクエストを戻す。
 
-Programs can control VM Cloning directly through the API, which is
-available for C, C++, Python and Java. Shell scripts that harness the
-execution of a program can use the provided command-line scripts
-instead.  Parallel frameworks such as MPI can embed the API: MPI
-programs can then use SnowFlock without even knowing, and with no
-modification to their source.
-Load balancers sitting in front of web or application
-servers can use the API to clone the servers they manage.
+%% Programs can control VM Cloning directly through the API, which is
+%% available for C, C++, Python and Java. Shell scripts that harness the
+%% execution of a program can use the provided command-line scripts
+%% instead.  Parallel frameworks such as MPI can embed the API: MPI
+%% programs can then use SnowFlock without even knowing, and with no
+%% modification to their source.
+%% Load balancers sitting in front of web or application
+%% servers can use the API to clone the servers they manage.
+プログラムからVMクローニングを直接制御するときにはAPIを利用する。
+用意されているのはCやC++、Python、そしてJava用のAPIだ。
+シェルスクリプトからプログラムを実行できない場合は、
+代わりに使えるコマンドラインスクリプトが提供されている。
+MPIのような並列プログラミングフレームワークにAPIを組み込むこともできる。
+そうすれば、MPIのプログラムからSnowFlockを使えるようになり、
+ソースへの変更も不要となる。
+ウェブサーバーあるいはアプリケーションサーバーの前に置いた
+ロードバランサーも、このAPIを使えば自身の管理するサーバーをクローンできる。
 
-SFLDs orchestrate the execution of VM Cloning requests. They create
-and transmit architectural descriptors, create cloned VMs, launch disk
-and memory servers, and launch \code{memtap} helper processes.  They are a
-miniature distributed system in charge of managing the VMs in a
-physical cluster.
+%% SFLDs orchestrate the execution of VM Cloning requests. They create
+%% and transmit architectural descriptors, create cloned VMs, launch disk
+%% and memory servers, and launch \code{memtap} helper processes.  They are a
+%% miniature distributed system in charge of managing the VMs in a
+%% physical cluster.
+SFLDは、VMクローニングリクエストの実行の調整役となる。
+SFLDが構造ディスクリプタを作ってそれを送信し、クローンVMを作成し、
+ディスクとメモリサーバーを立ち上げ、
+ヘルパープロセス\code{memtap}を立ち上げる。
+これらはちょっとした分散システムであり、
+物理クラスタ内のVMを管理する役割を果たす。
 
-SFLDs defer allocation decisions to a central SnowFlock Master Daemon
-(SFMD).  SFMD simply interfaces with appropriate cluster management
-software. We did not see any need to reinvent the wheel here, and
-deferred decisions on resource allocation, quotas, policies, etc.\  to
-suitable software such as Sun Grid Engine or Platform EGO.
+%% SFLDs defer allocation decisions to a central SnowFlock Master Daemon
+%% (SFMD).  SFMD simply interfaces with appropriate cluster management
+%% software. We did not see any need to reinvent the wheel here, and
+%% deferred decisions on resource allocation, quotas, policies, etc.\  to
+%% suitable software such as Sun Grid Engine or Platform EGO.
+SFLDは、割り当ての判断を中央のSnowFlock Master Daemon (SFMD)に任せる。
+SFMDは単に、適切なクラスタ管理ソフトウェアとのインターフェイスになるだけのものである。
+こんなところで車輪の再発明をする必要もないので、リソース割り当てや領域の分配そしてポリシーなどは
+Sun Grid EngineやPlatform EGOといった適切なソフトウェアに任せることにしたのだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Necessary Mutations}
-\begin{aosasect2}{欠かせない変化}
+\begin{aosasect2}{欠かせない変異}
 
-After cloning, most of the cloned VM's processes have no idea that
-they are no longer the parent, and that they are now running in a
-copy. In most aspects, this just works fine and causes no
-issues. After all, the primary task of the OS is to isolate
-applications from low-level details, such as the network identity.
-Nonetheless, making the transition smooth requires a set of mechanisms
-to be put in place. The meat of the problem is in managing the clone's
-network identity; to avoid conflicts and confusion, we must introduce
-slight mutations during the cloning process.  Also, because these
-tweaks may necessitate higher-level accommodations, a hook is inserted
-to allow the user to configure any necessary tasks, such as
-(re)mounting network filesystems that rely on the clone's identity.
+%% After cloning, most of the cloned VM's processes have no idea that
+%% they are no longer the parent, and that they are now running in a
+%% copy. In most aspects, this just works fine and causes no
+%% issues. After all, the primary task of the OS is to isolate
+%% applications from low-level details, such as the network identity.
+%% Nonetheless, making the transition smooth requires a set of mechanisms
+%% to be put in place. The meat of the problem is in managing the clone's
+%% network identity; to avoid conflicts and confusion, we must introduce
+%% slight mutations during the cloning process.  Also, because these
+%% tweaks may necessitate higher-level accommodations, a hook is inserted
+%% to allow the user to configure any necessary tasks, such as
+%% (re)mounting network filesystems that rely on the clone's identity.
+クローニングで作ったクローンVMのプロセスの大半は、
+自分がもはや親ではなく親のコピーであるということを知るすべがない。
+たいていの場合はそれでもうまく動くし問題はない。
+結局のところ、OSの最大の目的はアプリケーションをローレベルのあれこれ
+(ネットワーク上でのIDなど)から切り離すことである。
+しかし、移行をスムーズに進めるにはいくつかの仕組みが必要となる。
+問題の本質は、ネットワーク上でのクローンの一意性を管理することだ。
+衝突や混乱を回避するために、クローン処理の中でちょっとした変異が必要となる。
+また、これらの手入れで上位レベルでの調整を余儀なくされることもあるので、
+フックを導入して必要なタスクをユーザーが設定できるようにする。
+たとえば、クローンのネットワーク情報に基づいてマウントしているネットワークファイルシステムの
+再マウントなどといったタスクである。
 
-Clones are born to a world that is mostly not expecting them. The
-parent VM is part of a network managed most likely by a DHCP server,
-or by any other of the myriad ways sysadmins find to do their
-job. Rather than assume a necessarily inflexible scenario, we place
-the parent and all clones in their own private virtual network. Clones
-from the same parent are all assigned a unique ID, and their IP
-address in this private network is automatically set up upon cloning
-as a function of the ID\@. This guarantees that no intervention from a
-sysadmin is necessary, and that no IP address collisions will ever
-happen.
+%% Clones are born to a world that is mostly not expecting them. The
+%% parent VM is part of a network managed most likely by a DHCP server,
+%% or by any other of the myriad ways sysadmins find to do their
+%% job. Rather than assume a necessarily inflexible scenario, we place
+%% the parent and all clones in their own private virtual network. Clones
+%% from the same parent are all assigned a unique ID, and their IP
+%% address in this private network is automatically set up upon cloning
+%% as a function of the ID\@. This guarantees that no intervention from a
+%% sysadmin is necessary, and that no IP address collisions will ever
+%% happen.
+クローンは、もともとその存在が予期されていなかった世界に生まれてきたものだ。
+親VMは、もともと管理されたネットワークの一員であった。
+たいていはDHCPサーバーの配下にあっただろう。
+あるいはそれ以外の何かかもしれない。システム管理者が飯を食う種などいくらでもある。
+必ずしも柔軟性のないシナリオを想定するのではなく、
+私たちは親とすべてのクローンたちを同じプライベート仮想ネットワーク内に置くことにした。
+同じ親からのクローンたちにはすべて一意なIDを割り当て、プライベートネットワーク内での
+IPアドレスは、クローンの際にIDをもとに自動的に設定する。
+これでシステム管理者の介入は一切不要となり、IPアドレスの衝突も発生しなくなる。
 
-IP reconfiguration is performed directly by a hook we place on the
-virtual network driver. However, we also rig the driver to
-automatically generate synthetic DHCP responses. Thus, regardless of
-your choice of distribution, your virtual network interface will
-ensure that the proper IP coordinates are propagated to the guest OS,
-even when you are restarting from scratch.
+%% IP reconfiguration is performed directly by a hook we place on the
+%% virtual network driver. However, we also rig the driver to
+%% automatically generate synthetic DHCP responses. Thus, regardless of
+%% your choice of distribution, your virtual network interface will
+%% ensure that the proper IP coordinates are propagated to the guest OS,
+%% even when you are restarting from scratch.
+IPアドレスの再設定は、仮想ネットワークドライバ上に仕込んだフックが直接行う。
+しかし、それとは別に、DHCPのレスポンスを自動生成するドライバも用意している。
+したがって、どんなディストリビューションを選んだとしても、
+仮想ネットワークインターフェイスはゲストOSに対して適切なIPアドレスを割り振ることが保証される。
+スクラッチから再起動しても同様である。
 
-To prevent clones from different parents colliding with each others'
-virtual private networks---and to prevent mutual DDoS attacks---clone
-virtual network are isolated at the Ethernet (or layer 2) level. We
-hijack a range of Ethernet MAC OUIs~\footnote{OUI, or Organizational Unique ID,
-is a range of MAC addresses assigned to a vendor.} and dedicate them to clones. The
-OUI will be a function of the parent VM\@. Much like the ID of a VM
-determines its IP address, it also determines its non-OUI Ethernet MAC
-address.  The virtual network driver translates the MAC address the VM
-believes it has to the one assigned as a function of its ID, and
-filters out all traffic to and from virtual private network with
-different OUIs. This isolation is equivalent to that achievable via
-\code{ebtables}, although much simpler to implement.
+%% To prevent clones from different parents colliding with each others'
+%% virtual private networks---and to prevent mutual DDoS attacks---clone
+%% virtual network are isolated at the Ethernet (or layer 2) level. We
+%% hijack a range of Ethernet MAC OUIs~\footnote{OUI, or Organizational Unique ID,
+%% is a range of MAC addresses assigned to a vendor.} and dedicate them to clones. The
+%% OUI will be a function of the parent VM\@. Much like the ID of a VM
+%% determines its IP address, it also determines its non-OUI Ethernet MAC
+%% address.  The virtual network driver translates the MAC address the VM
+%% believes it has to the one assigned as a function of its ID, and
+%% filters out all traffic to and from virtual private network with
+%% different OUIs. This isolation is equivalent to that achievable via
+%% \code{ebtables}, although much simpler to implement.
+別々の親からのクローンがお互いに相手の仮想プライベートネットワークと衝突してしまうことを防ぐため
+---そしてお互いのDDoS攻撃を防ぐため---に、クローンの仮想ネットワークはイーサネットレベル
+(レイヤー2)で隔離されている。
+Ethernet MAC OUI~\footnote{Organizational Unique IDとは、ベンダーに割り当てられたMACアドレス範囲のことだ。}
+を乗っ取り、そこをクローン専用にしているのだ。
+このOUIは親VMの役割となる。
+VMのIDをもとにしてそのIPアドレスを決めるのと同様に、OUI部分以外のMACアドレスもIDにもとづいて決める。
+仮想ネットワークドライバは、VMが自分自身のIDにもとづいて与えられたと信じているMACアドレスを翻訳し、
+仮想プライベートネットワークと外部との間のトラフィックをフィルタして別のOUIにする。
+これは\code{ebtables}が使っているのと同じ方式だが、実装はそれよりもはるかにシンプルだ。
 
-Having clones talk only to each other may be fun, but not fun enough.
-Sometimes we will want our clones to reply to HTTP requests from the
-Internet, or mount public data repositories. We equip any set of
-parent and clones with a dedicated router VM\@. This tiny VM performs
-firewalling, throttling and NATing of traffic from the clones to the
-Internet. It also limits inbound connections to the parent VM and
-well-known ports.  The router VM is lightweight but represents a
-single point of centralization for network traffic, which can
-seriously limit scalability. The same network rules could be applied
-in a distributed fashion to each host upon which a clone VM runs. We
-have not released that experimental patch.
+%% Having clones talk only to each other may be fun, but not fun enough.
+%% Sometimes we will want our clones to reply to HTTP requests from the
+%% Internet, or mount public data repositories. We equip any set of
+%% parent and clones with a dedicated router VM\@. This tiny VM performs
+%% firewalling, throttling and NATing of traffic from the clones to the
+%% Internet. It also limits inbound connections to the parent VM and
+%% well-known ports.  The router VM is lightweight but represents a
+%% single point of centralization for network traffic, which can
+%% seriously limit scalability. The same network rules could be applied
+%% in a distributed fashion to each host upon which a clone VM runs. We
+%% have not released that experimental patch.
+クローンはクローン同士でしか通信できないようにするというのもおもしろいが、それでは不十分だ。
+時にはクローンからインターネットにHTTPレスポンスを返したいこともあるだろうし、
+公開されているデータリポジトリをマウントしたいこともあるだろう。
+親やクローンの中からいくつかを選んで、専用のルーターVMにすることもできる。
+この小さなVMの役割は、クローンたちとインターネットとの間のトラフィックの
+ファイアウォールであったり流量制限であったりNATであったりする。
+また、外部からの通信は親VMのwel-knownポートだけに限定している。
+ルーターVMは軽量だが、ネットワークトラフィックを一元管理する単一点となる。
+そのため、スケーラビリティに大きな制限ができてしまう。
+同じようなネットワークルールを分散形式で適用し、クローンVMが稼働する各ホスト上に置くこともできるだろう。
+そんな実験的なパッチは、まだリリースしていない。
 
-SFLDs assign IDs, and teach the virtual network drivers how they
-should configure themselves: internal MAC and IP addresses, DHCP
-directives, router VM coordinates, filtering rules, etc.
+%% SFLDs assign IDs, and teach the virtual network drivers how they
+%% should configure themselves: internal MAC and IP addresses, DHCP
+%% directives, router VM coordinates, filtering rules, etc.
+SFLDはIDを割り当て、どんな設定にすべきかを仮想ネットワークドライバに伝える。
+内部的なMACアドレスおよびIPアドレス、DHCPのディレクティブ、ルーターVMの設定、フィルタリング規則などである。
 
 \end{aosasect2}
 
