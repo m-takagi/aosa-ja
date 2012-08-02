@@ -53,6 +53,7 @@ in 2005.  It aims to combine the authoring ease and multi-person
 editing of wikis with the familiar visual formatting and calculating
 metaphor of spreadsheets.
 
+%% \begin{aosasect1}{WikiCalc}
 \begin{aosasect1}{WikiCalc}
 
 The first version of WikiCalc (\aosafigref{fig.soc.screenshot}) had
@@ -82,11 +83,14 @@ time:
 
 \end{aosaitemize}
 
-\aosafigure[300pt]{../images/socialcalc/wikicalc-screenshot.eps}{WikiCalc 1.0 Interface}{fig.soc.screenshot}
+%% \aosafigure[300pt]{../images/socialcalc/wikicalc-screenshot.eps}{WikiCalc 1.0 Interface}{fig.soc.screenshot}
+\aosafigure[300pt]{../images/socialcalc/wikicalc-screenshot.eps}{WikiCalc 1.0のインターフェイス}{fig.soc.screenshot}
 
-\aosafigure[250pt]{../images/socialcalc/wikicalc-components.eps}{WikiCalc Components}{fig.soc.comp}
+%% \aosafigure[250pt]{../images/socialcalc/wikicalc-components.eps}{WikiCalc Components}{fig.soc.comp}
+\aosafigure[250pt]{../images/socialcalc/wikicalc-components.eps}{WikiCalcのコンポーネント}{fig.soc.comp}
 
-\aosafigure[300pt]{../images/socialcalc/wikicalc-flow.eps}{WikiCalc Flow}{fig.soc.flow}
+%% \aosafigure[300pt]{../images/socialcalc/wikicalc-flow.eps}{WikiCalc Flow}{fig.soc.flow}
+\aosafigure[300pt]{../images/socialcalc/wikicalc-flow.eps}{WikiCalcのフロー}{fig.soc.flow}
 
 WikiCalc 1.0's internal architecture (\aosafigref{fig.soc.comp}) and
 information flow (\aosafigref{fig.soc.flow}) were deliberately simple,
@@ -119,7 +123,8 @@ updating a cell and seeing its new contents as shown in
 interactively editing formulas by tweaking the input and expecting to
 see results in real time.
 
-\aosafigure[250pt]{../images/socialcalc/wikicalc-loading.eps}{Loading Message}{fig.soc.load}
+%% \aosafigure[250pt]{../images/socialcalc/wikicalc-loading.eps}{Loading Message}{fig.soc.load}
+\aosafigure[250pt]{../images/socialcalc/wikicalc-loading.eps}{メッセージのロード}{fig.soc.load}
 
 Moreover, because the \code{{\textless}table{\textgreater}} element
 had the same dimensions as the spreadsheet, a $100{\times}100$ grid
@@ -164,7 +169,8 @@ system.
 
 \begin{aosasect1}{SocialCalc}
 
-\aosafigure[225pt]{../images/socialcalc/socialcalc-screenshot.eps}{SocialCalc Interface}{fig.soc.action}
+%% \aosafigure[225pt]{../images/socialcalc/socialcalc-screenshot.eps}{SocialCalc Interface}{fig.soc.action}
+\aosafigure[225pt]{../images/socialcalc/socialcalc-screenshot.eps}{SocialCalcのインターフェイス}{fig.soc.action}
 
 \aosafigref{fig.soc.action} and \aosafigref{fig.soc.class} show
 SocialCalc's interface and classes respectively.  Compared to
@@ -174,7 +180,8 @@ spreadsheets serialized in the save format; once the browser receives
 the data, all calculations, change tracking and user interaction are
 now implemented in Javascript.
 
-\aosafigure[325pt]{../images/socialcalc/socialcalc-class-diagram.eps}{SocialCalc Class Diagram}{fig.soc.class}
+%% \aosafigure[325pt]{../images/socialcalc/socialcalc-class-diagram.eps}{SocialCalc Class Diagram}{fig.soc.class}
+\aosafigure[325pt]{../images/socialcalc/socialcalc-class-diagram.eps}{SocialCalcのクラス図}{fig.soc.class}
 
 The Javascript components were designed with a layered MVC
 (Model/View/Controller) style, with each class focusing on a single
@@ -220,7 +227,8 @@ aspect:
     \code{comment} & \code{Ichi-Kyu-Hachi-Yon} \\
     \hline
   \end{tabular}
-  \caption{Cell Contents and Formats}
+  %% \caption{Cell Contents and Formats}
+  \caption{セルの内容と書式}
   \label{tbl.soc.cellcontents}
 \end{table}
 
@@ -270,20 +278,23 @@ use the \code{startcmdextension} command to invoke them.
 \end{verbatim}
 
 \end{minipage}
-\caption{SocialCalc Commands}
+%% \caption{SocialCalc Commands}
+\caption{SocialCalcのコマンド}
 \label{tbl.soc.commands}
 \end{table}
 
 \end{aosasect1}
 
-\begin{aosasect1}{Command Run-loop}
+%% \begin{aosasect1}{Command Run-loop}
+\begin{aosasect1}{コマンド実行ループ}
 
 To improve responsiveness, SocialCalc performs all recalculation and
 DOM updates in the background, so the user can keep making changes to
 several cells while the engine catches up on earlier changes in the
 command queue.
 
-\aosafigure[300pt]{../images/socialcalc/socialcalc-command-runloop.eps}{SocialCalc Command Run-loop}{fig.soc.loop}
+%% \aosafigure[300pt]{../images/socialcalc/socialcalc-command-runloop.eps}{SocialCalc Command Run-loop}{fig.soc.loop}
+\aosafigure[300pt]{../images/socialcalc/socialcalc-command-runloop.eps}{SocialCalcのコマンド実行ループ}{fig.soc.loop}
 
 When a command is running, the \code{TableEditor} object sets its
 \code{busy} flag to true; subsequent commands are then pushed into the
@@ -338,14 +349,16 @@ original value.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Table Editor}
+%% \begin{aosasect1}{Table Editor}
+\begin{aosasect1}{表エディタ}
 
 Now let's look at the TableEditor layer.  It calculates the on-screen
 coordinates of its \code{RenderContext}, and manages
 horizontal/vertical scroll bars through two \code{TableControl}
 instances.
 
-\aosafigure[225pt]{../images/socialcalc/socialcalc-parts.eps}{TableControl Instances Manage Scroll Bars}{fig.soc.parts}
+%% \aosafigure[225pt]{../images/socialcalc/socialcalc-parts.eps}{TableControl Instances Manage Scroll Bars}{fig.soc.parts}
+\aosafigure[225pt]{../images/socialcalc/socialcalc-parts.eps}{TableControlのインスタンスがスクロールバーを管理する}{fig.soc.parts}
 
 The view layer, handled by the \code{RenderContext} class, also
 differs from WikiCalc's design.  Instead of mapping each cell to a
@@ -370,14 +383,16 @@ implements the radial fill/move/slide menu attached to the
 bottom-right corner to the current editable cell, known as the ECell,
 shown in \aosafigref{fig.soc.ecell}.
 
-\aosafigure[180pt]{../images/socialcalc/socialcalc-cell-handles.eps}{Current Editable Cell, Known as the ECell}{fig.soc.ecell}
+%% \aosafigure[180pt]{../images/socialcalc/socialcalc-cell-handles.eps}{Current Editable Cell, Known as the ECell}{fig.soc.ecell}
+\aosafigure[180pt]{../images/socialcalc/socialcalc-cell-handles.eps}{現在編集可能なセル(ECell)}{fig.soc.ecell}
 
 The input box is managed by two classes: \code{InputBox} and
 \code{InputEcho}.  The former manages the above-the-grid edit row,
 while the latter shows an updated-as-you-type preview layer,
 overlaying the ECell's content (\aosafigref{fig.soc.input}).
 
-\aosafigure[200pt]{../images/socialcalc/socialcalc-input.eps}{The Input Box is Managed by Two Classes}{fig.soc.input}
+%% \aosafigure[200pt]{../images/socialcalc/socialcalc-input.eps}{The Input Box is Managed by Two Classes}{fig.soc.input}
+\aosafigure[200pt]{../images/socialcalc/socialcalc-input.eps}{入力ボックスは二つのクラスで管理する}{fig.soc.input}
 
 Usually, the SocialCalc engine only needs to communicate to the server
 when opening a spreadsheet for edit, and when saving it back to
@@ -394,7 +409,8 @@ same remote spreadsheets without re-fetching its content.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Save Format}
+%% \begin{aosasect1}{Save Format}
+\begin{aosasect1}{保存フォーマット}
 
 The save format is in standard MIME \code{multipart/mixed} format,
 consisting of four \code{text/plain; charset=UTF-8} parts, each part
@@ -423,7 +439,8 @@ cells, with \code{1874} in A1 as the ECell, the formula \code{2\^{}2*43}
 in A2, and the formula \code{SUM(Foo)} in A3 rendered in bold,
 referring to the named range \code{Foo} over \code{A1:A2}.
 
-\aosafigure[180pt]{../images/socialcalc/socialcalc-2046.eps}{A Spreadsheet with Three Cells}{fig.soc.save}
+%% \aosafigure[180pt]{../images/socialcalc/socialcalc-2046.eps}{A Spreadsheet with Three Cells}{fig.soc.save}
+\aosafigure[180pt]{../images/socialcalc/socialcalc-2046.eps}{三つのセルからなるスプレッドシート}{fig.soc.save}
 
 The serialized save format for the spreadsheet looks like this:
 
@@ -478,13 +495,15 @@ SocialCalc.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Rich-text Editing}
+%% \begin{aosasect1}{Rich-text Editing}
+\begin{aosasect1}{リッチテキストの編集}
 
 The first example we'll look at is enhancing SocialCalc's text cells
 with wiki markup to display its rich-text rendering right in the
 table editor (\aosafigref{fig.soc.rt}).
 
-\aosafigure[200pt]{../images/socialcalc/richtext-screenshot.eps}{Rich Text Rendering in the Table Editor}{fig.soc.rt}
+%% \aosafigure[200pt]{../images/socialcalc/richtext-screenshot.eps}{Rich Text Rendering in the Table Editor}{fig.soc.rt}
+\aosafigure[200pt]{../images/socialcalc/richtext-screenshot.eps}{表エディタにおけるリッチテキストのレンダリング}{fig.soc.rt}
 
 We added this feature to SocialCalc right after its 1.0 release, to
 address the popular request of inserting images, links and text
@@ -498,7 +517,8 @@ format for text cells to use it.
 
 What is this \code{textvalueformat}, you ask?  Read on.
 
-\begin{aosasect2}{Types and Formats}
+%% \begin{aosasect2}{Types and Formats}
+\begin{aosasect2}{型と書式}
 
 In SocialCalc, each cell has a \code{datatype} and a \code{valuetype}.
 Data cells with text or numbers correspond to text/numeric value
@@ -517,7 +537,8 @@ However, if the cell's \code{textvalueformat} or
 default format is looked up from its \code{valuetype}, as shown in
 \aosafigref{fig.soc.vformat}.
 
-\aosafigure[300pt]{../images/socialcalc/richtext-formats.eps}{Value Types}{fig.soc.vformat}
+%% \aosafigure[300pt]{../images/socialcalc/richtext-formats.eps}{Value Types}{fig.soc.vformat}
+\aosafigure[300pt]{../images/socialcalc/richtext-formats.eps}{値型}{fig.soc.vformat}
 
 % \pagebreak
 
@@ -543,7 +564,8 @@ feature.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Rendering Wikitext}
+%% \begin{aosasect2}{Rendering Wikitext}
+\begin{aosasect2}{Wikitextのレンダリング}
 
 Next, we'll make use of
 Wikiwyg\footnote{\url{https://github.com/audreyt/wikiwyg-js}}, a
@@ -578,7 +600,8 @@ spreadsheet.ExecuteCommand('set sheet defaulttextvalueformat text-wiki');
 \noindent Taken together, the Render step now works as shown in
 \aosafigref{fig.soc.render}.
 
-\aosafigure[349pt]{../images/socialcalc/richtext-flow.eps}{Render Step}{fig.soc.render}
+%% \aosafigure[349pt]{../images/socialcalc/richtext-flow.eps}{Render Step}{fig.soc.render}
+\aosafigure[349pt]{../images/socialcalc/richtext-flow.eps}{レンダリング手順}{fig.soc.render}
 
 That's all!  The enhanced SocialCalc now supports a rich set of wiki
 markup syntax:
@@ -595,7 +618,8 @@ markup syntax:
 \noindent Try entering \code{*bold* \_italic\_ `monospace`} in A1, and you'll
 see it rendered as rich text (\aosafigref{fig.soc.rtext}).
 
-\aosafigure[150pt]{../images/socialcalc/richtext-example.eps}{Wikywyg Example}{fig.soc.rtext}
+%% \aosafigure[150pt]{../images/socialcalc/richtext-example.eps}{Wikywyg Example}{fig.soc.rtext}
+\aosafigure[150pt]{../images/socialcalc/richtext-example.eps}{Wikywygの例}{fig.soc.rtext}
 
 \end{aosasect2}
 
@@ -603,7 +627,8 @@ see it rendered as rich text (\aosafigref{fig.soc.rtext}).
 
 % \pagebreak
 
-\begin{aosasect1}{Real-time Collaboration}
+%% \begin{aosasect1}{Real-time Collaboration}
+\begin{aosasect1}{リアルタイムのコラボレーション}
 
 The next example we'll explore is multi-user, real-time editing on a
 shared spreadsheet.  This may seem complicated at first, but thanks to
@@ -637,14 +662,16 @@ in 2009, the \code{broadcast} function was built with XPCOM calls into
 D-Bus/Telepathy, the standard transport for OLPC/Sugar networks (see
 \aosafigref{fig.soc.olpc}).
 
-\aosafigure[280pt]{../images/socialcalc/collab-olpc.eps}{OLPC Implementation}{fig.soc.olpc}
+%% \aosafigure[280pt]{../images/socialcalc/collab-olpc.eps}{OLPC Implementation}{fig.soc.olpc}
+\aosafigure[280pt]{../images/socialcalc/collab-olpc.eps}{OLPCの実装}{fig.soc.olpc}
 
 That worked reasonably well, enabling XO instances in the same Sugar
 network to collaborate on a common SocialCalc spreadsheet.  However,
 it is both specific to the Mozilla/XPCOM browser platform, as well as
 to the D-Bus/Telepathy messaging platform.
 
-\begin{aosasect2}{Cross-browser Transport}
+%% \begin{aosasect2}{Cross-browser Transport}
+\begin{aosasect2}{クロスブラウザの転送}
 
 To make this work across browsers and operating systems, we use the
 \code{Web::Hippie}\footnote{\url{http://search.cpan.org/dist/Web-Hippie/}}
@@ -659,7 +686,8 @@ WebSocket support, we use the
 project's Flash emulation of WebSocket, which is often faster and more reliable
 than MXHR.  The operation flow is shown in \aosafigref{fig.soc.collab}.
 
-\aosafigure{../images/socialcalc/collab-flow.eps}{Cross-Browser Flow}{fig.soc.collab}
+%% \aosafigure{../images/socialcalc/collab-flow.eps}{Cross-Browser Flow}{fig.soc.collab}
+\aosafigure{../images/socialcalc/collab-flow.eps}{クロスブラウザのフロー}{fig.soc.collab}
 
 \pagebreak
 
@@ -687,7 +715,8 @@ to resolve.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Conflict Resolution}
+%% \begin{aosasect2}{Conflict Resolution}
+\begin{aosasect2}{衝突の解決}
 
 The first one is a race-condition in the order of commands executed:
 If users A and B simultaneously perform an operation affecting the
@@ -695,12 +724,14 @@ same cells, then receive and execute commands broadcast from the other
 user, they will end up in different states, as shown in
 \aosafigref{fig.soc.conflict}.
 
-\aosafigure{../images/socialcalc/collab-conflict.eps}{Race Condition Conflict}{fig.soc.conflict}
+%% \aosafigure{../images/socialcalc/collab-conflict.eps}{Race Condition Conflict}{fig.soc.conflict}
+\aosafigure{../images/socialcalc/collab-conflict.eps}{レースコンディションの衝突}{fig.soc.conflict}
 
 We can resolve this with SocialCalc's built-in undo/redo mechanism, as
 shown in \aosafigref{fig.soc.resolve}.
 
-\aosafigure{../images/socialcalc/collab-resolution.eps}{Race Condition Conflict Resolution}{fig.soc.resolve}
+%% \aosafigure{../images/socialcalc/collab-resolution.eps}{Race Condition Conflict Resolution}{fig.soc.resolve}
+\aosafigure{../images/socialcalc/collab-resolution.eps}{レースコンディションの衝突の解決}{fig.soc.resolve}
 
 The process used to resolve the conflict is as follows.  When a client
 broadcasts a command, it adds the command to a Pending queue.  When a client
@@ -722,7 +753,8 @@ execute it again, then remove it from the queue.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Remote Cursors}
+%% \begin{aosasect2}{Remote Cursors}
+\begin{aosasect2}{リモートカーソル}
 
 Even with race conditions resolved, it is still suboptimal to
 accidentally overwrite the cell another user is currently editing.  A
@@ -763,13 +795,15 @@ box-shadow: inset 0 0 0 4px red, inset 0 0 0 2px green;
 \aosafigref{fig.soc.borders} shows how the screen would look with four
 people editing on the same spreadsheet.
 
-\aosafigure[150pt]{../images/socialcalc/collab-borders.eps}{Four Users Editing One Spreadsheet}{fig.soc.borders}
+%% \aosafigure[150pt]{../images/socialcalc/collab-borders.eps}{Four Users Editing One Spreadsheet}{fig.soc.borders}
+\aosafigure[150pt]{../images/socialcalc/collab-borders.eps}{四人のユーザーによる同時編集}{fig.soc.borders}
 
 \end{aosasect2}
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons Learned}
+%% \begin{aosasect1}{Lessons Learned}
+\begin{aosasect1}{教訓}
 
 We delivered SocialCalc 1.0 on October 19th, 2009, the 30th
 anniversary of the initial release of VisiCalc.  The experience of
@@ -777,7 +811,8 @@ collaborating with my colleagues at Socialtext under Dan Bricklin's
 guidance was very valuable to me, and I'd like to share some lessons
 I learned during that time.
 
-\begin{aosasect2}{Chief Designer with a Clear Vision}
+%% \begin{aosasect2}{Chief Designer with a Clear Vision}
+\begin{aosasect2}{明確なビジョンを持ったチーフデザイナー}
 
 In \cite{bib:brooks:design}, Fred Brooks argues that when building
 complex systems, the conversation is much more direct if we focus on a
@@ -804,7 +839,8 @@ present features in a way that feels intuitive to users.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Wikis for Project Continuity}
+%% \begin{aosasect2}{Wikis for Project Continuity}
+\begin{aosasect2}{プロジェクトの継続性のためのWiki}
 
 Before I joined the SocialCalc project, there was already over two
 years' worth of ongoing design and development, but I was able to
@@ -826,7 +862,8 @@ context from unstructured IRC logs and mail archives.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Embrace Time Zone Differences}
+%% \begin{aosasect2}{Embrace Time Zone Differences}
+\begin{aosasect2}{タイムゾーンの違いを受け入れる}
 
 David Heinemeier Hansson, creator of Ruby on Rails, once remarked on
 the benefit of distributed teams when he first joined 37signals. "The
@@ -844,7 +881,8 @@ trust in each other.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Optimize for Fun}
+%% \begin{aosasect2}{Optimize for Fun}
+\begin{aosasect2}{楽しくやろうよ}
 
 In my 2006 keynote for the CONISLI conference~\cite{bib:tang:fun}, I
 summarized my experience leading a distributed team implementing the
@@ -868,7 +906,8 @@ politics to a minimum, and made working on SocialCalc a lot of fun.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Drive Development with Story Tests}
+%% \begin{aosasect2}{Drive Development with Story Tests}
+\begin{aosasect2}{ストーリーテスト駆動開発}
 
 Prior to joining Socialtext, I've advocated the ``interleave tests
 with the specification'' approach, as can be seen in the Perl 6
@@ -915,7 +954,8 @@ our monthly releases.
 
 % \pagebreak
 
-\begin{aosasect2}{Open Source With CPAL}
+%% \begin{aosasect2}{Open Source With CPAL}
+\begin{aosasect2}{オープンソースとCPAL}
 
 Last but not least, the open source model we chose for SocialCalc
 makes an interesting lesson in itself.
