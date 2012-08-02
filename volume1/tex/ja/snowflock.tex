@@ -1147,51 +1147,100 @@ SFLDはIDを割り当て、どんな設定にすべきかを仮想ネットワ�
 %% \begin{aosasect1}{Conclusion}
 \begin{aosasect1}{結論}
 
-By tweaking the Xen hypervisor and lazily transferring the VM's state,
-SnowFlock can produce dozens of clones of a running VM in a few
-seconds. Cloning VMs with SnowFlock is thus instantaneous and
-live---it improves cloud usability by automating cluster management
-and giving applications greater programmatic control over the cloud
-resources. SnowFlock also improves cloud agility by speeding up VM
-instantiation by a factor of 20, and by improving the performance of
-most newly created VMs by leveraging their parent's warm, in-memory OS
-and application caches. The keys to SnowFlock's efficient performance
-are heuristics that avoid unnecessary page fetches, and the multicast
-system that lets clone siblings cooperatively prefetch their
-state. All it took was the clever application of a few tried-and-true
-techniques, some sleight of hand, and a generous helping of
-industrial-strength debugging.
+%% By tweaking the Xen hypervisor and lazily transferring the VM's state,
+%% SnowFlock can produce dozens of clones of a running VM in a few
+%% seconds. Cloning VMs with SnowFlock is thus instantaneous and
+%% live---it improves cloud usability by automating cluster management
+%% and giving applications greater programmatic control over the cloud
+%% resources. SnowFlock also improves cloud agility by speeding up VM
+%% instantiation by a factor of 20, and by improving the performance of
+%% most newly created VMs by leveraging their parent's warm, in-memory OS
+%% and application caches. The keys to SnowFlock's efficient performance
+%% are heuristics that avoid unnecessary page fetches, and the multicast
+%% system that lets clone siblings cooperatively prefetch their
+%% state. All it took was the clever application of a few tried-and-true
+%% techniques, some sleight of hand, and a generous helping of
+%% industrial-strength debugging.
+Xenハイパーバイザに手を入れてVMの状態の転送を遅らせるようにしたことで、
+SnowFlockは稼働中のVMのクローンを何十個も作れるようになった。
+それもたった数秒でだ。つまり、SnowFlockにおけるVMのクローニングとは、
+瞬時にその場で行えるものだということになる。
+これはクラウドの使い勝手を大きく向上させた。
+クラスタ管理は自動化できるし、
+アプリケーションのプログラムからクラウドのリソースを操作することもできるようになった。
+SnowFlockはまた、クラウドのアジリティも向上させた。
+VMの立ち上げ速度は20倍高速化したし、
+新しく作ったVMのパフォーマンスも向上した。親の環境の
+まさに稼働中の状態(メモリやアプリケーションのキャッシュなど)
+をそのまま引き継げたからである。
+SnowFlockがパフォーマンスを向上させた鍵は、
+ヒューリスティックを活用して無駄なページフェッチを回避したことと、
+同じ親を持つクローン同士がマルチキャストシステムで状態をプリフェッチできるようにしたことだ。
+これらすべての要因となったのが、
+いくつかの実証済みのテクニックをうまく適用したことやそこに加えたちょっとした小技、そして業務レベルでのデバッグだ。
 
-We learned two important lessons throughout the SnowFlock experience.
-The first is the often-underestimated value of the KISS theorem. We
-were expecting to implement complicated prefetching techniques to
-alleviate the spate of requests for memory pages a clone would issue
-upon startup.  This was, perhaps surprisingly, not necessary. The
-system performs very well for many workloads based on one single
-principle: bring the memory over as needed.  Another example of the
-value of simplicity is the page presence bitmap. A simple data
-structure with clear atomic access semantics greatly simplifies what
-could have been a gruesome concurrency problem, with multiple virtual
-CPUs competing for page updates with the asynchronous arrival of pages
-via multicast.
+%% We learned two important lessons throughout the SnowFlock experience.
+%% The first is the often-underestimated value of the KISS theorem. We
+%% were expecting to implement complicated prefetching techniques to
+%% alleviate the spate of requests for memory pages a clone would issue
+%% upon startup.  This was, perhaps surprisingly, not necessary. The
+%% system performs very well for many workloads based on one single
+%% principle: bring the memory over as needed.  Another example of the
+%% value of simplicity is the page presence bitmap. A simple data
+%% structure with clear atomic access semantics greatly simplifies what
+%% could have been a gruesome concurrency problem, with multiple virtual
+%% CPUs competing for page updates with the asynchronous arrival of pages
+%% via multicast.
+SnowFlockを通じて得た大切な教訓が二つある。
+第一の教訓は、過小評価されることが多いKISS原則である。
+クローンの起動時に発生する大量のページ要求に対応するため、
+当初は込み入ったプリフェッチ技術を実装しようとしていた。
+以外にも、そんなことはしなくてもよかったのだ。
+たったひとつの原則「必要になった時点でメモリを持ってくる」
+に従うだけで、システムのパフォーマンスは高負荷時でも非常に良好だった。
+シンプルに保つメリットを示すもうひとつの例が、ページの存在を表すビットマップだ。
+データ構造をシンプルにしておき、きっちりとアトミックなアクセス方式を使うことで、
+同時並行性に関するおぞましい問題をかなりシンプルにできた。
+また、複数の仮想CPUが同じページの更新を要求する問題も、
+マルチキャストを使ってページを非同期配信することで解決できた。
 
-The second lesson is that scale does not lie. In other words, be
-prepared to have your system shattered and new bottlenecks uncovered
-every time you bump your scale by a power of two. This is intimately
-tied with the previous lesson: simple and elegant solutions scale well
-and do not hide unwelcome surprises as load increases. A prime example
-of this principle is our \code{mcdist} system. In large-scale tests, a
-TCP/IP-based page distribution mechanism fails miserably for hundreds
-of clones. Mcdist succeeds by virtue of its extremely constrained and
-well-defined roles: clients only care about their own pages; the
-server only cares about maintaining a global flow control. By keeping
-\code{mcdist} humble and simple, SnowFlock is able to scale extremely well.
+%% The second lesson is that scale does not lie. In other words, be
+%% prepared to have your system shattered and new bottlenecks uncovered
+%% every time you bump your scale by a power of two. This is intimately
+%% tied with the previous lesson: simple and elegant solutions scale well
+%% and do not hide unwelcome surprises as load increases. A prime example
+%% of this principle is our \code{mcdist} system. In large-scale tests, a
+%% TCP/IP-based page distribution mechanism fails miserably for hundreds
+%% of clones. Mcdist succeeds by virtue of its extremely constrained and
+%% well-defined roles: clients only care about their own pages; the
+%% server only cares about maintaining a global flow control. By keeping
+%% \code{mcdist} humble and simple, SnowFlock is able to scale extremely well.
+第二の教訓は、規模は嘘をつかないということ。
+言い換えれば、システムの規模が倍になるたびに
+新たなボトルネックが発覚してシステムが大変なことになってしまうので
+その準備が必要だということだ。
+これは、先ほどの教訓と密接に関連する。
+シンプルでエレガントなソリューションは規模が拡大してもうまく機能するし、
+負荷が高まってもいやなことにならずに済ませられる。
+この法則の主要な例が、\code{mcdist}システムだ。
+大規模環境でのテストにおいて、TCP/IPベースのページ配信機構は
+クローン数百台程度でぶざまに失敗してしまう。
+mcdistは、窮屈なうまく定義したロールのおかげで成功をおさめた。
+クライアントは自分のページだけを気にすればよくて、
+サーバーは全体的なフロー制御だけを管理すればよいというものだ。
+\code{mcdist}を控え目でシンプルなものに保つことで、
+SnowFlockはとてもうまい具合にスケールできるようになった。
 
-If you are interested in knowing more, you can visit the University of
-Toronto site\footnote{\url{http://sysweb.cs.toronto.edu/projects/1}} for the
-academic papers and open-source code licensed under GPLv2, and
-GridCentric\footnote{\url{http://www.gridcentriclabs.com/}} for an industrial strength
-implementation.
+%% If you are interested in knowing more, you can visit the University of
+%% Toronto site\footnote{\url{http://sysweb.cs.toronto.edu/projects/1}} for the
+%% academic papers and open-source code licensed under GPLv2, and
+%% GridCentric\footnote{\url{http://www.gridcentriclabs.com/}} for an industrial strength
+%% implementation.
+より詳しく知りたくなった人は、トロント大学のサイト
+\footnote{\url{http://sysweb.cs.toronto.edu/projects/1}}
+に行ってみよう。学術論文や、GPLv2でライセンスされたオープンソースのコードがある。
+またGridCentric\footnote{\url{http://www.gridcentriclabs.com/}}
+には、業務レベルでの使用に耐える実装がある。
 
 \end{aosasect1}
 
