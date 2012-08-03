@@ -1,57 +1,90 @@
 \begin{aosachapter}{SocialCalc}{s:socialcalc}{Audrey Tang}
 %% Based on EN-Revision r367
 
-The history of spreadsheets spans more than 30 years.  The first
-spreadsheet program, VisiCalc, was conceived by Dan Bricklin in 1978
-and shipped in 1979.  The original concept was quite straightforward:
-a table that spans infinitely in two dimensions, its cells populated
-with text, numbers, and formulas.  Formulas are composed of normal
-arithmetic operators and various built-in functions, and each formula
-can use the current contents of other cells as values.
+%% The history of spreadsheets spans more than 30 years.  The first
+%% spreadsheet program, VisiCalc, was conceived by Dan Bricklin in 1978
+%% and shipped in 1979.  The original concept was quite straightforward:
+%% a table that spans infinitely in two dimensions, its cells populated
+%% with text, numbers, and formulas.  Formulas are composed of normal
+%% arithmetic operators and various built-in functions, and each formula
+%% can use the current contents of other cells as values.
+スプレッドシートの歴史は、かれこれ30年以上にもなる。
+Dan Bricklinが最初のスプレッドシートプログラムであるVisiCalcの構想をたてたのが1978年、
+そして実際に出荷されたのが1979年だ。当初のコンセプトは極めて単純なものだった。
+縦横両方向に好きなだけ拡張できる表があって、そのセルに
+テキストや数値や数式を入力する。ただそれだけ。
+数式は、ごく普通の算術演算子やさまざまな組み込み関数で構成されており、
+数式の中では他のセルの現在の値を利用できる。
 
-Although the metaphor was simple, it had many applications:
-accounting, inventory, and list management
-are just a few.  The possibilities were practically limitless.  All
-these uses made VisiCalc into the first ``killer app'' of the
-personal computer era.
+%% Although the metaphor was simple, it had many applications:
+%% accounting, inventory, and list management
+%% are just a few.  The possibilities were practically limitless.  All
+%% these uses made VisiCalc into the first ``killer app'' of the
+%% personal computer era.
+考え方自体はシンプルだけれど、適用範囲は幅広い。
+会計や在庫管理、あるいは一覧表の管理などはほんの一例に過ぎない。
+そこには無限の可能性があった。というわけで、
+VisiCalcはパソコン時代の最初の「キラーアプリ」になったのだ。
 
-In the decades that followed successors like Lotus 1-2-3 and Excel
-made incremental improvements, but the core metaphor stayed the same.
-Most spreadsheets were stored as on-disk files, and loaded into memory
-when opened for editing.  Collaboration was particularly hard under
-the file-based model:
+%% In the decades that followed successors like Lotus 1-2-3 and Excel
+%% made incremental improvements, but the core metaphor stayed the same.
+%% Most spreadsheets were stored as on-disk files, and loaded into memory
+%% when opened for editing.  Collaboration was particularly hard under
+%% the file-based model:
+その後数十年の間にLotus 1-2-3やExcelなどの後継者が登場した。
+機能はどんどん改良されていったが、もととなるメタファーは同じままだ。
+大半のスプレッドシートはディスク上のファイルとして保存され、
+ファイルを開いたときにメモリに読み込まれて、それを編集する。
+こういったファイルベースのモデルでは、複数人でのコラボレーションは極めて難しい。
 
 \begin{aosaitemize}
 
-  \item Each user needed to install a version of the spreadsheet editor.
+  %% \item Each user needed to install a version of the spreadsheet editor.
+  \item 各ユーザーが、スプレッドシートの編集ソフトをインストールする必要がある。
 
-  \item E-mail ping-pong, shared folders, or setting up a dedicated
-  version-control system all added bookkeeping overhead.
+  %% \item E-mail ping-pong, shared folders, or setting up a dedicated
+  %% version-control system all added bookkeeping overhead.
+  \item メールを使うにせよ共有フォルダを使うにせよバージョン管理システムを使うにせよ、余計なオーバーヘッドが増える。
 
-  \item Change tracking was limited; for example, Excel does not preserve
-  history for formatting changes and cell comments.
+  %% \item Change tracking was limited; for example, Excel does not preserve
+  %% history for formatting changes and cell comments.
+  \item 変更履歴の追跡がしにくい。たとえば、Excelには書式の変更やセルのコメントの履歴を記録する機能がない。
 
-  \item Updating formatting or formulas in templates required
-  painstaking changes to existing spreadsheet files that used that
-  template.
+  %% \item Updating formatting or formulas in templates required
+  %% painstaking changes to existing spreadsheet files that used that
+  %% template.
+  \item テンプレートの書式や数式を変更すると、そのテンプレートを使っているスプレッドシートファイルにも面倒くさい変更作業が必要になる。
 
 \end{aosaitemize}
 
-Fortunately, a new collaboration model emerged to address these issues
-with elegant simplicity.  It is the wiki model, invented by Ward
-Cunningham in 1994, and popularized by Wikipedia in the early 2000s.
+%% Fortunately, a new collaboration model emerged to address these issues
+%% with elegant simplicity.  It is the wiki model, invented by Ward
+%% Cunningham in 1994, and popularized by Wikipedia in the early 2000s.
+ありがたいことに、新たなコラボレーションモデルの登場によって、
+この問題をエレガントかつシンプルに解決できるようになった。
+それがWikiである。Ward Cunninghamが1994年に発案したWikiは、
+2000年代はじめにWikipediaによって広まった。
 
-Instead of files, the wiki model features server-hosted pages,
-editable in the browser without requiring special software.  Those
-hypertext pages can easily link to each other, and even include
-portions of other pages to form a larger page.  All participants view
-and edit the latest version by default, with revision history
-automatically managed by the server.
+%% Instead of files, the wiki model features server-hosted pages,
+%% editable in the browser without requiring special software.  Those
+%% hypertext pages can easily link to each other, and even include
+%% portions of other pages to form a larger page.  All participants view
+%% and edit the latest version by default, with revision history
+%% automatically managed by the server.
+Wikiモデルでは、ファイルのかわりにサーバーでページをホストする。
+このページはブラウザ上で編集でき、特別なソフトウェアを入れる必要はない。
+ハイパーテキストのページなので他のページへのリンクも簡単で、
+他のページを埋め込んで大きなページを作ることさえできる。
+デフォルトでは誰もがページの表示と編集が可能で、
+編集履歴は自動的にサーバーが管理する。
 
-Inspired by the wiki model, Dan Bricklin started working on WikiCalc
-in 2005.  It aims to combine the authoring ease and multi-person
-editing of wikis with the familiar visual formatting and calculating
-metaphor of spreadsheets.
+%% Inspired by the wiki model, Dan Bricklin started working on WikiCalc
+%% in 2005.  It aims to combine the authoring ease and multi-person
+%% editing of wikis with the familiar visual formatting and calculating
+%% metaphor of spreadsheets.
+Wikiモデルに触発されてDan BricklinはWikiCalcの開発を始めた。2005年のことである。
+その狙いは、管理しやすくて多人数で編集できるというWikiの特徴と、
+ビジュアルな書式設定や計算機能というスプレッドシートのメタファーを組み合わせることだった。
 
 %% \begin{aosasect1}{WikiCalc}
 \begin{aosasect1}{WikiCalc}
