@@ -89,30 +89,39 @@ Wikiモデルに触発されてDan BricklinはWikiCalcの開発を始めた。20
 %% \begin{aosasect1}{WikiCalc}
 \begin{aosasect1}{WikiCalc}
 
-The first version of WikiCalc (\aosafigref{fig.soc.screenshot}) had
-several features that set it apart from other spreadsheets at the
-time:
+%% The first version of WikiCalc (\aosafigref{fig.soc.screenshot}) had
+%% several features that set it apart from other spreadsheets at the
+%% time:
+WikiCalc (\aosafigref{fig.soc.screenshot})の最初のバージョンにはこんな機能があり、
+これらは、当時のスプレッドシートソフトウェアとは一線を画すものだった。
 
 \begin{aosaitemize}
 
-  \item Plain text, HTML, and wiki-style markup rendering for text data.
+  %% \item Plain text, HTML, and wiki-style markup rendering for text data.
+  \item プレーンテキストやHTML、そしてWiki記法によるテキストデータのマークアップ。
 
-  \item Wiki-style text that includes commands to insert links, images,
-  and values from cell references.
+  %% \item Wiki-style text that includes commands to insert links, images,
+  %% and values from cell references.
+  \item Wiki記法には、リンクや画像を挿入したり他のセルの値を参照したりするコマンドも含まれている。
 
-  \item Formula cells may reference values of other WikiCalc pages
-  hosted on other websites.
+  %% \item Formula cells may reference values of other WikiCalc pages
+  %% hosted on other websites.
+  \item セルの数式内で、他のウェブサイトで公開されている別のWikiCalcページの値を参照できる。
 
-  \item Ability to create output to be embedded in other web pages, both
-  static and live data.
+  %% \item Ability to create output to be embedded in other web pages, both
+  %% static and live data.
+  \item 出力を他のウェブページに埋め込むことが可能。静的にも埋め込めるし、生きたデータとして動的に埋め込むこともできる。
 
-  \item Cell formatting with access to CSS style attributes and CSS
-  classes.
+  %% \item Cell formatting with access to CSS style attributes and CSS
+  %% classes.
+  \item セルの書式設定で、CSSの属性やクラスにアクセスできる。
 
-  \item Logging of all edit operations as an audit trail.
+  %% \item Logging of all edit operations as an audit trail.
+  \item すべての編集操作を監査証跡として記録できる。
 
-  \item Wiki-like retention of each new version of a page with roll-back
-  capability.
+  %% \item Wiki-like retention of each new version of a page with roll-back
+  %% capability.
+  \item Wikiと同様に同一ページの各バージョンを保存でき、ロールバックも可能。
 
 \end{aosaitemize}
 
@@ -125,78 +134,116 @@ time:
 %% \aosafigure[300pt]{../images/socialcalc/wikicalc-flow.eps}{WikiCalc Flow}{fig.soc.flow}
 \aosafigure[300pt]{../images/socialcalc/wikicalc-flow.eps}{WikiCalcのフロー}{fig.soc.flow}
 
-WikiCalc 1.0's internal architecture (\aosafigref{fig.soc.comp}) and
-information flow (\aosafigref{fig.soc.flow}) were deliberately simple,
-but nevertheless powerful.  The ability to compose a master
-spreadsheet from several smaller spreadsheets proved particularly
-handy.  For example, imagine a scenario where each salesperson keeps
-numbers in a spreadsheet page.  Each sales manager then rolls up their
-reps' numbers into a regional spreadsheet, and the VP of sales then
-rolls up the regional numbers into a top-level spreadsheet.
+%% WikiCalc 1.0's internal architecture (\aosafigref{fig.soc.comp}) and
+%% information flow (\aosafigref{fig.soc.flow}) were deliberately simple,
+%% but nevertheless powerful.  The ability to compose a master
+%% spreadsheet from several smaller spreadsheets proved particularly
+%% handy.  For example, imagine a scenario where each salesperson keeps
+%% numbers in a spreadsheet page.  Each sales manager then rolls up their
+%% reps' numbers into a regional spreadsheet, and the VP of sales then
+%% rolls up the regional numbers into a top-level spreadsheet.
+WikiCalc 1.0の内部アーキテクチャ(\aosafigref{fig.soc.comp})と情報の流れ(\aosafigref{fig.soc.flow})
+は意図的にシンプルにしているが、それでも強力なものだった。複数の小さなスプレッドシートを組み合わせて
+マスタースプレッドシートを作る仕組みは特に有用だった。
+たとえば、各販売員が個別のスプレッドシートに売り上げを記録しているという状況を考えてみよう。
+地域のマネージャーは各メンバーの売り上げをまとめて地域ごとのスプレッドシートを作ることができるし、
+販売担当のVPは各地域の売り上げをまとめてトップレベルのスプレッドシートを作れる。
 
-Each time one of the individual spreadsheets is updated, all the
-roll-up spreadsheets can reflect the update.  If someone wants further
-detail, they simply click through to view the spreadsheet behind the
-spreadsheet.  This roll-up capability eliminates the redundant and
-error-prone effort of updating numbers in multiple places, and ensures
-all views of the information stay fresh.
+%% Each time one of the individual spreadsheets is updated, all the
+%% roll-up spreadsheets can reflect the update.  If someone wants further
+%% detail, they simply click through to view the spreadsheet behind the
+%% spreadsheet.  This roll-up capability eliminates the redundant and
+%% error-prone effort of updating numbers in multiple places, and ensures
+%% all views of the information stay fresh.
+販売員が自分のスプレッドシートで売り上げを更新すると、それをとりまとめた他のスプレッドシートにも
+すぐにその更新が反映される。とりまとめたスプレッドシート上から詳細が知りたければ、
+単にクリックするだけでその元となったスプレッドシートを閲覧できる。
+この機能があるおかげで、ひとつの数値を複数の場所で管理するなどという
+冗長かつ間違えやすい状況は回避でき、すべての情報が最新であることが保証できる。
 
-To ensure the recalculations are up-to-date, WikiCalc adopted a
-thin-client design, keeping all the state information on the server
-side.  Each spreadsheet is represented on the browser as a
-\code{{\textless}table{\textgreater}} element; editing a cell will
-send an \code{ajaxsetcell} call to the server, and the server then
-tells the browser which cells need updating.
+%% To ensure the recalculations are up-to-date, WikiCalc adopted a
+%% thin-client design, keeping all the state information on the server
+%% side.  Each spreadsheet is represented on the browser as a
+%% \code{{\textless}table{\textgreater}} element; editing a cell will
+%% send an \code{ajaxsetcell} call to the server, and the server then
+%% tells the browser which cells need updating.
+数値機を再計算して最新状態を保つためにWikiCalcはシンクライアント方式を採用しており、
+状態に関するすべての情報をサーバー側で管理している。各スプレッドシートは、ブラウザ上では
+\code{{\textless}table{\textgreater}}要素として表示される。
+セルを編集するときには\code{ajaxsetcell}コールをサーバーに送り、
+サーバーは、更新すべきセルをブラウザに通知する。
 
-Unsurprisingly, this design depends on a fast connection between the
-browser and the server.  When the latency is high, users will start to
-notice the frequent appearance of ``Loading\ldots'' messages between
-updating a cell and seeing its new contents as shown in
-\aosafigref{fig.soc.load}. This is especially a problem for users
-interactively editing formulas by tweaking the input and expecting to
-see results in real time.
+%% Unsurprisingly, this design depends on a fast connection between the
+%% browser and the server.  When the latency is high, users will start to
+%% notice the frequent appearance of ``Loading\ldots'' messages between
+%% updating a cell and seeing its new contents as shown in
+%% \aosafigref{fig.soc.load}. This is especially a problem for users
+%% interactively editing formulas by tweaking the input and expecting to
+%% see results in real time.
+当然ながら、この方式はブラウザとサーバーの間で高速な通信ができることが前提となる。
+レイテンシーが高くなると、セルの内容を更新したり新たなコンテンツを表示したりするときに
+``Loading\ldots''メッセージが頻発するようになる。ちょうど\aosafigref{fig.soc.load}のような感じだ。
+数式を対話的に編集して結果がどう変わるかをすぐ確認したいといったユーザーにとって、これは大きな問題となる。
 
 %% \aosafigure[250pt]{../images/socialcalc/wikicalc-loading.eps}{Loading Message}{fig.soc.load}
-\aosafigure[250pt]{../images/socialcalc/wikicalc-loading.eps}{メッセージのロード}{fig.soc.load}
+\aosafigure[250pt]{../images/socialcalc/wikicalc-loading.eps}{読み込み中のメッセージ}{fig.soc.load}
 
-Moreover, because the \code{{\textless}table{\textgreater}} element
-had the same dimensions as the spreadsheet, a $100{\times}100$ grid
-would create 10,000 \code{{\textless}td{\textgreater}} DOM objects,
-which strains the memory resource of browsers, further limiting the
-size of pages.
+%% Moreover, because the \code{{\textless}table{\textgreater}} element
+%% had the same dimensions as the spreadsheet, a $100{\times}100$ grid
+%% would create 10,000 \code{{\textless}td{\textgreater}} DOM objects,
+%% which strains the memory resource of browsers, further limiting the
+%% size of pages.
+さらに、\code{{\textless}table{\textgreater}}要素の行と列の数がスプレッドシートと等しくなるので、
+$100{\times}100$のグリッドを作ると10,000の\code{{\textless}td{\textgreater}} DOMオブジェクトを作ることになる。
+これはブラウザのメモリリソースを大量に消費し、さらにページのサイズにも制約が発生してしまう。
 
-Due to these shortcomings, while WikiCalc was useful as a stand-alone
-server running on localhost, it was not very practical to embed as part
-of web-based content management systems.
+%% Due to these shortcomings, while WikiCalc was useful as a stand-alone
+%% server running on localhost, it was not very practical to embed as part
+%% of web-based content management systems.
+これらの欠点もあって、WikiCalcはローカルホスト上でスタンドアロンで実行するには便利だが、
+ウェブベースのコンテンツ管理システムに組み込んで使うのは非現実的だった。
 
-In 2006, Dan Bricklin teamed up with Socialtext to start developing
-SocialCalc, a ground-up rewrite of WikiCalc in Javascript based on
-some of the original Perl code.
+%% In 2006, Dan Bricklin teamed up with Socialtext to start developing
+%% SocialCalc, a ground-up rewrite of WikiCalc in Javascript based on
+%% some of the original Perl code.
+2006年に、Dan BricklinはSocialtext社と組んでSocialCalcの開発に取りかかった。
+これは、WikiCalcをJavaScriptでゼロから書き直したもので、元のPerlのコードの一部を元にしている。
 
-This rewrite was aimed at large, distributed collaborations, and sought
-to deliver a look and feel more like that of a desktop app.  Other design
-goals included:
+%% This rewrite was aimed at large, distributed collaborations, and sought
+%% to deliver a look and feel more like that of a desktop app.  Other design
+%% goals included:
+この書き直しの狙いは、大規模な分散環境でのコラボレーションを行うことであり、
+デスクトップアプリケーションに負けないような見た目や操作性を提供することであった。
+またそれ以外にも、こういった目標を掲げていた。
 
 \begin{aosaitemize}
 
-  \item Capable of handling hundreds of thousands of cells.
+  %% \item Capable of handling hundreds of thousands of cells.
+  \item 何十万ものセルを扱えること。
 
-  \item Fast turnaround time for edit operations.
+  %% \item Fast turnaround time for edit operations.
+  \item 編集操作の所要時間を高速化すること。
 
-  \item Client-side audit trail and undo/redo stack.
+  %% \item Client-side audit trail and undo/redo stack.
+  \item クライアント側で監査証跡やundo／redoスタックを持つこと。
 
-  \item Better use of Javascript and CSS to provide full-fledged layout
-  functionality.
+  %% \item Better use of Javascript and CSS to provide full-fledged layout
+  %% functionality.
+  \item JavaScriptとCSSを活用して、本格的なレイアウト機能を提供すること。
 
-  \item Cross-browser support, despite the more extensive use of
-  responsive Javascript.
+  %% \item Cross-browser support, despite the more extensive use of
+  %% responsive Javascript.
+  \item JavaScriptを今まで以上に利用しつつも、クロスブラウザ対応を実現すること。
 
 \end{aosaitemize}
 
-After three years of development and various beta releases, Socialtext
-released SocialCalc 1.0 in 2009, successfully meeting the design
-goals.  Let's now take a look at the architecture of the SocialCalc
-system.
+%% After three years of development and various beta releases, Socialtext
+%% released SocialCalc 1.0 in 2009, successfully meeting the design
+%% goals.  Let's now take a look at the architecture of the SocialCalc
+%% system.
+三年の開発期間と数多くのベータリリースを経て、Socialtext社は2009年にSocialCalc 1.0をリリースした。
+これは、当初掲げた設計の目標をクリアしたものだった。
+さあ、SocialCalcシステムのアーキテクチャを見ていこう。
 
 \end{aosasect1}
 
