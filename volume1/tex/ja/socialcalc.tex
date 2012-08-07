@@ -247,52 +247,73 @@ $100{\times}100$のグリッドを作ると10,000の\code{{\textless}td{\textgre
 
 \end{aosasect1}
 
+%% \begin{aosasect1}{SocialCalc}
 \begin{aosasect1}{SocialCalc}
 
 %% \aosafigure[225pt]{../images/socialcalc/socialcalc-screenshot.eps}{SocialCalc Interface}{fig.soc.action}
 \aosafigure[225pt]{../images/socialcalc/socialcalc-screenshot.eps}{SocialCalcのインターフェイス}{fig.soc.action}
 
-\aosafigref{fig.soc.action} and \aosafigref{fig.soc.class} show
-SocialCalc's interface and classes respectively.  Compared to
-WikiCalc, the server's role has been greatly reduced.  Its only
-responsibility is responding to HTTP GETs by serving entire
-spreadsheets serialized in the save format; once the browser receives
-the data, all calculations, change tracking and user interaction are
-now implemented in Javascript.
+%% \aosafigref{fig.soc.action} and \aosafigref{fig.soc.class} show
+%% SocialCalc's interface and classes respectively.  Compared to
+%% WikiCalc, the server's role has been greatly reduced.  Its only
+%% responsibility is responding to HTTP GETs by serving entire
+%% spreadsheets serialized in the save format; once the browser receives
+%% the data, all calculations, change tracking and user interaction are
+%% now implemented in Javascript.
+\aosafigref{fig.soc.action}と\aosafigref{fig.soc.class}は、それぞれSocialCalc
+のインターフェイスとクラスを示したものだ。WikiCalcに比べてサーバー側の役割が大幅に減っている。
+サーバーの唯一の責務は、HTTP GETリクエストに応えてスプレッドシート全体を保存形式にシリアライズしたものを提供することだ。
+いったんブラウザにデータが渡ってしまった後は、すべての計算や変更の追跡そしてユーザーとの対話処理などが
+JavaScriptで行われるようになった。
 
 %% \aosafigure[325pt]{../images/socialcalc/socialcalc-class-diagram.eps}{SocialCalc Class Diagram}{fig.soc.class}
 \aosafigure[325pt]{../images/socialcalc/socialcalc-class-diagram.eps}{SocialCalcのクラス図}{fig.soc.class}
 
-The Javascript components were designed with a layered MVC
-(Model/View/Controller) style, with each class focusing on a single
-aspect:
+%% The Javascript components were designed with a layered MVC
+%% (Model/View/Controller) style, with each class focusing on a single
+%% aspect:
+JavaScriptのコンポーネントは階層型のMVC (Model/View/Controller)形式で作られており、
+各クラスがそれぞれ一つの役割に焦点を合わせている。
 
 \begin{aosadescription}
 
-  \item{\emph{Sheet}} is the data model, representing an in-memory
-  structure of a spreadsheet.
-  It contains a dictionary from
-  coordinates to \emph{Cell} objects, each representing a single cell.
-  Empty cells need no entries, and hence consume no memory at all.
+  %% \item{\emph{Sheet}} is the data model, representing an in-memory
+  %% structure of a spreadsheet.
+  %% It contains a dictionary from
+  %% coordinates to \emph{Cell} objects, each representing a single cell.
+  %% Empty cells need no entries, and hence consume no memory at all.
+  \item{\emph{Sheet}}はデータモデルで、スプレッドシートのメモリ内での構造を表す。
+  座標から\emph{Cell}オブジェクト(個々のセルを表す)までの辞書を含む。
+  空のセルのエントリは不要なので、空のセルはメモリを消費しない。
 
-  \item{\emph{Cell}} represents a cell's content and formats.  Some
-  common properties are shown in \aosatblref{tbl.soc.cellcontents}.
+  %% \item{\emph{Cell}} represents a cell's content and formats.  Some
+  %% common properties are shown in \aosatblref{tbl.soc.cellcontents}.
+  \item{\emph{Cell}}はセルの内容や書式を表す。
+  よく使うプロパティの一部を\aosatblref{tbl.soc.cellcontents}に示す。
 
-  \item{\emph{RenderContext}} implements the view; it is responsible
-  for rendering a sheet into DOM objects.
+  %% \item{\emph{RenderContext}} implements the view; it is responsible
+  %% for rendering a sheet into DOM objects.
+  \item{\emph{RenderContext}}はビューを実装する。
+  シートをDOMオブジェクトとしてレンダリングする役割を果たす。
 
-  \item{\emph{TableControl}} is the main controller, accepting mouse
-  and keyboard events.
-  As it receives view events such as scrolling
-  and resizing, it updates its associated \emph{RenderContext}
-  object.  As it receives update events that affects the sheet's
-  content, it schedules new commands to the sheet's command queue.
+  %% \item{\emph{TableControl}} is the main controller, accepting mouse
+  %% and keyboard events.
+  %% As it receives view events such as scrolling
+  %% and resizing, it updates its associated \emph{RenderContext}
+  %% object.  As it receives update events that affects the sheet's
+  %% content, it schedules new commands to the sheet's command queue.
+  \item{\emph{TableControl}}はメインコントローラーで、マウスやキーボードのイベントを受け付ける。
+  スクロールやリサイズといったビューのイベントを受け取ると、それに関連する\emph{RenderContext}オブジェクトを更新する。
+  シートの中身に影響を及ぼす更新イベントを受け取ると、新たなコマンドをシートのコマンドキューに追加する。
 
-  \item{\emph{SpreadSheetControl}} is the top-level UI with
-  toolbars, status bars, dialog boxes and color pickers.
+  %% \item{\emph{SpreadSheetControl}} is the top-level UI with
+  %% toolbars, status bars, dialog boxes and color pickers.
+  \item{\emph{SpreadSheetControl}}はトップレベルのUIを管理する。
+  ツールバーやステータスバー、ダイアログボックスそしてカラーピッカーも含む。
 
-  \item{\emph{SpreadSheetViewer}} is an alternate top-level UI that
-  provides a read-only interactive view.
+  %% \item{\emph{SpreadSheetViewer}} is an alternate top-level UI that
+  %% provides a read-only interactive view.
+  \item{\emph{SpreadSheetViewer}}はもうひとつのトップレベルUIで、読み込み専用のインタラクティブビューを提供する。
 
 \end{aosadescription}
 
@@ -312,18 +333,27 @@ aspect:
   \label{tbl.soc.cellcontents}
 \end{table}
 
-We adopted a minimal class-based object system with simple
-composition/delegation, and make no use of inheritance or object
-prototypes.  All symbols are placed under the \code{SocialCalc.*}
-namespace to avoid naming conflicts.
+%% We adopted a minimal class-based object system with simple
+%% composition/delegation, and make no use of inheritance or object
+%% prototypes.  All symbols are placed under the \code{SocialCalc.*}
+%% namespace to avoid naming conflicts.
+私たちが採用したのは、最小限のクラスベースのオブジェクトシステムとシンプルな
+合成/委譲の仕組みであり、継承やオブジェクトのプロトタイプは使っていない。
+すべてのシンボルは\code{SocialCalc.*}名前空間の中にあるので、名前が衝突する心配はない。
 
-Each update on the sheet goes through the \code{ScheduleSheetCommands}
-method, which takes a command string representing the edit. (Some
-common commands are show in \aosatblref{tbl.soc.commands}.)  The
-application embedding SocialCalc may define extra commands on their
-own, by adding named callbacks into the
-\code{SocialCalc.SheetCommandInfo.CmdExtensionCallbacks} object, and
-use the \code{startcmdextension} command to invoke them.
+%% Each update on the sheet goes through the \code{ScheduleSheetCommands}
+%% method, which takes a command string representing the edit. (Some
+%% common commands are show in \aosatblref{tbl.soc.commands}.)  The
+%% application embedding SocialCalc may define extra commands on their
+%% own, by adding named callbacks into the
+%% \code{SocialCalc.SheetCommandInfo.CmdExtensionCallbacks} object, and
+%% use the \code{startcmdextension} command to invoke them.
+シートへの更新はすべて\code{ScheduleSheetCommands}メソッドを経由する。
+このメソッドは、編集操作を表すコマンド文字列を受け取る
+(よく使われるコマンドの一部を\aosatblref{tbl.soc.commands}に示す)。
+SocialCalcを組み込んで使うアプリケーションが独自のコマンドを追加することもできる。
+名前付きコールバックを\code{SocialCalc.SheetCommandInfo.CmdExtensionCallbacks}
+オブジェクトに追加して、\code{startcmdextension}コマンドでそれを実行すればよい。
 
 \begin{table}[ht]
 \begin{minipage}[b]{0.4\linewidth}\centering
