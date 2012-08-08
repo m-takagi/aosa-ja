@@ -398,64 +398,98 @@ SocialCalcを組み込んで使うアプリケーションが独自のコマン�
 %% \begin{aosasect1}{Command Run-loop}
 \begin{aosasect1}{コマンド実行ループ}
 
-To improve responsiveness, SocialCalc performs all recalculation and
-DOM updates in the background, so the user can keep making changes to
-several cells while the engine catches up on earlier changes in the
-command queue.
+%% To improve responsiveness, SocialCalc performs all recalculation and
+%% DOM updates in the background, so the user can keep making changes to
+%% several cells while the engine catches up on earlier changes in the
+%% command queue.
+反応速度を向上させるために、SocialCalcはすべての再計算やDOMの更新をバックグラウンドで行う。
+そのため、ユーザーが複数のセルを編集していたとしても、エンジンがそれをきちんと追いかけて
+変更した順にそれをコマンドキューに送る。
 
 %% \aosafigure[300pt]{../images/socialcalc/socialcalc-command-runloop.eps}{SocialCalc Command Run-loop}{fig.soc.loop}
 \aosafigure[300pt]{../images/socialcalc/socialcalc-command-runloop.eps}{SocialCalcのコマンド実行ループ}{fig.soc.loop}
 
-When a command is running, the \code{TableEditor} object sets its
-\code{busy} flag to true; subsequent commands are then pushed into the
-\code{deferredCommands} queue, ensuring a sequential order of
-execution.  As the event loop diagram in \aosafigref{fig.soc.loop}
-shows, the Sheet object keeps sending \code{StatusCallback} events to
-notify the user of the current state of command execution, through
-each of the four steps:
+%% When a command is running, the \code{TableEditor} object sets its
+%% \code{busy} flag to true; subsequent commands are then pushed into the
+%% \code{deferredCommands} queue, ensuring a sequential order of
+%% execution.  As the event loop diagram in \aosafigref{fig.soc.loop}
+%% shows, the Sheet object keeps sending \code{StatusCallback} events to
+%% notify the user of the current state of command execution, through
+%% each of the four steps:
+コマンドを実行している間は、\code{TableEditor}オブジェクトの\code{busy}フラグがtrueになる。
+フラグが立っている場合、それに続くコマンドは\code{deferredCommands}キューに送られる。
+このキューに入ったコマンドは、順序通りに実行されることが保証される。
+\aosafigref{fig.soc.loop}のイベントループ図が示すとおり、
+Sheetオブジェクトは\code{StatusCallback}イベントを送出して
+コマンドの実行状況をユーザーに通知する。実行状況は、次の四段階に分かれる。
 
 \begin{aosadescription}
 
-  \item{\emph{ExecuteCommand}}: Sends \code{cmdstart} upon start, and
-   \code{cmdend} when the command finishes execution.  If the command
-   changed a cell's value indirectly, enter the \emph{Recalc} step.
-   Otherwise, if the command changed the visual appearance of one or
-   more on-screen cells, enter the \emph{Render} step.  If neither of
-   the above applies (for example with the \code{copy} command), skip
-   to the \emph{PositionCalculations} step.
+  %% \item{\emph{ExecuteCommand}}: Sends \code{cmdstart} upon start, and
+  %%  \code{cmdend} when the command finishes execution.  If the command
+  %%  changed a cell's value indirectly, enter the \emph{Recalc} step.
+  %%  Otherwise, if the command changed the visual appearance of one or
+  %%  more on-screen cells, enter the \emph{Render} step.  If neither of
+  %%  the above applies (for example with the \code{copy} command), skip
+  %%  to the \emph{PositionCalculations} step.
+  \item{\emph{ExecuteCommand}}:
+  開始時に\code{cmdstart}を送り、コマンドの実行が完了したときに\code{cmdend}を送る。
+  そのコマンドが間接的にセルの値を変更した場合は\emph{Recalc}ステップに入る。
+  そうではなく、そのコマンドが画面上のセルの見た目を変更した場合は\emph{Render}ステップに入る。
+  どちらにもあてはまらない場合(\code{copy}コマンドなど)は\emph{PositionCalculations}ステップまで飛ぶ。
 
 \pagebreak
 
-  \item{\emph{Recalc}} \emph{(as{ }needed)}: Sends \code{calcstart} upon start,
-  \code{calcorder} every 100ms when checking the dependency chain of
-  cells, \code{calccheckdone} when the check finishes, and
-  \code{calcfinished} when all affected cells received their
-  re-calculated values.  This step is always followed by the \emph{Render}
-  step.
+  %% \item{\emph{Recalc}} \emph{(as{ }needed)}: Sends \code{calcstart} upon start,
+  %% \code{calcorder} every 100ms when checking the dependency chain of
+  %% cells, \code{calccheckdone} when the check finishes, and
+  %% \code{calcfinished} when all affected cells received their
+  %% re-calculated values.  This step is always followed by the \emph{Render}
+  %% step.
+  \item{\emph{Recalc}} \emph{(必要に応じて)}:
+  開始時に\code{calcstart}を送り、セルの依存関係チェインをチェックしている間は100msごとに\code{calcorder}
+  を送る。チェックが終われば\code{calccheckdone}を送り、影響するすべてのセルが再計算後の値を受け取った時点で
+  \code{calcfinished}を送る。このステップの後には必ず\emph{Render}ステップが続く。
 
-  \item{\emph{Render}} \emph{(as{ }needed)}: Sends \code{schedrender} upon
-  start, and \code{renderdone} when the
-  \code{{\textless}table{\textgreater}} element is updated with
-  formatted cells. This step is always followed by \emph{PositionCalculations}.
+  %% \item{\emph{Render}} \emph{(as{ }needed)}: Sends \code{schedrender} upon
+  %% start, and \code{renderdone} when the
+  %% \code{{\textless}table{\textgreater}} element is updated with
+  %% formatted cells. This step is always followed by \emph{PositionCalculations}.
+  \item{\emph{Render}} \emph{(必要に応じて)}:
+  開始時に\code{schedrender}を送り、\code{{\textless}table{\textgreater}}要素が
+  新しい書式のセルで更新された時点で\code{renderdone}を送る。
+  このステップの後には必ず\emph{PositionCalculations}ステップが続く。
 
-  \item{\emph{PositionCalculations}}: Sends \code{schedposcalc} upon
-  start, and \code{doneposcalc} after updating the scrollbars, the
-  current editable cell cursor, and other visual components of the
-  \code{TableEditor}.
+  %% \item{\emph{PositionCalculations}}: Sends \code{schedposcalc} upon
+  %% start, and \code{doneposcalc} after updating the scrollbars, the
+  %% current editable cell cursor, and other visual components of the
+  %% \code{TableEditor}.
+  \item{\emph{PositionCalculations}}:
+  開始時に\code{schedposcalc}を送り、
+  スクロールバーや編集可能セルのカーソルなど\code{TableEditor}のビジュアルコンポーネントの更新を
+  終えた時点で\code{doneposcalc}を送る。
 
 \end{aosadescription}
 
-Because all commands are saved as they are executed, we naturally get
-an audit log of all operations.  The \code{Sheet.CreateAuditString}
-method provides a newline-delimited string as the audit trail, with
-each command in a single line.
+%% Because all commands are saved as they are executed, we naturally get
+%% an audit log of all operations.  The \code{Sheet.CreateAuditString}
+%% method provides a newline-delimited string as the audit trail, with
+%% each command in a single line.
+そのコマンドが実行されたという情報はすべて保存されるので、
+ごく自然にあらゆる操作の監査証跡が得られることになる。
+\code{Sheet.CreateAuditString}メソッドを使えば改行区切りの文字列として監査証跡が得られる。
+各コマンドが1行で表される形式だ。
 
-\code{ExecuteSheetCommand} also creates an undo command for each
-command it executes.  For example, if the cell A1 contains ``Foo''
-and the user executes \code{set A1 text Bar}, then an undo-command
-\code{set A1 text Foo} is pushed to the undo stack.  If the user
-clicks Undo, then the undo-command is executed to restore A1 to its
-original value.
+%% \code{ExecuteSheetCommand} also creates an undo command for each
+%% command it executes.  For example, if the cell A1 contains ``Foo''
+%% and the user executes \code{set A1 text Bar}, then an undo-command
+%% \code{set A1 text Foo} is pushed to the undo stack.  If the user
+%% clicks Undo, then the undo-command is executed to restore A1 to its
+%% original value.
+\code{ExecuteSheetCommand}はまた、各コマンドを実行するときに、その取り消し用のコマンドも作る。
+たとえばA1セルの中身が``Foo''のときにユーザーが\code{set A1 text Bar}コマンドを実行したとしよう。
+このときに作られる取り消し用コマンドは\code{set A1 text Foo}で、これがundoスタックに積まれる。
+ユーザーがUndoをクリックすると、このコマンドを実行してA1を元の状態に戻すというわけだ。
 
 \end{aosasect1}
 
