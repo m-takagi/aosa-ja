@@ -696,52 +696,72 @@ Excel形式(\code{.xls})やOpenDocument形式(\code{.ods})などの他のフォ�
 %% \begin{aosasect1}{Rich-text Editing}
 \begin{aosasect1}{リッチテキストの編集}
 
-The first example we'll look at is enhancing SocialCalc's text cells
-with wiki markup to display its rich-text rendering right in the
-table editor (\aosafigref{fig.soc.rt}).
+%% The first example we'll look at is enhancing SocialCalc's text cells
+%% with wiki markup to display its rich-text rendering right in the
+%% table editor (\aosafigref{fig.soc.rt}).
+まず最初に見る例は、SocialCalcのテキストセルを拡張したものだ。
+Wiki記法を使って、表エディタの中でリッチテキストの表示を実現している(\aosafigref{fig.soc.rt})。
 
 %% \aosafigure[200pt]{../images/socialcalc/richtext-screenshot.eps}{Rich Text Rendering in the Table Editor}{fig.soc.rt}
 \aosafigure[200pt]{../images/socialcalc/richtext-screenshot.eps}{表エディタにおけるリッチテキストのレンダリング}{fig.soc.rt}
 
-We added this feature to SocialCalc right after its 1.0 release, to
-address the popular request of inserting images, links and text
-markups using a unified syntax.  Since Socialtext already has an
-open-source wiki platform, it was natural to re-use the syntax for
-SocialCalc as well.
+%% We added this feature to SocialCalc right after its 1.0 release, to
+%% address the popular request of inserting images, links and text
+%% markups using a unified syntax.  Since Socialtext already has an
+%% open-source wiki platform, it was natural to re-use the syntax for
+%% SocialCalc as well.
+この機能をSocialCalcに追加したのはバージョン1.0のリリース直後のことだった。
+これは、画像やリンクの挿入そしてテキストのマークアップをすべて同じ方法でやりたいという要望に応えたものである。
+Socialtextには既にオープンソースのWikiプラットフォームが付属していたので、
+その構文をSocialCalcで使うのはごく自然な流れだった。
 
-To implement this, we need a custom renderer for the
-\code{textvalueformat} of \code{text-wiki}, and to change the default
-format for text cells to use it.
+%% To implement this, we need a custom renderer for the
+%% \code{textvalueformat} of \code{text-wiki}, and to change the default
+%% format for text cells to use it.
+この機能を実装するためには\code{text-wiki}の\code{textvalueformat}
+用のカスタムレンダラーが必要で、それを使うテキストセル側でもデフォルトフォーマットの変更が必要だった。
 
-What is this \code{textvalueformat}, you ask?  Read on.
+%% What is this \code{textvalueformat}, you ask?  Read on.
+\code{textvalueformat}なんて知らないよだって？まあ続きをよんでくださいな。
 
 %% \begin{aosasect2}{Types and Formats}
 \begin{aosasect2}{型と書式}
 
-In SocialCalc, each cell has a \code{datatype} and a \code{valuetype}.
-Data cells with text or numbers correspond to text/numeric value
-types, and formula cells with \code{datatype="f"} may generate either
-numeric or text values.
+%% In SocialCalc, each cell has a \code{datatype} and a \code{valuetype}.
+%% Data cells with text or numbers correspond to text/numeric value
+%% types, and formula cells with \code{datatype="f"} may generate either
+%% numeric or text values.
+SocialCalcでは、各セルが\code{datatype}と\code{valuetype}を保持している。
+テキストや数値が入っているセルはそれぞれtext/numericの値型に対応し、
+\code{datatype="f"}である数式セルは数値あるいはテキストの値を生成する。
 
-Recall that on the Render step, the \code{Sheet} object generates HTML
-from each of its cells.  It does so by inspecting each cell's
-\code{valuetype}: If it begins with t, then the cell's
-\code{textvalueformat} attribute determines how generation is done.
-If it begins with \code{n}, then the \code{nontextvalueformat} attribute is
-used instead.
+%% Recall that on the Render step, the \code{Sheet} object generates HTML
+%% from each of its cells.  It does so by inspecting each cell's
+%% \code{valuetype}: If it begins with t, then the cell's
+%% \code{textvalueformat} attribute determines how generation is done.
+%% If it begins with \code{n}, then the \code{nontextvalueformat} attribute is
+%% used instead.
+先ほどのRenderステップを思い出してみよう。\code{Sheet}オブジェクトは個々のセルからHTMLを生成していた。
+このとき、各セルの\code{valuetype}を調べているのだ。値型が\code{t}から始まるときは、そのセルの\code{textvalueformat}
+属性を見て生成方法を判断する。
+\code{n}から始まるときは、そのかわりに\code{nontextvalueformat}属性を利用する。
 
-However, if the cell's \code{textvalueformat} or
-\code{nontextvalueformat} attribute is not defined explicitly, then a
-default format is looked up from its \code{valuetype}, as shown in
-\aosafigref{fig.soc.vformat}.
+%% However, if the cell's \code{textvalueformat} or
+%% \code{nontextvalueformat} attribute is not defined explicitly, then a
+%% default format is looked up from its \code{valuetype}, as shown in
+%% \aosafigref{fig.soc.vformat}.
+しかし、セルの\code{textvalueformat}あるいは\code{nontextvalueformat}が明示的に定義されていない場合は、
+デフォルトの書式を\code{valuetype}から調べる。その様子は\aosafigref{fig.soc.vformat}のようになる。
 
 %% \aosafigure[300pt]{../images/socialcalc/richtext-formats.eps}{Value Types}{fig.soc.vformat}
 \aosafigure[300pt]{../images/socialcalc/richtext-formats.eps}{値型}{fig.soc.vformat}
 
 % \pagebreak
 
-\noindent Support for the \code{text-wiki} value format is coded in
-\code{SocialCalc.format\_text\_for\_display}:
+%% \noindent Support for the \code{text-wiki} value format is coded in
+%% \code{SocialCalc.format\_text\_for\_display}:
+\noindent
+\code{text-wiki}の値の書式に対応するコードは\code{SocialCalc.format\_text\_for\_display}にある。
 
 \begin{verbatim}
 if (SocialCalc.Callbacks.expand_wiki && /^text-wiki/.test(valueformat)) {
@@ -752,57 +772,75 @@ if (SocialCalc.Callbacks.expand_wiki && /^text-wiki/.test(valueformat)) {
 }
 \end{verbatim}
 
-Instead of inlining the wiki-to-HTML expander in
-\code{format\_text\_for\_display}, we will define a new hook in
-\code{SocialCalc.Callbacks}.  This is the recommended style
-throughout the SocialCalc codebase; it improves modularity by making
-it possible to plug in different ways of expanding wikitext, as well
-as keeping compatibility with embedders that do not desire this
-feature.
+%% Instead of inlining the wiki-to-HTML expander in
+%% \code{format\_text\_for\_display}, we will define a new hook in
+%% \code{SocialCalc.Callbacks}.  This is the recommended style
+%% throughout the SocialCalc codebase; it improves modularity by making
+%% it possible to plug in different ways of expanding wikitext, as well
+%% as keeping compatibility with embedders that do not desire this
+%% feature.
+\code{format\_text\_for\_display}の中でインラインでWikiからHTMLに展開するのではなく、
+新たなフックを\code{SocialCalc.Callbacks}に定義した。
+これは、SocialCalcのコードベース全体を通して推奨されている方式である。
+Wiki記法の展開を別の方法に差し替えるのも簡単になる。
+また、SocialCalcを組み込んだアプリケーション側も、
+その機能が不要であっても互換性を保てる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Rendering Wikitext}
 \begin{aosasect2}{Wikitextのレンダリング}
 
-Next, we'll make use of
-Wikiwyg\footnote{\url{https://github.com/audreyt/wikiwyg-js}}, a
-Javascript library offering two-way conversions between wikitext and
-HTML.
+%% Next, we'll make use of
+%% Wikiwyg\footnote{\url{https://github.com/audreyt/wikiwyg-js}}, a
+%% Javascript library offering two-way conversions between wikitext and
+%% HTML.
+次に、Wikiwyg\footnote{\url{https://github.com/audreyt/wikiwyg-js}}を利用する。
+これはJavaScriptのライブラリで、wikitextとHTMLの相互変換を行うものだ。
 
-We define the \code{expand\_wiki} function by taking the cell's text,
-running it through Wikiwyg's wikitext parser and its HTML emitter:
+%% We define the \code{expand\_wiki} function by taking the cell's text,
+%% running it through Wikiwyg's wikitext parser and its HTML emitter:
+私たちは\code{expand\_wiki}関数を用意した。
+この関数はセルのテキストを受け取って、それをWikiwygの
+wikitextパーサーとHTMLエミッターに渡す。
 
 \begin{verbatim}
 var parser = new Document.Parser.Wikitext();
 var emitter = new Document.Emitter.HTML();
 SocialCalc.Callbacks.expand_wiki = function(val) {
-    // Convert val from Wikitext to HTML
+    // val を Wikitext から HTML に変換する
     return parser.parse(val, emitter);
 }
 \end{verbatim}
 
+%% \pagebreak 
+%% \noindent The final step involves scheduling the \code{set sheet
+%% defaulttextvalueformat text-wiki} command right after the
+%% spreadsheet initializes:
 \pagebreak 
-\noindent The final step involves scheduling the \code{set sheet
-defaulttextvalueformat text-wiki} command right after the
-spreadsheet initializes:
+\noindent
+最後のステップは、スプレッドシートの初期化直後に
+\code{set sheet defaulttextvalueformat text-wiki}コマンドを実行させるようにすることだ。
 
 
 \begin{verbatim}
-// We assume there's a <div id="tableeditor"/> in the DOM already
+// 既に <div id="tableeditor"/> が DOM に存在するものとする
 var spreadsheet = new SocialCalc.SpreadsheetControl();
 spreadsheet.InitializeSpreadsheetControl("tableeditor", 0, 0, 0);
 spreadsheet.ExecuteCommand('set sheet defaulttextvalueformat text-wiki');
 \end{verbatim}
 
-\noindent Taken together, the Render step now works as shown in
-\aosafigref{fig.soc.render}.
+%% \noindent Taken together, the Render step now works as shown in
+%% \aosafigref{fig.soc.render}.
+\noindent
+これらをまとめると、Renderステップでの動きは\aosafigref{fig.soc.render}のようになる。
 
 %% \aosafigure[349pt]{../images/socialcalc/richtext-flow.eps}{Render Step}{fig.soc.render}
 \aosafigure[349pt]{../images/socialcalc/richtext-flow.eps}{レンダリング手順}{fig.soc.render}
 
-That's all!  The enhanced SocialCalc now supports a rich set of wiki
-markup syntax:
+%% That's all!  The enhanced SocialCalc now supports a rich set of wiki
+%% markup syntax:
+これで完了！進化したSocialCalcは、今やWiki記法にも対応するようになった。
 
 \begin{verbatim}
 *bold* _italic_ `monospace` {{unformatted}}
@@ -813,8 +851,11 @@ markup syntax:
 {image: http://www.socialtext.com/images/logo.png}
 \end{verbatim}
 
-\noindent Try entering \code{*bold* \_italic\_ `monospace`} in A1, and you'll
-see it rendered as rich text (\aosafigref{fig.soc.rtext}).
+%% \noindent Try entering \code{*bold* \_italic\_ `monospace`} in A1, and you'll
+%% see it rendered as rich text (\aosafigref{fig.soc.rtext}).
+\noindent
+試しに、A1に\code{*bold* \_italic\_ `monospace`}と入力してみよう。
+\aosafigref{fig.soc.rtext}のような感じでリッチテキストに変換されるはずだ。
 
 %% \aosafigure[150pt]{../images/socialcalc/richtext-example.eps}{Wikywyg Example}{fig.soc.rtext}
 \aosafigure[150pt]{../images/socialcalc/richtext-example.eps}{Wikywygの例}{fig.soc.rtext}
