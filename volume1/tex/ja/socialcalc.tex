@@ -869,15 +869,31 @@ spreadsheet.ExecuteCommand('set sheet defaulttextvalueformat text-wiki');
 %% \begin{aosasect1}{Real-time Collaboration}
 \begin{aosasect1}{リアルタイムのコラボレーション}
 
-The next example we'll explore is multi-user, real-time editing on a
-shared spreadsheet.  This may seem complicated at first, but thanks to
-SocialCalc's modular design all it takes is for each on-line user to
-broadcast their commands to other participants.
+%% The next example we'll explore is multi-user, real-time editing on a
+%% shared spreadsheet.  This may seem complicated at first, but thanks to
+%% SocialCalc's modular design all it takes is for each on-line user to
+%% broadcast their commands to other participants.
+次に紹介する例は、共有スプレッドシートにおける複数ユーザーでの同時編集だ。
+一見複雑に思えるが、SocialCalcのモジュラー設計のおかげでそれほどでもなかった。
+必要なのは、各オンラインユーザーが自分のコマンドを他のメンバーにブロードキャストすることだけだ。
 
-To distinguish between locally-issued commands and remote commands, we
-add an \code{isRemote} parameter to the \code{ScheduleSheetCommands}
-method:
+%% To distinguish between locally-issued commands and remote commands, we
+%% add an \code{isRemote} parameter to the \code{ScheduleSheetCommands}
+%% method:
+ローカルで発行したコマンドとリモートコマンドを区別するために、
+\code{ScheduleSheetCommands}メソッドに\code{isRemote}
+パラメータを追加した。
 
+%% \begin{verbatim}
+%% SocialCalc.ScheduleSheetCommands = function(sheet, cmdstr, saveundo, isRemote) {
+%%    if (SocialCalc.Callbacks.broadcast && !isRemote) {
+%%        SocialCalc.Callbacks.broadcast('execute', {
+%%            cmdstr: cmdstr, saveundo: saveundo
+%%        });
+%%    }
+%%    // ...original ScheduleSheetCommands code here...
+%% }
+%% \end{verbatim}
 \begin{verbatim}
 SocialCalc.ScheduleSheetCommands = function(sheet, cmdstr, saveundo, isRemote) {
    if (SocialCalc.Callbacks.broadcast && !isRemote) {
@@ -885,53 +901,81 @@ SocialCalc.ScheduleSheetCommands = function(sheet, cmdstr, saveundo, isRemote) {
            cmdstr: cmdstr, saveundo: saveundo
        });
    }
-   // ...original ScheduleSheetCommands code here...
+   // ...元からあった ScheduleSheetCommands のコードが続く...
 }
 \end{verbatim}
 
-\noindent Now all we need to do is to define a suitable
-\code{SocialCalc.Callbacks.broadcast} callback function.  Once it's
-in place, the same commands will be executed on all users connected
-to the same spreadsheet.
+%% \noindent Now all we need to do is to define a suitable
+%% \code{SocialCalc.Callbacks.broadcast} callback function.  Once it's
+%% in place, the same commands will be executed on all users connected
+%% to the same spreadsheet.
+\noindent
+つまり、必要なのは、適切なコールバック関数\code{SocialCalc.Callbacks.broadcast}
+を定義することだけだ。それさえできれば、同じスプレッドシートに接続するすべてのユーザーが
+同じコマンドを実行することになる。
 
-When this feature was first implemented for OLPC (One Laptop Per 
-Child\footnote{\url{http://one.laptop.org/}}) by SEETA's Sugar 
-Labs\footnote{\url{http://seeta.in/wiki/index.php?title=Collaboration_in_SocialCalc}}
-in 2009, the \code{broadcast} function was built with XPCOM calls into
-D-Bus/Telepathy, the standard transport for OLPC/Sugar networks (see
-\aosafigref{fig.soc.olpc}).
+%% When this feature was first implemented for OLPC (One Laptop Per 
+%% Child\footnote{\url{http://one.laptop.org/}}) by SEETA's Sugar 
+%% Labs\footnote{\url{http://seeta.in/wiki/index.php?title=Collaboration_in_SocialCalc}}
+%% in 2009, the \code{broadcast} function was built with XPCOM calls into
+%% D-Bus/Telepathy, the standard transport for OLPC/Sugar networks (see
+%% \aosafigref{fig.soc.olpc}).
+この機能を
+OLPC(One Laptop Per Child\footnote{\url{http://one.laptop.org/}})
+用にはじめて実装したのは
+SEETAのSugar Labs\footnote{\url{http://seeta.in/wiki/index.php?title=Collaboration_in_SocialCalc}}
+で、それは2009年のことだった。このときの\code{broadcast}関数の実装は、
+D-Bus/TelepathyへのXPCOM呼び出しだった。
+D-Bus/TelepathyはOLPC/Sugarネットワークの標準のトランスポートである(\aosafigref{fig.soc.olpc}を参照)。
 
 %% \aosafigure[280pt]{../images/socialcalc/collab-olpc.eps}{OLPC Implementation}{fig.soc.olpc}
 \aosafigure[280pt]{../images/socialcalc/collab-olpc.eps}{OLPCの実装}{fig.soc.olpc}
 
-That worked reasonably well, enabling XO instances in the same Sugar
-network to collaborate on a common SocialCalc spreadsheet.  However,
-it is both specific to the Mozilla/XPCOM browser platform, as well as
-to the D-Bus/Telepathy messaging platform.
+%% That worked reasonably well, enabling XO instances in the same Sugar
+%% network to collaborate on a common SocialCalc spreadsheet.  However,
+%% it is both specific to the Mozilla/XPCOM browser platform, as well as
+%% to the D-Bus/Telepathy messaging platform.
+これはそれなりにうまく機能して、同じSugarネットワーク上にあるXOのインスタンスが
+同じSocialCalcスプレッドシートを使って共同作業できるようになった。
+しかしこの方式はMozilla/XPCOMのプラットフォームでしか使えないし、
+D-Bus/Telepathyメッセージングプラットフォームでしか使えない。
 
 %% \begin{aosasect2}{Cross-browser Transport}
-\begin{aosasect2}{クロスブラウザの転送}
+\begin{aosasect2}{クロスブラウザのトランスポート}
 
-To make this work across browsers and operating systems, we use the
+%% To make this work across browsers and operating systems, we use the
+%% \code{Web::Hippie}\footnote{\url{http://search.cpan.org/dist/Web-Hippie/}}
+%% framework, a high-level abstraction of JSON-over-WebSocket with
+%% convenient jQuery bindings, with MXHR (Multipart XML HTTP
+%% Request\footnote{\url{http://about.digg.com/blog/duistream-and-mxhr}})
+%% as the fallback transport mechanism if WebSocket is not available.
+別のブラウザや別のOSでも機能するようにするために、
 \code{Web::Hippie}\footnote{\url{http://search.cpan.org/dist/Web-Hippie/}}
-framework, a high-level abstraction of JSON-over-WebSocket with
-convenient jQuery bindings, with MXHR (Multipart XML HTTP
-Request\footnote{\url{http://about.digg.com/blog/duistream-and-mxhr}})
-as the fallback transport mechanism if WebSocket is not available.
+フレームワークを採用した。これはJSON-over-WebSocketを上位レベルで抽象化したものに
+便利なjQueryバインディングを追加したものである。そして、WebSocketが使えないときに使う
+代替の撮らん図ポートとしてMXHR
+(Multipart XML HTTP Request\footnote{\url{http://about.digg.com/blog/duistream-and-mxhr}})
+を用意した。
 
-For browsers with Adobe Flash plugin installed but without native
-WebSocket support, we use the
-\code{web\_socket.js}\footnote{\url{https://github.com/gimite/web-socket-js}}
-project's Flash emulation of WebSocket, which is often faster and more reliable
-than MXHR.  The operation flow is shown in \aosafigref{fig.soc.collab}.
+%% For browsers with Adobe Flash plugin installed but without native
+%% WebSocket support, we use the
+%% \code{web\_socket.js}\footnote{\url{https://github.com/gimite/web-socket-js}}
+%% project's Flash emulation of WebSocket, which is often faster and more reliable
+%% than MXHR.  The operation flow is shown in \aosafigref{fig.soc.collab}.
+Adobe Flashプラグインは入っているけれどもWebSocketにはネイティブで対応していないという
+ブラウザ向けには、\code{web\_socket.js}\footnote{\url{https://github.com/gimite/web-socket-js}}
+プロジェクトが作ったFlashによるWebSocketエミュレーションを使った。
+たいていの場合、こちらのほうがMXHRよりも高速だし安定していた。
+処理フローは\aosafigref{fig.soc.collab}のようになる。
 
 %% \aosafigure{../images/socialcalc/collab-flow.eps}{Cross-Browser Flow}{fig.soc.collab}
 \aosafigure{../images/socialcalc/collab-flow.eps}{クロスブラウザのフロー}{fig.soc.collab}
 
 \pagebreak
 
-The client-side \code{SocialCalc.Callbacks.broadcast} function is
-defined as:
+%% The client-side \code{SocialCalc.Callbacks.broadcast} function is
+%% defined as:
+クライアント側の\code{SocialCalc.Callbacks.broadcast}関数の定義は、このようになる。
 
 \begin{verbatim}
 var hpipe = new Hippie.Pipe();
@@ -949,45 +993,65 @@ $(hpipe).bind("message.execute", function (e, d) {
 });
 \end{verbatim}
 
-\noindent Although this works quite well, there are still two remaining issues
-to resolve.
+%% \noindent Although this works quite well, there are still two remaining issues
+%% to resolve.
+\noindent
+これは非常にうまく機能したが、実はまだ二つの問題が残っていた。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Conflict Resolution}
 \begin{aosasect2}{衝突の解決}
 
-The first one is a race-condition in the order of commands executed:
-If users A and B simultaneously perform an operation affecting the
-same cells, then receive and execute commands broadcast from the other
-user, they will end up in different states, as shown in
-\aosafigref{fig.soc.conflict}.
+%% The first one is a race-condition in the order of commands executed:
+%% If users A and B simultaneously perform an operation affecting the
+%% same cells, then receive and execute commands broadcast from the other
+%% user, they will end up in different states, as shown in
+%% \aosafigref{fig.soc.conflict}.
+最初の問題は、コマンドを順に実行するときに発生するレースコンディションだ。
+あるユーザーAと別のユーザーBが、同じセルを同時に操作したとする。
+お互いが実行したコマンドは相手にもブロードキャストされ、
+\aosafigref{fig.soc.conflict}に示すように最終的にはお互いの状態が異なってしまう。
 
 %% \aosafigure{../images/socialcalc/collab-conflict.eps}{Race Condition Conflict}{fig.soc.conflict}
 \aosafigure{../images/socialcalc/collab-conflict.eps}{レースコンディションの衝突}{fig.soc.conflict}
 
-We can resolve this with SocialCalc's built-in undo/redo mechanism, as
-shown in \aosafigref{fig.soc.resolve}.
+%% We can resolve this with SocialCalc's built-in undo/redo mechanism, as
+%% shown in \aosafigref{fig.soc.resolve}.
+この問題を解決するために使ったのがSocialCalcに組み込まれている
+undo/redoの仕組みだ。\aosafigref{fig.soc.resolve}に示すように利用した。
 
 %% \aosafigure{../images/socialcalc/collab-resolution.eps}{Race Condition Conflict Resolution}{fig.soc.resolve}
 \aosafigure{../images/socialcalc/collab-resolution.eps}{レースコンディションの衝突の解決}{fig.soc.resolve}
 
-The process used to resolve the conflict is as follows.  When a client
-broadcasts a command, it adds the command to a Pending queue.  When a client
-receives a command, it checks the remote command against the Pending queue.
+%% The process used to resolve the conflict is as follows.  When a client
+%% broadcasts a command, it adds the command to a Pending queue.  When a client
+%% receives a command, it checks the remote command against the Pending queue.
+衝突を回避するための手順は次のとおりだ。
+あるクライアントがコマンドをブロードキャストするときには、そのコマンドをペンディングキューに追加する。
+あるクライアントがコマンドを受信するときには、リモートコマンドをペンディングキューと比べてチェックする。
 
-If the Pending queue is empty, then the command is simply executed as a remote
-action. If the remote command matches a command in the Pending queue, then the
-local command is removed from the queue.
+%% If the Pending queue is empty, then the command is simply executed as a remote
+%% action. If the remote command matches a command in the Pending queue, then the
+%% local command is removed from the queue.
+ペンディングキューが空の場合は、受信したコマンドをリモートアクションとしてシンプルに実行する。
+リモートコマンドと同じコマンドがペンディングキューにあった場合は、
+ローカルコマンドをキューから取り除く。
 
-Otherwise, the client checks if there are any queued commands that conflict
-with the received command.  If there are conflicting commands, the client first
-\code{Undo}es those commands and marks them for later \code{Redo}.  After
-undoing the conflicting commands (if any), the remote command is executed as
-usual.
+%% Otherwise, the client checks if there are any queued commands that conflict
+%% with the received command.  If there are conflicting commands, the client first
+%% \code{Undo}es those commands and marks them for later \code{Redo}.  After
+%% undoing the conflicting commands (if any), the remote command is executed as
+%% usual.
+それ以外の場合は、キューに入っているコマンドの中で今受信したコマンドと衝突するものがあるかどうかを調べる。
+衝突するコマンドが見つかったら、クライアントはまずそのコマンドを\code{Undo}して、
+後で\code{Redo}するよう印をつけておく。衝突するコマンドをいったん取り消せば、
+リモートコマンドをいつもどおり実行できる。
 
-When a marked-for-redo command is received from the server, the client will
-execute it again, then remove it from the queue.
+%% When a marked-for-redo command is received from the server, the client will
+%% execute it again, then remove it from the queue.
+\code{Redo}マークがついたコマンドをサーバーから受信した場合は、
+クライアントはそれをもう一度実行する。そしてキューから削除する。
 
 
 \end{aosasect2}
@@ -995,14 +1059,35 @@ execute it again, then remove it from the queue.
 %% \begin{aosasect2}{Remote Cursors}
 \begin{aosasect2}{リモートカーソル}
 
-Even with race conditions resolved, it is still suboptimal to
-accidentally overwrite the cell another user is currently editing.  A
-simple improvement is for each client to broadcast its cursor position
-to other users, so everyone can see which cells are being worked on.
+%% Even with race conditions resolved, it is still suboptimal to
+%% accidentally overwrite the cell another user is currently editing.  A
+%% simple improvement is for each client to broadcast its cursor position
+%% to other users, so everyone can see which cells are being worked on.
+レースコンディションの問題が解決できたとしても、
+別のユーザーがいま編集中のセルを不意に上書きしてしまう問題を完全に防げるわけではない。
+単純な改良方法としては、すべてのクライアントが自分のカーソルの位置を他のユーザーに
+ブロードキャストするというものがある。
+そうすれば、誰が今どのセルを編集しているのかを誰もが見られるようになる。
 
-To implement this idea, we add another \code{broadcast} handler to the
-\code{MoveECellCallback} event:
+%% To implement this idea, we add another \code{broadcast} handler to the
+%% \code{MoveECellCallback} event:
+このアイデアを実装するために、\code{MoveECellCallback}
+イベントに別の\code{broadcast}ハンドラを追加した。
 
+%% \begin{verbatim}
+%% editor.MoveECellCallback.broadcast = function(e) {
+%%     hpipe.send({
+%%         type: 'ecell',
+%%         data: e.ecell.coord
+%%     });
+%% };
+
+%% $(hpipe).bind("message.ecell", function (e, d) {
+%%     var cr = SocialCalc.coordToCr(d.data);
+%%     var cell = SocialCalc.GetEditorCellElement(editor, cr.row, cr.col);
+%%     // ...decorate cell with styles specific to the remote user(s) on it...
+%% });
+%% \end{verbatim}
 \begin{verbatim}
 editor.MoveECellCallback.broadcast = function(e) {
     hpipe.send({
@@ -1014,25 +1099,36 @@ editor.MoveECellCallback.broadcast = function(e) {
 $(hpipe).bind("message.ecell", function (e, d) {
     var cr = SocialCalc.coordToCr(d.data);
     var cell = SocialCalc.GetEditorCellElement(editor, cr.row, cr.col);
-    // ...decorate cell with styles specific to the remote user(s) on it...
+    // ...そこを編集しているリモートユーザーがわかるようにセルの書式を変える...
 });
 \end{verbatim}
 
-To mark cell focus in spreadsheets, it's common to use colored
-borders.  However, a cell may already define its own \code{border}
-property, and since \code{border} is mono-colored, it can only
-represent one cursor on the same cell.
+%% To mark cell focus in spreadsheets, it's common to use colored
+%% borders.  However, a cell may already define its own \code{border}
+%% property, and since \code{border} is mono-colored, it can only
+%% represent one cursor on the same cell.
+スプレッドシート上で作業中のセルに印をつける方法として一般的なのは、
+色つきの枠線で囲むことだ。しかし、もともとそのセルには\code{border}
+プロパティを設定してある可能性もある。また、\code{border}は単色なので、
+これだとひとつのセルの上に複数のカーソルがある場合に対応できない。
 
-Therefore, on browsers with support for CSS3, we use the \code{box-shadow}
-property to represent multiple peer cursors in the same cell:
+%% Therefore, on browsers with support for CSS3, we use the \code{box-shadow}
+%% property to represent multiple peer cursors in the same cell:
+そこで、CSS3に対応しているブラウザ上では
+\code{box-shadow}プロパティを使って同一セル上の複数のカーソルを表すようにした。
 
+%% \begin{verbatim}
+%% /* Two cursors on the same cell */
+%% box-shadow: inset 0 0 0 4px red, inset 0 0 0 2px green;
+%% \end{verbatim}
 \begin{verbatim}
-/* Two cursors on the same cell */
+/* ふたつのカーソルが同一セル上にある場合 */
 box-shadow: inset 0 0 0 4px red, inset 0 0 0 2px green;
 \end{verbatim}
 
-\aosafigref{fig.soc.borders} shows how the screen would look with four
-people editing on the same spreadsheet.
+%% \aosafigref{fig.soc.borders} shows how the screen would look with four
+%% people editing on the same spreadsheet.
+\aosafigref{fig.soc.borders}は、四人で同じスプレッドシートを編集したらどうなるかを示す図だ。
 
 %% \aosafigure[150pt]{../images/socialcalc/collab-borders.eps}{Four Users Editing One Spreadsheet}{fig.soc.borders}
 \aosafigure[150pt]{../images/socialcalc/collab-borders.eps}{四人のユーザーによる同時編集}{fig.soc.borders}
