@@ -1,5 +1,5 @@
 \begin{aosachapter}{Telepathy}{s:telepathy}{Danielle Madeley}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r272
 
 Telepathy\footnote{\url{http://telepathy.freedesktop.org/}, or see the
 developers' manual at \url{http://telepathy.freedesktop.org/doc/book/}} is a
@@ -22,7 +22,8 @@ Telepathy was created by Robert McQueen in 2005 and since that time
 has been developed and maintained by several companies and individual
 contributors including Collabora, the company co-founded by McQueen.
 
-\begin{aosabox}{The D-Bus Message Bus}
+%% \begin{aosabox}{The D-Bus Message Bus}
+\begin{aosabox}{D-Busメッセージバス}
 
 D-Bus is an asynchronous message bus for interprocess communication
 that forms the backbone of most GNU/Linux systems including the GNOME
@@ -62,7 +63,8 @@ For more information on D-Bus, see
 
 \end{aosabox}
 
-\begin{aosasect1}{Components of the Telepathy Framework}
+%% \begin{aosasect1}{Components of the Telepathy Framework}
+\begin{aosasect1}Telepathy Frameworkのコンポーネント}
 
 Telepathy is modular, with each module communicating with the others
 via a D-Bus messaging bus. Most usually via the user's session bus. This
@@ -107,7 +109,8 @@ Within the current implementation of Telepathy, the Account Manager
 and the Channel Dispatcher are both provided by a single process known
 as Mission Control.
 
-\aosafigureTop[250pt]{../images/telepathy/telepathy-components.eps}{Example Telepathy Components}{fig.telepathy.components}
+%% \aosafigureTop[250pt]{../images/telepathy/telepathy-components.eps}{Example Telepathy Components}{fig.telepathy.components}
+\aosafigureTop[250pt]{../images/telepathy/telepathy-components.eps}{Telepathyコンポーネントの例}{fig.telepathy.components}
 
 This modular design was based on Doug McIlroy's philosophy, ``Write
 programs that do one thing and do it well,'' and has several important
@@ -161,7 +164,8 @@ in detail in \aosasecref{sec.telepathy.ccc}.
 
 \end{aosasect1}
 
-\begin{aosasect1}{How Telepathy uses D-Bus}
+%% \begin{aosasect1}{How Telepathy uses D-Bus}
+\begin{aosasect1}{TelepathyによるD-Busの利用法}
 
 Telepathy components communicate via a D-Bus messaging bus, which is
 usually the user's session bus.  D-Bus provides features common to
@@ -176,9 +180,11 @@ interfaces. Again strictly namespaced, these have forms like
 Each interface provides methods, signals and properties that you can
 call, listen to, or request.
 
-\aosafigure{../images/telepathy/bus-hierarchy-conceptual.eps}{Conceptual Representation of Objects Published by a D-Bus Service}{fig.telepathy.conceptual}
+%% \aosafigure{../images/telepathy/bus-hierarchy-conceptual.eps}{Conceptual Representation of Objects Published by a D-Bus Service}{fig.telepathy.conceptual}
+\aosafigure{../images/telepathy/bus-hierarchy-conceptual.eps}D-Busサービスが公開するオブジェクトの概念表現}{fig.telepathy.conceptual}
 
-\begin{aosabox}{Publishing D-Bus Objects}
+%% \begin{aosabox}{Publishing D-Bus Objects}
+\begin{aosabox}{D-Busオブジェクトの公開}
 
 Publishing D-Bus objects is handled entirely by the D-Bus library
 being used. In effect it is a mapping from a D-Bus object path to the
@@ -243,7 +249,8 @@ example, a text channel implements at least the \path{ofdT.Channel},
 interfaces.  If it's a multi-user chat, it will also implement
 \path{odfT.Channel.Interface.Group}.
 
-\begin{aosabox}{Why an Interfaces Property and not D-Bus Introspection?}
+%% \begin{aosabox}{Why an Interfaces Property and not D-Bus Introspection?}
+\begin{aosabox}{なぜインターフェイスプロパティであってD-Busイントロスペクションではないのか}
 
 You might wonder why each base class implements an \code{Interfaces}
 property, instead of relying on D-Bus' introspection capabilities to
@@ -267,7 +274,8 @@ D-Bus has no concept of types, only arbitrarily named interfaces), we
 can use the information contained within the Telepathy specification
 to provide sanity checking within the Telepathy language bindings.
 
-\begin{aosabox}{Why and How the Specification IDL was Expanded}
+%% \begin{aosabox}{Why and How the Specification IDL was Expanded}
+\begin{aosabox}{なぜ、そしてどうやってSpecification IDLを展開するのか}
 
 The existing D-Bus specification IDL defines the names, arguments,
 access restrictions and D-Bus type signatures of methods, properties
@@ -297,9 +305,11 @@ order to simulate object inheritance for D-Bus objects.
 
 \end{aosabox}
 
+%% \aosafigure[250pt]{../images/telepathy/telepathy-types-unpacked.eps}{D-Bus Types (ii) and a\{sa(usuu)\}}{fig.telepathy.dbustypes}
 \aosafigure[250pt]{../images/telepathy/telepathy-types-unpacked.eps}{D-Bus Types (ii) and a\{sa(usuu)\}}{fig.telepathy.dbustypes}
 
-\begin{aosasect2}{Handles}
+%% \begin{aosasect2}{Handles}
+\begin{aosasect2}{ハンドル}
 
 Handles are used in Telepathy to represent identifiers (e.g., contacts
 and room names). They are an unsigned integer value assigned by the
@@ -325,7 +335,8 @@ for comparison.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Discovering Telepathy Services}
+%% \begin{aosasect2}{Discovering Telepathy Services}
+\begin{aosasect2}{Telepathyサービスの検出}
 
 Some services, such as the Account Manager and the Channel Dispatcher,
 which always exist, have well known names that are defined in the
@@ -347,7 +358,8 @@ currently running.  For instance, if the Account Manager crashes, it
 can look to see what connections are running, and reassociate those
 with its account objects.
 
-\begin{aosabox}{Connections are Services Too}
+%% \begin{aosabox}{Connections are Services Too}
+\begin{aosabox}{コネクションもまたサービス}
 
 As well as the Connection Managers themselves, the connections are
 also advertised as D-Bus services. This hypothetically allows for the
@@ -365,7 +377,8 @@ clients. These begin with the name \code{ofdT.Client}, e.g.,
 
 \end{aosasect2}
 
-\begin{aosasect2}{Reducing D-Bus Traffic}
+%% \begin{aosasect2}{Reducing D-Bus Traffic}
+\begin{aosasect2}{D-Busトラフィックの軽減}
 
 Original versions of the Telepathy specification created an excessive
 amount of D-Bus traffic in the form of method calls requesting
@@ -470,10 +483,12 @@ connection[CONNECTION_INTERFACE_CONTACTS].GetContactAttributes(
 
 \end{aosasect1}
 
-\begin{aosasect1}{Connections, Channels and Clients}
+%% \begin{aosasect1}{Connections, Channels and Clients}
+\begin{aosasect1}{コネクション、チャネル、そしてクライアント}
 \label{sec.telepathy.ccc}
 
-\begin{aosasect2}{Connections}
+%% \begin{aosasect2}{Connections}
+\begin{aosasect2}{コネクション}
 
 A Connection is created by the Connection Manager to establish a
 connection to a single protocol/account. For example, connecting to
@@ -497,7 +512,8 @@ for a given account.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Channels}
+%% \begin{aosasect2}{Channels}
+\begin{aosasect2}{チャネル}
 
 Channels are the mechanism through which communications are carried
 out.  A channel is typically an IM conversation, voice or video call
@@ -542,7 +558,8 @@ user to a multi-user chatroom might have the interfaces shown in
   \label{tbl.telepathy.textchannel}
 \end{table}
 
-\begin{aosabox}{Contact List Channels: A Mistake}
+%% \begin{aosabox}{Contact List Channels: A Mistake}
+\begin{aosabox}{コンタクトリストチャネル: 失敗例}
 
 In the first versions of the Telepathy specification, contact lists
 were considered a type of channel. There were several server-defined
@@ -577,7 +594,8 @@ indicates when the contact list has been prepared.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Requesting Channels, Channel Properties and Dispatching}
+%% \begin{aosasect2}{Requesting Channels, Channel Properties and Dispatching}
+\begin{aosasect2}{チャネルのリクエスト、チャネルのプロパティそしてディスパッチ}
 
 Channels are requested using a map of properties you wish the desired
 channel to possess. Typically, the channel request will include the
@@ -650,7 +668,8 @@ handle type, target, initiator (who created the channel) and
 interfaces.  Properties such as the channel's state are obviously not
 included.
 
-\begin{aosabox}{Old-School Channel Requesting}
+%% \begin{aosabox}{Old-School Channel Requesting}
+\begin{aosabox}{昔ながらのチャネルリクエスト}
 
 Channels were originally requested simply by type, handle type and
 target handle.  This wasn't sufficiently flexible because not all
@@ -713,7 +732,8 @@ that have no interest in communication channels beyond the initial
 request to request channels and have them handled by the best program
 available (e.g., launching a text chat from your email client).
 
-\aosafigure[300pt]{../images/telepathy/dispatching-model.eps}{Channel Request and Dispatching}{fig.telepathy.request}
+%% \aosafigure[300pt]{../images/telepathy/dispatching-model.eps}{Channel Request and Dispatching}{fig.telepathy.request}
+\aosafigure[300pt]{../images/telepathy/dispatching-model.eps}{チャネルリクエストとディスパッチ}{fig.telepathy.request}
 
 The requesting program makes a channel request to the Channel
 Dispatcher, which in turn forwards the request to the appropriate
@@ -726,7 +746,8 @@ initial request from a program.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Clients}
+%% \begin{aosasect2}{Clients}
+\begin{aosasect2}{クライアント}
 
 Clients handle or observe incoming and outgoing communications
 channels. A client is anything that is registered with the Channel
@@ -794,7 +815,8 @@ not already running.  Having clients be discoverable in this way makes
 the choice of user interface configurable and changeable at any time
 without having to replace any other part of Telepathy.
 
-\begin{aosabox}{All or Nothing}
+%% \begin{aosabox}{All or Nothing}
+\begin{aosabox}{オールオアナッシング}
 
 It is possible to provide a filter indicating you are interested in
 all channels, but in practice this is only useful as an example of
@@ -812,7 +834,8 @@ demand to handle a specific channel use such a filter.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Role of Language Bindings}
+%% \begin{aosasect1}{The Role of Language Bindings}
+\begin{aosasect1}{言語バインディングの役割}
 
 As Telepathy is a D-Bus API, and thus can driven by any programming
 language that supports D-Bus.  Language bindings are not required for
@@ -827,7 +850,8 @@ Examples of low-level bindings are the Python bindings and the
 original libtelepathy C bindings, though the GLib and Qt4 bindings
 include a low-level binding.
 
-\begin{aosasect2}{Asynchronous Programming}
+%% \begin{aosasect2}{Asynchronous Programming}
+\begin{aosasect2}{非同期プログラミング}
 
 Within the language bindings, all method calls that make requests over
 D-Bus are asynchronous: the request is made, and the reply is given in
@@ -845,7 +869,8 @@ telepathy-glib API bindings. Unfortunately using pseudo-synchronous
 API turns out to be fraught with problems, and was eventually removed
 from telepathy-glib.
 
-\begin{aosabox}{Why Pseudo-Synchronous D-Bus Calls Don't Work}
+%% \begin{aosabox}{Why Pseudo-Synchronous D-Bus Calls Don't Work}
+\begin{aosabox}{疑似同期D-Bus呼び出しが失敗する理由}
 
 The pseudo-synchronous interface offered by dbus-glib and other D-Bus
 bindings is implemented using a request-and-block technique. While
@@ -918,7 +943,8 @@ features provided by the languages and GLib.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Object Readiness}
+%% \begin{aosasect2}{Object Readiness}
+\begin{aosasect2}{オブジェクトの準備}
 \label{sec.telepathy.readiness}
 
 In a simple D-Bus API, such as the low-level Telepathy bindings, you
@@ -973,7 +999,8 @@ called once all the information for those features is retrieved.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Robustness}
+%% \begin{aosasect1}{Robustness}
+\begin{aosasect1}{ロバストネス}
 
 One of the key advantages of Telepathy is its robustness. The
 components are modular, so a crash in one component should not bring
@@ -1018,7 +1045,8 @@ Telepathy robust:
 
 \end{aosasect1}
 
-\begin{aosasect1}{Extending Telepathy: Sidecars}
+%% \begin{aosasect1}{Extending Telepathy: Sidecars}
+\begin{aosasect1}{Telepathyの拡張: サイドカー}
 
 Although the Telepathy specification tries to cover a wide range of
 features exported by communication protocols, some protocols are
@@ -1037,7 +1065,8 @@ object provided by the plugin, which should implement that interface
 (and possibly others). The object exists alongside the main Connection
 object (hence the name sidecar, like on a motorcycle).
 
-\begin{aosabox}{The History of Sidecars}
+%% \begin{aosabox}{The History of Sidecars}
+\begin{aosabox}{サイドカーの歴史}
 
 In the early days of Telepathy, the One Laptop Per Child project
 needed to support custom XMPP extensions (XEPs) to share information
@@ -1052,7 +1081,8 @@ for plugins was needed.
 
 \end{aosasect1}
 
-\begin{aosasect1}{A Brief Look Inside a Connection Manager}
+%% \begin{aosasect1}{A Brief Look Inside a Connection Manager}
+\begin{aosasect1}{コネクションマネージャーの内部構造の概要}
 
 Most Connection Managers are written using the C/GLib language
 binding, and a number of high-level base classes have been developed
@@ -1076,9 +1106,11 @@ object. There are also mixins to implement the
 possible to implement the old and new presence interfaces, and old and
 new text message interfaces via one set of methods.
 
-\aosafigure{../images/telepathy/cm.eps}{Example Connection Manager Architecture}{fig.telepathy.manager}
+%% \aosafigure{../images/telepathy/cm.eps}{Example Connection Manager Architecture}{fig.telepathy.manager}
+\aosafigure{../images/telepathy/cm.eps}{コネクションマネージャーのアーキテクチャの例}{fig.telepathy.manager}
 
-\begin{aosabox}{Using Mixins to Solve API Mistakes}
+%% \begin{aosabox}{Using Mixins to Solve API Mistakes}
+\begin{aosabox}{Mixinによる、APIの間違いの解決}
 
 One place where mixins have been used to solve a mistake in the
 Telepathy specification is the \code{TpPresenceMixin}.  The original
@@ -1100,7 +1132,8 @@ level of the simpler interface.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons Learned}
+%% \begin{aosasect1}{Lessons Learned}
+\begin{aosasect1}{教訓}
 
 Telepathy is an excellent example of how to build a modular, flexible
 API on top of D-Bus. It shows how you can develop an extensible,
