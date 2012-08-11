@@ -712,7 +712,7 @@ Wiki記法を使って、表エディタの中でリッチテキストの表示�
 %% SocialCalc as well.
 この機能をSocialCalcに追加したのはバージョン1.0のリリース直後のことだった。
 これは、画像やリンクの挿入そしてテキストのマークアップをすべて同じ方法でやりたいという要望に応えたものである。
-Socialtextには既にオープンソースのWikiプラットフォームが付属していたので、
+Socialtext社は既にオープンソースのWikiプラットフォームを持っていたので、
 その構文をSocialCalcで使うのはごく自然な流れだった。
 
 %% To implement this, we need a custom renderer for the
@@ -1140,150 +1140,225 @@ box-shadow: inset 0 0 0 4px red, inset 0 0 0 2px green;
 %% \begin{aosasect1}{Lessons Learned}
 \begin{aosasect1}{教訓}
 
-We delivered SocialCalc 1.0 on October 19th, 2009, the 30th
-anniversary of the initial release of VisiCalc.  The experience of
-collaborating with my colleagues at Socialtext under Dan Bricklin's
-guidance was very valuable to me, and I'd like to share some lessons
-I learned during that time.
+%% We delivered SocialCalc 1.0 on October 19th, 2009, the 30th
+%% anniversary of the initial release of VisiCalc.  The experience of
+%% collaborating with my colleagues at Socialtext under Dan Bricklin's
+%% guidance was very valuable to me, and I'd like to share some lessons
+%% I learned during that time.
+SocialCalc 1.0を公開したのは2009年10月19日。VisiCalcの最初のリリースからちょうど30年後のことだった。
+Socialtext社の同僚とともにDan Bricklinの指導のもとで作業したという経験はとても有益なものだった。
+そのときに学んだ教訓を、ここでみなさんと共有したい。
 
 %% \begin{aosasect2}{Chief Designer with a Clear Vision}
 \begin{aosasect2}{明確なビジョンを持ったチーフデザイナー}
 
-In \cite{bib:brooks:design}, Fred Brooks argues that when building
-complex systems, the conversation is much more direct if we focus on a
-coherent \emph{design concept}, rather than derivative
-representations. According to Brooks, the formulation of such a
-coherent design concept is best kept in a single person's mind:
+%% In \cite{bib:brooks:design}, Fred Brooks argues that when building
+%% complex systems, the conversation is much more direct if we focus on a
+%% coherent \emph{design concept}, rather than derivative
+%% representations. According to Brooks, the formulation of such a
+%% coherent design concept is best kept in a single person's mind:
+\cite{bib:brooks:design}において、Fred Brooksは複雑なシステムを構築するときのことについて述べている。
+一貫した\emph{設計コンセプト}に焦点を合わせるほうが、そこから派生したさまざまな表現を見るよりもより対話が直接的になるということだ。
+Brooksによると、一貫した設計コンセプトは誰かひとりで作り上げるのが一番だという。
 
 \begin{quotation}
 
+  %% \noindent
+  %% Since conceptual integrity is the most important attribute of a
+  %% great design, and since that comes from one or a few minds working
+  %% \emph{uno animo}, the wise manager boldly entrusts each design task to a
+  %% gifted chief designer.
   \noindent
-  Since conceptual integrity is the most important attribute of a
-  great design, and since that comes from one or a few minds working
-  \emph{uno animo}, the wise manager boldly entrusts each design task to a
-  gifted chief designer.
+  大規模な設計では概念の整合性が最も重要になるし、そのためには一人あるいはごく少数の人たちが
+  \emph{心をひとつ(uno animo)}にしなければならないので、よくわかっているマネージャーは
+  才能があるチーフデザイナーに設計を任せることになる。
 
 \end{quotation}
 
-In the case of SocialCalc, having Tracy Ruggles as our chief
-user-experience designer was the key for the project to converge
-toward a shared vision.  Since the underlying SocialCalc engine was
-so malleable, the temptation of feature creep was very real. Tracy's
-ability to communicate using design sketches really helped us
-present features in a way that feels intuitive to users.
+%% In the case of SocialCalc, having Tracy Ruggles as our chief
+%% user-experience designer was the key for the project to converge
+%% toward a shared vision.  Since the underlying SocialCalc engine was
+%% so malleable, the temptation of feature creep was very real. Tracy's
+%% ability to communicate using design sketches really helped us
+%% present features in a way that feels intuitive to users.
+SocialCalcの場合は、Tracy RugglesをチーフUXデザイナーとして迎えたことで
+プロジェクトのビジョンを共有できるようになった。
+元になるSocialCalcのエンジンはとても素直な作りだったので、
+場当たり式の機能追加で使いにくいものになってしまう危険性はかなり高かった。
+Tracyがデザインスケッチを使って話してくれたおかげで、
+ユーザーの直感に反するような機能を作り込んでしまわずに済んだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Wikis for Project Continuity}
 \begin{aosasect2}{プロジェクトの継続性のためのWiki}
 
-Before I joined the SocialCalc project, there was already over two
-years' worth of ongoing design and development, but I was able to
-catch up and start contributing in less than a week, simply due to
-the fact that \emph{everything is in the wiki}. From the earliest
-design notes to the most up-to-date browser support matrix, the
-entire process was chronicled in wiki pages and SocialCalc
-spreadsheets.
+%% Before I joined the SocialCalc project, there was already over two
+%% years' worth of ongoing design and development, but I was able to
+%% catch up and start contributing in less than a week, simply due to
+%% the fact that \emph{everything is in the wiki}. From the earliest
+%% design notes to the most up-to-date browser support matrix, the
+%% entire process was chronicled in wiki pages and SocialCalc
+%% spreadsheets.
+私がSocialCalcプロジェクトに合流するまでに、既に二年以上かけて設計や開発が進んでいた。
+しかし、これまでの流れを把握して実際に作業を始めるまでには一週間もかからなかった。
+というのも、\emph{すべてはWikiに書かれていた}からである。
+最初期の設計メモもあれば最新版のブラウザ対応表もあって、
+これまでの流れがすべてWikiページとSocialCalcのスプレッドシートにまとまっていたのだ。
 
-Reading through the project's workspace brought me quickly to the same
-page as others, without the usual hand-holding overhead
-typically associated with orienting a new team member.
+%% Reading through the project's workspace brought me quickly to the same
+%% page as others, without the usual hand-holding overhead
+%% typically associated with orienting a new team member.
+プロジェクトのワークスペースを読めば、すぐにその内容が頭に入るようになった。
+よくありがちな「新入りに誰か一人をつけてオリエンテーションをする」ような手間は不要だった。
 
-This would not be possible in traditional open source projects, where
-most conversation takes place on IRC and mailing lists and the wiki
-(if present) is only used for documentations and links to development
-resources.  For a newcomer, it's much more difficult to reconstruct
-context from unstructured IRC logs and mail archives.
+%% This would not be possible in traditional open source projects, where
+%% most conversation takes place on IRC and mailing lists and the wiki
+%% (if present) is only used for documentations and links to development
+%% resources.  For a newcomer, it's much more difficult to reconstruct
+%% context from unstructured IRC logs and mail archives.
+こんなこと、昔ながらのオープンソースプロジェクトではできなかっただろう。
+かつてはほとんどのやりとりをIRCやメーリングリストで済ませていたし、
+仮にWikiがあったとしてもそこにあるのはドキュメントや開発リソースへのリンクだけだった。
+新入りがチームの仲間入りをするには、体系化されていないIRCの過去ログや
+メーリングリストのアーカイブを読んで背景を共有する必要があった。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Embrace Time Zone Differences}
 \begin{aosasect2}{タイムゾーンの違いを受け入れる}
 
-David Heinemeier Hansson, creator of Ruby on Rails, once remarked on
-the benefit of distributed teams when he first joined 37signals. "The
-seven time zones between Copenhagen and Chicago actually meant that
-we got a lot done with few interruptions." With nine time zones
-between Taipei and Palo Alto, that was true for us during
-SocialCalc's development as well.
+%% David Heinemeier Hansson, creator of Ruby on Rails, once remarked on
+%% the benefit of distributed teams when he first joined 37signals. "The
+%% seven time zones between Copenhagen and Chicago actually meant that
+%% we got a lot done with few interruptions." With nine time zones
+%% between Taipei and Palo Alto, that was true for us during
+%% SocialCalc's development as well.
+Ruby on Railsの作者であるDavid Heinemeier Hanssonは、
+37signalsに合流したときのことを引き合いに出して分散チームの利点を説いたことがある。
+「コペンハーゲンとシカゴの間には7つのタイムゾーンがある。つまり、
+変な横やりが入る心配をせずに多くの作業をこなせるってことだ」。
+台北とパロアルトの間には9つのタイムゾーンがある。
+私たちがSocialCalcの開発をしているときにも同じように感じた。
 
-We often completed an entire Design-Development-QA feedback cycle
-within a 24-hour day, with each aspect taking one person's 8-hour
-work day in their local daytime.  This asynchronous style of
-collaboration compelled us to produce self-descriptive artifacts
-(design sketch, code and tests), which in turn greatly improved our
-trust in each other.
+%% We often completed an entire Design-Development-QA feedback cycle
+%% within a 24-hour day, with each aspect taking one person's 8-hour
+%% work day in their local daytime.  This asynchronous style of
+%% collaboration compelled us to produce self-descriptive artifacts
+%% (design sketch, code and tests), which in turn greatly improved our
+%% trust in each other.
+設計-開発-QAのフィードバックサイクルを24時間以内で回せることも多かった。
+各フェーズを、それぞれのタイムゾーンにおける昼間の8時間で済ませたのだ。
+このような非同期型の共同作業を進めるには、自己言及的な(それだけで意味がわかる)
+成果物(デザインスケッチやコード、そしてテスト)を作らざるを得なくなる。
+それがまた、お互いの信頼関係を高めることにつながった。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Optimize for Fun}
 \begin{aosasect2}{楽しくやろうよ}
 
-In my 2006 keynote for the CONISLI conference~\cite{bib:tang:fun}, I
-summarized my experience leading a distributed team implementing the
-Perl 6 language into a few observations.  Among them, \emph{Always
- have a Roadmap}, \emph{Forgiveness {\textgreater} Permission},
-\emph{Remove deadlocks}, \emph{Seek ideas, not consensus}, and
-\emph{Sketch ideas with code} are particularly relevant for small
-distributed teams.
+%% In my 2006 keynote for the CONISLI conference~\cite{bib:tang:fun}, I
+%% summarized my experience leading a distributed team implementing the
+%% Perl 6 language into a few observations.  Among them, \emph{Always
+%%  have a Roadmap}, \emph{Forgiveness {\textgreater} Permission},
+%% \emph{Remove deadlocks}, \emph{Seek ideas, not consensus}, and
+%% \emph{Sketch ideas with code} are particularly relevant for small
+%% distributed teams.
+2006のCONISLIカンファレンス\cite{bib:tang:fun}のキーノートで私は、
+Perl 6の実装を進める分散チームを率いた経験をまとめていくつかの所感を述べた。
+その中でも\emph{Always have a Roadmap(常にロードマップを)}、
+\emph{Forgiveness {\textgreater} Permission(許可を求めるのではなくやってから許しを請え)}、
+\emph{Remove deadlocks(デッドロックをなくせ)}、\emph{Seek ideas, not consensus(アイデアを探せ。合意を得ようとするな)}、
+そして\emph{Sketch ideas with code(アイデアのスケッチにコードをつけよ)}
+あたりは小規模な分散チームに特にかかわってくるものだ。
 
-When developing SocialCalc, we took great care in distributing
-knowledge among team members with collaborative code ownership, so
-nobody would become a critical bottleneck.
+%% When developing SocialCalc, we took great care in distributing
+%% knowledge among team members with collaborative code ownership, so
+%% nobody would become a critical bottleneck.
+SocialCalcの開発にあたって私たちが重視したのは、
+知識をチーム全体に広めること。コードを共同所有する方式にしたので、
+誰かひとりがクリティカルなボトルネックになることがなくなった。
 
-Furthermore, we pre-emptively resolved disputes by actually coding up
-alternatives to explore the design space, and were not afraid of
-replacing fully-working prototypes when a better design arrived.
+%% Furthermore, we pre-emptively resolved disputes by actually coding up
+%% alternatives to explore the design space, and were not afraid of
+%% replacing fully-working prototypes when a better design arrived.
+さらに、不和を事前に回避するために、実際に代替案のコードを書いてその設計を検証したりした。
+そして、よりよい設計が見つかった場合は、きちんと動いているプロトタイプがあったとしても
+躊躇せず新たな設計に書き換えた。
 
-These cultural traits helped us foster a sense of anticipation and
-camaraderie despite the absence of face-to-face interaction, kept
-politics to a minimum, and made working on SocialCalc a lot of fun.
+%% These cultural traits helped us foster a sense of anticipation and
+%% camaraderie despite the absence of face-to-face interaction, kept
+%% politics to a minimum, and made working on SocialCalc a lot of fun.
+こういった文化があったおかげで、先を予想する力がついたし、
+実際に顔を合わせて対話することがなくてもチームの仲間意識は育っていった。
+そしてチーム運営に関する面倒なことは最小限に抑えてSocialCalcの作業を楽しいものにしたのだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Drive Development with Story Tests}
 \begin{aosasect2}{ストーリーテスト駆動開発}
 
-Prior to joining Socialtext, I've advocated the ``interleave tests
-with the specification'' approach, as can be seen in the Perl 6
-specification\footnote{\url{http://perlcabal.org/syn/S02.html}}, where
-we annotate the language specification with the official test suite.
-However, it was Ken Pier and Matt Heusser, the QA team for SocialCalc,
-who really opened my eyes to how this can be taken to the next level,
-bringing tests to the place of \emph{executable specification}.
+%% Prior to joining Socialtext, I've advocated the ``interleave tests
+%% with the specification'' approach, as can be seen in the Perl 6
+%% specification\footnote{\url{http://perlcabal.org/syn/S02.html}}, where
+%% we annotate the language specification with the official test suite.
+%% However, it was Ken Pier and Matt Heusser, the QA team for SocialCalc,
+%% who really opened my eyes to how this can be taken to the next level,
+%% bringing tests to the place of \emph{executable specification}.
+Socialtext社に合流するまでの私は「テストと仕様策定を交互に行う」方式を支持していた。
+Perl 6の仕様\footnote{\url{http://perlcabal.org/syn/S02.html}}にも見られるように、
+言語仕様の注記として公式のテストスイートをつけていたのだ。しかし、SocialCalcの
+QAチームにいたKen PierとMatt Heusserにその考えを改めさせられた。
+もう一歩先に進んで、テスト自体を\emph{実行可能な仕様}にできると知ったのだ。
 
 % \pagebreak
 
-In Chapter 16 of \cite{bib:goucher:test}, Matt explained our
-story-test driven development process as follows:
+%% In Chapter 16 of \cite{bib:goucher:test}, Matt explained our
+%% story-test driven development process as follows:
+\cite{bib:goucher:test}の第16章で、Mattは私たちのストーリーテスト駆動開発についてこのように述べている。
 
 \begin{quotation}
 
-  The basic unit of work is a "story," which is an extremely
-  lightweight requirements document. A story contains a brief
-  description of a feature along with examples of what needs to happen
-  to consider the story completed; we call these examples "acceptance
-  tests" and describe them in plain English.
+  %% The basic unit of work is a "story," which is an extremely
+  %% lightweight requirements document. A story contains a brief
+  %% description of a feature along with examples of what needs to happen
+  %% to consider the story completed; we call these examples "acceptance
+  %% tests" and describe them in plain English.
+  作業の基本単位は「ストーリー」という、きわめて小さな要件文書です。
+  ストーリーにはフィーチャの簡単な説明と、
+  ストーリーの完成時に何を検討すべきかについての実例が含まれています。
+  これらの実例は「受け入れテスト」と呼ばれ、平易な英語で記述します。
 
-  During the initial cut of the story, the product owner makes a
-  good-faith first attempt to create acceptance tests, which are
-  augmented by developers and testers before any developer writes
-  a line of code.
+  %% During the initial cut of the story, the product owner makes a
+  %% good-faith first attempt to create acceptance tests, which are
+  %% augmented by developers and testers before any developer writes
+  %% a line of code.
+  ストーリーの開始では、まずプロダクトオーナーが叩き台としての受け入れテストを作成し、
+  それを開発者とテスターが受け取ってから、初めて開発者がコーディングを開始します。
 
 \end{quotation}
 
-These story tests are then translated into wikitests, a table-based
-specification language inspired by Ward Cunningham's FIT
-framework\footnote{\url{http://fit.c2.com/}}, which drives automated
-testing frameworks such as
+%% These story tests are then translated into wikitests, a table-based
+%% specification language inspired by Ward Cunningham's FIT
+%% framework\footnote{\url{http://fit.c2.com/}}, which drives automated
+%% testing frameworks such as
+%% \code{Test::WWW::Mechanize}\footnote{\url{http://search.cpan.org/dist/Test-WWW-Mechanize/}}
+%% and
+%% \code{Test::WWW::Selenium}\footnote{\url{http://search.cpan.org/dist/Test-WWW-Selenium/}}.
+このストーリーテストをwikitestに変換する。これはテーブルベースの仕様記述言語で、
+Ward CunninghamのFITフレームワーク\footnote{\url{http://fit.c2.com/}}
+を参考にしたものだ。wikitestは、
 \code{Test::WWW::Mechanize}\footnote{\url{http://search.cpan.org/dist/Test-WWW-Mechanize/}}
-and
-\code{Test::WWW::Selenium}\footnote{\url{http://search.cpan.org/dist/Test-WWW-Selenium/}}.
+や\code{Test::WWW::Selenium}\footnote{\url{http://search.cpan.org/dist/Test-WWW-Selenium/}}
+といったテスティングフレームワークの自動化を行う。
 
-It's hard to overstate the benefit of having story tests as a common
-language to express and validate requirements. It was instrumental in
-reducing misunderstanding, and has all but eliminated regressions from
-our monthly releases.
+%% It's hard to overstate the benefit of having story tests as a common
+%% language to express and validate requirements. It was instrumental in
+%% reducing misunderstanding, and has all but eliminated regressions from
+%% our monthly releases.
+ストーリーテストを普通の言葉で書き表して要件を検証する。そのメリットは計り知れない。
+誤解を減らす助けにもなるし、毎月のリリースでの手戻りがほとんど発生しなくなった。
 
 \end{aosasect2}
 
@@ -1292,41 +1367,60 @@ our monthly releases.
 %% \begin{aosasect2}{Open Source With CPAL}
 \begin{aosasect2}{オープンソースとCPAL}
 
-Last but not least, the open source model we chose for SocialCalc
-makes an interesting lesson in itself.
+%% Last but not least, the open source model we chose for SocialCalc
+%% makes an interesting lesson in itself.
+あとひとつ言い忘れたことが。
+SocialCalcに適用したオープンソースモデルそれ自体も興味深い教訓になった。
 
 % \vspace*{1.4ex}
 
-Socialtext created the Common Public Attribution
-License\footnote{\url{https://www.socialtext.net/open/?cpal}} for
-SocialCalc.  Based on the Mozilla Public License, CPAL is designed to
-allow the original author to require an attribution to be displayed
-on the software's user interface, and has a network-use clause that
-triggers share-alike provisions when derived work is hosted by a
-service over the network.
+%% Socialtext created the Common Public Attribution
+%% License\footnote{\url{https://www.socialtext.net/open/?cpal}} for
+%% SocialCalc.  Based on the Mozilla Public License, CPAL is designed to
+%% allow the original author to require an attribution to be displayed
+%% on the software's user interface, and has a network-use clause that
+%% triggers share-alike provisions when derived work is hosted by a
+%% service over the network.
+Socialtext社はSocialCalc用に新たなライセンス
+Common Public Attribution License\footnote{\url{https://www.socialtext.net/open/?cpal}}を作った。
+Mozilla Public Licenseを元にして作ったCPALは、ソフトウェアのユーザーインターフェイス上にクレジットを入れることを
+原作者が強要できるようにしている。また、ネットワーク上での利用を考慮した条項もあって、
+派生物をネットワーク上でホストする場合に同じ条件で配布することを要求する。
 
 % \vspace*{1.4ex}
 
-After its approval by both the Open Source
-Initiative\footnote{\url{http://opensource.org/}} and the Free
-Software Foundation\footnote{\url{http://www.fsf.org}}, we've seen prominent
-sites such as Facebook\footnote{\url{https://github.com/facebook/platform}}
-and Reddit\footnote{\url{https://github.com/reddit/reddit}} opting to release
-their platform's source code under the CPAL, which is very
-encouraging.
+%% After its approval by both the Open Source
+%% Initiative\footnote{\url{http://opensource.org/}} and the Free
+%% Software Foundation\footnote{\url{http://www.fsf.org}}, we've seen prominent
+%% sites such as Facebook\footnote{\url{https://github.com/facebook/platform}}
+%% and Reddit\footnote{\url{https://github.com/reddit/reddit}} opting to release
+%% their platform's source code under the CPAL, which is very
+%% encouraging.
+Open Source Initiative\footnote{\url{http://opensource.org/}}と
+Free Software Foundation\footnote{\url{http://www.fsf.org}}の両方の認証を得たことで、
+Facebook\footnote{\url{https://github.com/facebook/platform}}や
+Reddit\footnote{\url{https://github.com/reddit/reddit}}といった人気サイトが
+そのプラットフォームのソースコードをCPALでリリースするようになった。これはとても励みになった。
 
 % \vspace*{1.4ex}
 
-Because CPAL is a ``weak copyleft'' license, developers can freely
-combine it with either free or proprietary software, and only need to
-release modifications to SocialCalc itself.  This enabled various
-communities to adopt SocialCalc and made it more awesome.
+%% Because CPAL is a ``weak copyleft'' license, developers can freely
+%% combine it with either free or proprietary software, and only need to
+%% release modifications to SocialCalc itself.  This enabled various
+%% communities to adopt SocialCalc and made it more awesome.
+CPALは``弱いコピーレフト''なライセンスなので、他のフリーソフトウェアや
+プロプライエタリなソフトウェアとも自由に組み合わせることができる。
+唯一必要なのは、SocialCalc自体に手を入れたらそれを公開することだけだ。
+このおかげでさまざまなコミュニティからSocialCalcへの協力を得られ、よりすばらしいものになった。
 
 % \vspace*{1.4ex}
 
-There are many interesting possibilities with this open-source
-spreadsheet engine, and if you can find a way to embed SocialCalc
-into your favorite project, we'd definitely love to hear about it.
+%% There are many interesting possibilities with this open-source
+%% spreadsheet engine, and if you can find a way to embed SocialCalc
+%% into your favorite project, we'd definitely love to hear about it.
+このオープンソースのスプレッドシートエンジンにはまだまだ可能性に満ちあふれている。
+もしあなたのお気に入りのプロジェクトにSocialCalcを組み込むことができたら、
+ぜひ私たちにも教えて欲しい。
 
 \end{aosasect2}
 
