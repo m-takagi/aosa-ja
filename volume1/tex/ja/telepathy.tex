@@ -1,70 +1,119 @@
 \begin{aosachapter}{Telepathy}{s:telepathy}{Danielle Madeley}
 %% Based on EN-Revision r272
 
-Telepathy\footnote{\url{http://telepathy.freedesktop.org/}, or see the
-developers' manual at \url{http://telepathy.freedesktop.org/doc/book/}} is a
-modular framework for real-time communications that handles voice, video, text, file
-transfer, and so on. What's unique about Telepathy is not that it abstracts the
-details of various instant messaging protocols, but that it provides the idea
-of communications as a service, in much the same way that printing is a
-service, available to many applications at once. To achieve this Telepathy
-makes extensive use of the D-Bus messaging bus and a modular design.
+%% Telepathy\footnote{\url{http://telepathy.freedesktop.org/}, or see the
+%% developers' manual at \url{http://telepathy.freedesktop.org/doc/book/}} is a
+%% modular framework for real-time communications that handles voice, video, text, file
+%% transfer, and so on. What's unique about Telepathy is not that it abstracts the
+%% details of various instant messaging protocols, but that it provides the idea
+%% of communications as a service, in much the same way that printing is a
+%% service, available to many applications at once. To achieve this Telepathy
+%% makes extensive use of the D-Bus messaging bus and a modular design.
+Telepathy\footnote{\url{http://telepathy.freedesktop.org/}、あるいは
+\url{http://telepathy.freedesktop.org/doc/book/}にある開発者向けマニュアルを参照}
+はリアルタイム通信のためのモジュラーフレームワークで、音声や動画、テキスト、
+ファイル転送などを扱える。Telepathyが他のフレームワークと違う点は、
+さまざまなインスタントメッセージングプロトコルの詳細を抽象化しているというところではない。
+サービスとしての通信(communications as a service)を提供するというアイデアこそが他との違いで、
+これはちょうど印刷をサービスとして提供して多くのアプリケーションから使えるようにするという考え方と同じである。
+このアイデアを実現するために、TelepathyはD-Busメッセージングバスと
+モジュラー設計を幅広く活用した。
 
-Communications as a service is incredibly useful, because it allows us
-to break communications out of a single application. This enables lots
-of interesting use cases: being able to see a contact's
-presence in your email application; start communicating with
-her; launching a file transfer to a contact straight from your file
-browser; or providing contact-to-contact collaboration within
-applications, known in Telepathy as \emph{Tubes}.
+%% Communications as a service is incredibly useful, because it allows us
+%% to break communications out of a single application. This enables lots
+%% of interesting use cases: being able to see a contact's
+%% presence in your email application; start communicating with
+%% her; launching a file transfer to a contact straight from your file
+%% browser; or providing contact-to-contact collaboration within
+%% applications, known in Telepathy as \emph{Tubes}.
+通信をサービスとして提供できると非常に便利だ。
+単一のアプリケーションの枠を超えた通信ができるようになるからだ。
+いろんな使い道が考えられる。たとえば、メールアプリケーション上で相手が在席中であることを確認してから
+相手とのやりとりを始めたり、ファイルを転送も、ファイルブラウザから相手に直接送れたりする。
+アプリケーション内でお互いに共同作業することもできる。これはTelepathy as \emph{Tubes}
+(Telepathyを土管として使う)と呼ばれている。
 
-Telepathy was created by Robert McQueen in 2005 and since that time
-has been developed and maintained by several companies and individual
-contributors including Collabora, the company co-founded by McQueen.
+%% Telepathy was created by Robert McQueen in 2005 and since that time
+%% has been developed and maintained by several companies and individual
+%% contributors including Collabora, the company co-founded by McQueen.
+TelepathyはRobert McQueenが2005年に作ったものだ。
+それ以降はいくつかの企業や個人で開発と保守を進めている。
+その中の一社であるCollaboraは、McQueenが共同設立者の一人となっている企業である。
 
 %% \begin{aosabox}{The D-Bus Message Bus}
 \begin{aosabox}{D-Busメッセージバス}
 
-D-Bus is an asynchronous message bus for interprocess communication
-that forms the backbone of most GNU/Linux systems including the GNOME
-and KDE desktop environments.  D-Bus is a primarily a shared bus
-architecture: applications connect to a bus (identified by a socket
-address) and can either transmit a targeted message to another
-application on the bus, or broadcast a signal to all bus
-members. Applications on the bus have a bus address, similar to an IP
-address, and can claim a number of well-known names, like DNS names,
-for example \code{org.freedesktop.Telepathy.AccountManager}.  All
-processes communicate via the D-Bus daemon, which handles message
-passing, and name registration.
+%% D-Bus is an asynchronous message bus for interprocess communication
+%% that forms the backbone of most GNU/Linux systems including the GNOME
+%% and KDE desktop environments.  D-Bus is a primarily a shared bus
+%% architecture: applications connect to a bus (identified by a socket
+%% address) and can either transmit a targeted message to another
+%% application on the bus, or broadcast a signal to all bus
+%% members. Applications on the bus have a bus address, similar to an IP
+%% address, and can claim a number of well-known names, like DNS names,
+%% for example \code{org.freedesktop.Telepathy.AccountManager}.  All
+%% processes communicate via the D-Bus daemon, which handles message
+%% passing, and name registration.
+D-Busはプロセス間通信用の非同期メッセージバスで、GNOMEやKDEといったデスクトップ環境を含む
+ほとんどのGNU/Linuxシステムのバックボーンとなっている。
+D-Busはそもそも共有バスアーキテクチャだった。
+アプリケーションはソケットアドレスを指定してバスに接続し、
+ターゲットメッセージをバス上の別のアプリケーションに送信したり
+バス上の全メンバーにシグナルをブロードキャストしたりできる。
+バス上のアプリケーションは、IPアドレスと同じような感じのバスアドレスを持つ。
+また、名前を付けることもできる。DNSと同じような感じで、たとえば\code{org.freedesktop.Telepathy.AccountManager}
+のようになる。すべてのプロセスがD-Busデーモン経由で通信を行う。
+このデーモンが、メッセージの受け渡しや名前の登録を処理する。
 
-From the user's perspective, there are two buses available on every
-system.  The system bus is a bus that allows the user to communicate
-with system-wide components (printers, bluetooth, hardware management,
-etc.)  and is shared by all users on the system.  The session bus is
-unique to that user---i.e., there is a session bus per logged-in
-user---and is used for the user's applications to communicate with
-each other.  When a lot of traffic is to be transmitted over the bus,
-it's also possible for applications to create their own private bus,
-or to create a peer-to-peer, unarbitrated bus with no
-\code{dbus-daemon}.
+%% From the user's perspective, there are two buses available on every
+%% system.  The system bus is a bus that allows the user to communicate
+%% with system-wide components (printers, bluetooth, hardware management,
+%% etc.)  and is shared by all users on the system.  The session bus is
+%% unique to that user---i.e., there is a session bus per logged-in
+%% user---and is used for the user's applications to communicate with
+%% each other.  When a lot of traffic is to be transmitted over the bus,
+%% it's also possible for applications to create their own private bus,
+%% or to create a peer-to-peer, unarbitrated bus with no
+%% \code{dbus-daemon}.
+ユーザーの視点で見ると、すべてのシステムにはふたつのバスが存在する。
+ひとつはシステムバスで、これはユーザーがシステム全体のコンポーネント
+(プリンタやBluetooth、ハードウェア管理など)と通信できるようにするためのバスである。
+システム上のすべてのユーザーが共有する。
+もうひとつはセッションバスで、これは各ユーザーに固有のものである
+(つまり、システムにログインしているユーザーの数だけセッションバスが存在する)。
+これは、そのユーザーが使うアプリケーションどうしがお互いに通信するために使う。
+セッションバス上に大量のトラフィックが流れている場合は、
+アプリケーションが自前のプライベートバスを作ることもできる。
+あるいは、\code{dbus-daemon}を介さないピアツーピアのバスを作ることもできる。
 
-Several libraries implement the D-Bus protocol and can communicate
-with the D-Bus daemon, including libdbus, GDBus, QtDBus, and
-python-dbus. These libraries are responsible for sending and receiving
-D-Bus messages, marshalling types from the language's type system into
-D-Bus' type format and publishing objects on the bus.  Usually, the
-libraries also provide convenience APIs for listing connected
-applications and activatable applications, and requesting well-known
-names on the bus.  At the D-Bus level, all of these are done by making
-method calls on an object published by \code{dbus-daemon} itself.
+%% Several libraries implement the D-Bus protocol and can communicate
+%% with the D-Bus daemon, including libdbus, GDBus, QtDBus, and
+%% python-dbus. These libraries are responsible for sending and receiving
+%% D-Bus messages, marshalling types from the language's type system into
+%% D-Bus' type format and publishing objects on the bus.  Usually, the
+%% libraries also provide convenience APIs for listing connected
+%% applications and activatable applications, and requesting well-known
+%% names on the bus.  At the D-Bus level, all of these are done by making
+%% method calls on an object published by \code{dbus-daemon} itself.
+D-Busプロトコルを実装してD-Busデーモンと通信できるようにしたライブラリがいくつか存在する。
+libdbusやGDBus、QtDBus、そしてpython-dbusなどだ。これらのライブラリの役割は、
+D-Busメッセージの送受信だけでなく各言語の型システムからD-Busの型フォーマットへの変換や
+バス上のオブジェクトの公開などもある。
+これらのライブラリは、便利なAPIを提供していることも多い。
+接続中のアプリケーションの一覧やアクティベート可能なアプリケーションの一覧を表示したり、
+バス上での名前を取得したりするためのAPIである。
+D-Busレベルでは、これらすべての操作は\code{dbus-daemon}自身が公開するオブジェクト上での
+メソッド呼び出しで行う。
 
-For more information on D-Bus, see
-\url{http://www.freedesktop.org/wiki/Software/dbus}.
+%% For more information on D-Bus, see
+%% \url{http://www.freedesktop.org/wiki/Software/dbus}.
+D-Busについての詳細は\url{http://www.freedesktop.org/wiki/Software/dbus}
+を参照してほしい。
 
 \end{aosabox}
 
 %% \begin{aosasect1}{Components of the Telepathy Framework}
-\begin{aosasect1}Telepathy Frameworkのコンポーネント}
+\begin{aosasect1}{Telepathy Frameworkのコンポーネント}
 
 Telepathy is modular, with each module communicating with the others
 via a D-Bus messaging bus. Most usually via the user's session bus. This
@@ -181,7 +230,7 @@ Each interface provides methods, signals and properties that you can
 call, listen to, or request.
 
 %% \aosafigure{../images/telepathy/bus-hierarchy-conceptual.eps}{Conceptual Representation of Objects Published by a D-Bus Service}{fig.telepathy.conceptual}
-\aosafigure{../images/telepathy/bus-hierarchy-conceptual.eps}D-Busサービスが公開するオブジェクトの概念表現}{fig.telepathy.conceptual}
+\aosafigure{../images/telepathy/bus-hierarchy-conceptual.eps}{D-Busサービスが公開するオブジェクトの概念表現}{fig.telepathy.conceptual}
 
 %% \begin{aosabox}{Publishing D-Bus Objects}
 \begin{aosabox}{D-Busオブジェクトの公開}
