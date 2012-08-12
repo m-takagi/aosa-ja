@@ -115,101 +115,145 @@ D-Busについての詳細は\url{http://www.freedesktop.org/wiki/Software/dbus}
 %% \begin{aosasect1}{Components of the Telepathy Framework}
 \begin{aosasect1}{Telepathy Frameworkのコンポーネント}
 
-Telepathy is modular, with each module communicating with the others
-via a D-Bus messaging bus. Most usually via the user's session bus. This
-communication is detailed in the Telepathy
-specification\footnote{\url{http://telepathy.freedesktop.org/spec/}}.
-The components of the Telepathy framework are as shown in
-\aosafigref{fig.telepathy.components}:
+%% Telepathy is modular, with each module communicating with the others
+%% via a D-Bus messaging bus. Most usually via the user's session bus. This
+%% communication is detailed in the Telepathy
+%% specification\footnote{\url{http://telepathy.freedesktop.org/spec/}}.
+%% The components of the Telepathy framework are as shown in
+%% \aosafigref{fig.telepathy.components}:
+Telepathyはモジュラー構造で、各モジュール間の通信にはD-Busメッセージングバスを使う。
+たいていの場合は、ユーザーのセッションバスである。通信の詳細は
+Telepathyの仕様\footnote{\url{http://telepathy.freedesktop.org/spec/}}を参照して欲しい。
+Telepathyフレームワークのコンポーネント群を\aosafigref{fig.telepathy.components}に示す。
 
 \begin{aosaitemize}
 
-  \item A Connection Manager provides the interface between Telepathy
-    and the individual communication services. For instance, there is
-    a Connection Manager for XMPP, one for SIP, one for IRC, and so
-    on.  Adding support for a new protocol to Telepathy is simply a
-    matter of writing a new Connection Manager.
+  %% \item A Connection Manager provides the interface between Telepathy
+  %%   and the individual communication services. For instance, there is
+  %%   a Connection Manager for XMPP, one for SIP, one for IRC, and so
+  %%   on.  Adding support for a new protocol to Telepathy is simply a
+  %%   matter of writing a new Connection Manager.
+  \item Connection Managerは、Telepathyと個々の通信サービスとの間のインターフェイスを提供する。
+  たとえばXMPP用のConnection ManagerもあればSIP用やIRC用などのConnection Managerもあるという具合だ。
+  Telepathyで新たなプロトコルに対応しようと思ったら、単にそのプロトコル用のConnection Managerを書けばよい。
 
-  \item The Account Manager service is responsible for storing the
-    user's communications accounts and establishing a connection to
-    each account via the appropriate Connection Manager when
-    requested.
+  %% \item The Account Manager service is responsible for storing the
+  %%   user's communications accounts and establishing a connection to
+  %%   each account via the appropriate Connection Manager when
+  %%   requested.
+  \item Account Managerは、ユーザーの通信用アカウントを格納して各クライアントとの接続を確立する。
+  その際に、リクエストがあれば適切なConnection Managerを利用する。
 
-  \item The Channel Dispatcher's role is to listen for incoming
-    channels signalled by each Connection Manager and dispatch them to
-    clients that indicate their ability to handle that type of
-    channel, such as text, voice, video, file transfer, tubes.  The
-    Channel Dispatcher also provides a service so that applications,
-    most importantly applications that are not Telepathy clients, can
-    request outgoing channels and have them handled locally by the
-    appropriate client. This allows an application, such as an email
-    application, to request a text chat with a contact, and have your
-    IM client show a chat window.
+  %% \item The Channel Dispatcher's role is to listen for incoming
+  %%   channels signalled by each Connection Manager and dispatch them to
+  %%   clients that indicate their ability to handle that type of
+  %%   channel, such as text, voice, video, file transfer, tubes.  The
+  %%   Channel Dispatcher also provides a service so that applications,
+  %%   most importantly applications that are not Telepathy clients, can
+  %%   request outgoing channels and have them handled locally by the
+  %%   appropriate client. This allows an application, such as an email
+  %%   application, to request a text chat with a contact, and have your
+  %%   IM client show a chat window.
+  \item Channel Dispatcherの役割は、各Connection Managerからの入力チャネルをリスンして
+  チャネルの型(テキストや音声、動画、ファイル転送、チューブなど)に応じてそれを処理できるクライアントに振り分ける。
+  Channel Dispatcherは、それ以外にもサービスを提供する。
+  さまざまなアプリケーション、特にTelepathyクライアントではないアプリケーションから
+  出力チャネルにリクエストできるようにして、それをローカルの適切なクライアントで処理させるサービスだ。
+  これを使えば、メールソフトなどのアプリケーションがテキストチャットのリクエストを出せるようになり、
+  リクエストがあれば、IMクライアントがチャットウィンドウを表示することになる。
 
-  \item Telepathy clients handle or observe communications
-    channels. They include both user interfaces like IM and VoIP
-    clients and services such the chat logger. Clients register
-    themselves with the Channel Dispatcher, giving a list of channel
-    types they wish to handle or observe.
+  %% \item Telepathy clients handle or observe communications
+  %%   channels. They include both user interfaces like IM and VoIP
+  %%   clients and services such the chat logger. Clients register
+  %%   themselves with the Channel Dispatcher, giving a list of channel
+  %%   types they wish to handle or observe.
+  \item Telepathyクライアントは、通信チャネルを処理したり監視したりする。
+  IMやVoIPクライアントのようなユーザーインターフェイスだけでなく、チャットのロガーのようなサービスも含む。
+  クライアントは自分自身をChannel Dispatcherに登録し、自分が処理したいチャネルタイプを伝える。
 
 \end{aosaitemize}
 
-Within the current implementation of Telepathy, the Account Manager
-and the Channel Dispatcher are both provided by a single process known
-as Mission Control.
+%% Within the current implementation of Telepathy, the Account Manager
+%% and the Channel Dispatcher are both provided by a single process known
+%% as Mission Control.
+現在のTelepathyの実装では、Account ManagerとChannel Dispatcherは
+ひとつのプロセスで提供している。このプロセスのことをMission Controlと呼ぶ。
 
 %% \aosafigureTop[250pt]{../images/telepathy/telepathy-components.eps}{Example Telepathy Components}{fig.telepathy.components}
 \aosafigureTop[250pt]{../images/telepathy/telepathy-components.eps}{Telepathyコンポーネントの例}{fig.telepathy.components}
 
-This modular design was based on Doug McIlroy's philosophy, ``Write
-programs that do one thing and do it well,'' and has several important
-advantages:
+%% This modular design was based on Doug McIlroy's philosophy, ``Write
+%% programs that do one thing and do it well,'' and has several important
+%% advantages:
+このモジュラー設計は、Doug McIlroyの哲学「一つのことを行い、またそれをうまくやるプログラムを書け」
+に基づいたもので、次のような利点がある。
 
 \pagebreak
 
 \begin{aosadescription}
 
-  \item{Robustness:} a fault in one component won't crash the
-  entire service.
+  %% \item{Robustness:} a fault in one component won't crash the
+  %% entire service.
+  \item{ロバストネス:}どれかひとつのコンポーネントに障害が発生しても、サービス全体がクラッシュすることはない。
 
-  \item{Ease of development:} components can be replaced within
-  a running system without affecting others. It's possible to test a
-  development version of one module against another known to be
-  good.
+  %% \item{Ease of development:} components can be replaced within
+  %% a running system without affecting others. It's possible to test a
+  %% development version of one module against another known to be
+  %% good.
+  \item{開発のしやすさ:}稼働中のシステムのコンポーネントを差し替えたとしても、他の箇所には影響しない。
+  開発版のモジュールを、動作検証済みの他のモジュールと組み合わせてテストすることもできる。
 
-  \item{Language independence:} components can be written in any
-  language that has a D-Bus binding. If the best
-  implementation of a given communications protocol is in a certain
-  language, you are able to write your Connection Manager in that
-  language, and still have it available to all Telepathy clients.
-  Similarly, if you wish to develop your user interface in a certain
-  language, you have access to all available protocols.
+  %% \item{Language independence:} components can be written in any
+  %% language that has a D-Bus binding. If the best
+  %% implementation of a given communications protocol is in a certain
+  %% language, you are able to write your Connection Manager in that
+  %% language, and still have it available to all Telepathy clients.
+  %% Similarly, if you wish to develop your user interface in a certain
+  %% language, you have access to all available protocols.
+  \item{言語非依存:}コンポーネントは、D-Busバインディングがありさえすればどんな言語でも書ける。
+  もし何かの通信プロトコル用の実装としてすぐれたものが何かの言語で用意されているのなら、
+  Connection Managerをその言語で書けばよい。他の言語で書いたものも含め、すべてのTelepathyクライアントからそれを使うことができる。
+  同様に、何か特定の言語でユーザーインターフェイスを作れば、そこからすべてのプロトコルにアクセスできる。
 
-  \item{License independence:} components can be under different
-  software licenses that would be incompatible if everything was
-  running as one process.
+  %% \item{License independence:} components can be under different
+  %% software licenses that would be incompatible if everything was
+  %% running as one process.
+  \item{ライセンス非依存:}自分で作ったコンポーネントを、まったく別のライセンスで公開することもできる。
+  すべてがひとつのプロセスの場合だと非互換になってしまうようなライセンスでも、だいじょうぶだ。
 
-  \item{Interface independence:} multiple user interfaces can be
-  developed on top of the same Telepathy components. This allows native
-  interfaces for desktop environments and hardware devices
-  (e.g., GNOME, KDE, Meego, Sugar).
+  %% \item{Interface independence:} multiple user interfaces can be
+  %% developed on top of the same Telepathy components. This allows native
+  %% interfaces for desktop environments and hardware devices
+  %% (e.g., GNOME, KDE, Meego, Sugar).
+  \item{インターフェイス非依存:}同じTelepathyコンポーネントに対して複数のユーザーインターフェイスを開発できる。
+  デスクトップ環境やハードウェアデバイス(GNOMEやKDE、Meego、Sugarなど)ごとにネイティブインターフェイスを用意できるということだ。
 
-  \item{Security:} Components run in separate address spaces and
-  with very limited privileges.  For example, a typical
-  Connection Manager only needs access to the network and the D-Bus
-  session bus, making it possible to use something like SELinux to
-  limit what a component can access.
+  %% \item{Security:} Components run in separate address spaces and
+  %% with very limited privileges.  For example, a typical
+  %% Connection Manager only needs access to the network and the D-Bus
+  %% session bus, making it possible to use something like SELinux to
+  %% limit what a component can access.
+  \item{セキュリティ:}コンポーネントは個別のアドレス空間で動作し、限られた権限しか持たない。
+  たとえば、一般的なConnection Managerが必要な権限はネットワークへのアクセスと
+  D-Busセッションバスへのアクセスだけである。それを実現するために、SELinux風の仕組みを使って
+  そのコンポーネントがアクセスできる範囲を制限している。
 
 \end{aosadescription}
 
-The Connection Manager manages a number of Connections, where each
-Connection represents a logical connection to a communications
-service. There is one Connection per configured account.
-A Connection will contain multiple Channels. Channels are the
-mechanism through which communications are carried out. A channel
-might be an IM conversation, voice or video call, file transfer or
-some other stateful operation.  Connections and channels are discussed
-in detail in \aosasecref{sec.telepathy.ccc}.
+%% The Connection Manager manages a number of Connections, where each
+%% Connection represents a logical connection to a communications
+%% service. There is one Connection per configured account.
+%% A Connection will contain multiple Channels. Channels are the
+%% mechanism through which communications are carried out. A channel
+%% might be an IM conversation, voice or video call, file transfer or
+%% some other stateful operation.  Connections and channels are discussed
+%% in detail in \aosasecref{sec.telepathy.ccc}.
+Connection Managerはコネクションを管理し、各コネクションは通信サービスへの論理的な接続を表す。
+設定済みのアカウントごとにひとつのコネクションが存在する。
+ひとつのコネクションには複数のチャネルが含まれる。
+チャネルとは、通信を運ぶ仕組みである。
+チャネルは、IMの会話や音声通信、映像通信、ファイル転送などのステートフルな操作となる。
+コネクションとチャネルの詳細については\aosasecref{sec.telepathy.ccc}で説明する。
 
 \end{aosasect1}
 
