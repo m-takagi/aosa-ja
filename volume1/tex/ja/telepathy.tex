@@ -260,18 +260,28 @@ Connection Managerはコネクションを管理し、各コネクションは�
 %% \begin{aosasect1}{How Telepathy uses D-Bus}
 \begin{aosasect1}{TelepathyによるD-Busの利用法}
 
-Telepathy components communicate via a D-Bus messaging bus, which is
-usually the user's session bus.  D-Bus provides features common to
-many IPC systems: each service publishes objects which have
-a strictly namespaced object path, like
-\code{/org/freedesktop/Telepathy/AccountManager}\footnote{From here
-on, \code{/org/freedesktop/Telepathy/} and
-\code{org.freedesktop.Telepathy} will be abbreviated to \code{ofdT}
-to save space.}.  Each object implements a number of
-interfaces. Again strictly namespaced, these have forms like
-\code{org.freedesktop.DBus.Properties} and \code{ofdT.Connection}.
-Each interface provides methods, signals and properties that you can
-call, listen to, or request.
+%% Telepathy components communicate via a D-Bus messaging bus, which is
+%% usually the user's session bus.  D-Bus provides features common to
+%% many IPC systems: each service publishes objects which have
+%% a strictly namespaced object path, like
+%% \code{/org/freedesktop/Telepathy/AccountManager}\footnote{From here
+%% on, \code{/org/freedesktop/Telepathy/} and
+%% \code{org.freedesktop.Telepathy} will be abbreviated to \code{ofdT}
+%% to save space.}.  Each object implements a number of
+%% interfaces. Again strictly namespaced, these have forms like
+%% \code{org.freedesktop.DBus.Properties} and \code{ofdT.Connection}.
+%% Each interface provides methods, signals and properties that you can
+%% call, listen to, or request.
+TelepathyコンポーネントはD-Busメッセージングバスを使って通信する。通常はユーザーのセッションバスだ。
+D-Busが提供する機能は、他のプロセス間通信システムにもよくあるものだ。
+各サービスはオブジェクトを公開し、それぞれがきちんと名前空間に分けられたオブジェクトパスを持つ。
+たとえば\code{/org/freedesktop/Telepathy/AccountManager}
+\footnote{これ以降は、\code{/org/freedesktop/Telepathy/}や\code{org.freedesktop.Telepathy}を\code{ofdT}と略記する。}
+のようなものだ。各オブジェクトはさまざまなインターフェイスを実装する。
+これもまたきちんと名前空間に分かれており、
+\code{org.freedesktop.DBus.Properties}や\code{ofdT.Connection}
+のような形式になる。それぞれのインターフェイスが、メソッドやシグナルそしてプロパティを提供する。
+これらを呼んだりリスンしたりリクエストしたりするわけだ。
 
 %% \aosafigure{../images/telepathy/bus-hierarchy-conceptual.eps}{Conceptual Representation of Objects Published by a D-Bus Service}{fig.telepathy.conceptual}
 \aosafigure{../images/telepathy/bus-hierarchy-conceptual.eps}{D-Busサービスが公開するオブジェクトの概念表現}{fig.telepathy.conceptual}
@@ -279,127 +289,206 @@ call, listen to, or request.
 %% \begin{aosabox}{Publishing D-Bus Objects}
 \begin{aosabox}{D-Busオブジェクトの公開}
 
-Publishing D-Bus objects is handled entirely by the D-Bus library
-being used. In effect it is a mapping from a D-Bus object path to the
-software object implementing those interfaces.  The paths of objects
-being published by a service are exposed by the optional
-\code{org.freedesktop.DBus.Introspectable} interface.
+%% Publishing D-Bus objects is handled entirely by the D-Bus library
+%% being used. In effect it is a mapping from a D-Bus object path to the
+%% software object implementing those interfaces.  The paths of objects
+%% being published by a service are exposed by the optional
+%% \code{org.freedesktop.DBus.Introspectable} interface.
+D-Busオブジェクトの公開は、使っているD-Busライブラリが全体を担当する。
+実際は、D-Busオブジェクトのパスとそのインターフェイスを実装するソフトウェアオブジェクトとのマッピングである。
+サービスが公開するオブジェクトのパスは、オプションの\code{org.freedesktop.DBus.Introspectable}
+インターフェイスで公開する。
 
-When a service receives an incoming method call with a given
-destination path (e.g., \code{/ofdT/AccountManager}), the D-Bus
-library is responsible for locating the software object providing that
-D-Bus object and then making the appropriate method call on that
-object.
+%% When a service receives an incoming method call with a given
+%% destination path (e.g., \code{/ofdT/AccountManager}), the D-Bus
+%% library is responsible for locating the software object providing that
+%% D-Bus object and then making the appropriate method call on that
+%% object.
+あるサービスが、指定したパス(\code{/ofdT/AccountManager}など)からのメソッド呼び出しを受け取ると、
+D-BusライブラリがそのD-Busオブジェクトを提供するソフトウェアオブジェクトの場所を探し、それに対して適切なメソッド呼び出しを行う。
 
 \end{aosabox}
 
-The interfaces, methods, signal and properties provided by Telepathy
-are detailed in an XML-based D-Bus IDL that has been expanded to
-include more information.  The specification can be parsed to generate
-documentation and language bindings.
+%% The interfaces, methods, signal and properties provided by Telepathy
+%% are detailed in an XML-based D-Bus IDL that has been expanded to
+%% include more information.  The specification can be parsed to generate
+%% documentation and language bindings.
+Telepathyが提供するインターフェイスやメソッド、シグナル、そしてプロパティは
+XMLベースのD-Bus IDLで詳述される。それだけでなく、ここにはより詳細な情報も含まれている。
+この仕様をパースして、ドキュメントを生成したり言語バインディングを生成したりできる。
 
-Telepathy services publish a number of objects onto the bus. Mission
-Control publishes objects for the Account Manager and Channel
-Dispatcher so that their services can be accessed. Clients publish a
-Client object that can be accessed by the Channel Dispatcher. Finally,
-Connection Managers publish a number of objects: a service object that
-can be used by the Account Manager to request new connections, an
-object per open connection, and an object per open channel.
+%% Telepathy services publish a number of objects onto the bus. Mission
+%% Control publishes objects for the Account Manager and Channel
+%% Dispatcher so that their services can be accessed. Clients publish a
+%% Client object that can be accessed by the Channel Dispatcher. Finally,
+%% Connection Managers publish a number of objects: a service object that
+%% can be used by the Account Manager to request new connections, an
+%% object per open connection, and an object per open channel.
+Telepathyサービスは、さまざまなオブジェクトをバス上に公開する。
+Mission Controlが公開するのはAccount ManagerやChannel Dispatcher用のオブジェクトで、
+これを使えばそれぞれのサービスにアクセスできるようになる。
+クライアントが公開するのはClientオブジェクトで、これを使えばChannel Dispatcher
+からクライアントにアクセスできるようになる。
+最後に、Connection Managersもいくつかのオブジェクトを公開する。
+Account Managerが新たなコネクションを要求するために使うサービスオブジェクトや
+各コネクションに対応するオブジェクト、そしてチャネルに対応するオブジェクトなどだ。
 
-Although D-Bus objects do not have a type (only interfaces), Telepathy
-simulates types several ways. The object's path tells us whether the
-object is a connection, channel, client, and so on, though generally
-you already know this when you request a proxy to it. Each object
-implements the base interface for that type, e.g.,
-\code{ofdT.Connection} or \code{ofdT.Channel}.  For channels this is
-sort of like an abstract base class.  Channel objects then have a
-concrete class defining their channel type.  Again, this is
-represented by a D-Bus interface. The channel type can be learned by
-reading the \code{ChannelType} property on the Channel interface.
+%% Although D-Bus objects do not have a type (only interfaces), Telepathy
+%% simulates types several ways. The object's path tells us whether the
+%% object is a connection, channel, client, and so on, though generally
+%% you already know this when you request a proxy to it. Each object
+%% implements the base interface for that type, e.g.,
+%% \code{ofdT.Connection} or \code{ofdT.Channel}.  For channels this is
+%% sort of like an abstract base class.  Channel objects then have a
+%% concrete class defining their channel type.  Again, this is
+%% represented by a D-Bus interface. The channel type can be learned by
+%% reading the \code{ChannelType} property on the Channel interface.
+D-Busバスオブジェクトは型を持たない(インターフェイスしか持たない)が、
+Telepathyはいくつかの方法で型をシミュレートする。
+オブジェクトのパスを見れば、そのオブジェクトがコネクションなのかチャネルなのかクライアントなのかといったことはわかる。
+しかし普通は、プロキシにオブジェクトをリクエストした時点で既にそのパスを知っているはずだ。
+各オブジェクトは、その型に合わせた基底インターフェイスを実装している。\code{ofdT.Connection}や\code{ofdT.Channel}
+といったものだ。チャネルにとっては、これは一種の抽象基底クラスのようなものになる。
+Channelオブジェクトはそのチャネルの型を定義する具象クラスを持つことになる。
+改めて言うが、これはD-Busのインターフェイスで表されるものだ。
+チャネルの型について知るには、Channelインターフェイスの\code{ChannelType}プロパティを読めばよい。
 
-Finally, each object implements a number of optional interfaces
-(unsurprisingly also represented as D-Bus interfaces), which depend on
-the capabilities of the protocol and the Connection Manager.  The
-interfaces available on a given object are available via the
-\code{Interfaces} property on the object's base class.
+%% Finally, each object implements a number of optional interfaces
+%% (unsurprisingly also represented as D-Bus interfaces), which depend on
+%% the capabilities of the protocol and the Connection Manager.  The
+%% interfaces available on a given object are available via the
+%% \code{Interfaces} property on the object's base class.
+最後にもうひとつ。各オブジェクトはオプションのインターフェイスも実装している
+(言うまでもなく、これらもまたD-Busのインターフェイスだ)。
+これらは、そのプロトコルやConnection Managerの機能に依存する。
+あるオブジェクトで使えるインターフェイスを知るには、
+そのオブジェクトの基底クラスの\code{Interfaces}プロパティを調べればよい。
 
-For Connection objects of type \code{ofdT.Connection}, the optional
-interfaces have names like \code{ofdT.Connection.Interface.Avatars}
-(if the protocol has a concept of avatars),
-\path{odfT.Connection.Interface.ContactList} (if the protocol provides
-a contact roster---not all do) and
-\path{odfT.Connection.Interface.Location} (if a protocol provides
-geolocation information).  For Channel objects, of type
-\path{ofdT.Channel}, the concrete classes have interface names of the
-form \path{ofdT.Channel.Type.Text}, \path{odfT.Channel.Type.Call} and
-\path{odfT.Channel.Type.FileTransfer}. Like Connections, optional
-interface have names likes \path{odfT.Channel.Interface.Messages} (if
-this channel can send and receive text messages) and
-\path{odfT.Channel.Interface.Group} (if this channel is to a group
-containing multiple contacts, e.g., a multi-user chat).  So, for
-example, a text channel implements at least the \path{ofdT.Channel},
-\path{ofdT.Channel.Type.Text} and \path{Channel.Interface.Messages}
-interfaces.  If it's a multi-user chat, it will also implement
-\path{odfT.Channel.Interface.Group}.
+%% For Connection objects of type \code{ofdT.Connection}, the optional
+%% interfaces have names like \code{ofdT.Connection.Interface.Avatars}
+%% (if the protocol has a concept of avatars),
+%% \path{odfT.Connection.Interface.ContactList} (if the protocol provides
+%% a contact roster---not all do) and
+%% \path{odfT.Connection.Interface.Location} (if a protocol provides
+%% geolocation information).  For Channel objects, of type
+%% \path{ofdT.Channel}, the concrete classes have interface names of the
+%% form \path{ofdT.Channel.Type.Text}, \path{odfT.Channel.Type.Call} and
+%% \path{odfT.Channel.Type.FileTransfer}. Like Connections, optional
+%% interface have names likes \path{odfT.Channel.Interface.Messages} (if
+%% this channel can send and receive text messages) and
+%% \path{odfT.Channel.Interface.Group} (if this channel is to a group
+%% containing multiple contacts, e.g., a multi-user chat).  So, for
+%% example, a text channel implements at least the \path{ofdT.Channel},
+%% \path{ofdT.Channel.Type.Text} and \path{Channel.Interface.Messages}
+%% interfaces.  If it's a multi-user chat, it will also implement
+%% \path{odfT.Channel.Interface.Group}.
+\code{ofdT.Connection}型のConnectionオブジェクトの場合、オプションのインターフェイスの名前は
+\code{ofdT.Connection.Interface.Avatars} (アバターの概念を持つプロトコルの場合)や
+\path{odfT.Connection.Interface.ContactList} (連絡先名簿を提供するプロトコルの場合---そうでないものもある)
+そして\path{odfT.Connection.Interface.Location} (位置情報を提供するプロ所ルの場合)となる。
+\path{ofdT.Channel}型のChannelオブジェクトの場合は、具象クラスが持つインターフェイスの名前は
+\path{ofdT.Channel.Type.Text}や\path{odfT.Channel.Type.Call}そして\path{odfT.Channel.Type.FileTransfer}
+といった形式になる。コネクションの場合と同様、オプションのインターフェイスの名前は
+\path{odfT.Channel.Interface.Messages} (このチャネルでテキストメッセージの送受信ができる場合)や
+\path{odfT.Channel.Interface.Group} (このチャネルの相手が複数の連絡先を含むグループ、たとえばマルチユーザーチャットである場合)
+のようになる。つまり、たとえばテキストチャネルの場合は、少なくとも
+\path{ofdT.Channel}と\path{ofdT.Channel.Type.Text}そして\path{Channel.Interface.Messages}
+インターフェイスを実装していることになる。もしそのチャネルがマルチユーザーチャットであるなら、
+さらに\path{odfT.Channel.Interface.Group}も実装しているわけだ。
 
 %% \begin{aosabox}{Why an Interfaces Property and not D-Bus Introspection?}
-\begin{aosabox}{なぜインターフェイスプロパティであってD-Busイントロスペクションではないのか}
+\begin{aosabox}{D-BusイントロスペクションがあるのになぜInterfacesプロパティなのか}
 
-You might wonder why each base class implements an \code{Interfaces}
-property, instead of relying on D-Bus' introspection capabilities to
-tell us what interfaces are available.  The answer is that different
-channel and connection objects may offer different interfaces to each
-other, depending on the capabilities of the channel or connection, but
-that most of the implementations of D-Bus introspection assume that
-all objects of the same object class will have the same interfaces.
-For example, in \code{telepathy-glib}, the D-Bus interfaces listed by
-D-Bus introspection are retrieved from the object interfaces a class
-implements, which is statically defined at compile time.  We work
-around this by having D-Bus introspection provide data for all the
-interfaces that could exist on an object, and use the
-\code{Interfaces} property to indicate which ones actually do.
+%% You might wonder why each base class implements an \code{Interfaces}
+%% property, instead of relying on D-Bus' introspection capabilities to
+%% tell us what interfaces are available.  The answer is that different
+%% channel and connection objects may offer different interfaces to each
+%% other, depending on the capabilities of the channel or connection, but
+%% that most of the implementations of D-Bus introspection assume that
+%% all objects of the same object class will have the same interfaces.
+%% For example, in \code{telepathy-glib}, the D-Bus interfaces listed by
+%% D-Bus introspection are retrieved from the object interfaces a class
+%% implements, which is statically defined at compile time.  We work
+%% around this by having D-Bus introspection provide data for all the
+%% interfaces that could exist on an object, and use the
+%% \code{Interfaces} property to indicate which ones actually do.
+なぜわざわざ各基底クラスが\code{Interfaces}プロパティを実装しているのだろう？
+D-Busのイントロスペクション機能を使えばどんなインターフェイスがあるかはわかるはずなのに。
+その理由を説明する。
+さまざまなチャネルやコネクションオブジェクトはそれぞれ異なるインターフェイスを持つ可能性があり、
+それはチャネルやコネクションの機能に依存している。
+しかしD-Busのイントロスペクション機能の大半は、同じクラスのオブジェクトはすべて
+同じインターフェイスを持つことを前提としている。
+たとえば\code{telepathy-glib}では、D-Busのイントロスペクションが列挙する
+D-Busインターフェイスはそのクラスが実装するオブジェクトのインターフェイスから取得したものであり、
+コンパイル時に静的に決まるものである。
+私たちはこの問題を解決するために、
+D-Busのイントロスペクションがオブジェクトに存在しないものも含めてすべてのインターフェイスのデータを提供させるようにした。
+そして、\code{Interfaces}プロパティを使って実際に動くものがどれなのかを示すようにした。
 
 \end{aosabox}
 
-Although D-Bus itself provides no sanity checking that connection
-objects only have connection-related interfaces and so forth (since
-D-Bus has no concept of types, only arbitrarily named interfaces), we
-can use the information contained within the Telepathy specification
-to provide sanity checking within the Telepathy language bindings.
+%% Although D-Bus itself provides no sanity checking that connection
+%% objects only have connection-related interfaces and so forth (since
+%% D-Bus has no concept of types, only arbitrarily named interfaces), we
+%% can use the information contained within the Telepathy specification
+%% to provide sanity checking within the Telepathy language bindings.
+D-Bus自体には、コネクションオブジェクトがコネクション関係のインターフェイスだけしか持っていないことを確認する手段がない
+(というのもD-Busには型という概念がなく、任意の名前のインターフェイスがあるだけだからである)。
+しかし、Telepathyの仕様に含まれる情報を使えば、Telepathyの言語バインディングの中で
+そのチェックはできる。
 
 %% \begin{aosabox}{Why and How the Specification IDL was Expanded}
 \begin{aosabox}{なぜ、そしてどうやってSpecification IDLを展開するのか}
 
-The existing D-Bus specification IDL defines the names, arguments,
-access restrictions and D-Bus type signatures of methods, properties
-and signals. It provides no support for documentation, binding hints
-or named types.
+%% The existing D-Bus specification IDL defines the names, arguments,
+%% access restrictions and D-Bus type signatures of methods, properties
+%% and signals. It provides no support for documentation, binding hints
+%% or named types.
+既存のD-Bus specification IDLで定義されているのは名前や引数そしてアクセス制御の他には
+メソッドやプロパティそしてシグナルのD-Bus型シグネチャである。
+ドキュメンテーションやバインドヒントあるいは型の名前などには対応していない。
 
-To resolve these limitations, a new XML namespace was added to provide
-the required information. This namespace was designed to be generic so
-that it could be used by other D-Bus APIs. New elements were added to
-include inline documentation, rationales, introduction and deprecation
-versions and potential exceptions from methods.
+%% To resolve these limitations, a new XML namespace was added to provide
+%% the required information. This namespace was designed to be generic so
+%% that it could be used by other D-Bus APIs. New elements were added to
+%% include inline documentation, rationales, introduction and deprecation
+%% versions and potential exceptions from methods.
+この制約を解決するために、新たなXML名前空間を追加して必要な情報を提供することにした。
+この名前空間は汎用的に作られている。他のD-Bus APIからも使えるようにするためだ。
+新たに追加された要素を使えば、インラインドキュメントや論理的な意味、
+簡単な解説、廃止予定のバージョン、発生しうる例外などといった情報をメソッドに含められるようになる。
 
-D-Bus type signatures are the low-level type notation of what is
-serialized over the bus. A D-Bus type signature may look like
-\code{(ii)} (which is a structure containing two int32s), or it may be
-more complex.  For example, \code{a\{sa(usuu)\}}, is a map from string
-to an array of structures containing uint32, string, uint32, uint32
-(\aosafigref{fig.telepathy.dbustypes}).  These types, while
-descriptive of the data format, provide no semantic meaning to the
-information contained in the type.
+%% D-Bus type signatures are the low-level type notation of what is
+%% serialized over the bus. A D-Bus type signature may look like
+%% \code{(ii)} (which is a structure containing two int32s), or it may be
+%% more complex.  For example, \code{a\{sa(usuu)\}}, is a map from string
+%% to an array of structures containing uint32, string, uint32, uint32
+%% (\aosafigref{fig.telepathy.dbustypes}).  These types, while
+%% descriptive of the data format, provide no semantic meaning to the
+%% information contained in the type.
+D-Busの型シグネチャは低レベルの型記法であり、バス上で何がシリアライズされるのかを表している。
+D-Busの型シグネチャは\code{(ii)} (これは、ふたつのint32を含む構造体を表す)
+のようなものだったり、あるいはもう少し複雑なものだったりする。
+たとえば\code{a\{sa(usuu)\}}は文字列から構造体の配列へのマップで、
+その構造にはuint32、string、uint32そしてuint32が含まれる(\aosafigref{fig.telepathy.dbustypes})。
+これらの型情報にはデータフォーマットについての説明しか含まれておらず、
+その型に含まれる情報の意味はまったくわからない。
 
-In an effort to provide semantic clarity for programmers and
-strengthen the typing for language bindings, new elements were added
-to name simple types, structs, maps, enums, and flags, providing their
-type signature, as well as documentation.  Elements were also added in
-order to simulate object inheritance for D-Bus objects.
+%% In an effort to provide semantic clarity for programmers and
+%% strengthen the typing for language bindings, new elements were added
+%% to name simple types, structs, maps, enums, and flags, providing their
+%% type signature, as well as documentation.  Elements were also added in
+%% order to simulate object inheritance for D-Bus objects.
+プログラマーにとっての意味を明確にして言語バインディングの型付けを強化するために、
+新たな要素が追加された。単純な型や構造体、マップ、列挙型、フラグなどについて、
+その型シグネチャだけでなくドキュメンテーションも提供できるようにしたのだ。
+また、D-Busオブジェクトでのオブジェクト継承をシミュレートするための要素も追加された。
 
 \end{aosabox}
 
 %% \aosafigure[250pt]{../images/telepathy/telepathy-types-unpacked.eps}{D-Bus Types (ii) and a\{sa(usuu)\}}{fig.telepathy.dbustypes}
-\aosafigure[250pt]{../images/telepathy/telepathy-types-unpacked.eps}{D-Bus Types (ii) and a\{sa(usuu)\}}{fig.telepathy.dbustypes}
+\aosafigure[250pt]{../images/telepathy/telepathy-types-unpacked.eps}{D-Busの(ii)型およびa\{sa(usuu)\}型}{fig.telepathy.dbustypes}
 
 %% \begin{aosasect2}{Handles}
 \begin{aosasect2}{ハンドル}
