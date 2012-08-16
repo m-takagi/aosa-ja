@@ -493,69 +493,105 @@ D-Busの型シグネチャは\code{(ii)} (これは、ふたつのint32を含む
 %% \begin{aosasect2}{Handles}
 \begin{aosasect2}{ハンドル}
 
-Handles are used in Telepathy to represent identifiers (e.g., contacts
-and room names). They are an unsigned integer value assigned by the
-connection manager, such that the tuple (connection, handle type,
-handle) uniquely refers to a given contact or room.
+%% Handles are used in Telepathy to represent identifiers (e.g., contacts
+%% and room names). They are an unsigned integer value assigned by the
+%% connection manager, such that the tuple (connection, handle type,
+%% handle) uniquely refers to a given contact or room.
+ハンドルは、Telepathyの中での識別子(連絡先やルーム名など)として利用される。
+Connection Managerが割り当てる符号なし整数値で、タプル
+(connection, handle type, handle)で連絡先やルームを一意に特定できる。
 
 \pagebreak
 
-Because different communications protocols normalize identifiers in
-different ways (e.g., case sensitivity, resources), handles provide a
-way for clients to determine if two identifiers are the same. They can
-request the handle for two different identifiers, and if the handle
-numbers match, then the identifiers refer to the same contact or room.
+%% Because different communications protocols normalize identifiers in
+%% different ways (e.g., case sensitivity, resources), handles provide a
+%% way for clients to determine if two identifiers are the same. They can
+%% request the handle for two different identifiers, and if the handle
+%% numbers match, then the identifiers refer to the same contact or room.
+通信プロトコルによって識別子の正規化の方法が違う(大文字小文字の区別やリソースの扱いなど)
+ので、クライアント側からふたつの識別子が一致するかどうかを知る方法をハンドルが提供する。
+異なるふたつの識別子のハンドルをリクエストして、もし両方のハンドル番号が一致していれば
+そのふたつの識別子は同じ連絡先あるいはルームを指していることになる。
 
-Identifier normalization rules are different for each protocol, so it
-is a mistake for clients to compare identifier strings to compare
-identifiers. For example, \code{escher@tuxedo.cat/bed} and
-\code{escher@tuxedo.cat/litterbox} are two instances of the same
-contact (\code{escher@tuxedo.cat}) in the XMPP protocol, and therefore
-have the same handle. It is possible for clients to request channels
-by either identifier or handle, but they should only ever use handles
-for comparison.
+%% Identifier normalization rules are different for each protocol, so it
+%% is a mistake for clients to compare identifier strings to compare
+%% identifiers. For example, \code{escher@tuxedo.cat/bed} and
+%% \code{escher@tuxedo.cat/litterbox} are two instances of the same
+%% contact (\code{escher@tuxedo.cat}) in the XMPP protocol, and therefore
+%% have the same handle. It is possible for clients to request channels
+%% by either identifier or handle, but they should only ever use handles
+%% for comparison.
+プロトコルによって識別子の正規化ルールは違うのだから、
+クライアント側で識別子の文字列を使った比較をしても無意味だ。
+たとえば\code{escher@tuxedo.cat/bed}と\code{escher@tuxedo.cat/litterbox}
+は、XMPPプロトコルではどちらも同じ連絡先(\code{escher@tuxedo.cat})
+を表すふたつのインスタンスとなる。つまりこれらふたつのハンドルは一致する。
+クライアント側からは、チャネルに対して識別子を要求することもできるし
+ハンドルを要求することもできる。しかし、
+比較に使えるのはハンドルだけであることに注意。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Discovering Telepathy Services}
 \begin{aosasect2}{Telepathyサービスの検出}
 
-Some services, such as the Account Manager and the Channel Dispatcher,
-which always exist, have well known names that are defined in the
-Telepathy specification. However, the names of Connection Managers and
-clients are not well-known, and must be discovered.
+%% Some services, such as the Account Manager and the Channel Dispatcher,
+%% which always exist, have well known names that are defined in the
+%% Telepathy specification. However, the names of Connection Managers and
+%% clients are not well-known, and must be discovered.
+Account ManagerやChannel Dispatcherなど、サービスによっては常に存在するものもあり、
+これらについてはTelepathyの仕様で名前が定義されている。しかし
+Connection Managersやクライアントには既知の名前がないので、使うときにはサービスを探す必要がある。
 
-There's no service in Telepathy responsible for the registration of
-running Connection Managers and Clients. Instead, interested parties
-listen on the D-Bus for the announcement of a new service.  The D-Bus
-bus daemon will emit a signal whenever a new named D-Bus service
-appears on the bus. The names of Clients and Connection Managers begin
-with known prefixes, defined by the specification, and new names can
-be matched against these.
+%% There's no service in Telepathy responsible for the registration of
+%% running Connection Managers and Clients. Instead, interested parties
+%% listen on the D-Bus for the announcement of a new service.  The D-Bus
+%% bus daemon will emit a signal whenever a new named D-Bus service
+%% appears on the bus. The names of Clients and Connection Managers begin
+%% with known prefixes, defined by the specification, and new names can
+%% be matched against these.
+Telepathyには、稼働中のConnection Managersやクライアントの登録を受け持つサービスはない。
+その代わりに、D-Bus上に新たなサービスが現れたときのアナウンスを聞いて調べることになる。
+D-Busバスデーモンは、新たなD-Busサービスがバス上に登場するたびにシグナルを発行する。
+クライアントやConnection Managersの名前は使用で定義されたプレフィックスから始まるので、
+新たな名前をこのプレフィックスとマッチさせて調べることができる。
 
-The advantage of this design is that it's completely stateless. When a
-Telepathy component is starting up, it can ask the bus daemon (which
-has a canonical list, based on its open connections) what services are
-currently running.  For instance, if the Account Manager crashes, it
-can look to see what connections are running, and reassociate those
-with its account objects.
+%% The advantage of this design is that it's completely stateless. When a
+%% Telepathy component is starting up, it can ask the bus daemon (which
+%% has a canonical list, based on its open connections) what services are
+%% currently running.  For instance, if the Account Manager crashes, it
+%% can look to see what connections are running, and reassociate those
+%% with its account objects.
+この方式のメリットは、完全にステートレスであることだ。
+Telepathyコンポーネントが立ち上がるときに、バスデーモン
+(コネクションが開いているときには、正式な一覧がある)
+に対してどんなサービスが稼働中なのかを問い合わせることができる。
+たとえば仮にAccount Managerがクラッシュした場合、
+いまどんなコネクションが稼働中なのかを確認してそれをアカウントオブジェクトと再びつなげることができる。
 
 %% \begin{aosabox}{Connections are Services Too}
 \begin{aosabox}{コネクションもまたサービス}
 
-As well as the Connection Managers themselves, the connections are
-also advertised as D-Bus services. This hypothetically allows for the
-Connection Manager to fork each connection off as a separate process,
-but to date no Connection Manager like this has been implemented.
-More practically, it allows all running connections to be discovered
-by querying the D-Bus bus daemon for all services beginning with
-\code{ofdT.Connection}.
+%% As well as the Connection Managers themselves, the connections are
+%% also advertised as D-Bus services. This hypothetically allows for the
+%% Connection Manager to fork each connection off as a separate process,
+%% but to date no Connection Manager like this has been implemented.
+%% More practically, it allows all running connections to be discovered
+%% by querying the D-Bus bus daemon for all services beginning with
+%% \code{ofdT.Connection}.
+Connection Managers自身と同様、コネクションもまたD-Busのサービスとなる。
+この前提だと、Connection Managerは各コネクションを個別のプロセスとしてフォークできるようになる。
+しかし現時点では、そんな実装のConnection Managerは存在しない。
+より現実的な手段として、すべての稼働中のコネクションを調べるときには
+D-Busバスデーモンに対して\code{ofdT.Connection}ではじまるすべてのサービスを問い合わせる。
 
 \end{aosabox}
 
-The Channel Dispatcher also uses this method to discover Telepathy
-clients. These begin with the name \code{ofdT.Client}, e.g.,
-\code{ofdT.Client.Logger}.
+%% The Channel Dispatcher also uses this method to discover Telepathy
+%% clients. These begin with the name \code{ofdT.Client}, e.g.,
+%% \code{ofdT.Client.Logger}.
+Channel Dispatcherもこの方式を使ってTelepathyクライアントを探す。
+クライアントの名前は\code{ofdT.Client}ではじまり、たとえば\code{ofdT.Client.Logger}のようになる。
 
 \end{aosasect2}
 
