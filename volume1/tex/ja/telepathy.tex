@@ -598,71 +598,117 @@ Channel Dispatcherもこの方式を使ってTelepathyクライアントを探�
 %% \begin{aosasect2}{Reducing D-Bus Traffic}
 \begin{aosasect2}{D-Busトラフィックの軽減}
 
-Original versions of the Telepathy specification created an excessive
-amount of D-Bus traffic in the form of method calls requesting
-information desired by lots of consumers on the bus. Later versions of
-the Telepathy have addressed this through a number of optimizations.
+%% Original versions of the Telepathy specification created an excessive
+%% amount of D-Bus traffic in the form of method calls requesting
+%% information desired by lots of consumers on the bus. Later versions of
+%% the Telepathy have addressed this through a number of optimizations.
+最初のTelepathyの仕様は、大量のD-Busトラフィックが発生するものだった。
+メソッドを呼ぼうとすると、バス上の大量のコンシューマーが必要とする情報をリクエストすることになったのだ。
+その後のバージョンで、Telepathyはこれに対処するためにさまざまな最適化を施した。
 
-Individual method calls were replaced by D-Bus properties. The
-original specification included separate method calls for object
-properties: \code{GetInterfaces}, \code{GetChannelType},
-etc. Requesting all the properties of an object required several
-method calls, each with its own calling overhead. By using D-Bus
-properties, everything can be requested at once using the standard
-\code{GetAll} method.
+%% Individual method calls were replaced by D-Bus properties. The
+%% original specification included separate method calls for object
+%% properties: \code{GetInterfaces}, \code{GetChannelType},
+%% etc. Requesting all the properties of an object required several
+%% method calls, each with its own calling overhead. By using D-Bus
+%% properties, everything can be requested at once using the standard
+%% \code{GetAll} method.
+個々のメソッド呼び出しはD-Busのプロパティに置き換えられた。
+当初の仕様では、オブジェクトのプロパティごとに\code{GetInterfaces}や\code{GetChannelType}
+といった個別のメソッドがあったのだ。オブジェクトのすべてのプロパティを取得したければ
+メソッド呼び出しが何回も発生し、そのたびに呼び出しのオーバーヘッドが発生することになる。
+D-Busのプロパティを使うことで、すべてのプロパティを取得するには
+標準の\code{GetAll}メソッドを一度使うだけでいいことになった。
 
-Furthermore, quite a number of properties on a channel are immutable
-for the lifetime of the channel. These include things like the
-channel's type, interfaces, who it's connected to and the requestor.
-For a file transfer channel, for example, it also includes things like
-the file size and its content type.
+%% Furthermore, quite a number of properties on a channel are immutable
+%% for the lifetime of the channel. These include things like the
+%% channel's type, interfaces, who it's connected to and the requestor.
+%% For a file transfer channel, for example, it also includes things like
+%% the file size and its content type.
+さらに、チャネル上のプロパティの大半は、そのチャネルの活動中は不変なものだ。
+チャネルの型やインターフェイス、接続先、リクエスト元などがその一例である。
+たとえばファイル転送チャネルなら、それ以外にもファイルサイズやコンテントタイプなども含まれる。
 
-A new signal was added to herald the creation of channels (both
-incoming and in response to outgoing requests) that includes a hash
-table of the immutable properties.  This can be passed directly to the
-channel proxy constructor (see \aosasecref{sec.telepathy.readiness}),
-which saves interested clients from having to request this information
-individually.
+%% A new signal was added to herald the creation of channels (both
+%% incoming and in response to outgoing requests) that includes a hash
+%% table of the immutable properties.  This can be passed directly to the
+%% channel proxy constructor (see \aosasecref{sec.telepathy.readiness}),
+%% which saves interested clients from having to request this information
+%% individually.
+チャネル(入力側もリクエストの送出側も)の作成を事前に通知するシグナルが追加され、
+不変なプロパティ用のハッシュテーブルもそこに含むようにした。
+これはチャネルプロキシのコンストラクタ(\aosasecref{sec.telepathy.readiness}を参照)
+に直接渡せて、これを使えば各クライアントが個別に情報をリクエストせずに済むようになる。
 
-User avatars are transmitted across the bus as byte arrays. Although
-Telepathy already used tokens to refer to avatars, allowing clients to
-know when they needed a new avatar and to save downloading unrequired
-avatars, each client had to individually request the avatar via a
-\code{RequestAvatar} method that returned the avatar as its reply.
-Thus, when the Connection Manager signalled that a contact had updated
-its avatar, several individual requests for the avatar would be made,
-requiring the avatar to be transmitted over the message bus several
-times.
+%% User avatars are transmitted across the bus as byte arrays. Although
+%% Telepathy already used tokens to refer to avatars, allowing clients to
+%% know when they needed a new avatar and to save downloading unrequired
+%% avatars, each client had to individually request the avatar via a
+%% \code{RequestAvatar} method that returned the avatar as its reply.
+%% Thus, when the Connection Manager signalled that a contact had updated
+%% its avatar, several individual requests for the avatar would be made,
+%% requiring the avatar to be transmitted over the message bus several
+%% times.
+ユーザーのアバターがバス上を通るときには、バイト配列形式になる。
+Telepathyは既にアバターを参照するトークンを使っており、
+それを見れば新たなアバターをダウンロードする必要があるかどうかを判断できた。
+不要なダウンロードの手間はこれで省けていたが、アバターをダウンロードするときには
+各クライアントが個別に\code{RequestAvatar}メソッドを呼ぶ必要があった。
+このメソッドは、アバターを返すものだ。つまり、ある連絡先がアバターを更新したと
+Connection Managerが通知すると、そのアバターを取得しようとするリクエストがあちこちから別々に発生し、
+メッセージバス上を同じアバターが複数回転送されることになっていた。
 
-This was resolved by adding a new method which did not return the
-avatar (it returns nothing). Instead, it placed the avatar in a
-request queue.  Retrieving the avatar from the network would result in
-a signal, \code{AvatarRetrieved}, that all interested clients could
-listen to. This means the avatar data only needs to be transmitted
-over the bus once, and will be available to all the interested
-clients. Once the client's request was in the queue, all further
-client requests can be ignored until the emission of the
-\code{AvatarRetrieved}.
+%% This was resolved by adding a new method which did not return the
+%% avatar (it returns nothing). Instead, it placed the avatar in a
+%% request queue.  Retrieving the avatar from the network would result in
+%% a signal, \code{AvatarRetrieved}, that all interested clients could
+%% listen to. This means the avatar data only needs to be transmitted
+%% over the bus once, and will be available to all the interested
+%% clients. Once the client's request was in the queue, all further
+%% client requests can be ignored until the emission of the
+%% \code{AvatarRetrieved}.
+これを解決するために新たなメソッドを追加した。このメソッドはアバターを返さない(何も返さない)。
+そのかわりに、アバターをリクエストキューに追加する。
+アバターをネットワークから取得すると\code{AvatarRetrieved}
+シグナルが発生する。各クライアントは、このシグナルを待ち受けることができる。
+これはつまり、アバターのデータがバス上で転送されるのは一度だけで済むということだ。
+それ以降は、すべてのクライアントがそのアバターを使えるようになる。
+あるクライアントのリクエストがキューに入れば、
+それ以降のクライアントからのリクエストは\code{AvatarRetrieved}
+が発行されるまでは無視される。
 
-Whenever a large number of contacts need to be loaded (i.e., when
-loading the contact roster), a significant amount of information needs
-to be requested: their aliases, avatars, capabilities, and group
-memberships, and possibly their location, address, and telephone numbers.
-Previously in Telepathy this would require one method call per
-information group (most API calls, such as \code{GetAliases} already
-took a list of contacts), resulting in half a dozen or more method calls.
+%% Whenever a large number of contacts need to be loaded (i.e., when
+%% loading the contact roster), a significant amount of information needs
+%% to be requested: their aliases, avatars, capabilities, and group
+%% memberships, and possibly their location, address, and telephone numbers.
+%% Previously in Telepathy this would require one method call per
+%% information group (most API calls, such as \code{GetAliases} already
+%% took a list of contacts), resulting in half a dozen or more method calls.
+たくさんの連絡先を読み込む必要がある場合(連絡先一覧を読み込む場合など)は、
+大量の情報をリクエストしなければいけない。エイリアス、アバター、所属グループ、
+位置、アドレス、電話番号などである。かつてのTelepathyでは
+情報グループごとに個別のメソッド呼び出しが必要で
+(\code{GetAliases}など大半のAPIは既に連絡先リストを受け取るようになっていた)、
+その結果、10回近くもメソッド呼び出しが発生した。
 
-To solve this, the \code{Contacts} interface was introduced.  It
-allowed information from multiple interfaces to be returned via a
-single method call. The Telepathy specification was expanded to
-include Contact Attributes: namespaced properties returned by the
-\code{GetContactAttributes} method that shadowed method calls used to
-retrieve contact information. A client calls
-\code{GetContactAttributes} with a list of contacts and interfaces it
-is interested in, and gets back a map from contacts to a map of
-contact attributes to values.
+%% To solve this, the \code{Contacts} interface was introduced.  It
+%% allowed information from multiple interfaces to be returned via a
+%% single method call. The Telepathy specification was expanded to
+%% include Contact Attributes: namespaced properties returned by the
+%% \code{GetContactAttributes} method that shadowed method calls used to
+%% retrieve contact information. A client calls
+%% \code{GetContactAttributes} with a list of contacts and interfaces it
+%% is interested in, and gets back a map from contacts to a map of
+%% contact attributes to values.
+これを解決するために\code{Contacts}インターフェイスを導入した。
+そのおかげで、複数のインターフェイスからの情報を一度のメソッド呼び出しで返せるようになった。
+Telepathyの仕様は拡張され、連絡先の属性も含むようになった。\code{GetContactAttributes}
+メソッドが返す名前空間付きのプロパティが、連絡先情報を取得するために使うメソッド呼び出しを覆い隠したのだ。
+クライアントは、\code{GetContactAttributes}を呼ぶときに
+連絡先一覧と知りたいインターフェイスを渡す。そして、属性と値とのマップを連絡先と関連づけたマップを取得する。
 
-A bit of code will make this clearer.  The request looks like this:
+%% A bit of code will make this clearer.  The request looks like this:
+コードを見たほうが話が早いだろう。まずリクエストはこのようになる。
 
 \begin{verbatim}
 connection[CONNECTION_INTERFACE_CONTACTS].GetContactAttributes(
@@ -676,7 +722,9 @@ connection[CONNECTION_INTERFACE_CONTACTS].GetContactAttributes(
 )
 \end{verbatim}
 
-\noindent and the reply might look like this:
+%% \noindent and the reply might look like this:
+\noindent
+そしてその応答はこのようになる。
 
 \begin{verbatim}
 { 1: { 'ofdT.Connection.Interface.Aliasing/alias': 'Harvey Cat',
