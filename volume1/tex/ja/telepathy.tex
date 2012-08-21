@@ -756,105 +756,164 @@ connection[CONNECTION_INTERFACE_CONTACTS].GetContactAttributes(
 %% \begin{aosasect2}{Connections}
 \begin{aosasect2}{コネクション}
 
-A Connection is created by the Connection Manager to establish a
-connection to a single protocol/account. For example, connecting to
-the XMPP accounts \code{escher@tuxedo.cat} and \code{cami@egg.cat}
-would result in two Connections, each represented by a D-Bus
-object. Connections are typically set up by the Account Manager, for
-the currently enabled accounts.
+%% A Connection is created by the Connection Manager to establish a
+%% connection to a single protocol/account. For example, connecting to
+%% the XMPP accounts \code{escher@tuxedo.cat} and \code{cami@egg.cat}
+%% would result in two Connections, each represented by a D-Bus
+%% object. Connections are typically set up by the Account Manager, for
+%% the currently enabled accounts.
+コネクションを作るのはConnection Managerで、単一のプロトコル／アカウントとの接続を確立する。
+たとえばXMPPアカウント\code{escher@tuxedo.cat}および\code{cami@egg.cat}
+と接続すると二つのコネクションが作られることになり、それぞれがD-Busオブジェクトとして表される。
+コネクションの準備をするのはたいていの場合Account Managerで、
+現在有効なアカウントに対して行う。
 
-The Connection provides some mandatory functionality for managing and
-monitoring the connection status and for requesting channels. It can
-then also provide a number of optional features, depending on the
-features of the protocol. These are provided as optional D-Bus
-interfaces (as discussed in the previous section) and listed by the
-Connection's \code{Interfaces} property.
+%% The Connection provides some mandatory functionality for managing and
+%% monitoring the connection status and for requesting channels. It can
+%% then also provide a number of optional features, depending on the
+%% features of the protocol. These are provided as optional D-Bus
+%% interfaces (as discussed in the previous section) and listed by the
+%% Connection's \code{Interfaces} property.
+コネクションは、いくつかの必須機能を提供する。
+接続状態の管理や監視、そしてチャネルのリクエストに欠かせないものである。
+そしてまた、オプションの機能も提供する。
+どんな機能を提供するかは、そのプロトコルの機能に依存する。
+これらはオプションのD-Busインターフェイス(先ほど説明したもの)
+として提供され、コネクションの\code{Interfaces}プロパティで一覧できる。
 
-Typically Connections are managed by the Account Manager, created
-using the properties of the respective accounts. The Account Manager
-will also synchronize the user's presence for each account to its
-respective connection and can be asked to provide the connection path
-for a given account.
+%% Typically Connections are managed by the Account Manager, created
+%% using the properties of the respective accounts. The Account Manager
+%% will also synchronize the user's presence for each account to its
+%% respective connection and can be asked to provide the connection path
+%% for a given account.
+通常は、コネクションを管理するのはAccount Managerで、
+対応するアカウントのプロパティを使って作成する。
+Account Managerは各アカウントに対してユーザーの存在を
+それに対応する接続と同期させ、指定したアカウント用のコネクションパスを答えることができる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Channels}
 \begin{aosasect2}{チャネル}
 
-Channels are the mechanism through which communications are carried
-out.  A channel is typically an IM conversation, voice or video call
-or file transfer, but channels are also used to provide some stateful
-communication with the server itself, (e.g., to search for chat rooms
-or contacts). Each channel is represented by a D-Bus object.
+%% Channels are the mechanism through which communications are carried
+%% out.  A channel is typically an IM conversation, voice or video call
+%% or file transfer, but channels are also used to provide some stateful
+%% communication with the server itself, (e.g., to search for chat rooms
+%% or contacts). Each channel is represented by a D-Bus object.
+チャネルは、実際の通信を行う仕組みである。
+通常はIMの会話だったり音声や映像での通話だったりファイル転送だったりするが、
+チャネルを使ってサーバー自身とのステートフルな通信(チャットルームや連絡先の検索など)をさせることもできる。
+個々のチャネルはD-Busオブジェクトとして表される。
 
-Channels are typically between two or more users, one of whom is
-yourself. They typically have a target identifier, which is either
-another contact, in the case of one-to-one communication; or a room
-identifier, in the case of multi-user communication (e.g., a chat
-room). Multi-user channels expose the \code{Group} interface, which
-lets you track the contacts who are currently in the channel.
+%% Channels are typically between two or more users, one of whom is
+%% yourself. They typically have a target identifier, which is either
+%% another contact, in the case of one-to-one communication; or a room
+%% identifier, in the case of multi-user communication (e.g., a chat
+%% room). Multi-user channels expose the \code{Group} interface, which
+%% lets you track the contacts who are currently in the channel.
+チャネルは一般に複数のユーザーの間でできるものであり、その中の一人があなたとなる。
+通常は、ターゲットIDを持っている。これは、一対一の通信の場合は通信の相手を指し、
+マルチユーザーの通信(チャットルームなど)の場合はルームIDを指す。
+マルチユーザーのチャネルは\code{Group}インテーフェイスを公開しており、
+これを使えば現在チャネルに参加している連絡先を追える。
 
-Channels belong to a Connection, and are requested from the Connection
-Manager, usually via the Channel Dispatcher; or they are created by
-the Connection in response to a network event (e.g., incoming chat),
-and handed to the Channel Dispatcher for dispatching.
+%% Channels belong to a Connection, and are requested from the Connection
+%% Manager, usually via the Channel Dispatcher; or they are created by
+%% the Connection in response to a network event (e.g., incoming chat),
+%% and handed to the Channel Dispatcher for dispatching.
+チャネルはコネクションに属し、Connection Managerからのリクエストを(通常はChannel Dispatcher経由で)
+受ける。あるいは、ネットワーク上でのイベント(チャットの受信など)に対応してコネクションがチャネルを作ることもある。
+そしてそれをChannel Dispatcherに渡してディスパッチさせる。
 
-The type of channel is defined by the channel's \code{ChannelType}
-property. The core features, methods, properties, and signals that are
-needed for this channel type (e.g., sending and receiving text
-messages) are defined in the appropriate \code{Channel.Type} D-Bus
-interface, for instance \code{Channel.Type.Text}. Some channel types
-may implement optional additional features (e.g., encryption) which
-appear as additional interfaces listed by the channel's
-\code{Interfaces} property.  An example text channel that connects the
-user to a multi-user chatroom might have the interfaces shown in
-\aosatblref{tbl.telepathy.textchannel}.
+%% The type of channel is defined by the channel's \code{ChannelType}
+%% property. The core features, methods, properties, and signals that are
+%% needed for this channel type (e.g., sending and receiving text
+%% messages) are defined in the appropriate \code{Channel.Type} D-Bus
+%% interface, for instance \code{Channel.Type.Text}. Some channel types
+%% may implement optional additional features (e.g., encryption) which
+%% appear as additional interfaces listed by the channel's
+%% \code{Interfaces} property.  An example text channel that connects the
+%% user to a multi-user chatroom might have the interfaces shown in
+%% \aosatblref{tbl.telepathy.textchannel}.
+チャネルの型を定義するのが、チャネルの\code{ChannelType}プロパティである。
+このチャネルの型で必要となるフィーチャ(テキストメッセージの送受信など)やメソッド、プロパティ、シグナルの定義は
+適切な\code{Channel.Type} D-Busインターフェイスで行われる。\code{Channel.Type.Text}などである。
+チャネルの型によっては、オプションで追加機能(暗号化など)を実装しているものもある。
+これらは別のインターフェイスとして、チャネルの\code{Interfaces}プロパティから得られる。
+あるユーザーをマルチユーザーのチャットルームに接続させるテキストチャネルを例にして考えよう。
+そのインターフェイスは\aosatblref{tbl.telepathy.textchannel}に示すようなものとなる。
 
 \begin{table}[h]\centering
   \begin{tabular}{ |lp{3.0in}| }
    \hline
-    \code{odfT.Channel} & Features common to all channels \\
-    \code{odfT.Channel.Type.Text} & The Channel Type, includes features common to text channels \\
-    \code{odfT.Channel.Interface.Messages} & Rich-text messaging \\
-    \code{odfT.Channel.Interface.Group} & List, track, invite and approve members in this channel \\
-    \code{odfT.Channel.Interface.Room} & Read and set properties such as the chatroom's subject \\
+    %% \code{odfT.Channel} & Features common to all channels \\
+    %% \code{odfT.Channel.Type.Text} & The Channel Type, includes features common to text channels \\
+    %% \code{odfT.Channel.Interface.Messages} & Rich-text messaging \\
+    %% \code{odfT.Channel.Interface.Group} & List, track, invite and approve members in this channel \\
+    %% \code{odfT.Channel.Interface.Room} & Read and set properties such as the chatroom's subject \\
+    \code{odfT.Channel} & すべてのチャネルに共通するフィーチャ \\
+    \code{odfT.Channel.Type.Text} & チャネルの型。テキストチャネルに共通するフィーチャも含む \\
+    \code{odfT.Channel.Interface.Messages} & リッチテキストメッセージング \\
+    \code{odfT.Channel.Interface.Group} & このチャネルのメンバーの一覧、追跡、招待、そして承認 \\
+    \code{odfT.Channel.Interface.Room} & チャットルームの件名などのプロパティの読み込みと設定 \\
    \hline
   \end{tabular}
-  \caption{Example Text Channel}
+  %% \caption{Example Text Channel}
+  \caption{テキストチャネルの例}
   \label{tbl.telepathy.textchannel}
 \end{table}
 
 %% \begin{aosabox}{Contact List Channels: A Mistake}
 \begin{aosabox}{コンタクトリストチャネル: 失敗例}
 
-In the first versions of the Telepathy specification, contact lists
-were considered a type of channel. There were several server-defined
-contact lists (subscribed users, publish-to users, blocked users),
-that could be requested from each Connection. The members of the list
-were then discovered using the \code{Group} interface, like for a
-multi-user chat.
+%% In the first versions of the Telepathy specification, contact lists
+%% were considered a type of channel. There were several server-defined
+%% contact lists (subscribed users, publish-to users, blocked users),
+%% that could be requested from each Connection. The members of the list
+%% were then discovered using the \code{Group} interface, like for a
+%% multi-user chat.
+最初のバージョンのTelepathyの仕様では、連絡先リストもチャネルの一種だとしていた。
+サーバー側で定義された連絡先リスト(購読ユーザー一覧、配信先ユーザー一覧、ブロック済みユーザー一覧など)
+があって、これをコネクションからリクエストできた。
+リストのメンバーを取得するには\code{Group}インターフェイスを使う。
+ちょうどマルチユーザーのチャットと同じような仕組みだ。
 
-Originally this would allow for channel creation to occur only once
-the contact list had been retrieved, which takes time on some
-protocols. A client could request the channel whenever it liked, and
-it would be delivered once ready, but for users with lots of contacts
-this meant the request would occasionally time out.  Determining the
-subscription/publish/blocked status of a client required checking
-three channels.
+%% Originally this would allow for channel creation to occur only once
+%% the contact list had been retrieved, which takes time on some
+%% protocols. A client could request the channel whenever it liked, and
+%% it would be delivered once ready, but for users with lots of contacts
+%% this meant the request would occasionally time out.  Determining the
+%% subscription/publish/blocked status of a client required checking
+%% three channels.
+当初は、チャネルを作るのは連絡先リストを取得するときの一度だけでよかったが、
+プロトコルによってはこれは時間のかかる処理だった。
+クライアント側からはいつでもチャネルをリクエストでき、準備ができしだいすぐに配送されたが、
+多数の連絡先を持つユーザーの場合は、時にリクエストがタイムアウトすることもあった。
+あるクライアントの購読/配信/ブロックの状態を知るには、三つのチャネルをチェックしなければいけなかったのだ。
 
-Contact Groups (e.g., Friends) were also exposed as channels, one
-channel per group. This proved extremely difficult for client
-developers to work with.  Operations like getting the list of groups a
-contact was in required a significant amount of code in the client.
-Further, with the information only available via channels, properties
-such as a contact's groups or subscription state could not be
-published via the Contacts interface.
+%% Contact Groups (e.g., Friends) were also exposed as channels, one
+%% channel per group. This proved extremely difficult for client
+%% developers to work with.  Operations like getting the list of groups a
+%% contact was in required a significant amount of code in the client.
+%% Further, with the information only available via channels, properties
+%% such as a contact's groups or subscription state could not be
+%% published via the Contacts interface.
+連絡先グループ(友人など)もチャネルとして公開され、グループごとにひとつのチャネルになっていた。
+クライアント側の開発者にしてみると、これは非常に使いづらいものであることがわかった。
+たとえば、グループの一覧を取得しようとすれば、クライアント側で大量のコードを書く必要があったのだ。
+さらに、情報がチャネル経由でしか得られないので、ある連絡先のグループや購読の状態を
+Contactsインターフェイス経由で公開できないことになる。
 
-Both channel types have since been replaced by interfaces on the
-Connection itself which expose contact roster information in ways more
-useful to client authors, including subscription state of a contact
-(an enum), groups a contact is in, and contacts in a group.  A signal
-indicates when the contact list has been prepared.
+%% Both channel types have since been replaced by interfaces on the
+%% Connection itself which expose contact roster information in ways more
+%% useful to client authors, including subscription state of a contact
+%% (an enum), groups a contact is in, and contacts in a group.  A signal
+%% indicates when the contact list has been prepared.
+そのため、どちらのチャネル型についても結局はコネクション自身のインターフェイスに
+置き換えた。こうすることで、連絡先情報や各連絡先の購読状況、所属グループ、グループのメンバーなどを
+より有用な形式でクライアント側に公開できるようになった。
+連絡先リストの準備ができたら、シグナルで通知する。
 
 \end{aosabox}
 
