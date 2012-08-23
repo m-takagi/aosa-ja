@@ -922,45 +922,61 @@ Contactsインターフェイス経由で公開できないことになる。
 %% \begin{aosasect2}{Requesting Channels, Channel Properties and Dispatching}
 \begin{aosasect2}{チャネルのリクエスト、チャネルのプロパティそしてディスパッチ}
 
-Channels are requested using a map of properties you wish the desired
-channel to possess. Typically, the channel request will include the
-channel type, target handle type (contact or room) and target.
-However, a channel request may also include properties such as the
-filename and filesize for file transfers, whether to initially include
-audio and video for calls, what existing channels to combine into a
-conference call, or which contact server to conduct a contact search
-on.
+%% Channels are requested using a map of properties you wish the desired
+%% channel to possess. Typically, the channel request will include the
+%% channel type, target handle type (contact or room) and target.
+%% However, a channel request may also include properties such as the
+%% filename and filesize for file transfers, whether to initially include
+%% audio and video for calls, what existing channels to combine into a
+%% conference call, or which contact server to conduct a contact search
+%% on.
+チャネルをリクエストするときには、そのチャネルに持たせたいプロパティのマップを使う。
+一般に、チャネルのリクエストに含まれるのはチャネルの型とターゲットのハンドル型(連絡先あるいはルーム)そしてターゲットだ。
+しかし、チャネルのリクエストにはそれ以外のプロパティも含めることもできる。ファイル転送なら
+ファイル名とファイルサイズ、通話なら音声と映像のどちらを使うか、どの既存のチャネルをカンファレンスコールに含めるか、
+どのコンタクトサーバーから連絡先を探すか、などがその一例だ。
 
-The properties in the channel request are properties defined by
-interfaces of the Telepathy spec, such as the \code{ChannelType}
-property (\aosatblref{tbl.telepathy.channelrequest}). They are
-qualified with the namespace of the interface they come from
-Properties which can be included in channel requests are marked as
-\emph{requestable} in the Telepathy spec.
+%% The properties in the channel request are properties defined by
+%% interfaces of the Telepathy spec, such as the \code{ChannelType}
+%% property (\aosatblref{tbl.telepathy.channelrequest}). They are
+%% qualified with the namespace of the interface they come from
+%% Properties which can be included in channel requests are marked as
+%% \emph{requestable} in the Telepathy spec.
+チャネルリクエストに含まれるプロパティは、Telepathyの仕様に定められたインターフェイスで定義されているものとなる。
+たとえば\code{ChannelType}プロパティ(\aosatblref{tbl.telepathy.channelrequest})がそのひとつである。
+プロパティは、その定義元のインターフェイスの名前空間で表す。
+チャネルリクエストに含めることのできるプロパティは、Telepathyの仕様上では
+\emph{requestable}と記されている。
 
 \begin{table}[h]\centering
   \begin{tabular}{ |ll| }
     \hline
-    Property & Value \\
+    %% Property & Value \\
+    プロパティ & 値 \\
     \hline
     \code{ofdT.Channel.ChannelType} & \code{ofdT.Channel.Type.Text} \\
     \code{ofdT.Channel.TargetHandleType} & \code{Handle\_Type\_Contact} (1) \\
     \code{ofdT.Channel.TargetID} & \code{escher@tuxedo.cat} \\
     \hline
   \end{tabular}
-  \caption{Example Channel Requests}
+  %% \caption{Example Channel Requests}
+  \caption{チャネルリクエストの例}
   \label{tbl.telepathy.channelrequest}
 \end{table}
 
-The more complicated example in \aosatblref{tbl.telepathy.transfer}
-requests a file transfer channel. Notice how the requested properties
-are qualified by the interface from which they come.  (For brevity,
-not all required properties are shown.)
+%% The more complicated example in \aosatblref{tbl.telepathy.transfer}
+%% requests a file transfer channel. Notice how the requested properties
+%% are qualified by the interface from which they come.  (For brevity,
+%% not all required properties are shown.)
+もう少し複雑な例を\aosatblref{tbl.telepathy.transfer}に示す。これはファイル転送チャネルへのリクエストだ。
+リクエストしているプロパティが、その定義元のインターフェイス名で指定されているところに注目しよう
+(簡潔にするために、必須プロパティの一部を省略した)。
 
 \begin{table}[h]\centering
 \begin{tabular}{ |ll| }
     \hline
-    Property & Value \\
+    %% Property & Value \\
+    プロパティ & 値 \\
     \hline
     \code{ofdT.Channel.ChannelType} & \code{ofdT.Channel.Type.FileTransfer} \\
     \code{ofdT.Channel.TargetHandleType} & \code{Handle\_Type\_Contact} (1) \\
@@ -969,64 +985,97 @@ not all required properties are shown.)
     \code{ofdT.Channel.Type.FileTransfer.ContentType} & \code{image/jpeg} \\
     \hline
   \end{tabular}
-  \caption{File Transfer Channel Request}
+  %% \caption{File Transfer Channel Request}
+  \caption{ファイル転送チャネルのリクエスト}
   \label{tbl.telepathy.transfer}
 \end{table}
 
-Channels can either be \emph{created} or \emph{ensured}. Ensuring a
-channel means creating it only if it does not already exist. Asking to
-create a channel will either result in a completely new and separate
-channel being created, or in an error being generated if multiple
-copies of such a channel cannot exist. Typically you wish to ensure
-text channels and calls (i.e., you only need one conversation open with
-a person, and in fact many protocols do not support multiple separate
-conversations with the same contact), and wish to create file
-transfers and stateful channels.
+%% Channels can either be \emph{created} or \emph{ensured}. Ensuring a
+%% channel means creating it only if it does not already exist. Asking to
+%% create a channel will either result in a completely new and separate
+%% channel being created, or in an error being generated if multiple
+%% copies of such a channel cannot exist. Typically you wish to ensure
+%% text channels and calls (i.e., you only need one conversation open with
+%% a person, and in fact many protocols do not support multiple separate
+%% conversations with the same contact), and wish to create file
+%% transfers and stateful channels.
+チャネルは、\emph{作成(create)する}か、あるいは\emph{確保(ensure)する}ことができる。
+チャネルを確保するとは、そのチャネルがまだ存在しないときにだけ作成するということである。
+チャネルを作成しようとした場合は、まったく新しい個別のチャネルを作成する。
+ただし、すでにそのチャネルが存在する場合にはエラーになる。同じチャネルのコピーは複数存在できないからである。
+一般的には、テキストチャネルや通話に関しては「確保」を使い
+(だれかとのやりとりに必要なチャネルはひとつだけだし、
+実際のところ、たいていのプロトコルは同じ相手と複数の会話を別々にできるようになっていない)
+、ファイル転送やステートフルなチャネルなどでは「作成」を使うことになるだろう。
 
-Newly created channels (requested or otherwise) are announced by a
-signal from the Connection. This signal includes a map of the
-channel's \emph{immutable} properties. These are the properties which
-are guaranteed not to change throughout the channel's lifetime.
-Properties which are considered immutable are marked as such in the
-Telepathy spec, but typically include the channel's type, target
-handle type, target, initiator (who created the channel) and
-interfaces.  Properties such as the channel's state are obviously not
-included.
+%% Newly created channels (requested or otherwise) are announced by a
+%% signal from the Connection. This signal includes a map of the
+%% channel's \emph{immutable} properties. These are the properties which
+%% are guaranteed not to change throughout the channel's lifetime.
+%% Properties which are considered immutable are marked as such in the
+%% Telepathy spec, but typically include the channel's type, target
+%% handle type, target, initiator (who created the channel) and
+%% interfaces.  Properties such as the channel's state are obviously not
+%% included.
+(リクエストなり何なりによって)新たに作成されたチャネルは、コネクションからのシグナルで通知される。
+このシグナルには、チャネルの\emph{不変}なプロパティのマップが含まれる。
+不変なプロパティとは、そのチャネルの活動期間を通して値が変わらないことが保証されているプロパティのことだ。
+不変であろうとみなされているプロパティについてはTelepathyの仕様でそのように明記されているが、
+一般的にはチャネルの型やターゲット、作成者、インターフェイスなどがそれに含まれる。
+チャネルの状態などのプロパティは、もちろん不変ではない。
 
 %% \begin{aosabox}{Old-School Channel Requesting}
 \begin{aosabox}{昔ながらのチャネルリクエスト}
 
-Channels were originally requested simply by type, handle type and
-target handle.  This wasn't sufficiently flexible because not all
-channels have a target (e.g., contact search channels), and some
-channels require additional information included in the initial
-channel request (e.g., file transfers, requesting voicemails and
-channels for sending SMSes).
+%% Channels were originally requested simply by type, handle type and
+%% target handle.  This wasn't sufficiently flexible because not all
+%% channels have a target (e.g., contact search channels), and some
+%% channels require additional information included in the initial
+%% channel request (e.g., file transfers, requesting voicemails and
+%% channels for sending SMSes).
+チャネルのリクエストは元々はシンプルなもので、単に型とハンドルタイプそしてターゲットハンドルを指定するだけのことだった。
+しかしこれは柔軟性に欠けていた。というのも、すべてのチャネルがターゲットを持っているわけではないし
+(例: 連絡先検索チャネル)、最初のリクエストのときにそれ以外の情報を必要とするチャネルもあったからだ
+(例: ファイル転送、ボイスメールのリクエスト、SMS送信用のチャネル)。
 
-It was also discovered that two different behaviors might be desired
-when a channel was requested (either to create a guaranteed unique
-channel, or simply ensure a channel existed), and until this time the
-Connection had been responsible for deciding which behavior would
-occur.  Hence, the old method was replaced by the newer, more
-flexible, more explicit ones.
+%% It was also discovered that two different behaviors might be desired
+%% when a channel was requested (either to create a guaranteed unique
+%% channel, or simply ensure a channel existed), and until this time the
+%% Connection had been responsible for deciding which behavior would
+%% occur.  Hence, the old method was replaced by the newer, more
+%% flexible, more explicit ones.
+また、チャネルをリクエストするときには二通りの振る舞い
+(一意なチャネルを新たに作成するのか単に既存のチャネルを確保するだけなのか)
+を考えないといけないこともわかったし、当時はどっちの振る舞いにするのかを決めるのが
+コネクションの役割だった。そんなこともあって、かつての方式はとりやめて
+新しい方式に変わったのだ。こちらのほうがより柔軟で明示的な方式である。
 
 \end{aosabox}
 
 \pagebreak
 
-Returning a channel's immutable properties when you create or ensure
-the channel makes it much faster to create a proxy object for the
-channel. This is information we now don't have to request.  The map in
-\aosatblref{tbl.telepathy.immutable} shows the immutable properties
-that might be included when we request a text channel (i.e., using the
-channel request in \aosatblref{tbl.telepathy.transfer}). Some
-properties (including \code{TargetHandle} and \code{InitiatorHandle})
-have been excluded for brevity.
+%% Returning a channel's immutable properties when you create or ensure
+%% the channel makes it much faster to create a proxy object for the
+%% channel. This is information we now don't have to request.  The map in
+%% \aosatblref{tbl.telepathy.immutable} shows the immutable properties
+%% that might be included when we request a text channel (i.e., using the
+%% channel request in \aosatblref{tbl.telepathy.transfer}). Some
+%% properties (including \code{TargetHandle} and \code{InitiatorHandle})
+%% have been excluded for brevity.
+チャネルを作成あるいは確保するときにそのチャネルの不変なプロパティを返すようにしたことで、
+そのチャネルのプロキシーオブジェクトを高速に作れるようになった。
+必要な情報をわざわざリクエストする必要がなくなったのだ。
+\aosatblref{tbl.telepathy.immutable}は不変なプロパティを示すもので、
+テキストチャネルをリクエストした
+(つまり、\aosatblref{tbl.telepathy.transfer}のチャネルリクエストを使った)
+場合の一例だ。\code{TargetHandle}や\code{InitiatorHandle}など
+一部のプロパティは、簡潔にまとめるために省略した。
 
 \begin{table}[h]\centering
 \begin{tabular}{ |p{6cm} p{6cm} | }
     \hline
-    Property & Value \\
+    %% Property & Value \\
+    プロパティ & 値 \\
     \hline
     \code{ofdT.Channel.ChannelType} & \code{Channel.Type.Text} \\
     \code{ofdT.Channel.Interfaces} & \code{{[} Channel.Interface.Messages,\newline Channel.Interface.Destroyable,\newline Channel.Interface.ChatState {]}}  \\
@@ -1037,37 +1086,59 @@ have been excluded for brevity.
     \code{ofdT.Channel.Interface.Messages.}{\newline}\hspace*{1em}\code{SupportedContentTypes} & \code{{[} text/html, text/plain {]}} \\
     \hline
   \end{tabular}
-  \caption{Example Immutable Properties Returned by a New Channel}
+  %% \caption{Example Immutable Properties Returned by a New Channel}
+  \caption{新しいチャネルが返す不変なプロパティの例}
   \label{tbl.telepathy.immutable}
 \end{table}
 
-The requesting program typically makes a request for a channel to the
-Channel Dispatcher, providing the account the request is for, the
-channel request, and optionally the name of a the desired handler
-(useful if the program wishes to handle the channel itself).  Passing
-the name of an account instead of a connection means that the Channel
-Dispatcher can ask the Account Manager to bring an account online if
-required.
+%% The requesting program typically makes a request for a channel to the
+%% Channel Dispatcher, providing the account the request is for, the
+%% channel request, and optionally the name of a the desired handler
+%% (useful if the program wishes to handle the channel itself).  Passing
+%% the name of an account instead of a connection means that the Channel
+%% Dispatcher can ask the Account Manager to bring an account online if
+%% required.
+リクエストする側のプログラムは、あるチャネルへのリクエストを通常は
+Channel Dispatcherに対して送る。このときに渡すのは、
+そのリクエストの対象となるアカウントとチャネルリクエストであり、
+必要なハンドラをオプションで渡すこともある
+(これは、プログラム側でチャネル自身を扱いたい場合に便利だ)。
+コネクションではなくアカウントの名前を渡す意味は、
+Channel DispatcherからAccount Managerに対して、
+必要に応じてそのアカウントをオンラインにするよう依頼できるようにすることだ。
 
-Once the request is complete, the Channel Dispatcher will either pass
-the channel to the named Handler, or locate an appropriate Handler
-(see below for discussion on Handlers and other clients). Making the
-name of the desired Handler optional makes it possible for programs
-that have no interest in communication channels beyond the initial
-request to request channels and have them handled by the best program
-available (e.g., launching a text chat from your email client).
+%% Once the request is complete, the Channel Dispatcher will either pass
+%% the channel to the named Handler, or locate an appropriate Handler
+%% (see below for discussion on Handlers and other clients). Making the
+%% name of the desired Handler optional makes it possible for programs
+%% that have no interest in communication channels beyond the initial
+%% request to request channels and have them handled by the best program
+%% available (e.g., launching a text chat from your email client).
+リクエストが完了すると、Channel Dispatcherがそのチャネルを名前付きのハンドラに渡すか
+適切なハンドラの場所を示す(ハンドラやその他のクライアントに関しては後述する)。
+要求するハンドラの名前をオプションにすることで、
+最初のリクエスト以降の通信チャネルに興味のないプログラムでも
+チャネルをリクエストできるようになり、最適なプログラムで処理させるようにできる
+(メールソフトからテキストチャットを立ち上げるなど)。
 
 %% \aosafigure[300pt]{../images/telepathy/dispatching-model.eps}{Channel Request and Dispatching}{fig.telepathy.request}
 \aosafigure[300pt]{../images/telepathy/dispatching-model.eps}{チャネルリクエストとディスパッチ}{fig.telepathy.request}
 
-The requesting program makes a channel request to the Channel
-Dispatcher, which in turn forwards the request to the appropriate
-Connection. The Connection emits the NewChannels signal which is
-picked up by the Channel Dispatcher, which then finds the appropriate
-client to handle the channel.  Incoming, unrequested channels are
-dispatched in much the same way, with a signal from the Connection
-that is picked up by the Channel Dispatcher, but obviously without the
-initial request from a program.
+%% The requesting program makes a channel request to the Channel
+%% Dispatcher, which in turn forwards the request to the appropriate
+%% Connection. The Connection emits the NewChannels signal which is
+%% picked up by the Channel Dispatcher, which then finds the appropriate
+%% client to handle the channel.  Incoming, unrequested channels are
+%% dispatched in much the same way, with a signal from the Connection
+%% that is picked up by the Channel Dispatcher, but obviously without the
+%% initial request from a program.
+リクエストする側のプログラムはチャネルリクエストをChannel Dispatcher
+に送り、Channel Dispatcherはそのリクエストを適切なコネクションに転送する。
+コネクションはNewChannelsシグナルを発行し、これをChannel Dispatcher
+が受け取ると、そのチャネルを処理できる適切なクライアントを探す。
+リクエストしたものでない、外部から受信したチャネルのディスパッチも同様に行い、
+コネクションからのシグナルをChannel Dispatcherが取り上げる。
+しかし当然、プログラムからの最初のリクエストはない。
 
 \end{aosasect2}
 
