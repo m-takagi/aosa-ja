@@ -1145,84 +1145,126 @@ Channel DispatcherからAccount Managerに対して、
 %% \begin{aosasect2}{Clients}
 \begin{aosasect2}{クライアント}
 
-Clients handle or observe incoming and outgoing communications
-channels. A client is anything that is registered with the Channel
-Dispatcher.  There are three types of clients (though a single client
-may be two, or all three, types if the developer wishes):
+%% Clients handle or observe incoming and outgoing communications
+%% channels. A client is anything that is registered with the Channel
+%% Dispatcher.  There are three types of clients (though a single client
+%% may be two, or all three, types if the developer wishes):
+クライアントは、送受信チャネルを処理したり監視したりする。
+クライアントとは、Channel Dispatcherで登録したもののことである。
+クライアントには次の三種類の形式がある(開発者次第で、
+あるひとつのクライアントが二種類の形式あるいは三種類すべての形式を兼ねることもある)。
 
 \begin{aosadescription}
 
-  \item{Observers}: Observe channels without interacting with
-    them. Observers tend to be used for chat and activity logging
-    (e.g., incoming and outgoing VoIP calls).
+  %% \item{Observers}: Observe channels without interacting with
+  %%   them. Observers tend to be used for chat and activity logging
+  %%   (e.g., incoming and outgoing VoIP calls).
+  \item{オブザーバー}: チャネルとのやりとりをせずにただ観察する。
+  オブザーバーは、チャットに使ったりアクティビティ(VoIP通話の発信や着信など)の記録
+  に使ったりすることが多い。
 
-  \item{Approvers}: Responsible for giving users an opportunity to
-    accept or reject an incoming channel.
+  %% \item{Approvers}: Responsible for giving users an opportunity to
+  %%   accept or reject an incoming channel.
+  \item{アプルーバー}: チャネルの受信を許可するか拒否するかをユーザーが決められるようにする。
 
-  \item{Handlers}: Actually interact with the channel. That might be
-    acknowledging and sending text messages, sending or receiving a
-    file, etc. A Handler tends to be associated with a user interface.
+  %% \item{Handlers}: Actually interact with the channel. That might be
+  %%   acknowledging and sending text messages, sending or receiving a
+  %%   file, etc. A Handler tends to be associated with a user interface.
+  \item{ハンドラー}: 実際にチャネルとのやりとりをする。
+  テキストメッセージを受け入れたり送信したり、ファイルを送受信したりといったものである。
+  ハンドラーは、ユーザーインターフェイスと関連づけられることが多い。
 
 \end{aosadescription}
 
-Clients offer D-Bus services with up to three interfaces:
-\code{Client.Observer}, \code{Client.Approver}, and
-\code{Client.Handler}. Each interface provides a method that the
-Channel Dispatcher can call to inform the client about a channel to
-observe, approve or handle.
+%% Clients offer D-Bus services with up to three interfaces:
+%% \code{Client.Observer}, \code{Client.Approver}, and
+%% \code{Client.Handler}. Each interface provides a method that the
+%% Channel Dispatcher can call to inform the client about a channel to
+%% observe, approve or handle.
+クライアントは、最大で三つまでのインターフェイスを持つD-Busサービスを提供する。
+\code{Client.Observer}、\code{Client.Approver}そして\code{Client.Handler}だ。
+それぞれのインターフェイスが提供するメソッドをChannel Dispatcherが呼んで、
+観察あるいは許可あるいは処理させたいチャネルをクライアントに伝える。
 
-The Channel Dispatcher dispatches the channel to each group of clients
-in turn. First, the channel is dispatched to all appropriate
-Observers.  Once they have all returned, the channel is dispatched to
-all the appropriate Approvers. Once the first Approver has approved or
-rejected the channel, all other Approvers are informed and the channel
-is finally dispatched to the Handler.  Channel dispatching is done in
-stages because Observers might need time to get set up before the
-Handler begins altering the channel.
+%% The Channel Dispatcher dispatches the channel to each group of clients
+%% in turn. First, the channel is dispatched to all appropriate
+%% Observers.  Once they have all returned, the channel is dispatched to
+%% all the appropriate Approvers. Once the first Approver has approved or
+%% rejected the channel, all other Approvers are informed and the channel
+%% is finally dispatched to the Handler.  Channel dispatching is done in
+%% stages because Observers might need time to get set up before the
+%% Handler begins altering the channel.
+Channel Dispatcherは、そのチャネルを各クライアントグループに振り分ける。
+まず、そのチャネルを適切なオブザーバーすべてにディスパッチする。
+すべての結果が戻ってきたら、チャネルを適切なアプルーバーすべてにディスパッチする。
+最初のアプルーバーがチャネルを許可あるいは拒否すると、その他すべてのアプルーバーにそれが通知され、
+最終的にチャネルはハンドラーに渡される。チャネルのディスパッチがこのように段階を踏んで行われる理由は、
+オブザーバーの準備をするのにある程度の時間が必要で、それまではハンドラーがチャネルに手を加えられないからである。
 
-Clients expose a channel filter property which is a list of filters
-read by the Channel Dispatcher so that it knows what sorts of channels
-a client is interested in. A filter must include at least the channel
-type, and target handle type (e.g., contact or room) that the client
-is interested in, but it can contain more properties. Matching is done
-against the channel's immutable properties, using simple equality for
-comparison.  The filter in \aosatblref{tbl.telepathy.filter} matches
-all one-to-one text channels.
+%% Clients expose a channel filter property which is a list of filters
+%% read by the Channel Dispatcher so that it knows what sorts of channels
+%% a client is interested in. A filter must include at least the channel
+%% type, and target handle type (e.g., contact or room) that the client
+%% is interested in, but it can contain more properties. Matching is done
+%% against the channel's immutable properties, using simple equality for
+%% comparison.  The filter in \aosatblref{tbl.telepathy.filter} matches
+%% all one-to-one text channels.
+クライアントはチャネルフィルタプロパティを公開する。これはChannel Dispatcher
+が読むフィルタの一覧で、これを読めばそのクライアントがどんなチャネルに興味を持っているのかがわかる。
+フィルタに少なくとも含める必要があるのは、チャネル型とそのクライアントが扱えるターゲットハンドル型
+(連絡先あるいはルームなど)である。それ以外にもプロパティを含めることができる。
+このフィルタをチャネルの不変プロパティとマッチングさせる。マッチするかどうかは、単純に一致するかどうかで判断する。
+たとえば\aosatblref{tbl.telepathy.filter}のフィルタは、すべての一対一テキストチャネルにマッチする。
 
 \begin{table}\centering
 \begin{tabular}{ |ll| }
   \hline
-    Property & Value \\
+    %% Property & Value \\
+    プロパティ & 値 \\
   \hline
     \code{ofdT.Channel.ChannelType} & \code{Channel.Type.Text} \\
     \code{ofdT.Channel.TargetHandleType} & \code{Handle\_Type\_Contact} (1) \\
   \hline
   \end{tabular}
-  \caption{Example Channel Filter}
+  %% \caption{Example Channel Filter}
+  \caption{チャネルフィルタの例}
   \label{tbl.telepathy.filter}
 \end{table}
 
-Clients are discoverable via D-Bus because they publish services
-beginning with the well-known name \code{ofdT.Client} (for example
-\code{ofdT.Client.Empathy.Chat}).  They can also optionally install a
-file which the Channel Dispatcher will read specifying the channel
-filters. This allows the Channel Dispatcher to start a client if it is
-not already running.  Having clients be discoverable in this way makes
-the choice of user interface configurable and changeable at any time
-without having to replace any other part of Telepathy.
+%% Clients are discoverable via D-Bus because they publish services
+%% beginning with the well-known name \code{ofdT.Client} (for example
+%% \code{ofdT.Client.Empathy.Chat}).  They can also optionally install a
+%% file which the Channel Dispatcher will read specifying the channel
+%% filters. This allows the Channel Dispatcher to start a client if it is
+%% not already running.  Having clients be discoverable in this way makes
+%% the choice of user interface configurable and changeable at any time
+%% without having to replace any other part of Telepathy.
+クライアントをD-Bus経由で発見できるのは、クライアントが既知の名前\code{ofdT.Client}
+から始まる(たとえば\code{ofdT.Client.Empathy.Chat})サービスを公開しているからである。
+また、オプションでファイルをインストールできる。これをChannel Dispatcherが読んで、
+チャネルフィルタを指定する。これを使えば、Channel Dispatcher
+からまだ起動していないクライアントを立ち上げることができる。
+このようにしてクライアントを発見可能にしておくことで、ユーザーインターフェイスを
+設定や変更がいつでもできるようになり、その時にTelepathyの他の部分に一切手を加える必要がなくなる。
 
 %% \begin{aosabox}{All or Nothing}
 \begin{aosabox}{オールオアナッシング}
 
-It is possible to provide a filter indicating you are interested in
-all channels, but in practice this is only useful as an example of
-observing channels. Real clients contain code that is specific to
-channel types.
+%% It is possible to provide a filter indicating you are interested in
+%% all channels, but in practice this is only useful as an example of
+%% observing channels. Real clients contain code that is specific to
+%% channel types.
+すべてのチャネルを扱えるというフィルタを提供することもできる。
+しかし、現実的に考えると、そんなことをして有用なのはチャネルを観察するサンプルくらいである。
+実際のクライアントは、チャネル型に固有のコードを含むものだ。
 
-An empty filter indicates a Handler is not interested in any channel
-types. However it is still possible to dispatch a channel to this
-handler if you do so by name.  Temporary Handlers which are created on
-demand to handle a specific channel use such a filter.
+%% An empty filter indicates a Handler is not interested in any channel
+%% types. However it is still possible to dispatch a channel to this
+%% handler if you do so by name.  Temporary Handlers which are created on
+%% demand to handle a specific channel use such a filter.
+空のフィルタを渡すと、そのハンドラーは一切のチャネル型に興味を持たないということになる。
+しかしそれでも、名前を直接指定してそのハンドラに処理をディスパッチできる。
+特定のチャネルを処理するためだけに一時的に作るハンドラーなどで、このようなフィルタを使うことがある。
 
 \end{aosabox}
 
