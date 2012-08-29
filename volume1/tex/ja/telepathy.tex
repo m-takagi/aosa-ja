@@ -1275,89 +1275,140 @@ Channel Dispatcherは、そのチャネルを各クライアントグループ�
 %% \begin{aosasect1}{The Role of Language Bindings}
 \begin{aosasect1}{言語バインディングの役割}
 
-As Telepathy is a D-Bus API, and thus can driven by any programming
-language that supports D-Bus.  Language bindings are not required for
-Telepathy, but they can be used to provide a convenient way to use it.
+%% As Telepathy is a D-Bus API, and thus can driven by any programming
+%% language that supports D-Bus.  Language bindings are not required for
+%% Telepathy, but they can be used to provide a convenient way to use it.
+TelepathyはD-Bus APIなので、D-Busをサポートするあらゆる言語から使うことができる。
+言語バインディングはTelepathyに必須のものではないが、これを使えばTelepathyを
+さらに便利に活用できる。
 
-Language bindings can be split into two groups: low-level bindings
-that include code generated from the specification, constants, method
-names, etc.; and high-level bindings, which are hand-written code that
-makes it easier for programmers to do things using Telepathy.
-Examples of high-level bindings are the GLib and Qt4 bindings.
-Examples of low-level bindings are the Python bindings and the
-original libtelepathy C bindings, though the GLib and Qt4 bindings
-include a low-level binding.
+%% Language bindings can be split into two groups: low-level bindings
+%% that include code generated from the specification, constants, method
+%% names, etc.; and high-level bindings, which are hand-written code that
+%% makes it easier for programmers to do things using Telepathy.
+%% Examples of high-level bindings are the GLib and Qt4 bindings.
+%% Examples of low-level bindings are the Python bindings and the
+%% original libtelepathy C bindings, though the GLib and Qt4 bindings
+%% include a low-level binding.
+言語バインディングは二つのグループに分類できる。ローレベルのバインディングとハイレベルのバインディングだ。
+ローレベルのバインディングには、仕様や定数、メソッド名に基づいて生成したコードが含まれる。
+ハイレベルのバインディングは手書きのコードで、プログラマーがTelepathyをより使いやすくするものだ。
+ハイレベルのバインディングの例にはGLibやQt4用のバインディングがある。
+ローレベルのバインディングの例はPythonバインディングや
+Cのlibtelepathyであるが、GLibやQt4バインディングにもローレベルのバインディングが含まれている。
 
 %% \begin{aosasect2}{Asynchronous Programming}
 \begin{aosasect2}{非同期プログラミング}
 
-Within the language bindings, all method calls that make requests over
-D-Bus are asynchronous: the request is made, and the reply is given in
-a callback. This is required because D-Bus itself is asynchronous.
+%% Within the language bindings, all method calls that make requests over
+%% D-Bus are asynchronous: the request is made, and the reply is given in
+%% a callback. This is required because D-Bus itself is asynchronous.
+言語バインディング内でのすべてのメソッド呼び出しはD-Bus越しのリクエストであり、
+これは非同期になる。リクエストを投げて、結果はコールバックで取得するという方式だ。
+D-Bus自体が非同期なため、これが必須となる。
 
-Like most network and user interface programming, D-Bus requires the
-use of an event loop to dispatch callbacks for incoming signals and
-method returns. D-Bus integrates well with the GLib mainloop used by
-the GTK+ and Qt toolkits.
+%% Like most network and user interface programming, D-Bus requires the
+%% use of an event loop to dispatch callbacks for incoming signals and
+%% method returns. D-Bus integrates well with the GLib mainloop used by
+%% the GTK+ and Qt toolkits.
+ネットワークやユーザーインターフェイスがからむプログラミングにはよくあることだが、
+D-Busではイベントループを使う必要がある。
+入力シグナル用のコールバックへのディスパッチやメソッドの結果を返すときにこれを使う。
+D-Busは、GTK+やQtが使うGLibメインループとうまく統合されている。
 
-Some D-Bus language bindings (such as dbus-glib) provide a
-pseudo-synchronous API, where the main loop is blocked until the
-method reply is returned.  Once upon a time this was exposed via the
-telepathy-glib API bindings. Unfortunately using pseudo-synchronous
-API turns out to be fraught with problems, and was eventually removed
-from telepathy-glib.
+%% Some D-Bus language bindings (such as dbus-glib) provide a
+%% pseudo-synchronous API, where the main loop is blocked until the
+%% method reply is returned.  Once upon a time this was exposed via the
+%% telepathy-glib API bindings. Unfortunately using pseudo-synchronous
+%% API turns out to be fraught with problems, and was eventually removed
+%% from telepathy-glib.
+D-Bus言語バインディングの中には、dbus-glibのように疑似同期型API
+を提供するものもある。このAPIでは、メインループをブロックしてメソッドの結果を待つ。
+昔々は、これはtelepathy-glib APIバインディング経由で公開されていた。
+残念ながら、疑似同期型のAPIを使っているといろんな問題に悩まされることになり、
+最終的にtelepathy-glibから削除された。
 
 %% \begin{aosabox}{Why Pseudo-Synchronous D-Bus Calls Don't Work}
 \begin{aosabox}{疑似同期D-Bus呼び出しが失敗する理由}
 
-The pseudo-synchronous interface offered by dbus-glib and other D-Bus
-bindings is implemented using a request-and-block technique. While
-blocking, only the D-Bus socket is polled for new I/O and any D-Bus
-messages that are not the response to the request are queued for later
-processing.
+%% The pseudo-synchronous interface offered by dbus-glib and other D-Bus
+%% bindings is implemented using a request-and-block technique. While
+%% blocking, only the D-Bus socket is polled for new I/O and any D-Bus
+%% messages that are not the response to the request are queued for later
+%% processing.
+dbus-glibなどのD-Busバインディングが提供する疑似同期インターフェイスの実装は、
+request-and-block方式になっている。ブロックしている間、
+D-Busソケットだけが新たなI/Oをポールする。
+リクエストへの応答以外のD-Busメッセージはすべてキューに入れておき、後で処理する。
 
-This causes several major and inescapable problems:
+%% This causes several major and inescapable problems:
+それが原因で、重大かつ不可避な問題がいくつか発生する。
 
 \begin{aosaitemize}
 
-  \item The caller is blocked while waiting for the request to be
-    answered.  It (and its user interface, if any) will be completely
-    unresponsive. If the request requires accessing the network, that
-    takes time; if the callee has locked up, the caller will be
-    unresponsive until the call times out.
+  %% \item The caller is blocked while waiting for the request to be
+  %%   answered.  It (and its user interface, if any) will be completely
+  %%   unresponsive. If the request requires accessing the network, that
+  %%   takes time; if the callee has locked up, the caller will be
+  %%   unresponsive until the call times out.
+  \item 呼び出し元はブロックされ、リクエストに対する応答があるまで待たされる。
+  呼び出し元(そしてそれに対応するユーザーインターフェイス)は、その間は何もできなくなる。
+  ネットワーク越しのリクエストの場合などは、それなりに時間がかかる。
+  呼び出された側がダウンした場合などは、タイムアウトになるまで呼び出し元は身動きできなくなる。
 
-    Threading is not a solution here because threading is just another
-    way of making your calling asynchronous. Instead you may as well
-    make asynchronous calls where the responses come in via the
-    existing event loop.
+    %% Threading is not a solution here because threading is just another
+    %% way of making your calling asynchronous. Instead you may as well
+    %% make asynchronous calls where the responses come in via the
+    %% existing event loop.
+    スレッドを分けたって問題は解決しない。スレッドを分けるということは、
+    単に非同期呼び出しを別の方法で行っているだけだからである。
+    それだったら普通に非同期呼び出しをしたほうがいい。そうすれば、レスポンスは
+    既存のイベントループ経由で得られる。
 
-  \item Messages may be reordered. Any messages received before the
-    watched-for reply will be placed on a queue and delivered to the
-    client after the reply.
+  %% \item Messages may be reordered. Any messages received before the
+  %%   watched-for reply will be placed on a queue and delivered to the
+  %%   client after the reply.
+  \item メッセージの順番が入れ替わることがあり得る。
+  応答待ちのメッセージの前に受け取ったメッセージはキューに入るので、
+  その応答がクライアントに配送されるのは応答待ちメッセージの処理を終えた後になる。
 
-    This causes problems in situations where a signal indicating a
-    change of state (i.e., the object has been destroyed) is now
-    received after the method call on that object fails (i.e., with
-    the exception \code{UnknownMethod}).  In this situation, it is
-    hard to know what error to display to the user.  Whereas if we
-    receive a signal first, we can cancel pending D-Bus method calls,
-    or ignore their responses.
+    %% This causes problems in situations where a signal indicating a
+    %% change of state (i.e., the object has been destroyed) is now
+    %% received after the method call on that object fails (i.e., with
+    %% the exception \code{UnknownMethod}).  In this situation, it is
+    %% hard to know what error to display to the user.  Whereas if we
+    %% receive a signal first, we can cancel pending D-Bus method calls,
+    %% or ignore their responses.
+    これが問題になるのは、状態が変わった(オブジェクトが破棄されたなど)というシグナルを受信する前に
+    そのオブジェクトのメソッド呼び出しを実行してしまう(その結果として\code{UnknownMethod}が発生する)などの場合だ。
+    こんなときは、ユーザーにどんなエラーメッセージを見せればいいのかわからなくなる。
+    もし事前にシグナルを受け取っていたら、ペンディング中のD-Busメソッド呼び出しをキャンセルするなり
+    その応答を無視するなりの対策ができる。
 
-  \item Two processes making pseudo-blocking calls on each other can
-    deadlock, with each waiting for the other to respond to its query.
-    This scenario can occur with processes that are both a D-Bus
-    service and call other D-Bus services (for example, Telepathy
-    clients). The Channel Dispatcher calls methods on clients to
-    dispatch channels, but clients also call methods on the Channel
-    Dispatcher to request the opening of new channels (or equally they
-    call the Account Manager, which is part of the same process).
+  %% \item Two processes making pseudo-blocking calls on each other can
+  %%   deadlock, with each waiting for the other to respond to its query.
+  %%   This scenario can occur with processes that are both a D-Bus
+  %%   service and call other D-Bus services (for example, Telepathy
+  %%   clients). The Channel Dispatcher calls methods on clients to
+  %%   dispatch channels, but clients also call methods on the Channel
+  %%   Dispatcher to request the opening of new channels (or equally they
+  %%   call the Account Manager, which is part of the same process).
+  \item 二つのプロセスがお互いに疑似同期呼び出しをするとデッドロックが発生し、
+  お互いが相手への問い合わせの応答を待ち続ける状態になってしまう。
+  こんな状況が発生するのは、あるD-Busサービスが別のD-Busサービス(Telepathyクライアントなど)を呼ぶ場合などである。
+  Channel Dispatcherはクライアントのメソッドを呼んでチャネルをディスパッチする。
+  一方でクライアントもChannel Dispatcherのメソッドを呼んで新たなチャネルのオープンを要求する
+  (あるいはAccount Managerを呼ぶこともあって、こちらの場合も同様の可能性がある)。
 
 \end{aosaitemize}
 \end{aosabox}
 
-Method calls in the first Telepathy bindings, generated in C, simply
-used typedef callback functions. Your callback function simply had to
-implement the same type signature.
+%% Method calls in the first Telepathy bindings, generated in C, simply
+%% used typedef callback functions. Your callback function simply had to
+%% implement the same type signature.
+最初のTelepathyバインディングはCで生成したものだったが、そこでのメソッド呼び出しは
+単にtypedefコールバック関数を使っていた。コールバック関数側では
+単にそれと同じ型シグネチャを実装しておく必要があるだけだった。
 
 \begin{verbatim}
 typedef void (*tp_conn_get_self_handle_reply) (
@@ -1368,70 +1419,102 @@ typedef void (*tp_conn_get_self_handle_reply) (
 );
 \end{verbatim}
 
-\noindent This idea is simple, and works for C, so was continued into
-the next generation of bindings.
+%% \noindent This idea is simple, and works for C, so was continued into
+%% the next generation of bindings.
+\noindent
+このアイデアはシンプルだしCでも動くので、次世代のバインディングにも引き継がれた。
 
-In recent years, people have developed a way to use scripting
-languages such as Javascript and Python, as well as a C\#-like
-language called Vala, that use GLib/GObject-based APIs via a tool
-called GObject-Introspection.  Unfortunately, it's extremely difficult
-to rebind these types of callbacks into other languages, so newer
-bindings are designed to take advantage of the asynchronous callback
-features provided by the languages and GLib.
+%% In recent years, people have developed a way to use scripting
+%% languages such as Javascript and Python, as well as a C\#-like
+%% language called Vala, that use GLib/GObject-based APIs via a tool
+%% called GObject-Introspection.  Unfortunately, it's extremely difficult
+%% to rebind these types of callbacks into other languages, so newer
+%% bindings are designed to take advantage of the asynchronous callback
+%% features provided by the languages and GLib.
+最近は、JavaScriptやPythonのようなスクリプティング言語、そしてValaというC風の言語を使おうとする人も出てきた。
+これらはGLib/GObjectベースのAPIをGObject-Introspectionツール経由で使うものだ。
+残念ながら、これらのコールバックを他の言語に再バインドするのは極めて難しい。
+そこで、新たなバインディングを設計することにした。言語自身やGLibの持つ非同期コールバック機能を活用するものだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Object Readiness}
-\begin{aosasect2}{オブジェクトの準備}
+\begin{aosasect2}{オブジェクトのレディネス}
 \label{sec.telepathy.readiness}
 
-In a simple D-Bus API, such as the low-level Telepathy bindings, you
-can start making method calls or receive signals on a D-Bus object
-simply by creating a proxy object for it.  It's as simple as giving an
-object path and interface name and getting started.
+%% In a simple D-Bus API, such as the low-level Telepathy bindings, you
+%% can start making method calls or receive signals on a D-Bus object
+%% simply by creating a proxy object for it.  It's as simple as giving an
+%% object path and interface name and getting started.
+ローレベルTelepathyバインディングのようなシンプルなD-Bus APIでは、
+メソッド呼び出しを開始したりD-Busオブジェクトのシグナルを受信したりするには
+単にプロキシオブジェクトを作るだけでよい。
+プロキシオブジェクトにオブジェクトへのパスとインターフェイス名を渡すだけで始められる。
 
-However, in Telepathy's high-level API, we want our object proxies to
-know what interface are available, we want common properties for the
-object type to be retrieved (e.g., the channel type, target,
-initiator), and we want to determine and track the object's state or
-status (e.g., the connection status).
+%% However, in Telepathy's high-level API, we want our object proxies to
+%% know what interface are available, we want common properties for the
+%% object type to be retrieved (e.g., the channel type, target,
+%% initiator), and we want to determine and track the object's state or
+%% status (e.g., the connection status).
+しかしTelepathyのハイレベルAPIの場合は、
+どんなインターフェイスが使えるかをオブジェクトのプロキシが知っていて欲しいし、
+オブジェクト型に共通するプロパティ(チャネル型やターゲット、イニシエータなど)も取得できて欲しい。
+また、オブジェクトの状態や現状(接続状況など)も取得できるようにしたい。
 
-Thus, the concept of \emph{readiness} exists for all proxy objects. By
-making a method call on a proxy object, you are able to asynchronously
-retrieve the state for that object and be notified when state is
-retrieved and the object is ready for use.
+%% Thus, the concept of \emph{readiness} exists for all proxy objects. By
+%% making a method call on a proxy object, you are able to asynchronously
+%% retrieve the state for that object and be notified when state is
+%% retrieved and the object is ready for use.
+そのために、すべてのプロキシオブジェクトに\emph{レディネス}という概念が存在する。
+プロキシオブジェクト上のメソッドを呼び出すとそのオブジェクトの状態を非同期で取得できるようになり、
+状態の取得を終えてオブジェクトが使えるようになった時点で通知される。
 
-Since not all clients implement, or are interested in, all the
-features of a given object, readiness for an object type is separated
-into a number of possible features.  Each object implements a
-\emph{core} feature, which will prepare crucial information about the
-object (i.e., its \code{Interfaces} property and basic state), plus a
-number of optional features for additional state, which might include
-extra properties or state-tracking.  Specific examples of additional
-features you can ready on various proxies are contact info,
-capabilities, geolocation information, chat states (such as ``Escher
-is typing{\ldots}'') and user avatars.
+%% Since not all clients implement, or are interested in, all the
+%% features of a given object, readiness for an object type is separated
+%% into a number of possible features.  Each object implements a
+%% \emph{core} feature, which will prepare crucial information about the
+%% object (i.e., its \code{Interfaces} property and basic state), plus a
+%% number of optional features for additional state, which might include
+%% extra properties or state-tracking.  Specific examples of additional
+%% features you can ready on various proxies are contact info,
+%% capabilities, geolocation information, chat states (such as ``Escher
+%% is typing{\ldots}'') and user avatars.
+指定したオブジェクトの全機能をクライアントが実装しているとは限らないので、
+オブジェクト型のレディネスはそのオブジェクトで使える機能とは切り離されている。
+各オブジェクトは\emph{コア}機能を実装している。これは、そのオブジェクトに欠かせない情報
+(\code{Interfaces}プロパティや基本状態)を準備するためのものだ。
+そしてそれとは別にオプションの機能も実装しており、ここには追加のプロパティや状態の追跡などが含まれる。
+各種プロキシ上で使える追加機能の例としては、
+連絡先情報や位置情報、チャットのステータス(``Escher is typing{\ldots}''など)そしてユーザーのアバターなどがある。
 
-For example, connection object proxies have:
+%% For example, connection object proxies have:
+たとえば、コネクションオブジェクトのプロキシが持つ機能は、次のようになる。
 
 \begin{aosaitemize}
 
-  \item a core feature which retrieves the interface and connection
-    status;
+  %% \item a core feature which retrieves the interface and connection
+  %%   status;
+  \item インターフェイスや接続状態を取得するコア機能。
 
-  \item features to retrieve the requestable channel classes and
-    support contact info; and
+  %% \item features to retrieve the requestable channel classes and
+  %%   support contact info; and
+  \item リクエスト可能なチャネルのクラスやサポートする連絡先情報などを取得する機能。
 
-  \item a feature to establish a connection and return ready when
-    connected.
+  %% \item a feature to establish a connection and return ready when
+  %%   connected.
+  \item 接続を確立して、接続完了通知を返す機能。
 
 \end{aosaitemize}
 
-The programmer requests that the object is readied, providing a list
-of features in which they are interested and a callback to call when
-all of those features are ready. If all the features are already
-ready, the callback can be called immediately, else the callback is
-called once all the information for those features is retrieved.
+%% The programmer requests that the object is readied, providing a list
+%% of features in which they are interested and a callback to call when
+%% all of those features are ready. If all the features are already
+%% ready, the callback can be called immediately, else the callback is
+%% called once all the information for those features is retrieved.
+プログラマーは、そのオブジェクトを使う準備が完了したかどうかを問い合わせる。
+その際に、使いたい機能のリストと準備完了時に呼び出すコールバックを指定する。
+すべての機能が既に使える状態の場合はコールバックが即時に呼び出されるが、
+そうでない場合は、指定したすべての機能の準備が整った時点でコールバック呼び出される。
 
 \end{aosasect2}
 
