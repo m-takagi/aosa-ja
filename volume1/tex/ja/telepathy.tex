@@ -1594,34 +1594,54 @@ Telepathyの頑健性の理由を以下にまとめる。
 %% \begin{aosasect1}{Extending Telepathy: Sidecars}
 \begin{aosasect1}{Telepathyの拡張: サイドカー}
 
-Although the Telepathy specification tries to cover a wide range of
-features exported by communication protocols, some protocols are
-themselves extensible\footnote{E.g., the Extensible Messaging and
- Presence Protocol (XMPP).}.  Telepathy's developers wanted to make
-it possible extend your Telepathy connections to make use of such
-extensions without having to extend the Telepathy specification
-itself. This is done through the use of \emph{sidecars}.
+%% Although the Telepathy specification tries to cover a wide range of
+%% features exported by communication protocols, some protocols are
+%% themselves extensible\footnote{E.g., the Extensible Messaging and
+%%  Presence Protocol (XMPP).}.  Telepathy's developers wanted to make
+%% it possible extend your Telepathy connections to make use of such
+%% extensions without having to extend the Telepathy specification
+%% itself. This is done through the use of \emph{sidecars}.
+Telepathyの仕様では、各種通信プロトコルが公開するさまざまな機能をできるだけカバーしようとしている。
+しかし中には、プロトコル自体が拡張可能なものもある
+\footnote{Extensible Messaging and Presence Protocol (XMPP)がその一例だ。}。
+Telepathyの開発者たちは、Telepathyコネクションを拡張してそれに対応できるようにしようとした。
+Telepathyの仕様自体はそのままにしておきたかったのだ。
+これを実現するのが\emph{サイドカー}である。
 
-Sidecars are typically implemented by plugins in a Connection Manager.
-Clients call a method requesting a sidecar that implements a given
-D-Bus interface.  For example, someone's implementation of XEP-0016
-privacy lists might implement an interface named
-\code{com.example.PrivacyLists}. The method then returns a D-Bus
-object provided by the plugin, which should implement that interface
-(and possibly others). The object exists alongside the main Connection
-object (hence the name sidecar, like on a motorcycle).
+%% Sidecars are typically implemented by plugins in a Connection Manager.
+%% Clients call a method requesting a sidecar that implements a given
+%% D-Bus interface.  For example, someone's implementation of XEP-0016
+%% privacy lists might implement an interface named
+%% \code{com.example.PrivacyLists}. The method then returns a D-Bus
+%% object provided by the plugin, which should implement that interface
+%% (and possibly others). The object exists alongside the main Connection
+%% object (hence the name sidecar, like on a motorcycle).
+サイドカーは、一般にConnection Managerのプラグインとして実装されている。
+クライアントからは、指定したD-Busインターフェイスを実装したサイドカーをリクエストするメソッドを呼ぶ。
+たとえば誰かがXEP-0016プライバシーリストを実装したとすると、そのインターフェイスは\code{com.example.PrivacyLists}
+のようになるだろう。このメソッドは、プラグインが提供するD-Busメソッドを返す。
+このオブジェクトは指定したインターフェイスを実装していなければ行けない(それ以外のインターフェイスも実装しているかもしれない)。
+このオブジェクトは、メインのコネクションオブジェクトと並んで存在する
+(だからこそサイドカーという名前にした。ちょうどバイクのサイドカーと同じようなものだ)。
 
 %% \begin{aosabox}{The History of Sidecars}
 \begin{aosabox}{サイドカーの歴史}
 
-In the early days of Telepathy, the One Laptop Per Child project
-needed to support custom XMPP extensions (XEPs) to share information
-between devices. These were added directly to Telepathy-Gabble (the
-XMPP Connection Manager), and exposed via undocumented interfaces on
-the Connection object.  Eventually, with more developers wanting
-support for specific XEPs which have no analogue in other
-communications protocols, it was agreed that a more generic interface
-for plugins was needed.
+%% In the early days of Telepathy, the One Laptop Per Child project
+%% needed to support custom XMPP extensions (XEPs) to share information
+%% between devices. These were added directly to Telepathy-Gabble (the
+%% XMPP Connection Manager), and exposed via undocumented interfaces on
+%% the Connection object.  Eventually, with more developers wanting
+%% support for specific XEPs which have no analogue in other
+%% communications protocols, it was agreed that a more generic interface
+%% for plugins was needed.
+Telepathyが誕生して間もないころ、One Laptop Per Childプロジェクトが
+カスタムXMPPエクステンション(XEP)を必要としていた。デバイス間で情報を共有するためのものだ。
+そのエクステンションはTelepathy-Gabble (XMPP Connection Manager)
+に直接追加され、コネクションオブジェクトの非公式なインターフェイスとして公開された。
+後に、他の開発者たちも別のXEPへの対応を求めるようになった。
+類似機能が他の通信プロトコルにはないようなものだ。
+そんな経緯があって、プラグイン用のより汎用的なインターフェイスが必要だという結論に達したのだ。
 
 \end{aosabox}
 
