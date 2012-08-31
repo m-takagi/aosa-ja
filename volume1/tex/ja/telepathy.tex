@@ -1521,46 +1521,71 @@ typedef void (*tp_conn_get_self_handle_reply) (
 \end{aosasect1}
 
 %% \begin{aosasect1}{Robustness}
-\begin{aosasect1}{ロバストネス}
+\begin{aosasect1}{頑健性}
 
-One of the key advantages of Telepathy is its robustness. The
-components are modular, so a crash in one component should not bring
-down the whole system.  Here are some of the features that make
-Telepathy robust:
+%% One of the key advantages of Telepathy is its robustness. The
+%% components are modular, so a crash in one component should not bring
+%% down the whole system.  Here are some of the features that make
+%% Telepathy robust:
+Telepathyの大きな利点のひとつが、その頑健性だ。
+コンポーネントがモジュール化されているので、なにかひとつのコンポーネントが
+クラッシュしたとしてもシステム全体がダウンするようなことがない。
+Telepathyの頑健性の理由を以下にまとめる。
 
 \begin{aosaitemize}
 
-  \item The Account Manager and Channel Dispatcher can recover their
-    state.  When Mission Control (the single process that includes the
-    Account Manager and Channel Dispatcher) starts, it looks at the
-    names of services currently registered on the user's session bus.
-    Any Connections it finds that are associated with a known account
-    are reassociated with that account (rather than a new connection
-    being established), and running clients are queried for the list
-    of channels they're handling.
+  %% \item The Account Manager and Channel Dispatcher can recover their
+  %%   state.  When Mission Control (the single process that includes the
+  %%   Account Manager and Channel Dispatcher) starts, it looks at the
+  %%   names of services currently registered on the user's session bus.
+  %%   Any Connections it finds that are associated with a known account
+  %%   are reassociated with that account (rather than a new connection
+  %%   being established), and running clients are queried for the list
+  %%   of channels they're handling.
+  \item Account ManagerとChannel Dispatcherが自身の状態を復元できること。
+  Mission Control(Account ManagerとChannel Dispatcherを含む単一のプロセス)が立ち上がるときに、
+  ユーザーのセッションバスに現在登録されているサービス名を調べる。
+  既知のアカウントに関連づけられているコネクションが見つかれば
+  (新たな接続を確立せずに)そのアカウントとの関連づけをもう一度行い、
+  稼働中のクライアントには自分が扱っているチャネルのリストを問い合わせる。
 
-  \item If a client disappears while a channel it's handling is open,
-    the Channel Dispatcher will respawn it and reissue the channel.
+  %% \item If a client disappears while a channel it's handling is open,
+  %%   the Channel Dispatcher will respawn it and reissue the channel.
+  \item 処理中のチャネルがオープンしているときにクライアントが消えてしまった場合は、
+  Channel Dispatcherがクライアントをもう一度立ち上げてチャネルを再発行する。
 
-    If a client repeatedly crashes the Channel Dispatcher can attempt
-    to launch a different client, if available, or else it will close
-    the channel (to prevent the client repeatedly crashing on data it
-    can't handle).
+    %% If a client repeatedly crashes the Channel Dispatcher can attempt
+    %% to launch a different client, if available, or else it will close
+    %% the channel (to prevent the client repeatedly crashing on data it
+    %% can't handle).
+    クライアントが頻繁にクラッシュする場合は、
+    もし別のクライアントがあるのならChannel Dispatcherは別のクライアントを立ち上げることもできる。
+    別のクライアントがない場合は、チャネルを閉じる
+    (そして、扱うことのできないデータを渡されてクライアントがクラッシュしまくるのを防ぐ)。
 
-    Text messages require acknowledgment before they will disappear
-    from the list of pending messages. A client is only meant to
-    acknowledge a message once it is sure the user has seen it (that
-    is, displayed the message in a focused window). This way if the
-    client crashes trying to render the message, the channel will
-    still have the previously undisplayed message in the pending
-    message queue.
+    %% Text messages require acknowledgment before they will disappear
+    %% from the list of pending messages. A client is only meant to
+    %% acknowledge a message once it is sure the user has seen it (that
+    %% is, displayed the message in a focused window). This way if the
+    %% client crashes trying to render the message, the channel will
+    %% still have the previously undisplayed message in the pending
+    %% message queue.
+    テキストメッセージの場合、受信確認があってからでないと処理待ちメッセージのリストからは消せない。
+    クライアント側でメッセージの受信を確認できるのは、ユーザーがメッセージを見たとき
+    (つまり、フォーカスのあたっているウィンドウにメッセージが表示されたとき)だけである。
+    この方式にしておくと、もしメッセージのレンダリング中にクライアントがクラッシュしたとしても
+    そのメッセージはまだ表示されていないものとして処理待ちキューに残る。
 
-  \item If a Connection crashes, the Account Manager will respawn
-    it. Obviously the content of any stateful channels will be lost,
-    but it will only affect the Connections running in that process
-    and no others. Clients can monitor the state of the connections
-    and simply re-request information like the contact roster and any
-    stateless channels.
+  %% \item If a Connection crashes, the Account Manager will respawn
+  %%   it. Obviously the content of any stateful channels will be lost,
+  %%   but it will only affect the Connections running in that process
+  %%   and no others. Clients can monitor the state of the connections
+  %%   and simply re-request information like the contact roster and any
+  %%   stateless channels.
+  \item コネクションがクラッシュした場合はAccount Managerがコネクションを立ち上げなおす。
+  ステートフルなチャネルの内容は当然消えてしまうが、そのプロセスで稼働していたコネクションにしか影響は及ばず、
+  他には影響しない。クライアントはコネクションの状態を監視できるので、
+  連絡先リストやステートレスなチャネルなどに関しては単純に情報を再リクエストするだけでよい。
 
 \end{aosaitemize}
 
