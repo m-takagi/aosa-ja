@@ -1729,56 +1729,89 @@ mixinを使ってTelepathyの仕様バグを解決した例が\code{TpPresenceMi
 %% \begin{aosasect1}{Lessons Learned}
 \begin{aosasect1}{教訓}
 
-Telepathy is an excellent example of how to build a modular, flexible
-API on top of D-Bus. It shows how you can develop an extensible,
-decoupled framework on top of D-Bus. One which requires no central
-management daemon and allows components to be restartable, without
-loss of data in any other component.  Telepathy also shows how you can
-use D-Bus efficiently and effectively, minimizing the amount of
-traffic you transmit on the bus.
+%% Telepathy is an excellent example of how to build a modular, flexible
+%% API on top of D-Bus. It shows how you can develop an extensible,
+%% decoupled framework on top of D-Bus. One which requires no central
+%% management daemon and allows components to be restartable, without
+%% loss of data in any other component.  Telepathy also shows how you can
+%% use D-Bus efficiently and effectively, minimizing the amount of
+%% traffic you transmit on the bus.
+Telepathyは、モジュール化された柔軟なAPIをD-Bus上に実装したすばらしい実例のひとつだ。
+拡張性があって疎結合なフレームワークをD-Bus上で開発する方法を示している。
+中央集権型のデーモンを使わずにコンポーネントを再起動できるし、
+他のコンポーネントのデータを失うこともない。
+Telepathyはまた、D-Busを効率的に使う方法も示している。
+バス上をやりとりするデータのトラフィックを最小限に抑える方法がわかるだろう。
 
-Telepathy's development has been iterative, improving its use of D-Bus
-as time goes on. Mistakes were made, and lessons have been learned.
-Here are some of the important things we learned in designing the
-architecture of Telepathy:
+%% Telepathy's development has been iterative, improving its use of D-Bus
+%% as time goes on. Mistakes were made, and lessons have been learned.
+%% Here are some of the important things we learned in designing the
+%% architecture of Telepathy:
+Telepathyの開発は漸進的に行われており、時を経てD-Busの使い方も改善されている。
+かつては間違いも犯したし、そこから得た教訓もあった。
+Telepathyのアーキテクチャ設計で学んだ大切なことを、ここでいくつか紹介する。
 
 \begin{aosadescription}
 
-  \item{Use D-Bus properties; don't require dozens of small D-Bus
-    method calls to look up information.}  Every method call has a
-    round-trip time. Rather than making lots of individual calls
-    (e.g., \code{GetHandle}, \code{GetChannelType},
-    \code{GetInterfaces}) use D-Bus properties and return all the
-    information via a single call to \code{GetAll}.
+  %% \item{Use D-Bus properties; don't require dozens of small D-Bus
+  %%   method calls to look up information.}  Every method call has a
+  %%   round-trip time. Rather than making lots of individual calls
+  %%   (e.g., \code{GetHandle}, \code{GetChannelType},
+  %%   \code{GetInterfaces}) use D-Bus properties and return all the
+  %%   information via a single call to \code{GetAll}.
+  \item{D-Busのプロパティを使うこと。細かいD-Busメソッド呼び出しを大量に行わないと情報が得られないというのはやめる。}
+  あらゆるメソッド呼び出しにはラウンドトリップタイムが発生する。
+  個別の呼び出し(\code{GetHandle}、\code{GetChannelType}、\code{GetInterfaces}など)
+  を大量に行うのではなく、D-Busプロパティを使ってすべての情報を一回の\code{GetAll}だけで返せるようにする。
 
-  \item{Provide as much information as you can when announcing new
-    objects.}  The first thing clients used to do when they learned
-    about a new object was to request all of its properties to learn
-    whether they were even interested in the object. By including the
-    immutable properties of an object in the signal announcing the
-    object, most clients can determine their interest in the object
-    without making any method calls. Furthermore, if they are
-    interested in the object, they do not have to bother requesting
-    any of its immutable properties.
+  %% \item{Provide as much information as you can when announcing new
+  %%   objects.}  The first thing clients used to do when they learned
+  %%   about a new object was to request all of its properties to learn
+  %%   whether they were even interested in the object. By including the
+  %%   immutable properties of an object in the signal announcing the
+  %%   object, most clients can determine their interest in the object
+  %%   without making any method calls. Furthermore, if they are
+  %%   interested in the object, they do not have to bother requesting
+  %%   any of its immutable properties.
+  \item{新たなオブジェクトをアナウンスするときには可能な限りの情報を提供する。}
+  新たなオブジェクトを知ったクライアントが最初にするのは、そのすべてのプロパティをリクエストして
+  そのオブジェクトで何ができるのかを知ることだ。オブジェクトを通知するシグナルの中に
+  不変なプロパティを含めておけば、たいていのクライアントはそれだけで
+  どんなことができるのかを判断できる。
+  さらに、そのオブジェクトを実際に使うことになっても、
+  不変なプロパティを改めてリクエストする手間が省ける。
 
-  \item{The \code{Contacts} interface allows requesting information
-    from multiple interfaces at once.}  Rather than making numerous
-    \code{GetAll} calls to retrieve all the information for a contact,
-    the \code{Contacts} interface lets us request all the information
-    at once, saving a number of D-Bus round trips.
+  %% \item{The \code{Contacts} interface allows requesting information
+  %%   from multiple interfaces at once.}  Rather than making numerous
+  %%   \code{GetAll} calls to retrieve all the information for a contact,
+  %%   the \code{Contacts} interface lets us request all the information
+  %%   at once, saving a number of D-Bus round trips.
+  \item{\code{Contacts}インターフェイスは、複数のインターフェイスからのリクエストを一度に受け付けられるようにする。}
+  大量の\code{GetAll}呼び出しで連絡先の全情報を取得するのではなく、
+  \code{Contacts}インターフェイスがすべての情報を一度に取得できるようにしておけば
+  D-Busのラウンドトリップを減らせる。
 
-  \item{Don't use abstractions that don't quite fit.}  Exposing the
-    contact roster and contact groups as channels implementing the
-    \code{Group} interface seemed like a good idea because it used
-    existing abstractions rather than requiring additional
-    interfaces. However, it made implementing clients difficult and
-    was ultimately not suitable.
+  %% \item{Don't use abstractions that don't quite fit.}  Exposing the
+  %%   contact roster and contact groups as channels implementing the
+  %%   \code{Group} interface seemed like a good idea because it used
+  %%   existing abstractions rather than requiring additional
+  %%   interfaces. However, it made implementing clients difficult and
+  %%   was ultimately not suitable.
+  \item{すべきでないところでの抽象化はやめる。}
+  \code{Group}インターフェイスを実装したチャネルで連絡先一覧や連絡先グループを
+  公開するというのはよい考えに思える。新たなインターフェイスを追加せずに
+  既存の抽象化を使えるからだ。
+  しかし、クライアント側の実装は難しくなってしまうので、結局はあまり適しているとは言えない。
 
-  \item{Ensure your API will meet your future needs.}  The original
-    channel requesting API was very rigid, only permitting very basic
-    channel requests. This did not meet our needs when needing to
-    request channels that required more information. This API had to
-    be replaced with one that had significantly more flexibility.
+  %% \item{Ensure your API will meet your future needs.}  The original
+  %%   channel requesting API was very rigid, only permitting very basic
+  %%   channel requests. This did not meet our needs when needing to
+  %%   request channels that required more information. This API had to
+  %%   be replaced with one that had significantly more flexibility.
+  \item{将来のニーズを満たせるようにAPIを設計する}
+  当初のチャネルリクエストAPIは非常に柔軟性に欠け、ほんとうに基本的なチャネルリクエストしかできなかった。
+  もっと多くの情報を必要とするチャネルリクエストをしたいというニーズは満たせないものだった。
+  このAPIは書き直さざるを得なくなり、ずっと柔軟なものに置き換えられた。
 
 \end{aosadescription}
 
