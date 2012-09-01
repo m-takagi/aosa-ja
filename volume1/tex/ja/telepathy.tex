@@ -1650,27 +1650,45 @@ Telepathyが誕生して間もないころ、One Laptop Per Childプロジェク
 %% \begin{aosasect1}{A Brief Look Inside a Connection Manager}
 \begin{aosasect1}{コネクションマネージャーの内部構造の概要}
 
-Most Connection Managers are written using the C/GLib language
-binding, and a number of high-level base classes have been developed
-to make writing a Connection Manager easier.  As discussed previously,
-D-Bus objects are published from software objects that implement a
-number of software interfaces that map to D-Bus
-interfaces. Telepathy-GLib provides base objects to implement the
-Connection Manager, Connection and Channel objects. It also provides
-an interface to implement a Channel Manager. Channel Managers are
-factories that can be used by the \code{BaseConnection} to instantiate
-and manage channel objects for publishing on the bus.
+%% Most Connection Managers are written using the C/GLib language
+%% binding, and a number of high-level base classes have been developed
+%% to make writing a Connection Manager easier.  As discussed previously,
+%% D-Bus objects are published from software objects that implement a
+%% number of software interfaces that map to D-Bus
+%% interfaces. Telepathy-GLib provides base objects to implement the
+%% Connection Manager, Connection and Channel objects. It also provides
+%% an interface to implement a Channel Manager. Channel Managers are
+%% factories that can be used by the \code{BaseConnection} to instantiate
+%% and manage channel objects for publishing on the bus.
+ほとんどのConnection ManagerはC/GLibバインディングを使って書かれており、
+高レベルの基底クラス群の多くがConnection Managerを書きやすくするために開発されたものだ。
+先に説明したとおり、D-Busオブジェクトを公開するのは
+さまざまなインターフェイスを実装したソフトウェアオブジェクトであり、
+それらのインターフェイスをD-Busインターフェイスとマップしている。
+Telepathy-GLibは、Connection Managerやコネクションそしてチャネルを実装するための基底オブジェクトを提供する。
+また、Channel Managerを実装するためのインターフェイスも用意する。
+Channel Managerはファクトリーで、
+\code{BaseConnection}によってインスタンス化され、
+バス上に公開するチャネルオブジェクトを管理する。
 
-The bindings also provide what are known as \emph{mixins}.  These can
-be added to a class to provide additional functionality, abstract the
-specification API and provide backwards compatibility for new and
-deprecated versions of an API through one mechanism. The most commonly
-used mixin is one that adds the D-Bus properties interface to an
-object. There are also mixins to implement the
-\code{ofdT.Connection.Interface.Contacts} and
-\code{ofdT.Channel.Interface.Group} interfaces and mixins making it
-possible to implement the old and new presence interfaces, and old and
-new text message interfaces via one set of methods.
+%% The bindings also provide what are known as \emph{mixins}.  These can
+%% be added to a class to provide additional functionality, abstract the
+%% specification API and provide backwards compatibility for new and
+%% deprecated versions of an API through one mechanism. The most commonly
+%% used mixin is one that adds the D-Bus properties interface to an
+%% object. There are also mixins to implement the
+%% \code{ofdT.Connection.Interface.Contacts} and
+%% \code{ofdT.Channel.Interface.Group} interfaces and mixins making it
+%% possible to implement the old and new presence interfaces, and old and
+%% new text message interfaces via one set of methods.
+C/GLibバインディングは、いわゆる\emph{mixin}も提供する。
+これをクラスに追加すると、付加機能を提供できる。
+そしてAPIの仕様を抽象化し、新たなAPIが追加されたり過去のAPIが廃止されたりしても
+互換性を保てるようになる。
+最も使われているmixinは、D-Busプロパティのインターフェイスをオブジェクトに追加するものだ。
+それ以外にも、\code{ofdT.Connection.Interface.Contacts}や\code{ofdT.Channel.Interface.Group}
+インターフェイスを実装するmixinもあれば、新旧のプレゼンスインターフェイスや
+新旧のテキストメッセージインターフェイスを同じメソッド群で実装できるようにするmixinもある。
 
 %% \aosafigure{../images/telepathy/cm.eps}{Example Connection Manager Architecture}{fig.telepathy.manager}
 \aosafigure{../images/telepathy/cm.eps}{コネクションマネージャーのアーキテクチャの例}{fig.telepathy.manager}
@@ -1678,21 +1696,31 @@ new text message interfaces via one set of methods.
 %% \begin{aosabox}{Using Mixins to Solve API Mistakes}
 \begin{aosabox}{Mixinによる、APIの間違いの解決}
 
-One place where mixins have been used to solve a mistake in the
-Telepathy specification is the \code{TpPresenceMixin}.  The original
-interface exposed by Telepathy
-(\code{odfT.Connection.Interface.Presence}) was incredibly
-complicated, hard to implement for both Connections and Clients, and
-exposed functionality that was both nonexistent in most communications
-protocols, and very rarely used in others. The interface was replaced
-by a much simpler interface
-(\code{odfT.Connection.Interface.SimplePresence}), which exposed all
-the functionality that users cared about and had ever actually been
-implemented in the connection managers.
+%% One place where mixins have been used to solve a mistake in the
+%% Telepathy specification is the \code{TpPresenceMixin}.  The original
+%% interface exposed by Telepathy
+%% (\code{odfT.Connection.Interface.Presence}) was incredibly
+%% complicated, hard to implement for both Connections and Clients, and
+%% exposed functionality that was both nonexistent in most communications
+%% protocols, and very rarely used in others. The interface was replaced
+%% by a much simpler interface
+%% (\code{odfT.Connection.Interface.SimplePresence}), which exposed all
+%% the functionality that users cared about and had ever actually been
+%% implemented in the connection managers.
+mixinを使ってTelepathyの仕様バグを解決した例が\code{TpPresenceMixin}だ。
+元々Telepathyが公開していたインターフェイス(\code{odfT.Connection.Interface.Presence})
+は信じられないほど複雑で、コネクションとクライアントのどちらを実装するのも大変だった。
+また、そもそもほとんどのプロトコルでコネクションにもクライアントにも存在しない機能を公開していたり、
+片方では使うけれどももう一方ではほとんど使わないという機能を公開していたりした。
+後にこのインターフェイスはもっとシンプルなもの(\code{odfT.Connection.Interface.SimplePresence})
+に置き換えられた。これはユーザーが必要としていてConnection Managerで実際に実装されている機能は
+すべて公開するものだ。
 
-The presence mixin implements both interfaces on the Connection so
-that legacy clients continue to work, but only at the functionality
-level of the simpler interface.
+%% The presence mixin implements both interfaces on the Connection so
+%% that legacy clients continue to work, but only at the functionality
+%% level of the simpler interface.
+プレゼンスmixinはコネクション上でのどちらのインターフェイスも実装しているので、
+レガシーなクライアントでもドウサスル。しかし、機能面ではシンプルなインターフェイスのレベルにとどまる。
 
 \end{aosabox}
 
