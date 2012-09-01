@@ -1,94 +1,159 @@
 \begin{aosachapter}{Thousand Parsec}{s:thousandparsec}{Alan Laudicina and Aaron Mavrinac}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r272
 
-A vast star empire encompasses a hundred worlds, stretching a thousand
-parsecs across space. Unlike some other areas of the galaxy, few
-warriors live here; this is an intellectual people, with a rich
-cultural and academic tradition. Their magnificent planets, built turn
-by turn around great universities of science and technology, are a
-beacon of light to all in this age of peace and prosperity. Starships
-arrive from the vast reaches of the quadrant and beyond, bearing the
-foremost researchers from far and wide. They come to contribute their
-skills to the most ambitious project ever attempted by sentient
-beings: the development of a decentralized computer network to connect
-the entire galaxy, with all its various languages, cultures, and
-systems of law.
+%% A vast star empire encompasses a hundred worlds, stretching a thousand
+%% parsecs across space. Unlike some other areas of the galaxy, few
+%% warriors live here; this is an intellectual people, with a rich
+%% cultural and academic tradition. Their magnificent planets, built turn
+%% by turn around great universities of science and technology, are a
+%% beacon of light to all in this age of peace and prosperity. Starships
+%% arrive from the vast reaches of the quadrant and beyond, bearing the
+%% foremost researchers from far and wide. They come to contribute their
+%% skills to the most ambitious project ever attempted by sentient
+%% beings: the development of a decentralized computer network to connect
+%% the entire galaxy, with all its various languages, cultures, and
+%% systems of law.
+広大なスターエンパイアには100の世界が存在し、1000パーセクにまたがって広がっている。
+銀河の他の部分とは違って、ここには戦士はほとんどいない。
+そこにいるのは知的な人々で、豊かな文化と教養を兼ね備えている。
+彼らの住む惑星では科学や工学の大学が続々とうまれ、
+この世代の平和と繁栄の象徴となっている。
+象限を超えて遙か彼方から宇宙船がやってきて、一線級の研究者たちが隅々まで調査している。
+彼らはその知識をいかして、これまでにない壮大なプロジェクトにとりかかる。
+分散型のコンピューターネットワークを構築して銀河全体をひとつにするというプロジェクトだ。
+さまざまな言語や文化、そして法体系をすべてひとつにつないでしまおうというのだ。
 
-Thousand Parsec is more than a video game: it is a framework, with a
-complete toolkit for building multiplayer, turn-based space empire
-strategy games. Its generic game protocol allows diverse
-implementations of client, server, and AI software, as well as a vast
-array of possible games. Though its size
-has made planning and execution challenging,
-forcing contributors to walk a thin line between
-excessively vertical and excessively horizontal development, it also
-makes it a rather interesting specimen when discussing the
-architecture of open source applications.
+%% Thousand Parsec is more than a video game: it is a framework, with a
+%% complete toolkit for building multiplayer, turn-based space empire
+%% strategy games. Its generic game protocol allows diverse
+%% implementations of client, server, and AI software, as well as a vast
+%% array of possible games. Though its size
+%% has made planning and execution challenging,
+%% forcing contributors to walk a thin line between
+%% excessively vertical and excessively horizontal development, it also
+%% makes it a rather interesting specimen when discussing the
+%% architecture of open source applications.
+Thousand Parsecは単なるビデオゲームではない。
+一種のフレームワークであり、マルチプレイヤー型でターン制の宇宙帝国戦略ゲームを
+構築するための完全なツールキットを含む。汎用的なゲームプロトコルを使えば
+さまざまな実装のクライアントやサーバーそしてAIソフトウェアを作れるし、
+あらゆるゲームを作れるだろう。規模が規模だけに実際に計画を実行するのは大変だろうが、
+オープンソースアプリケーションのアーキテクチャについて議論するには興味深いものになる。
 
-The journalist's label for the genre Thousand Parsec games inhabit is
-``4X''---shorthand for ``e\emph{x}plore, e\emph{x}pand,
-e\emph{x}ploit, and e\emph{x}terminate,'' the modus operandi of the
-player controlling an empire\footnote{Some excellent commercial
-examples of Thousand Parsec's inspiration include \emph{VGA Planets}
-and \emph{Stars!}, as well as the \emph{Master of Orion},
-\emph{Galactic Civilizations}, and \emph{Space Empires} series. For
-readers unfamiliar with these titles, the \emph{Civilization} series
-is a popular example of the same gameplay style, albeit in a
-different setting. A number of real-time 4X games also exist, such
-as \emph{Imperium Galactica} and \emph{Sins of a Solar Empire}.}.
-Typically in the 4X genre of games, players will scout to reveal the
-map (explore), create new settlements or extend the influence of
-existing ones (expand), gather and use resources in areas they control
-(exploit), and attack and eliminate rival players (exterminate). The
-emphasis on economic and technological development, micromanagement,
-and variety of routes to supremacy yield a depth and complexity of
-gameplay unparalleled within the greater strategy genre.
+%% The journalist's label for the genre Thousand Parsec games inhabit is
+%% ``4X''---shorthand for ``e\emph{x}plore, e\emph{x}pand,
+%% e\emph{x}ploit, and e\emph{x}terminate,'' the modus operandi of the
+%% player controlling an empire\footnote{Some excellent commercial
+%% examples of Thousand Parsec's inspiration include \emph{VGA Planets}
+%% and \emph{Stars!}, as well as the \emph{Master of Orion},
+%% \emph{Galactic Civilizations}, and \emph{Space Empires} series. For
+%% readers unfamiliar with these titles, the \emph{Civilization} series
+%% is a popular example of the same gameplay style, albeit in a
+%% different setting. A number of real-time 4X games also exist, such
+%% as \emph{Imperium Galactica} and \emph{Sins of a Solar Empire}.}.
+%% Typically in the 4X genre of games, players will scout to reveal the
+%% map (explore), create new settlements or extend the influence of
+%% existing ones (expand), gather and use resources in areas they control
+%% (exploit), and attack and eliminate rival players (exterminate). The
+%% emphasis on economic and technological development, micromanagement,
+%% and variety of routes to supremacy yield a depth and complexity of
+%% gameplay unparalleled within the greater strategy genre.
+Thousand Parsecのようなゲームは、ジャーナリストに言わせると``4X''
+(``e\emph{x}plore, e\emph{x}pand, e\emph{x}ploit, and e\emph{x}terminate''の略)
+というジャンルらしい。プレイヤーが帝国をコントロールするものだ
+\footnote{Thousand Parsecの発想の元になった、すばらしい商用ゲームの例がある。
+\emph{VGA Planets}や\emph{Stars!}、そして\emph{Master of Orion}や
+\emph{Galactic Civilizations}や\emph{Space Empires}シリーズなどである。
+どれもあまりなじみのない人がいるかもしれない。では\emph{Civilization}シリーズならどうだろう。
+これも同じスタイルのゲームだが、設定が少し異なる。リアルタイム型の4Xゲームもいろいろあって、
+たとえば\emph{Imperium Galactica}や\emph{Sins of a Solar Empire}がその一例だ。}。
+一般的な4X系のゲームでは、プレイヤーたちが地図を探し(explore)、
+新たな協定を結んだり既存の協定の効力を拡張したり(expand)、
+自分たちでコントロールできる資源を活用したり(exploit)して、
+ライバルのプレイヤーたちを攻撃して滅亡させる(exterminate)。
+経済成長や技術開発の重視、マイクロマネージメント、そしていろんなルートの優位性などによって、
+このジャンルで他に類を見ない深みと複雑さを生み出した。
 
-From a player's perspective, three main components are involved
-in a game of Thousand Parsec. First, there is the client: this is the
-application through which the player interacts with the universe. This
-connects to a server over the network---communicating using the
-all-important protocol---to which other players' (or, in some cases,
-artificial intelligence) clients are also connected. The server stores
-the entire game state, updating clients at the start of each turn.
-Players can then perform various actions and communicate them back to
-the server, which computes the resulting state for the next turn. The
-nature of the actions a player may perform is dictated by a ruleset:
-this in essence defines the game being played, implemented and
-enforced on the server side, and actualized for the player by any
-supporting client.
+%% From a player's perspective, three main components are involved
+%% in a game of Thousand Parsec. First, there is the client: this is the
+%% application through which the player interacts with the universe. This
+%% connects to a server over the network---communicating using the
+%% all-important protocol---to which other players' (or, in some cases,
+%% artificial intelligence) clients are also connected. The server stores
+%% the entire game state, updating clients at the start of each turn.
+%% Players can then perform various actions and communicate them back to
+%% the server, which computes the resulting state for the next turn. The
+%% nature of the actions a player may perform is dictated by a ruleset:
+%% this in essence defines the game being played, implemented and
+%% enforced on the server side, and actualized for the player by any
+%% supporting client.
+プレイヤーの視点でとらえると、三つの主要なコンポーネントがThousand Parsecのゲームにかかわることになる。
+まず最初がクライアント。プレイヤーがゲームの世界とのやりとりをするアプリケーションだ。
+クライアントはネットワーク越しに(あらゆる重要なプロトコルを用いて)サーバーに接続する。他のプレイヤー
+(場合によっては人工知能)のクライアントもそこに接続している。
+そしてサーバー。サーバーでは全体的なゲームの状態を管理し、各ターンの開始時にクライアントを更新する。
+プレイヤーはさまざまなアクションを行い、それをサーバーに返す。
+サーバーでは、その結果を計算して次のターンに備える。
+そして最後がルールセット。
+プレイヤーが行うアクションの性質はルールセットによって決まる。
+突き詰めると、このルールセットがゲームを定義することになる。
+これはサーバー側で実装するもので、
+それをサポートするクライアントによってプレイヤー側で実現する。
 
-Because of the diversity of possible games, and the complexity of the
-architecture required to support this diversity, Thousand Parsec is an
-exciting project both for gamers and for developers. We hope that even
-the serious coder with little interest in the anatomy of game
-frameworks might find value in the underlying mechanics of
-client-server communication, dynamic configuration, metadata handling,
-and layered implementation, all of which have grown rather organically
-toward good design over the years in quintessential open source style.
+%% Because of the diversity of possible games, and the complexity of the
+%% architecture required to support this diversity, Thousand Parsec is an
+%% exciting project both for gamers and for developers. We hope that even
+%% the serious coder with little interest in the anatomy of game
+%% frameworks might find value in the underlying mechanics of
+%% client-server communication, dynamic configuration, metadata handling,
+%% and layered implementation, all of which have grown rather organically
+%% toward good design over the years in quintessential open source style.
+さまざまなゲームが作られるだろうし、その多様性に対応するだけの複雑なアーキテクチャが必要となる。
+Thousand Parsecは、ゲーマーだけでなく開発者にとってもエキサイティングなプロジェクトだ。
+ゲームのフレームワークの仕組みになんか興味がないというまじめな開発者さんたちにも、
+ぜひそのおもしろさを知っていただきたい。その裏側で動いているクライアント・サーバー通信や
+動的な構成、メタデータの処理、レイヤー化した実装など、これらすべてが長年をかけて
+有機的に成長してきた。典型的なオープンソーススタイルでだ。
 
-At its core, Thousand Parsec is primarily a set of standard
-specifications for a game protocol and other related
-functionality. This chapter discusses the framework mostly from this
-abstract viewpoint, but in many cases it is much more enlightening
-to refer to actual implementations. To this end, the authors have
-chosen the ``flagship'' implementations of each major component for
-concrete discussion.
+%% At its core, Thousand Parsec is primarily a set of standard
+%% specifications for a game protocol and other related
+%% functionality. This chapter discusses the framework mostly from this
+%% abstract viewpoint, but in many cases it is much more enlightening
+%% to refer to actual implementations. To this end, the authors have
+%% chosen the ``flagship'' implementations of each major component for
+%% concrete discussion.
+本質的には、そもそもThousand Parsecはゲームのプロトコルやその他関連機能に関する標準仕様群である。
+本章の大半は、この視点でとらえたフレームワークについて議論する。
+しかし、実際の実装を参照したほうがずっとわかりやすい場合も多い。
+そのために私たちは、主要コンポーネントのそれぞれについて「フラッグシップ」実装を選び、
+それを使って具体的な議論をすることにした。
 
-The case model client is \code{tpclient-pywx}, a relatively mature
-wxPython-based client which at present supports the largest set of
-features and the latest game protocol version. This is supported by
-\code{libtpclient-py}, a Python client helper library providing
-caching and other functionality, and \code{libtpproto-py}, a Python
-library which implements the latest version of the Thousand Parsec
-protocol. For the server, \code{tpserver-cpp}, the mature C++
-implementation supporting the latest features and protocol version, is
-the specimen. This server sports numerous rulesets, among which the
-\emph{Missile and Torpedo Wars} milestone ruleset is exemplary for
-making the most extensive use of features and for being a
-"traditional" 4X space game.
+%% The case model client is \code{tpclient-pywx}, a relatively mature
+%% wxPython-based client which at present supports the largest set of
+%% features and the latest game protocol version. This is supported by
+%% \code{libtpclient-py}, a Python client helper library providing
+%% caching and other functionality, and \code{libtpproto-py}, a Python
+%% library which implements the latest version of the Thousand Parsec
+%% protocol. For the server, \code{tpserver-cpp}, the mature C++
+%% implementation supporting the latest features and protocol version, is
+%% the specimen. This server sports numerous rulesets, among which the
+%% \emph{Missile and Torpedo Wars} milestone ruleset is exemplary for
+%% making the most extensive use of features and for being a
+%% "traditional" 4X space game.
+モデルとなるクライアントは\code{tpclient-pywx}だ。
+これは比較的成熟したwxPythonベースのクライアントで、
+現時点では最も多くの機能をサポートしており、最新バージョンのゲームプロトコルにも対応している。
+このクライアントは\code{libtpclient-py}によってサポートされている。
+これはPythonのクライアントヘルパーライブラリで、キャッシュなどの機能を提供する。
+また、Pythonのライブラリ\code{libtpproto-py}は最新バージョンのThousand Parsecプロトコルを実装している。
+サーバーには\code{tpserver-cpp}。これも歴史のあるC++の実装で、
+最新の機能やプロトコルに対応している。これを見本として採用する。
+このサーバーはさまざまなルールセットに対応しているが、中でも
+マイルストーンルールセット\emph{Missile and Torpedo Wars}
+は、「伝統的な」4X宇宙ゲームを実装するためのよい見本となる。
 
-\begin{aosasect1}{Anatomy of a Star Empire}
+%% \begin{aosasect1}{Anatomy of a Star Empire}
+\begin{aosasect1}{スターエンパイアの世界観}
 
 In order to properly introduce the things that make up a Thousand
 Parsec universe, it makes sense first to give a quick overview of a
@@ -143,7 +208,8 @@ other states: mineable and inaccessible. Using a Mine order on a
 planet, mineable resources may be converted over time into surface
 resources, which can then be used for building.
 
-\begin{aosasect2}{Objects}
+%% \begin{aosasect2}{Objects}
+\begin{aosasect2}{オブジェクト}
 
 In a Thousand Parsec universe, every physical thing is an object. In
 fact, the universe itself is also an object. This design allows for a
@@ -204,7 +270,8 @@ objects in the game.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Orders}
+%% \begin{aosasect2}{Orders}
+\begin{aosasect2}{指令}
 
 Defined by each ruleset, orders can be attached to both Fleet and
 Planet objects. While the core server does not ship with any default
@@ -277,7 +344,8 @@ developers to do very interesting things with custom order types.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Resources}
+%% \begin{aosasect2}{Resources}
+\begin{aosasect2}{資源}
 
 Resources are extra pieces of data that are packed into Objects in the
 game. Extensively used---particularly by Planet objects---resources
@@ -311,7 +379,8 @@ resource tied to each planet.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Designs}
+%% \begin{aosasect2}{Designs}
+\begin{aosasect2}{設計}
 
 In Thousand Parsec, both weapons and ships may be composed of various
 components. These components are combined to form the basis of a
@@ -360,7 +429,8 @@ components.
 
 \end{aosasect1}
 
-\begin{aosasect1}{The Thousand Parsec Protocol}
+%% \begin{aosasect1}{The Thousand Parsec Protocol}
+\begin{aosasect1}{Thousand Parsecプロトコル}
 
 One might say that the Thousand Parsec protocol is the basis upon
 which everything else in the project is built. It defines the features
@@ -398,7 +468,8 @@ The Thousand Parsec protocol is designed to function either standalone
 over TCP/IP, or tunnelled through another protocol such as HTTP.  It
 also supports SSL encryption.
 
-\begin{aosasect2}{Basics}
+%% \begin{aosasect2}{Basics}
+\begin{aosasect2}{基本}
 
 The protocol provides a few generic frames which are ubiquitous in
 communication between client and server. The previously mentioned
@@ -427,7 +498,8 @@ appropriate responses describing the item requested.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Players and Games}
+%% \begin{aosasect2}{Players and Games}
+\begin{aosasect2}{プレイヤーとゲーム}
 
 Before a client can begin interacting with a game, some formalities
 need to be addressed. The client must first issue a \code{Connect}
@@ -522,7 +594,8 @@ on the \code{GetMessage} frame).
 
 \end{aosasect2}
 
-\begin{aosasect2}{Objects, Orders, and Resources}
+%% \begin{aosasect2}{Objects, Orders, and Resources}
+\begin{aosasect2}{オブジェクト、指令、そして資源}
 
 The bulk of the process of interacting with the universe is
 accomplished through a series of frames comprising the functionality
@@ -579,7 +652,8 @@ Description} requests and \code{Resource Description} responses.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Design Manipulation}
+%% \begin{aosasect2}{Design Manipulation}
+\begin{aosasect2}{設計の操作}
 
 The handling of designs in the Thousand Parsec Protocol is broken down
 into the manipulation of four separate sub-categories: categories,
@@ -676,7 +750,8 @@ example property from that game data.
 </tpclRequirementsFunction>
 </prop>
 \end{verbatim}
-\caption{Example Property}
+%% \caption{Example Property}
+\caption{プロパティの例}
 \label{fig.tp.prop}
 \end{figure}
 
@@ -724,7 +799,8 @@ with a counter.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Server Administration}
+%% \begin{aosasect2}{Server Administration}
+\begin{aosasect2}{サーバー管理}
 
 A server administration protocol extension is also available, allowing
 for remote live control of supporting servers. The standard use case
@@ -766,9 +842,11 @@ needed, and added the code to the same protocol libraries.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Supporting Functionality}
+%% \begin{aosasect1}{Supporting Functionality}
+\begin{aosasect1}{サポート機能}
 
-\begin{aosasect2}{Server Persistence}
+%% \begin{aosasect2}{Server Persistence}
+\begin{aosasect2}{サーバーの永続化}
 
 Thousand Parsec games, like many in the turn-based strategy genre,
 have the potential to last for quite some time. Besides often running
@@ -796,6 +874,7 @@ should be recovered when the server starts again from the saved data.
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{Thousand Parsec Component Language}
 \begin{aosasect2}{Thousand Parsec Component Language}
 
 The Thousand Parsec Component Language (TPCL) exists to allow clients
@@ -842,6 +921,7 @@ the \code{Requirements} function from a ship hull).
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{BattleXML}
 \begin{aosasect2}{BattleXML}
 
 In war, every battle counts, from the short skirmish in deep space
@@ -884,7 +964,8 @@ to describe each round of battle is dictated by the ruleset.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Metaserver}
+%% \begin{aosasect2}{Metaserver}
+\begin{aosasect2}{メタサーバー}
 
 Finding a public Thousand Parsec server to play on 
 is much like locating a lone stealth scout in deep space---a
@@ -915,7 +996,8 @@ through a server browser in the initial connection window.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Single-Player Mode}
+%% \begin{aosasect2}{Single-Player Mode}
+\begin{aosasect2}{シングルプレイヤーモード}
 
 Thousand Parsec is designed from the ground up to support networked
 multiplayer games. However, there is nothing preventing a player from
@@ -1073,7 +1155,8 @@ is subsequently loaded.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons Learned}
+%% \begin{aosasect1}{Lessons Learned}
+\begin{aosasect1}{教訓}
 
 The creation and growth of the extensive Thousand Parsec framework has
 allowed the developers plenty of opportunity to look back and assess
@@ -1082,7 +1165,8 @@ developers (Tim Ansell and Lee Begg) built the original framework from
 scratch and have shared with us some suggestions on starting a similar
 project.
 
-\begin{aosasect2}{What Worked}
+%% \begin{aosasect2}{What Worked}
+\begin{aosasect2}{うまくいったこと}
 
 A major key to the development of Thousand Parsec was the decision to
 define and build a subset of the framework, followed by the
@@ -1105,7 +1189,8 @@ of Thousand Parsec.
 
 \end{aosasect2}
 
-\begin{aosasect2}{What Didn't Work}
+%% \begin{aosasect2}{What Didn't Work}
+\begin{aosasect2}{うまくいかなかったこと}
 
 A major downfall of the Thousand Parsec framework was the decision to
 use a binary protocol. As you can imagine, debugging a binary protocol
@@ -1122,7 +1207,8 @@ to keep development flowing.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Conclusion}
+%% \begin{aosasect2}{Conclusion}
+\begin{aosasect2}{結論}
 
 Like a construction skiff inspecting the skeletal hull of a massive
 prototype battleship in an orbital construction yard, we have passed
