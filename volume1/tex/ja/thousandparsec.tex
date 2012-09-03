@@ -155,58 +155,97 @@ Thousand Parsecは、ゲーマーだけでなく開発者にとってもエキ�
 %% \begin{aosasect1}{Anatomy of a Star Empire}
 \begin{aosasect1}{スターエンパイアの世界観}
 
-In order to properly introduce the things that make up a Thousand
-Parsec universe, it makes sense first to give a quick overview of a
-game. For this, we'll examine the \emph{Missile and Torpedo Wars}
-ruleset, the project's second milestone ruleset, which makes use of
-most of the major features in the current mainline version of the
-Thousand Parsec protocol. Some terminology will be used here which
-will not yet be familiar; the remainder of this section will elucidate
-it so that the pieces all fall into place.
+%% In order to properly introduce the things that make up a Thousand
+%% Parsec universe, it makes sense first to give a quick overview of a
+%% game. For this, we'll examine the \emph{Missile and Torpedo Wars}
+%% ruleset, the project's second milestone ruleset, which makes use of
+%% most of the major features in the current mainline version of the
+%% Thousand Parsec protocol. Some terminology will be used here which
+%% will not yet be familiar; the remainder of this section will elucidate
+%% it so that the pieces all fall into place.
+Thousand Parsecの世界を構成するものごとを適切に紹介するために、
+まずこのゲームの概要を説明しよう。ここでは
+\emph{Missile and Torpedo Wars}ルールセットを見ていく。
+このルールセットはプロジェクトの二番目のマイルストーンルールセットで、
+現在の安定版Thousand Parsecプロトコルにある主要な機能のほとんどを使っている。
+あまりなじみのない用語もいくつか登場するが、それらは追々解説していくので
+理解してもらえるだろう。
 
-\emph{Missile and Torpedo Wars} is an advanced ruleset in that it
-implements all of the methods available in the Thousand Parsec
-framework. At the time of writing, it is the only ruleset to do so,
-and it is being quickly expanded to become a more complete and
-entertaining game.
+%% \emph{Missile and Torpedo Wars} is an advanced ruleset in that it
+%% implements all of the methods available in the Thousand Parsec
+%% framework. At the time of writing, it is the only ruleset to do so,
+%% and it is being quickly expanded to become a more complete and
+%% entertaining game.
+\emph{Missile and Torpedo Wars}は上級者向けのルールセットで、
+Thousand Parsecフレームワークで使えるすべてのメソッドを実装している。
+本章の執筆時点ではそんなルールセットはこれだけしかない。
+また、手早く拡張し、より完全な楽しいゲームになった。
 
-Upon establishing a connection to a Thousand Parsec server, the client
-probes the server for a list of game entities and proceeds to download
-the entire catalog.  This cataloger includes all of the objects,
-boards, messages, categories, designs, components, properties, players,
-and resources that make up the state of the game, all of which are
-covered in detail in this section. While this may seem like a lot for
-the client to digest at the beginning of the game---and also at the
-end of each turn---this information is absolutely vital for the
-game. Once this information has been downloaded, which generally takes on the order of a few seconds, the client now has
-everything it needs to plot the information onto its representation of
-the game universe.
+%% Upon establishing a connection to a Thousand Parsec server, the client
+%% probes the server for a list of game entities and proceeds to download
+%% the entire catalog.  This cataloger includes all of the objects,
+%% boards, messages, categories, designs, components, properties, players,
+%% and resources that make up the state of the game, all of which are
+%% covered in detail in this section. While this may seem like a lot for
+%% the client to digest at the beginning of the game---and also at the
+%% end of each turn---this information is absolutely vital for the
+%% game. Once this information has been downloaded, which generally takes on the order of a few seconds, the client now has
+%% everything it needs to plot the information onto its representation of
+%% the game universe.
+Thousand Parsecサーバーとの接続を確立するときに、
+クライアントはゲームエンティティの一覧を調べて全カタログをダウンロードする。
+このカタログにはすべてのオブジェクトやボード、メッセージ、カテゴリ、デザイン、
+コンポーネント、プロパティ、プレイヤー、そしてゲームの状態を形作る資源が含まれている。
+これらの詳細については後ほど詳述する。ゲームを始めるときにクライアント側で知るべきことが
+大量にあるように見える(各ターンの終了時も同様だ)が、
+これらの情報はどれもゲームに不可欠なものである。
+この情報をダウンロードし終えるには数秒程度かかるが、
+これでクライアントに必要な情報はすべてそろい、
+ゲームの世界を表現できるようになる。
 
-When first connected to the server, a random planet is generated and
-assigned as the new player's ``home planet'', and two fleets are
-automatically created there. Each fleet consists of two default Scout
-designs, consisting of a Scout Hull with an Alpha Missile Tube.  Since
-there is no Explosive component added, this default fleet is not yet
-capable of fleet-to-fleet or fleet-to-planet combat; it is, in fact, a
-sitting duck.
+%% When first connected to the server, a random planet is generated and
+%% assigned as the new player's ``home planet'', and two fleets are
+%% automatically created there. Each fleet consists of two default Scout
+%% designs, consisting of a Scout Hull with an Alpha Missile Tube.  Since
+%% there is no Explosive component added, this default fleet is not yet
+%% capable of fleet-to-fleet or fleet-to-planet combat; it is, in fact, a
+%% sitting duck.
+最初にサーバーに接続したときにランダムに惑星が作られ、それが新しいプレイヤーの
+「母星」となる。そして、その母星には自動的にふたつの艦隊が配備される。
+各艦隊はふたつのScoutデザイン(デフォルトのデザイン)で構成されており、
+Scout HullとAlpha Missile Tubeを持っている。
+Explosiveコンポーネントが追加されていないので、デフォルトの艦隊はこのままでは
+対艦隊戦や対惑星戦ができない。要するに、まったく無防備な状態だ。
 
 \pagebreak
 
-At this point, it is important for a player to begin equipping fleets
-with weaponry. This is achieved by creating a weapon design using a
-Build Weapon order, and then loading the finished product onto the
-target fleet through a Load Armament order. The Build Weapon order
-converts a planet's resources---of which each planet has amounts and
-proportions assigned by a random distribution---into a finished
-product: an explosive warhead which is planted on the creating
-planet's surface. The Load Armament order then transfers this
-completed weapon onto a waiting fleet.
+%% At this point, it is important for a player to begin equipping fleets
+%% with weaponry. This is achieved by creating a weapon design using a
+%% Build Weapon order, and then loading the finished product onto the
+%% target fleet through a Load Armament order. The Build Weapon order
+%% converts a planet's resources---of which each planet has amounts and
+%% proportions assigned by a random distribution---into a finished
+%% product: an explosive warhead which is planted on the creating
+%% planet's surface. The Load Armament order then transfers this
+%% completed weapon onto a waiting fleet.
+この時点でプレイヤーがすべきことは、まず艦隊の武装を始めることだ。
+Build Weapon命令を使って兵器を設計して、できあがった製品を
+Load Armament命令で艦隊に搭載する。
+Build Weapon命令は、惑星の資源
+---各惑星には、資源がランダムに割り当てられている---
+を製品に変換する。爆発性の弾頭で、これを惑星の地表で生産するわけだ。
+Load Armament命令は、完成した製品を艦隊に転送する。
 
-Once the easily accessible surface resources of a planet are used up,
-it is important to obtain more through mining. Resources come in two
-other states: mineable and inaccessible. Using a Mine order on a
-planet, mineable resources may be converted over time into surface
-resources, which can then be used for building.
+%% Once the easily accessible surface resources of a planet are used up,
+%% it is important to obtain more through mining. Resources come in two
+%% other states: mineable and inaccessible. Using a Mine order on a
+%% planet, mineable resources may be converted over time into surface
+%% resources, which can then be used for building.
+惑星の地表にある資源を使い切ってしまったら、
+新たな資源を得るための採掘が重要になる。
+資源には、地表にある状態以外に二種類の状態がある。採掘可能(mineable)とアクセス不能(inaccessible)だ。
+Mine命令を惑星上で実行すると、採掘可能な資源を地表の資源に変換する。
+これにはある程度の時間がかかり、地表の資源になれば実際に使えるようになる。
 
 %% \begin{aosasect2}{Objects}
 \begin{aosasect2}{オブジェクト}
