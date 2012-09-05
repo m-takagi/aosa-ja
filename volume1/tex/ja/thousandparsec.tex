@@ -217,7 +217,7 @@ Scout HullとAlpha Missile Tubeを持っている。
 Explosiveコンポーネントが追加されていないので、デフォルトの艦隊はこのままでは
 対艦隊戦や対惑星戦ができない。要するに、まったく無防備な状態だ。
 
-\pagebreak
+%% \pagebreak
 
 %% At this point, it is important for a player to begin equipping fleets
 %% with weaponry. This is achieved by creating a weapon design using a
@@ -250,62 +250,99 @@ Mine命令を惑星上で実行すると、採掘可能な資源を地表の資�
 %% \begin{aosasect2}{Objects}
 \begin{aosasect2}{オブジェクト}
 
-In a Thousand Parsec universe, every physical thing is an object. In
-fact, the universe itself is also an object. This design allows for a
-virtually unlimited set of elements in a game, while remaining simple
-for rulesets which require only a few types of objects. On top of the
-addition of new object types, each object can store some of its own
-specific information that can be sent and used via the Thousand Parsec
-protocol. Five basic built-in object types are currently provided by
-default: Universe, Galaxy, Star System, Planet, and Fleet.
+%% In a Thousand Parsec universe, every physical thing is an object. In
+%% fact, the universe itself is also an object. This design allows for a
+%% virtually unlimited set of elements in a game, while remaining simple
+%% for rulesets which require only a few types of objects. On top of the
+%% addition of new object types, each object can store some of its own
+%% specific information that can be sent and used via the Thousand Parsec
+%% protocol. Five basic built-in object types are currently provided by
+%% default: Universe, Galaxy, Star System, Planet, and Fleet.
+Thousand Parsecの世界では、形を持つものはすべてオブジェクトとなる。
+実際、その世界自体もまたオブジェクトだ。
+このように設計したおかげで、事実上無限の要素をゲームに含めることができるようになり、
+いくらオブジェクトを増やしたところでその一部しか使わないルールセットはシンプルなままに保てるようになった。
+新たなオブジェクト型を追加すると、それに固有の情報を格納できるようになる。
+そしてそれを、Thousand Parsecプロトコルで送信したり使ったりできるというわけだ。
+現在デフォルトで提供されている基本的なオブジェクト型は
+Universe、Galaxy、Star System、Planet、そしてFleetの五つである。
 
-The Universe is the top-level object in a Thousand Parsec game, and it
-is always accessible to all players. While the Universe object does
-not actually exert much control over the game, it does store one
-vastly important piece of information: the current turn number. Also
-known as the ``year'' in Thousand Parsec parlance, the turn number,
-naturally, increments after the completion of each turn. It is stored
-in an unsigned 32-bit integer, allowing for games to run until year
-4,294,967,295. While not impossible in theory, the authors have not,
-to date, seen a game progress this far.
+%% The Universe is the top-level object in a Thousand Parsec game, and it
+%% is always accessible to all players. While the Universe object does
+%% not actually exert much control over the game, it does store one
+%% vastly important piece of information: the current turn number. Also
+%% known as the ``year'' in Thousand Parsec parlance, the turn number,
+%% naturally, increments after the completion of each turn. It is stored
+%% in an unsigned 32-bit integer, allowing for games to run until year
+%% 4,294,967,295. While not impossible in theory, the authors have not,
+%% to date, seen a game progress this far.
+UniverseはThousand Parsecのゲームの最上位にあるオブジェクトであり、全プレイヤーが常にアクセスできる。
+Universeオブジェクト自体は実際のところゲーム全体を取り仕切るわけではなく、
+非常に重要なたったひとつの情報、つまり現在のターン番号を格納している。
+Thousand Parsecの世界ではターン番号のことを``year''と呼んでおり、
+ターンが終わるごとにひとつずつ増えていく。符号なし32ビット整数で格納されるので、
+4,294,967,295年までゲームを続けることができる。
+ただ、理屈上ではそうだが、作者は実際にゲームがそこまで進むのを見たことはない。
 
-A Galaxy is a container for a number of proximate objects---Star
-Systems, Planets and Fleets---and provides no additional
-information. A large number of Galaxies may exist in a game, each
-hosting a subsection of the Universe.
+%% A Galaxy is a container for a number of proximate objects---Star
+%% Systems, Planets and Fleets---and provides no additional
+%% information. A large number of Galaxies may exist in a game, each
+%% hosting a subsection of the Universe.
+Galaxyは、近くにあるオブジェクト(Star SystemやPlanet、Fleet)
+をとりまとめるコンテナで、それ以外に特別な情報を提供するわけではない。
+一つのゲームの中には多数のGalaxyが存在することがあり、それぞれがUniverse
+の一部を構成する。
 
-Like the previous two objects, a Star System is primarily a container
-for lower-level objects. However, the Star System object is the first
-tier of object which is represented graphically by the client. These
-objects may contain Planets and Fleets (at least temporarily).
+%% Like the previous two objects, a Star System is primarily a container
+%% for lower-level objects. However, the Star System object is the first
+%% tier of object which is represented graphically by the client. These
+%% objects may contain Planets and Fleets (at least temporarily).
+これら二つのオブジェクトと同様に、Star Systemもその主目的は下位レベルのオブジェクトのコンテナとなることだ。
+ただ、Star Systemオブジェクトはクライアントに表示されるオブジェクトの最初の層となる。
+このオブジェクトの中には、(少なくとも一時的には)PlanetやFleetが含まれることになる。
 
-A Planet is a large celestial body which may be inhabited and provide
-resource mines, production facilities, ground-based armaments, and
-more. The Planet is the first tier of object which can be owned by a
-player; ownership of a Planet is an accomplishment not to be taken
-lightly, and not owning any planets is a typical condition for
-rulesets to proclaim a player's defeat. The Planet object has a
-relatively large amount of stored data, accounting for the following:
+%% A Planet is a large celestial body which may be inhabited and provide
+%% resource mines, production facilities, ground-based armaments, and
+%% more. The Planet is the first tier of object which can be owned by a
+%% player; ownership of a Planet is an accomplishment not to be taken
+%% lightly, and not owning any planets is a typical condition for
+%% rulesets to proclaim a player's defeat. The Planet object has a
+%% relatively large amount of stored data, accounting for the following:
+Planetは大きな天体で、人が住んだり資源を採掘したり設備を生産したり
+地上軍を配備したりといったことができる。
+Planetは、プレイヤーが所有できるオブジェクトの最初の層である。
+あるPlanetを所有するというのは気軽にできることではない。
+たいていのルールセットでは、ひとつもPlanteを持っていないということは
+そのプレイヤーが敗北したことを意味する。
+Planetオブジェクトには比較的大量のデータが格納される。次のようなものだ。
 
 \begin{aosaitemize}
 
-  \item The player ID of the Planet's owner (or -1 if not owned by any
-  player).
+  %% \item The player ID of the Planet's owner (or -1 if not owned by any
+  %% player).
+  \item そのPlanetの所有者のプレイヤーID(所有者がいない場合は-1)。
 
-  \item A list of the Planet's resources, containing the resource ID
-  (type), and the amount of surface, mineable, and inaccessible
-  resources of this type on the Planet.
+  %% \item A list of the Planet's resources, containing the resource ID
+  %% (type), and the amount of surface, mineable, and inaccessible
+  %% resources of this type on the Planet.
+  \item そのPlanetの資源の一覧。資源ID(型)と、そのPlanetにおける地表資源・採掘可能資源・アクセス不能資源の量。
 
 \end{aosaitemize}
 
-The built-in objects described above provide a good basis for many
-rulesets following the traditional 4X space game formula. Naturally,
-in keeping with good software engineering principles, object classes
-can be extended within rulesets. A ruleset designer thus has the
-ability to create new object types or store additional information in
-the existing object types as required by the ruleset, allowing for
-virtually unlimited extensibility in terms of the available physical
-objects in the game.
+%% The built-in objects described above provide a good basis for many
+%% rulesets following the traditional 4X space game formula. Naturally,
+%% in keeping with good software engineering principles, object classes
+%% can be extended within rulesets. A ruleset designer thus has the
+%% ability to create new object types or store additional information in
+%% the existing object types as required by the ruleset, allowing for
+%% virtually unlimited extensibility in terms of the available physical
+%% objects in the game.
+これまでに取り上げた組み込みのオブジェクト群を使えば、伝統的な
+4X型宇宙ゲームに沿った多くのルールセットにとっての十分な基盤となる。
+当然ながら、ソフトウェア工学の原則に従って、これらのオブジェクトのクラスをルールセット内で
+拡張することもできる。つまりルールセットを作る人は、
+新たなオブジェクト型を作ることもできるし既存のオブジェクト型に追加情報を持たせることもできるというわけだ。
+ゲーム内に登場するあらゆるオブジェクトについて、事実上無制限に拡張できることになる。
 
 \end{aosasect2}
 
