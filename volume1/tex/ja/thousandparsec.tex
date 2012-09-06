@@ -347,76 +347,128 @@ Planetオブジェクトには比較的大量のデータが格納される。�
 \end{aosasect2}
 
 %% \begin{aosasect2}{Orders}
-\begin{aosasect2}{指令}
+\begin{aosasect2}{命令}
 
-Defined by each ruleset, orders can be attached to both Fleet and
-Planet objects. While the core server does not ship with any default
-order types, these are an essential part of even the most basic
-game. Depending on the nature of the ruleset, orders may be used to
-accomplish almost any task. In the spirit of the 4X genre, there are a
-few standard orders which are implemented in most rulesets: these are
-the Move, Intercept, Build, Colonize, Mine, and Attack orders.
+%% Defined by each ruleset, orders can be attached to both Fleet and
+%% Planet objects. While the core server does not ship with any default
+%% order types, these are an essential part of even the most basic
+%% game. Depending on the nature of the ruleset, orders may be used to
+%% accomplish almost any task. In the spirit of the 4X genre, there are a
+%% few standard orders which are implemented in most rulesets: these are
+%% the Move, Intercept, Build, Colonize, Mine, and Attack orders.
+命令はルールセットが定義するもので、FleetオブジェクトとPlanetオブジェクトにアタッチできる。
+コアサーバーにはデフォルトの命令型は何も含まれていないが、どんなに基本的なゲームであっても命令は不可欠なものだ。
+そのルールセットの性質に沿って、命令を使えばほぼあらゆるタスクを達成できる。
+4X型のゲームではお決まりの命令がいくつかあって、それは大抵のルールセットに実装されている。
+Move、Intercept、Build、Colonize、MineそしてAttackといった命令である。
 
-In order to fulfill the first imperative (e\emph{x}plore) of 4X, one
-needs to be able to move about the map of the universe. This is
-typically achieved via a Move order appended to a Fleet object. In the
-flexible and extensible spirit of the Thousand Parsec framework, Move
-orders can be implemented differently depending on the nature of the
-ruleset. In \emph{Minisec} and \emph{Missile and Torpedo Wars}, a Move
-order typically takes a point in 3D space as a parameter. On the
-server side, the estimated time of arrival is calculated and the
-number of required turns is sent back to the client. The Move order
-also acts as a pseudo-Attack order in rulesets where teamwork is not
-implemented. For example, moving to a point occupied by an enemy fleet
-in both Minisec and Missile and Torpedo Wars is almost certain to be
-followed by a period of intense combat. Some rulesets supporting a Move
-order parameterize it differently (i.e. not using 3D points). For
-example, the \emph{Risk} ruleset only allows single-turn moves to
-planets which are directly connected by a ``wormhole''.
+%% In order to fulfill the first imperative (e\emph{x}plore) of 4X, one
+%% needs to be able to move about the map of the universe. This is
+%% typically achieved via a Move order appended to a Fleet object. In the
+%% flexible and extensible spirit of the Thousand Parsec framework, Move
+%% orders can be implemented differently depending on the nature of the
+%% ruleset. In \emph{Minisec} and \emph{Missile and Torpedo Wars}, a Move
+%% order typically takes a point in 3D space as a parameter. On the
+%% server side, the estimated time of arrival is calculated and the
+%% number of required turns is sent back to the client. The Move order
+%% also acts as a pseudo-Attack order in rulesets where teamwork is not
+%% implemented. For example, moving to a point occupied by an enemy fleet
+%% in both Minisec and Missile and Torpedo Wars is almost certain to be
+%% followed by a period of intense combat. Some rulesets supporting a Move
+%% order parameterize it differently (i.e. not using 3D points). For
+%% example, the \emph{Risk} ruleset only allows single-turn moves to
+%% planets which are directly connected by a ``wormhole''.
+4Xのうちの最初の任務(つまりe\emph{x}plore)をこなすには、
+ゲーム世界のマップ上を移動できないといけない。これは一般に
+Move命令の仕事で、この命令はFleetオブジェクトに追加されている。
+Thousand Parsecフレームワークは柔軟で拡張性を重視しているので、
+Move命令の実装もルールセットごとに変更できる。
+\emph{Minisec}や\emph{Missile and Torpedo Wars}の場合、Move命令は
+三次元空間上の座標をパラメータとして受け取る。サーバー側では
+移動所要時間を計算し、必要なターン数をクライアントに返す。
+ルールセットによっては、Move命令が疑似Attack命令として機能するものもある。
+チーム作業が実装されていないようなルールセットでよくあることだ。
+たとえばMinisecやMissile and Torpedo Warsの場合、
+敵の艦隊が抑えている座標に移動するとそこで戦いが始まる。
+ルールセットによっては、Move命令のパラメータが違っている
+(つまり、三次元座標を使わない)ものもある。
+たとえば\emph{Risk}ルールセットには1ターンでの移動しか存在しない。
+「ワームホール」でつながった別の惑星に直接移動するというものだ。
 
-Typically appended to Fleet objects, the Intercept order allows an
-object to meet another (commonly an enemy fleet) within space. This
-order is similar to Move, but since two objects might be moving in
-different directions during the execution of a turn, it is impossible
-to land directly on another fleet simply using spatial coordinates, so
-a distinct order type is necessary. The Intercept order addresses this
-issue, and can be used to wipe out an enemy fleet in deep space or
-fend off an oncoming attack in a moment of crisis.
+%% Typically appended to Fleet objects, the Intercept order allows an
+%% object to meet another (commonly an enemy fleet) within space. This
+%% order is similar to Move, but since two objects might be moving in
+%% different directions during the execution of a turn, it is impossible
+%% to land directly on another fleet simply using spatial coordinates, so
+%% a distinct order type is necessary. The Intercept order addresses this
+%% issue, and can be used to wipe out an enemy fleet in deep space or
+%% fend off an oncoming attack in a moment of crisis.
+一般的にFleetオブジェクトに追加されることが多いIntercept命令は、
+空間内の他のオブジェクト(たいていは敵艦隊)に遭遇させるために使うものだ。
+Move命令と似ているが、実行している間にふたつのオブジェクトが別方向に移動する可能性もあるので、
+単純に空間内の座標を指定するだけでは他の艦隊にぶつけるのは不可能だ。そこで、別の命令を用意する必要があった。
+この問題に対応するために用意されたのがIntercept命令で、
+これを使えば深宇宙にいる敵艦隊を一掃したり、危機的な状況で攻撃されるのをかわしたりできる。
 
-The Build order helps to fulfill two of the 4X
-imperatives---e\emph{x}pand and e\emph{x}ploit. The obvious means of
-expansion throughout the universe is to build many fleets of ships and
-move them far and wide. The Build order is typically appended to
-Planet objects and is often bound to the amount of resources that a
-planet contains---and how they are exploited. If a player is lucky
-enough to have a home planet rich in resources, that player could gain
-an early advantage in the game through building.
+%% The Build order helps to fulfill two of the 4X
+%% imperatives---e\emph{x}pand and e\emph{x}ploit. The obvious means of
+%% expansion throughout the universe is to build many fleets of ships and
+%% move them far and wide. The Build order is typically appended to
+%% Planet objects and is often bound to the amount of resources that a
+%% planet contains---and how they are exploited. If a player is lucky
+%% enough to have a home planet rich in resources, that player could gain
+%% an early advantage in the game through building.
+Build命令は、4Xのうちの二つ(e\emph{x}pandとe\emph{x}ploit)に対応するものだ。
+ゲーム世界で勢力を拡大していく手段として明白なのは、大量の艦隊を編成してより遠方まで進出することだ。
+Build命令はPlanetオブジェクトに追加されるのが一般的で、
+たいていは、その惑星に存在する資源の量(そして採掘状況)による制約を受ける。
+幸運にも資源に恵まれた母星を持っているプレイヤーは、
+ゲームの初期段階で有利にたてる。
 
-Like the Build order, the Colonize order helps fulfill the
-e\emph{x}pand and e\emph{x}ploit imperatives. Almost always appended
-to Fleet objects, the Colonize order allows the player to take over an
-unclaimed planet. This helps to expand control over planets throughout
-the universe.
+%% Like the Build order, the Colonize order helps fulfill the
+%% e\emph{x}pand and e\emph{x}ploit imperatives. Almost always appended
+%% to Fleet objects, the Colonize order allows the player to take over an
+%% unclaimed planet. This helps to expand control over planets throughout
+%% the universe.
+Build命令と同様に、Colonize命令もe\emph{x}pandとe\emph{x}ploitを実行するためのものだ。
+ほとんどの場合はFleetオブジェクトに追加される命令であり、
+このColonize命令を使うと、まだ誰も領有権を宣言していない惑星を占領できる。
+ゲーム世界の中で、自分の制御のおよぶ範囲を拡大するのに役立つだろう。
 
-The Mine order embodies the e\emph{x}ploit imperative. This order,
-typically appended to Planet objects and other celestial bodies,
-allows the player to mine for unused resources not immediately
-available on the surface. Doing so brings these resources to the
-surface, allowing them to be used subsequently to build and ultimately
-expand the player's grip on the universe.
+%% The Mine order embodies the e\emph{x}ploit imperative. This order,
+%% typically appended to Planet objects and other celestial bodies,
+%% allows the player to mine for unused resources not immediately
+%% available on the surface. Doing so brings these resources to the
+%% surface, allowing them to be used subsequently to build and ultimately
+%% expand the player's grip on the universe.
+Mine命令はe\emph{x}ploitのために使うものだ。この命令はPlanetオブジェクトあるいは
+その他の天体オブジェクトに追加されるのが一般的で、
+まだ地表にはない資源を採掘することができる。
+採掘を実行すれば資源が地表に登場し、後でそれを使って開発をしたり、
+ゲーム世界内でプレイヤーの手の届く範囲を広げたりする。
 
-Implemented in some rulesets, the Attack order allows a player to
-explicitly initiate combat with an enemy Fleet or Planet, fulfilling
-the final 4X imperative (e\emph{x}terminate). In team-based rulesets,
-the inclusion of a distinct Attack order (as opposed to simply using
-Move and Intercept to implicitly attack targets) is important to avoid
-friendly fire and to coordinate attacks.
+%% Implemented in some rulesets, the Attack order allows a player to
+%% explicitly initiate combat with an enemy Fleet or Planet, fulfilling
+%% the final 4X imperative (e\emph{x}terminate). In team-based rulesets,
+%% the inclusion of a distinct Attack order (as opposed to simply using
+%% Move and Intercept to implicitly attack targets) is important to avoid
+%% friendly fire and to coordinate attacks.
+いくつかのルールセットに実装されているAttack命令を使うと、
+敵のFleetやPlanetとの戦闘を明示的に始めることができる。
+これは、4Xの最後の任務すなわちe\emph{x}terminateを達成するためのものだ。
+チームベースのルールセットでは、(MoveやInterceptで攻撃対象を指定して暗黙のうちに戦いを始めるのではなく)
+Attack命令を別途用意しておくことが重要となる。
+そうしないと、まちがって友軍との戦闘が始まってしまうことがあり得るからである。
 
-Since the Thousand Parsec framework requires ruleset developers to
-define their own order types, it is possible---even encouraged---for
-them to think outside the box and create custom orders not found
-elsewhere. The ability to pack extra data into any object allows
-developers to do very interesting things with custom order types.
+%% Since the Thousand Parsec framework requires ruleset developers to
+%% define their own order types, it is possible---even encouraged---for
+%% them to think outside the box and create custom orders not found
+%% elsewhere. The ability to pack extra data into any object allows
+%% developers to do very interesting things with custom order types.
+Thousand Parsecフレームワークでは、ルールセットの開発者が自分で命令の型を定義できるようにしているので、
+どこにもないような斬新な命令を作ることもできる…というか、それが推奨されている。
+追加のデータをあらゆるオブジェクトに組み込めるので、
+開発者にとっては新たな命令を作るのはとてもおもしろいことだろう。
 
 \end{aosasect2}
 
