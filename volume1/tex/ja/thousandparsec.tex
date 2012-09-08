@@ -666,7 +666,7 @@ Thousand Parsecプロトコルは、プロジェクトを組み立てるのに�
 %% be supported for sending by one side (server or client) and receiving
 %% by the other.
 プロトコルの仕様では、一連のフレームを定義している。
-これは階層型になっており、ヘッダーフレームを除く各フレームが基底フレーム型を持っている。
+これは階層型になっており、Headerフレームを除く各フレームが基底フレーム型を持っている。
 基底フレーム型に対して独自のデータを追加する方式だ。
 さまざまな抽象フレーム型も用意されている。これらは明示的に使うものではなく、
 単に具象フレームを作るときのベースとして使うためだけのものだ。
@@ -684,30 +684,50 @@ HTTPのような別のプロトコル上のトンネル経由でも機能する�
 %% \begin{aosasect2}{Basics}
 \begin{aosasect2}{基本}
 
-The protocol provides a few generic frames which are ubiquitous in
-communication between client and server. The previously mentioned
-\code{Header} frame simply provides a basis for all other frames via
-its two direct descendants, the \code{Request} and \code{Response}
-frames. The former is the basis for frames which initiate
-communication (in either direction), and the latter for frames which
-are prompted by these. The \code{OK} and \code{Fail} frames (both
-\code{Response} frames) provide the two values for Boolean logic in
-the exchange. A \code{Sequence} frame (also a \code{Response})
-indicates to the recipient that multiple frames are to follow in
-response to its request.
+%% The protocol provides a few generic frames which are ubiquitous in
+%% communication between client and server. The previously mentioned
+%% \code{Header} frame simply provides a basis for all other frames via
+%% its two direct descendants, the \code{Request} and \code{Response}
+%% frames. The former is the basis for frames which initiate
+%% communication (in either direction), and the latter for frames which
+%% are prompted by these. The \code{OK} and \code{Fail} frames (both
+%% \code{Response} frames) provide the two values for Boolean logic in
+%% the exchange. A \code{Sequence} frame (also a \code{Response})
+%% indicates to the recipient that multiple frames are to follow in
+%% response to its request.
+いくつかの汎用的なフレームをプロトコルで提供している。
+これは、クライアントとサーバーとの間の通信で常に利用するものだ。
+先述の\code{Header}フレームは、単に他のすべてのフレームの基盤となるためだけのもので、
+これを直接継承したフレーム\code{Request}と\code{Response}経由で基盤を提供する。
+\code{Request}フレームは(クライアントからサーバー、あるいはサーバーからクライアントへの)通信を開始するときの基盤となり、
+\code{Response}フレームはその通信が引き起こすものに対応するフレームとなる。
+\code{OK}フレームと\code{Fail}フレーム(どちらも\code{Response})は、
+通信の中でのBooleanロジックの二つの値を表す。
+\code{Sequence}フレーム(これも\code{Response})は、
+リクエストに対するレスポンスが複数のフレームになることを受信者に通知する。
 
-Thousand Parsec uses numerical IDs to address things. Accordingly, a
-vocabulary of frames exists to push around data via these IDs. The
-\code{Get With ID} frame is the basic request for things with such an
-ID; there is also a \code{Get With ID and Slot} frame for things which
-are in a ``slot'' on a parent thing which has an ID (e.g., an order on
-an object). Of course, it is often necessary to obtain sequences of
-IDs, such as when initially populating the client's state; this is
-handled using \code{Get ID Sequence} type requests and \code{ID
-Sequence} type responses. A common structure for requesting multiple
-items is a \code{Get ID Sequence} request and \code{ID Sequence}
-response, followed by a series of \code{Get With ID} requests and
-appropriate responses describing the item requested.
+%% Thousand Parsec uses numerical IDs to address things. Accordingly, a
+%% vocabulary of frames exists to push around data via these IDs. The
+%% \code{Get With ID} frame is the basic request for things with such an
+%% ID; there is also a \code{Get With ID and Slot} frame for things which
+%% are in a ``slot'' on a parent thing which has an ID (e.g., an order on
+%% an object). Of course, it is often necessary to obtain sequences of
+%% IDs, such as when initially populating the client's state; this is
+%% handled using \code{Get ID Sequence} type requests and \code{ID
+%% Sequence} type responses. A common structure for requesting multiple
+%% items is a \code{Get ID Sequence} request and \code{ID Sequence}
+%% response, followed by a series of \code{Get With ID} requests and
+%% appropriate responses describing the item requested.
+Thousand Parsecは、何かを表すときに数値のIDを利用する。
+そのため、IDを指定してデータのやりとりをするフレームも用意されている。
+\code{Get With ID}フレームは、IDを使って作業をするための基本的なリクエストとなる。
+それ以外にも\code{Get With ID and Slot}フレームもある。
+これは、IDを持つ親の「スロット」内にあるもの(あるオブジェクトに対する命令など)を扱うリクエストだ。
+もちろん、IDのシーケンスを取得する必要に迫られることもある。最初にクライアントの状態を設定するときなどである。
+こんなときには、\code{Get ID Sequence}型のリクエストと\code{ID Sequence}型のレスポンスを利用する。
+複数のアイテムをやりとりするときによく使われるのが\code{Get ID Sequence}リクエストと
+\code{ID Sequence}レスポンスで、それに続けて一連の\code{Get With ID}
+リクエストを実行して個々のアイテムを表すレスポンスを得る。
 
 \end{aosasect2}
 
