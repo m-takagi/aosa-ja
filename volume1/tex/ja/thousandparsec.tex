@@ -475,83 +475,138 @@ Thousand Parsecフレームワークでは、ルールセットの開発者が�
 %% \begin{aosasect2}{Resources}
 \begin{aosasect2}{資源}
 
-Resources are extra pieces of data that are packed into Objects in the
-game. Extensively used---particularly by Planet objects---resources
-allow for easy extension of rulesets. As with many of the design
-decisions in Thousand Parsec, extensibility was the driving factor in
-the inclusion of resources.
+%% Resources are extra pieces of data that are packed into Objects in the
+%% game. Extensively used---particularly by Planet objects---resources
+%% allow for easy extension of rulesets. As with many of the design
+%% decisions in Thousand Parsec, extensibility was the driving factor in
+%% the inclusion of resources.
+資源は、ゲーム内のオブジェクトに組み込まれているデータのひとつである。
+特にPlanetオブジェクトで幅広く使われており、これを使うと
+ルールセットを簡単に拡張できる。Thousand Parsecの設計の多くがそうであったように、
+資源という概念を含めたのも拡張性を考慮したためだ。
 
-While resources are typically implemented by the ruleset designer,
-there is one resource that is in consistent use throughout the
-framework: the Home Planet resource, which is used to identify a
-player's home planet.
+%% While resources are typically implemented by the ruleset designer,
+%% there is one resource that is in consistent use throughout the
+%% framework: the Home Planet resource, which is used to identify a
+%% player's home planet.
+資源を実装するのはルールセットを設計する人であることが多いが、
+フレームワーク全体を通して一貫して使われる資源がひとつだけある。
+それがHome Planetで、これはプレイヤーの母星を識別するために使われる。
 
-According to Thousand Parsec best practices, resources are typically
-used to represent something that can be converted into some type of
-object. For example, Minisec implements a Ship Parts resource, which
-is assigned in random quantities to each planet object in the
-universe.  When one of these planets is colonized, you can then
-convert this Ship Parts resource into actual Fleets using a Build
-order.
+%% According to Thousand Parsec best practices, resources are typically
+%% used to represent something that can be converted into some type of
+%% object. For example, Minisec implements a Ship Parts resource, which
+%% is assigned in random quantities to each planet object in the
+%% universe.  When one of these planets is colonized, you can then
+%% convert this Ship Parts resource into actual Fleets using a Build
+%% order.
+Thousand Parsecのベストプラクティスに従うと、
+資源の一般的な利用法は、何らかの型のオブジェクトに変換できる何かを表現することだ。
+たとえばMinisecではShip Partsという資源を実装しており、
+ゲーム世界のそれぞれのPlanetオブジェクトに対してランダムな量が割り当てられる。
+どこかの惑星を占領すると、その惑星のShip Partsを使って
+Build命令でFleetに変換することができる。
 
-\emph{Missile and Torpedo Wars} makes perhaps the most extensive use
-of resources of any ruleset to date. It is the first ruleset where the
-weapons are of a dynamic nature, meaning that they can be added to a
-ship from a planet and also removed from a ship and added back to a
-planet. To account for this, the game creates a resource type for each
-weapon that is created in the game. This allows ships to identify a
-weapon type by a resource, and move them freely throughout the
-universe. \emph{Missile and Torpedo Wars} also keeps track of
-factories (the production capability of planets) using a Factories
-resource tied to each planet.
+%% \emph{Missile and Torpedo Wars} makes perhaps the most extensive use
+%% of resources of any ruleset to date. It is the first ruleset where the
+%% weapons are of a dynamic nature, meaning that they can be added to a
+%% ship from a planet and also removed from a ship and added back to a
+%% planet. To account for this, the game creates a resource type for each
+%% weapon that is created in the game. This allows ships to identify a
+%% weapon type by a resource, and move them freely throughout the
+%% universe. \emph{Missile and Torpedo Wars} also keeps track of
+%% factories (the production capability of planets) using a Factories
+%% resource tied to each planet.
+\emph{Missile and Torpedo Wars}は、おそらく現時点で最も資源を活用しているルールセットだろう。
+兵器を動的な資源として扱った最初のルールセットでもある。
+これはつまり、惑星上にある兵器を船に追加したり、
+逆に船に搭載していた兵器を惑星に戻したりできるということだ。
+ゲーム内のそれぞれの兵器に対して新たな資源の型を用意し、
+ゲーム内で資源を作るようにしたのだ。
+これで、資源の型を指定して船上の兵器を特定したり、
+ゲームの世界の中で兵器を自由に運べるようになった。
+\emph{Missile and Torpedo Wars}では、工場(惑星上での生産施設)
+についてもFactoriesという資源で管理しており、これを各惑星に結び付けている。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Designs}
-\begin{aosasect2}{設計}
+\begin{aosasect2}{デザイン}
 
-In Thousand Parsec, both weapons and ships may be composed of various
-components. These components are combined to form the basis of a
-Design---a prototype for something which can be built and used within
-the game. When creating a ruleset, the designer has to make an almost
-immediate decision: should the ruleset allow dynamic creation of
-weapon and ship designs, or simply use a predetermined list of
-designs? On the one hand, a game using pre-packaged designs will be
-easier to develop and balance, but on the other hand, dynamic creation
-of designs adds an entirely new level of complexity, challenge, and
-fun to the game.
+%% In Thousand Parsec, both weapons and ships may be composed of various
+%% components. These components are combined to form the basis of a
+%% Design---a prototype for something which can be built and used within
+%% the game. When creating a ruleset, the designer has to make an almost
+%% immediate decision: should the ruleset allow dynamic creation of
+%% weapon and ship designs, or simply use a predetermined list of
+%% designs? On the one hand, a game using pre-packaged designs will be
+%% easier to develop and balance, but on the other hand, dynamic creation
+%% of designs adds an entirely new level of complexity, challenge, and
+%% fun to the game.
+Thousand Parsecでは、兵器や船はさまざまなコンポーネントで構成されている。
+こういったコンポーネントを組み合わせたものが、デザインの基盤となる。
+デザインとは、ゲームの中で組み立てたり使ったりする何かのプロトタイプのことだ。
+ルールセットを作ろうとすると、デザイナーはこんな決断を迫られる。
+そのルールセットで兵器や船のデザインを動的に作れるようにする？
+それとも、あらかじめ用意したデザインしか使えないようにする？
+用意されたデザインしか使えないようにしてしまえばルールセットを作るのも簡単になるし
+バランスも保ちやすい。一方、動的にデザインを作れるようにすれば、
+ルールセットを作るのは複雑で難しくなるが、そのぶんゲームは楽しくなる。
 
-User-created designs allow a game to become far more advanced. Since
-users must strategically design their own ships and their armaments, a
-stratum of variance is added to the game which can help to mitigate
-otherwise great advantages that might be conferred on a player based
-on luck (e.g., of placement) and other aspects of game strategy. These
-designs are governed by the rules of each component, outlined in the
-Thousand Parsec Component Language (TPCL, covered later in this
-chapter), and specific to each ruleset. The upshot is that no
-additional programming of functionality is necessary on the part of
-the developer to implement the design of weapons and ships;
-configuring some simple rules for each component available in the
-ruleset is sufficient.
+%% User-created designs allow a game to become far more advanced. Since
+%% users must strategically design their own ships and their armaments, a
+%% stratum of variance is added to the game which can help to mitigate
+%% otherwise great advantages that might be conferred on a player based
+%% on luck (e.g., of placement) and other aspects of game strategy. These
+%% designs are governed by the rules of each component, outlined in the
+%% Thousand Parsec Component Language (TPCL, covered later in this
+%% chapter), and specific to each ruleset. The upshot is that no
+%% additional programming of functionality is necessary on the part of
+%% the developer to implement the design of weapons and ships;
+%% configuring some simple rules for each component available in the
+%% ruleset is sufficient.
+ユーザーがデザインを作れるようにすると、ゲームはより高度なものになる。
+ユーザーは自分の船やその武装を戦略的に設計しないといけないので、ゲームにいっそうの変化が加わることになる。
+プレイヤーが配置された場所がたまたまよい場所だったとか、その他のゲーム戦略上得られた利点などを
+打ち消す助けになるだろう。
+これらのデザインは各コンポーネントのルールの影響を受ける。コンポーネントのルールは後述する
+Thousand Parsec Component Language (TPCL)
+で記述されており、各ルールセットに固有のものである。
+要するに、兵器や船のデザインを実装するときに、新たに機能をプログラミングする必要がないということだ。
+ルールセットで定義されているコンポーネント用にシンプルなルールを設定するだけでよいことになる。
 
-Without careful planning and proper balance, the great advantage of
-using custom designs can become its downfall. In the later stages of a
-game, an inordinate amount of time can be spent designing new types of
-weapons and ships to build. The creation of a good user experience on
-the client side for design manipulation is also a challenge. Since
-design manipulation can be an integral part of one game, while
-completely irrelevant to another, the integration of a design window
-into clients is a significant obstacle. Thousand Parsec's most
-complete client, tpclient-pywx, currently houses the launcher for this
-window in a relatively out-of-the-way place, in a sub-menu of the menu
-bar (which is rarely used in-game otherwise).
+%% Without careful planning and proper balance, the great advantage of
+%% using custom designs can become its downfall. In the later stages of a
+%% game, an inordinate amount of time can be spent designing new types of
+%% weapons and ships to build. The creation of a good user experience on
+%% the client side for design manipulation is also a challenge. Since
+%% design manipulation can be an integral part of one game, while
+%% completely irrelevant to another, the integration of a design window
+%% into clients is a significant obstacle. Thousand Parsec's most
+%% complete client, tpclient-pywx, currently houses the launcher for this
+%% window in a relatively out-of-the-way place, in a sub-menu of the menu
+%% bar (which is rarely used in-game otherwise).
+念入りに計画してきちんとバランスを取らないと、
+カスタムデザインを使う利点も台無しになってしまう。
+ゲームが後半に進むと、多くの時間を割いて
+新型の兵器や船のデザインをすることになる。
+クライアント側でのデザインの操作をうまくできるようにするもまた大変な作業だ。
+デザインの操作はゲームの中でも重要な位置を占めるが、その他の部分とはあまり関係がない。
+デザインウィンドウをクライアントに統合してしまうと相当邪魔になってしまう。
+Thousand Parsecで最も完成度の高いクライアントであるtpclient-pywx
+の場合は、デザインウィンドウのランチャーを比較的目立たない場所に用意している。
+メニューバーのサブメニューの中で、ゲーム中にはめったに使わないところだ。
 
-The Design functionality is designed to be easily accessible to
-ruleset developers, while allowing games to expand to virtually
-unlimited levels of complexity.  Many of the existing rulesets allow
-for only predetermined designs. \emph{Missile and Torpedo Wars},
-however, allows for full weapon and ship design from a variety of
-components.
+%% The Design functionality is designed to be easily accessible to
+%% ruleset developers, while allowing games to expand to virtually
+%% unlimited levels of complexity.  Many of the existing rulesets allow
+%% for only predetermined designs. \emph{Missile and Torpedo Wars},
+%% however, allows for full weapon and ship design from a variety of
+%% components.
+デザイン機能は、ルールセットの開発者が簡単に使えるように作られている。
+これを使えば、ゲームを拡張して事実上無制限に複雑化できる。
+既存のルールセットの多くは、事前に用意されたデザインしか使えないようになっているが、
+\emph{Missile and Torpedo Wars}は兵器や船をさまざまなコンポーネントでデザインできるようになっている。
 
 \end{aosasect2}
 
