@@ -615,41 +615,71 @@ Thousand Parsecで最も完成度の高いクライアントであるtpclient-py
 %% \begin{aosasect1}{The Thousand Parsec Protocol}
 \begin{aosasect1}{Thousand Parsecプロトコル}
 
-One might say that the Thousand Parsec protocol is the basis upon
-which everything else in the project is built. It defines the features
-available to ruleset writers, how servers should work, and what
-clients should be able to handle. Most importantly, like an
-interstellar communications standard, it allows the various software
-components to understand one another.
+%% One might say that the Thousand Parsec protocol is the basis upon
+%% which everything else in the project is built. It defines the features
+%% available to ruleset writers, how servers should work, and what
+%% clients should be able to handle. Most importantly, like an
+%% interstellar communications standard, it allows the various software
+%% components to understand one another.
+Thousand Parsecプロトコルは、プロジェクトを組み立てるのに必要なあらゆるものの
+基盤であるという人もいる。このプロトコルでは、
+ルールセットの作者が使える機能やサーバー側の動き、
+そしてクライアント側でなにを処理できるのかなどを定義する。
+最も大切なのは、惑星間通信の標準規格のように、
+各種ソフトウェアコンポーネントがお互いに理解し合えるようにすることだ。
 
-The server manages the actual state and dynamics of a game according
-to the instructions provided by the ruleset. Each turn, a player's
-client receives some of the information about the state of the game:
-objects and their ownership and current state, orders in progress,
-resource stockpiles, technological progress, messages, and everything
-else visible to that particular player. The player can then perform
-certain actions given the current state, such as issuing orders or
-creating designs, and send these back to the server to be processed
-into the computation of the next turn. All of this communication is
-framed in the Thousand Parsec protocol. An interesting and quite
-deliberate effect of this architecture is that AI clients---which are
-external to the server/ruleset and are the only means of providing
-computer players in a game---are bound by the same rules as the
-clients human players use, and thus cannot ``cheat'' by having unfair
-access to information or by being able to bend the rules.
+%% The server manages the actual state and dynamics of a game according
+%% to the instructions provided by the ruleset. Each turn, a player's
+%% client receives some of the information about the state of the game:
+%% objects and their ownership and current state, orders in progress,
+%% resource stockpiles, technological progress, messages, and everything
+%% else visible to that particular player. The player can then perform
+%% certain actions given the current state, such as issuing orders or
+%% creating designs, and send these back to the server to be processed
+%% into the computation of the next turn. All of this communication is
+%% framed in the Thousand Parsec protocol. An interesting and quite
+%% deliberate effect of this architecture is that AI clients---which are
+%% external to the server/ruleset and are the only means of providing
+%% computer players in a game---are bound by the same rules as the
+%% clients human players use, and thus cannot ``cheat'' by having unfair
+%% access to information or by being able to bend the rules.
+サーバーでは、ゲームの動的な状態をルールセットの指示に従って管理する。
+ターンごとに、プレイヤーのクライアントはゲームの状態に関する何らかの情報を受け取る。
+オブジェクトとその所有者そして現状、進行中の命令、資源の貯蔵量、技術開発の進捗、
+メッセージ、その他プレイヤーが見るあらゆるものに関する情報だ。
+プレイヤーは、現状で与えられた選択肢の中から何らかのアクションを実行する。
+命令を実行したりデザインを作ったりといったものだ。
+そのアクションがサーバーに返され、サーバー側では次のターンに向けた計算処理を行う。
+これらすべてのやりとりが、Thousand Parsecプロトコルの枠組みの中で行われるのだ。
+このアーキテクチャのおかげで、興味深い効果が得られる。AI(人工知能)クライアント
+---サーバーやルールセットとは別に、コンピューター側のプレイヤーとしてゲームに参加するだけのクライアント---
+も人間のプレイヤーと同様のルールに縛られるので、
+人間が見ることのできない情報にこっそりアクセスしたりルールをねじ曲げたりといった
+いわゆる「チート」ができなくなるのだ。
 
-The protocol specification describes a series of frames, which are
-hierarchical in the sense that each frame (except the Header frame)
-has a base frame type to which it adds its own data. There are a
-variety of abstract frame types which are never explicitly used, but
-simply exist to describe bases for concrete frames. Frames may also
-have a specified direction, with the intent that such frames need only
-be supported for sending by one side (server or client) and receiving
-by the other.
+%% The protocol specification describes a series of frames, which are
+%% hierarchical in the sense that each frame (except the Header frame)
+%% has a base frame type to which it adds its own data. There are a
+%% variety of abstract frame types which are never explicitly used, but
+%% simply exist to describe bases for concrete frames. Frames may also
+%% have a specified direction, with the intent that such frames need only
+%% be supported for sending by one side (server or client) and receiving
+%% by the other.
+プロトコルの仕様では、一連のフレームを定義している。
+これは階層型になっており、ヘッダーフレームを除く各フレームが基底フレーム型を持っている。
+基底フレーム型に対して独自のデータを追加する方式だ。
+さまざまな抽象フレーム型も用意されている。これらは明示的に使うものではなく、
+単に具象フレームを作るときのベースとして使うためだけのものだ。
+フレームには方向の指定も含まれている。これは、ひとつのフレームが、
+サーバーあるいはクライアントのどちらか一方からもう一方への送信にだけ対応すればよいというように
+するためのものである。
 
-The Thousand Parsec protocol is designed to function either standalone
-over TCP/IP, or tunnelled through another protocol such as HTTP.  It
-also supports SSL encryption.
+%% The Thousand Parsec protocol is designed to function either standalone
+%% over TCP/IP, or tunnelled through another protocol such as HTTP.  It
+%% also supports SSL encryption.
+Thousand ParsecプロトコルはTCP/IP越しでそれ単体でも機能するし、
+HTTPのような別のプロトコル上のトンネル経由でも機能するように作られている。
+また、SSLによる暗号化にも対応している。
 
 %% \begin{aosasect2}{Basics}
 \begin{aosasect2}{基本}
