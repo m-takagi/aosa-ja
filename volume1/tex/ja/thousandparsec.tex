@@ -734,96 +734,150 @@ Thousand Parsecは、何かを表すときに数値のIDを利用する。
 %% \begin{aosasect2}{Players and Games}
 \begin{aosasect2}{プレイヤーとゲーム}
 
-Before a client can begin interacting with a game, some formalities
-need to be addressed. The client must first issue a \code{Connect}
-frame to the server, to which the server might respond with \code{OK}
-or \code{Fail}---since the \code{Connect} frame includes the client's
-protocol version, one reason for failure might be a version
-mismatch. The server can also respond with the \code{Redirect} frame,
-for moves or server pools. Next, the client must issue a \code{Login}
-frame, which identifies and possibly authenticates the player; players
-new to a server can first use the \code{Create Account} frame if the
-server allows it.
+%% Before a client can begin interacting with a game, some formalities
+%% need to be addressed. The client must first issue a \code{Connect}
+%% frame to the server, to which the server might respond with \code{OK}
+%% or \code{Fail}---since the \code{Connect} frame includes the client's
+%% protocol version, one reason for failure might be a version
+%% mismatch. The server can also respond with the \code{Redirect} frame,
+%% for moves or server pools. Next, the client must issue a \code{Login}
+%% frame, which identifies and possibly authenticates the player; players
+%% new to a server can first use the \code{Create Account} frame if the
+%% server allows it.
+クライアントがゲームに参加するには、いくつかの手続きが必要だ。
+まず最初に、サーバーに\code{Connect}フレームを発行しなければいけない。
+これに対してサーバーは\code{OK}あるいは\code{Fail}で応答する。
+\code{Fail}になるのは、たとえば\code{Connect}フレームに含まれるクライアント側のプロトコルのバージョンが
+サーバー側と一致しない場合などである。サーバー側では\code{Redirect}
+フレームを返すこともできる。他のサーバーに移動させたりサーバープールを使ったりする場合だ。
+次にクライアントが発行する必要があるのが\code{Login}フレームだ。
+ここでプレイヤーの認証情報を指定する。はじめてそのサーバーに接続するプレイヤーの場合は、
+サーバー側でアカウントの作成を許している場合はまず\code{Create Account}フレームを使える。
 
-Because of the vast variability of Thousand Parsec, the client needs
-some way to ascertain which protocol features are supported by the
-server; this is accomplished via the \code{Get Features} request and
-\code{Features} response. Some of the features the server might
-respond with include:
-
-\begin{aosaitemize}
-
-  \item Availability of SSL and HTTP tunnelling (on this port or another
-  port).
-
-  \item Support for server-side component property calculation.
-
-  \item Ordering of ID sequences in responses (ascending vs.\ descending).
-
-\end{aosaitemize}
-
-Similarly, the \code{Get Games} request and sequence of \code{Game}
-responses informs the client about the nature of the active games on
-the server. A single \code{Game} frame contains the following
-information about a game:
+%% Because of the vast variability of Thousand Parsec, the client needs
+%% some way to ascertain which protocol features are supported by the
+%% server; this is accomplished via the \code{Get Features} request and
+%% \code{Features} response. Some of the features the server might
+%% respond with include:
+Thousand Parsecは常に変化し続けるので、プロトコルにある機能がサーバー側でサポートされているかどうかを
+何らかの手段で確かめる必要がある。そのために使うのが\code{Get Features}リクエストと
+\code{Features}レスポンスだ。サーバー側が返すレスポンスには次のような情報が含まれる。
 
 \begin{aosaitemize}
 
-  \item The long (descriptive) name of the game.
+  %% \item Availability of SSL and HTTP tunnelling (on this port or another
+  %% port).
+  \item SSLおよびHTTPのトンネリングが(このポートあるいは別のポートで)使えるかどうか。
 
-  \item A list of supported protocol versions.
+  %% \item Support for server-side component property calculation.
+  \item サーバー側でのコンポーネントのプロパティの算出をサポートしているか。
 
-  \item The type and version of the server.
-
-  \item The name and version of the ruleset.
-
-  \item A list of possible network connection configurations.
-
-  \item A few optional items (number of players, number of objects,
-  administrator details, comment, current turn number, etc.).
-
-  \item The base URL for media used by the game.
+  %% \item Ordering of ID sequences in responses (ascending vs.\ descending).
+  \item レスポンスにおけるIDシーケンスの並び順(昇順あるいは降順)。
 
 \end{aosaitemize}
 
-It is, of course, important for a player to know who he or she is up
-against (or working with, as the case may be), and there is a set of
-frames for that. The exchange follows the common item sequence pattern
-with a \code{Get Player IDs} request, a \code{List of Player IDs}
-response, and a series of \code{Get Player Data} requests and
-\code{Player Data} responses. The \code{Player Data} frame contains
-the player's name and race.
+%% Similarly, the \code{Get Games} request and sequence of \code{Game}
+%% responses informs the client about the nature of the active games on
+%% the server. A single \code{Game} frame contains the following
+%% information about a game:
+同様に、\code{Get Games}リクエストとそれに対応する一連の\code{Game}レスポンスが、
+クライアントに対してそのサーバー上でアクティブなゲームの特性を示す。
+一つの\code{Game}フレームには、あるゲームに対する次のような情報が含まれる。
 
-Turns in the game are also controlled via the protocol. When a player
-has finished performing actions, he or she may signal readiness for
-the next turn via the \code{Finished Turn} request; the next turn is
-computed when all players have done so. Turns also have a time limit
-imposed by the server, so that slow or unresponsive players cannot
-hold up a game; the client normally issues a \code{Get Time Remaining}
-request, and tracks the turn with a local timer set to the value in
-the server's \code{Time Remaining} response.
+\begin{aosaitemize}
 
-Finally, Thousand Parsec supports messages for a variety of purposes:
-game broadcasts to all players, game notifications to a single player,
-player-to-player communications. These are organized into ``board''
-containers which manage ordering and visibility; following the item
-sequence pattern, the exchange consists of a \code{Get Board IDs}
-request, a \code{List of Board IDs} response, and a series of
-\code{Get Board} requests and \code{Board} responses.
+  %% \item The long (descriptive) name of the game.
+  \item そのゲームの長い(説明的な)名前。
 
-Once the client has information on a message board, it can issue
-\code{Get Message} requests to obtain messages on the board by slot
-(hence, \code{Get Message} uses the \code{Get With ID and Slot} base
-frame); the server responds with \code{Message} frames containing the
-message subject and body, the turn on which the message was generated,
-and references to any other entities mentioned in the message. In
-addition to the normal set of items encountered in Thousand Parsec
-(players, objects, and the like), there are also some special
-references including message priority, player actions, and order
-status. Naturally, the client can also add messages using the
-\code{Post Message} frame---a vehicle for a \code{Messsage}
-frame---and delete them using the \code{Remove Message} frame (based
-on the \code{GetMessage} frame).
+  %% \item A list of supported protocol versions.
+  \item サポートするプロトコルのバージョンの一覧。
+
+  %% \item The type and version of the server.
+  \item サーバーの型とバージョン。
+
+  %% \item The name and version of the ruleset.
+  \item ルールセットの名前とバージョン。
+
+  %% \item A list of possible network connection configurations.
+  \item 利用可能なネットワーク接続設定の一覧。
+
+  %% \item A few optional items (number of players, number of objects,
+  %% administrator details, comment, current turn number, etc.).
+  \item オプションの項目(プレイヤー数やオブジェクト数、管理者の詳細情報、コメント、現在のターン番号など)。
+
+  %% \item The base URL for media used by the game.
+  \item ベームが使うメディア用のベースURL。
+
+\end{aosaitemize}
+
+%% It is, of course, important for a player to know who he or she is up
+%% against (or working with, as the case may be), and there is a set of
+%% frames for that. The exchange follows the common item sequence pattern
+%% with a \code{Get Player IDs} request, a \code{List of Player IDs}
+%% response, and a series of \code{Get Player Data} requests and
+%% \code{Player Data} responses. The \code{Player Data} frame contains
+%% the player's name and race.
+もちろん、プレイヤーにとっても、自分の対戦相手(あるいは仲間)の情報を知ることが重要だ。
+そのためのフレームも用意されている。一般的な項目パターンの交換をするには、
+まず\code{Get Player IDs}リクエストに対して\code{List of Player IDs}レスポンスを得て、
+それから各プレイヤーについての\code{Get Player Data}リクエストと\code{Player Data}レスポンスを利用する。
+\code{Player Data}フレームには、プレイヤーの名前と種族が含まれている。
+
+%% Turns in the game are also controlled via the protocol. When a player
+%% has finished performing actions, he or she may signal readiness for
+%% the next turn via the \code{Finished Turn} request; the next turn is
+%% computed when all players have done so. Turns also have a time limit
+%% imposed by the server, so that slow or unresponsive players cannot
+%% hold up a game; the client normally issues a \code{Get Time Remaining}
+%% request, and tracks the turn with a local timer set to the value in
+%% the server's \code{Time Remaining} response.
+ゲームでのターンもこのプロトコルによって制御される。
+プレイヤーが何らかのアクションを終えると、次のターンの準備が整ったことを表す
+\code{Finished Turn}リクエストを送る。全プレイヤーがこのリクエストを送り終えた時点で
+次のターンに向けた計算が始まる。ターンには、サーバーで定めた時間制限もある。
+そのため、反応が遅れたり応答がなかったりしたプレイヤーはゲームについて行けなくなる。
+クライアントは一般に、\code{Get Time Remaining}リクエストを発行して、
+ローカルのタイマーの値をサーバーの\code{Time Remaining}レスポンスに合わせる。
+
+%% Finally, Thousand Parsec supports messages for a variety of purposes:
+%% game broadcasts to all players, game notifications to a single player,
+%% player-to-player communications. These are organized into ``board''
+%% containers which manage ordering and visibility; following the item
+%% sequence pattern, the exchange consists of a \code{Get Board IDs}
+%% request, a \code{List of Board IDs} response, and a series of
+%% \code{Get Board} requests and \code{Board} responses.
+最後に、Thousand Parsecではさまざまな目的で使うためのメッセージに対応している。
+ゲームから全プレイヤーへの通知、ゲームから特定のプレイヤーへの通知、
+そしてプレイヤーどうしのコミュニケーションなどに使うものだ。
+これらは``board''コンテナが取り仕切っており、ここでメッセージの順序や表示を管理している。
+項目の並びのパターンに従って、\code{Get Board IDs}リクエストと\code{List of Board IDs}
+レスポンス、そして一連の\code{Get Board}リクエストと\code{Board}レスポンスが行われる。
+
+%% Once the client has information on a message board, it can issue
+%% \code{Get Message} requests to obtain messages on the board by slot
+%% (hence, \code{Get Message} uses the \code{Get With ID and Slot} base
+%% frame); the server responds with \code{Message} frames containing the
+%% message subject and body, the turn on which the message was generated,
+%% and references to any other entities mentioned in the message. In
+%% addition to the normal set of items encountered in Thousand Parsec
+%% (players, objects, and the like), there are also some special
+%% references including message priority, player actions, and order
+%% status. Naturally, the client can also add messages using the
+%% \code{Post Message} frame---a vehicle for a \code{Messsage}
+%% frame---and delete them using the \code{Remove Message} frame (based
+%% on the \code{GetMessage} frame).
+クライアントがメッセージボードの情報を得たら、\code{Get Message}リクエスト
+を使ってボード上のメッセージをスロットで取得できる
+(従って、\code{Get Message}は基底フレームとして\code{Get With ID and Slot}を使う)。
+サーバーは\code{Message}フレームを返す。この中にはメッセージのタイトルと本文やそのメッセージが作られたターン、
+メッセージ内で言及されているエンティティへの参照などが含まれる。
+Thousand Parsecで通常現れるアイテム(プレイヤーやオブジェクトなど)
+に加えて、特殊な参照が存在する。メッセージの優先度やプレイヤーのアクション、
+その他のステータスなどである。もちろん、クライアントは\code{Post Message}
+フレーム(\code{Messsage}フレームを運ぶメディア)でメッセージを追加できる。
+メッセージを削除するときに使うのは\code{Remove Message}フレーム(基底フレームは\code{GetMessage})
+だ。
 
 \end{aosasect2}
 
