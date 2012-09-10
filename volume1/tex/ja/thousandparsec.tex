@@ -882,65 +882,101 @@ Thousand Parsecで通常現れるアイテム(プレイヤーやオブジェク�
 \end{aosasect2}
 
 %% \begin{aosasect2}{Objects, Orders, and Resources}
-\begin{aosasect2}{オブジェクト、指令、そして資源}
+\begin{aosasect2}{オブジェクト、命令、そして資源}
 
-The bulk of the process of interacting with the universe is
-accomplished through a series of frames comprising the functionality
-for objects, orders, and resources.
+%% The bulk of the process of interacting with the universe is
+%% accomplished through a series of frames comprising the functionality
+%% for objects, orders, and resources.
+ゲーム世界でのやりとりの多くは、オブジェクトや命令そして資源に対する
+各種機能を含むフレームを使って行う。
 
-The physical state of the universe---or at least that part of it that
-the player controls or has the ability to see---must be obtained upon
-connecting, and every turn thereafter, by the client. The client
-generally issues a \code{Get Object IDs} request (a \code{Get ID
-Sequence}), to which the server replies with a \code{List of Object
-IDs} response. The client can then request details about individual
-objects using \code{Get Object by ID} requests, which are answered
-with \code{Object} frames containing such details---again subject to
-visibility by the player---as their type, name, size, position,
-velocity, contained objects, applicable order types, and current
-orders. The protocol also provides the \code{Get Object IDs by
-Position} request, which allows the client to find all objects
-within a specified sphere of space.
+%% The physical state of the universe---or at least that part of it that
+%% the player controls or has the ability to see---must be obtained upon
+%% connecting, and every turn thereafter, by the client. The client
+%% generally issues a \code{Get Object IDs} request (a \code{Get ID
+%% Sequence}), to which the server replies with a \code{List of Object
+%% IDs} response. The client can then request details about individual
+%% objects using \code{Get Object by ID} requests, which are answered
+%% with \code{Object} frames containing such details---again subject to
+%% visibility by the player---as their type, name, size, position,
+%% velocity, contained objects, applicable order types, and current
+%% orders. The protocol also provides the \code{Get Object IDs by
+%% Position} request, which allows the client to find all objects
+%% within a specified sphere of space.
+クライアントは、接続時そして各ターンの終了時に世界の物理的な状態
+---少なくとも、そのプレイヤーから見えて制御できる範囲の状態---を取得する必要がある。
+クライアントは一般に、\code{Get Object IDs}リクエスト(\code{Get ID Sequence})
+を発行し、サーバーはそれに対して\code{List of Object IDs}で応える。
+クライアントが個々のオブジェクトの詳細を知るには\code{Get Object by ID}リクエストを使う。
+その応答は\code{Object}フレームになり、そのプレイヤーから見える範囲の詳細が含まれている。
+その型や名前、サイズ、位置、速度、内包するオブジェクト、使える命令、現在の命令などである。
+プロトコルでは\code{Get Object IDs by Position}リクエストも用意している。
+これを使うと、指定した球体の内部にある全オブジェクトを探すことができる。
 
-The client obtains the set of possible orders following the usual item
-sequence pattern by issuing a \code{Get Order Description IDs} request
-and, for each ID in the \code{List of Order Description IDs} response,
-issuing a \code{Get Order Description} request and receiving a
-\code{Order Description} response. The implementation of the orders
-and order queues themselves has evolved markedly over the history of
-the protocol. Originally, each object had a single order queue. The
-client would issue an \code{Order} request (containing the order type,
-target object, and other information), receive an \code{Outcome}
-response detailing the expected result of the order, and, after
-completion of the order, receive a \code{Result} frame containing the
-actual result.
+%% The client obtains the set of possible orders following the usual item
+%% sequence pattern by issuing a \code{Get Order Description IDs} request
+%% and, for each ID in the \code{List of Order Description IDs} response,
+%% issuing a \code{Get Order Description} request and receiving a
+%% \code{Order Description} response. The implementation of the orders
+%% and order queues themselves has evolved markedly over the history of
+%% the protocol. Originally, each object had a single order queue. The
+%% client would issue an \code{Order} request (containing the order type,
+%% target object, and other information), receive an \code{Outcome}
+%% response detailing the expected result of the order, and, after
+%% completion of the order, receive a \code{Result} frame containing the
+%% actual result.
+クライアントが使える命令を取得するには、通常のアイテム群のときと同様のパターンを使う。
+つまり、まず\code{Get Order Description IDs}リクエストを発行し、
+返ってきたレスポンス\code{List of Order Description IDs}の中の各IDに対して
+\code{Get Order Description}リクエストをして\code{Order Description}を受け取る。
+命令群と命令キューの実装は、このプロトコルの歴史とともにめざましく成長してきた。
+最初の頃は、各オブジェクトがひとつの命令キューを持っていたのだ。
+クライアントが\code{Order}リクエスト(命令の型や対象オブジェクトなどの情報を含む)
+を発行して\code{Outcome}レスポンス(命令の結果として期待される詳細)を受け取り、
+命令が完了したら実際の結果を\code{Result}フレームで受け取っていた。
 
-In the second version, the \code{Order} frame incorporated the
-contents of the \code{Outcome} frame (since, based on the order
-description, this did not require the server's input), and the
-\code{Result} frame was removed entirely. The latest version of the
-protocol refactored the order queue out of objects, and added the
-\code{Get Order Queue IDs}, \code{List of Order Queue IDs}, \code{Get
-Order Queue}, and \code{Order Queue} frames, which work similarly to
-the message and board functionality\footnote{Actually, it's the other
-way around: messages and boards were derived from orders in the
-second version of the protocol.}.  The \code{Get Order} and
-\code{Remove Order} frames (both \code{GetWithIDSlot} requests) allow
-the client to access and remove orders on a queue, respectively. The
-\code{Insert Order} frame now acts as a vehicle for the \code{Order}
-payload; this was done to allow for another frame, \code{Probe Order},
-which is used by the client in some cases to obtain information for
-local use.
+%% In the second version, the \code{Order} frame incorporated the
+%% contents of the \code{Outcome} frame (since, based on the order
+%% description, this did not require the server's input), and the
+%% \code{Result} frame was removed entirely. The latest version of the
+%% protocol refactored the order queue out of objects, and added the
+%% \code{Get Order Queue IDs}, \code{List of Order Queue IDs}, \code{Get
+%% Order Queue}, and \code{Order Queue} frames, which work similarly to
+%% the message and board functionality\footnote{Actually, it's the other
+%% way around: messages and boards were derived from orders in the
+%% second version of the protocol.}.  The \code{Get Order} and
+%% \code{Remove Order} frames (both \code{GetWithIDSlot} requests) allow
+%% the client to access and remove orders on a queue, respectively. The
+%% \code{Insert Order} frame now acts as a vehicle for the \code{Order}
+%% payload; this was done to allow for another frame, \code{Probe Order},
+%% which is used by the client in some cases to obtain information for
+%% local use.
+次のバージョンでは\code{Order}フレームが\code{Outcome}フレームの内容を取り込み
+(というのも、命令の内容によってはサーバーの入力を必要としないからだ)、
+\code{Result}フレームは完全に廃止された。
+最新版のプロトコルでは命令キューをオブジェクトから切り離し、
+\code{Get Order Queue IDs}や\code{List of Order Queue IDs}、\code{Get Order Queue}
+そして\code{Order Queue}といったフレームを追加した。これらはメッセージやボード機能と同じように動く
+\footnote{実際のところ、別の見方もできる。メッセージやボードが、第二バージョンのプロトコルから派生したものだという見方だ。}。
+\code{Get Order}フレームおよび\code{Remove Order}フレーム(どちらも\code{GetWithIDSlot}リクエスト)
+を使えば、クライアントがキューにある命令を取得したり削除したりできる。
+\code{Insert Order}フレームは、\code{Order}を運ぶための道具だ。
+これを用意したのは、別のフレーム\code{Probe Order}を考慮したためだ。
+このフレームを使って、クライアントがローカルで使うための情報を取得することになる。
 
-Resource descriptions also follow the item sequence pattern: a
-\code{Get Resource Description IDs} request, a \code{List of Resource
-Description IDs} response, and a series of \code{Get Resource
-Description} requests and \code{Resource Description} responses.
+%% Resource descriptions also follow the item sequence pattern: a
+%% \code{Get Resource Description IDs} request, a \code{List of Resource
+%% Description IDs} response, and a series of \code{Get Resource
+%% Description} requests and \code{Resource Description} responses.
+資源についての説明を取得するのも、通常のアイテム群のパターンと同じだ。
+まず\code{Get Resource Description IDs}リクエストを発行して\code{List of Resource Description IDs}
+レスポンスが取得し、一連の\code{Get Resource Description}リクエストで
+\code{Resource Description}レスポンスを得ることになる。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Design Manipulation}
-\begin{aosasect2}{設計の操作}
+\begin{aosasect2}{デザインの操作}
 
 The handling of designs in the Thousand Parsec Protocol is broken down
 into the manipulation of four separate sub-categories: categories,
