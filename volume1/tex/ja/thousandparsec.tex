@@ -978,84 +978,132 @@ Thousand Parsecで通常現れるアイテム(プレイヤーやオブジェク�
 %% \begin{aosasect2}{Design Manipulation}
 \begin{aosasect2}{デザインの操作}
 
-The handling of designs in the Thousand Parsec Protocol is broken down
-into the manipulation of four separate sub-categories: categories,
-components, properties, and designs.
+%% The handling of designs in the Thousand Parsec Protocol is broken down
+%% into the manipulation of four separate sub-categories: categories,
+%% components, properties, and designs.
+Thousand Parsecプロトコルにおけるデザインの操作は、
+四つのサブカテゴリの操作に切り分けられる。
+カテゴリ、コンポーネント、プロパティ、そしてデザインだ。
 
-Categories differentiate the different design types. Two of the most
-commonly used design types are ships and weapons. Creating a category
-is simple, as it consists only of a name and description; the
-\code{Category} frame itself contains only these two strings. Each
-category is added by the ruleset to the Design Store using an
-\code{Add Category} request, a vehicle for the \code{Category}
-frame. The remainder of the management of categories is handled in the
-usual item sequence pattern with the \code{Get Category IDs} request
-and \code{List of Category IDs} response.
+%% Categories differentiate the different design types. Two of the most
+%% commonly used design types are ships and weapons. Creating a category
+%% is simple, as it consists only of a name and description; the
+%% \code{Category} frame itself contains only these two strings. Each
+%% category is added by the ruleset to the Design Store using an
+%% \code{Add Category} request, a vehicle for the \code{Category}
+%% frame. The remainder of the management of categories is handled in the
+%% usual item sequence pattern with the \code{Get Category IDs} request
+%% and \code{List of Category IDs} response.
+カテゴリは、さまざまなデザイン型を区別するためのものだ。
+最も一般的に使われているデザイン型は、船と兵器の二つである。
+カテゴリを作るのは単純なことで、名前と説明を指定するだけでよい。
+\code{Category}フレーム自体に含まれるのは、この二つの文字列だけである。
+ルールセットがカテゴリをデザインストアに追加するときに使うのが\code{Add Category}
+リクエストで、このリクエストが\code{Category}フレームを運ぶ。
+カテゴリ管理のその他の作業を受け持つのは通常のアイテム群のパターンで、
+\code{Get Category IDs}リクエストと\code{List of Category IDs}レスポンスを使う。
 
-Components consist of the different parts and modules which comprise a
-design. This can be anything from the hull of a ship or missile to the
-tube that a missile is housed in. Components are a bit more involved
-than categories. A \code{Component} frame contains the following
-information:
-
-\begin{aosaitemize}
-
-  \item The name and description of the component.
-
-  \item A list of categories to which the component belongs.
-
-  \item A \code{Requirements} function, in Thousand Parsec Component
-  Language (TPCL).
-
-  \item A list of properties and their corresponding values.
-
-\end{aosaitemize}
-
-Of particular note is the \code{Requirements} function associated with
-the component. Since components are the parts that make up a ship,
-weapon, or other constructed object, it is necessary to ensure that
-they are valid when adding them to a design. The \code{Requirements}
-function verifies that each component added to the design conforms to
-the rules of other previously added components. For example, in
-\code{Missile and Torpedo Wars}, it is impossible to hold an Alpha
-Missile in a ship without an Alpha Missile Tube. This verification
-occurs on both the client side and the server side, which is why the
-entire function must appear in a protocol frame, and why a concise
-language (TPCL, covered later in the chapter) was chosen for it.
-
-All of a design's properties are communicated via \code{Property}
-frames. Each ruleset exposes a set of properties used within the
-game. These typically include things like the number of missile tubes
-of a certain type allowed on a ship, or the amount of armor included
-with a certain hull type. Like \code{Component} frames,
-\code{Property} frames make use of TPCL\@. A \code{Property} frame
-contains the following information:
+%% Components consist of the different parts and modules which comprise a
+%% design. This can be anything from the hull of a ship or missile to the
+%% tube that a missile is housed in. Components are a bit more involved
+%% than categories. A \code{Component} frame contains the following
+%% information:
+コンポーネントには、そのデザインを構成するさまざまなパーツやモジュールが含まれている。
+船体からミサイル、そしてミサイルを据え付ける砲台まであらゆるものが考えられる。
+コンポーネントは、カテゴリに比べて少し込み入っている。
+\code{Component}フレームに含まれる情報は次のとおりだ。
 
 \begin{aosaitemize}
 
-  \item The (display) name and description of the property.
+  %% \item The name and description of the component.
+  \item コンポーネントの名前と説明。
 
-  \item A list of categories to which the property belongs.
+  %% \item A list of categories to which the component belongs.
+  \item コンポーネントが属するカテゴリのリスト。
 
-  \item The name (valid TPCL identifier) of the property.
+  %% \item A \code{Requirements} function, in Thousand Parsec Component
+  %% Language (TPCL).
+  \item \code{Requirements}関数。Thousand Parsec Component Language (TPCL)形式。
 
-  \item The rank of the property.
-
-  \item \code{Calculate} and \code{Requirements} functions, in Thousand Parsec Component Language (TPCL).
+  %% \item A list of properties and their corresponding values.
+  \item プロパティとその値のリスト。
 
 \end{aosaitemize}
 
-The rank of a property is used to distinguish a hierarchy of
-dependencies. In TPCL, a function may not depend on any property which
-has a rank less than or equal to this property. This means that if one
-had an Armor property of rank 1 and an Invisibility property of rank
-0, then the Invisibility property could not directly depend on the
-Armor property. This ranking was implemented as a method of curtailing
-circular dependencies. The \code{Calculate} function is used to define
-how a property is displayed, differentiating the methods of
-measurement. \code{Missile and Torpedo Wars} uses XML to import game
-properties from a game data file. \aosafigref{fig.tp.prop} shows an
-example property from that game data.
+%% Of particular note is the \code{Requirements} function associated with
+%% the component. Since components are the parts that make up a ship,
+%% weapon, or other constructed object, it is necessary to ensure that
+%% they are valid when adding them to a design. The \code{Requirements}
+%% function verifies that each component added to the design conforms to
+%% the rules of other previously added components. For example, in
+%% \code{Missile and Torpedo Wars}, it is impossible to hold an Alpha
+%% Missile in a ship without an Alpha Missile Tube. This verification
+%% occurs on both the client side and the server side, which is why the
+%% entire function must appear in a protocol frame, and why a concise
+%% language (TPCL, covered later in the chapter) was chosen for it.
+コンポーネントに関連づけられた\code{Requirements}関数について、もう少し詳しく説明する。
+コンポーネントを組み合わせて船や兵器などのオブジェクトを作ることになるので、
+デザインに追加するときにその妥当性を保証できなければいけない。
+\code{Requirements}関数は、デザインに追加する各コンポーネントが
+すでに追加済みの他のコンポーネントのルールを満たすかどうかを検証する。
+たとえば\code{Missile and Torpedo Wars}では、船にAlpha Missileを搭載するには
+Alpha Missile Tubeが必須となる。こういった検証が、クライアント側とサーバー側の
+両方で行われる。そのためには関数全体がプロトコルのフレームに存在しなければいけないし、
+簡潔な言語(後述するTPCL)を採用したのもそのためだ。
+
+%% All of a design's properties are communicated via \code{Property}
+%% frames. Each ruleset exposes a set of properties used within the
+%% game. These typically include things like the number of missile tubes
+%% of a certain type allowed on a ship, or the amount of armor included
+%% with a certain hull type. Like \code{Component} frames,
+%% \code{Property} frames make use of TPCL\@. A \code{Property} frame
+%% contains the following information:
+デザインのプロパティに関する通信は、すべて\code{Property}フレームを使って行う。
+各ルールセットは、ゲーム内で使えるプロパティ群を公開している。
+一般的なプロパティとしては、一隻の船に搭載できる砲台の最大数や
+船体の装甲などがある。\code{Component}フレームと同様に、\code{Property}
+フレームでもTPCLを使っている。\code{Property}フレームに含まれる情報は次のとおりだ。
+
+\begin{aosaitemize}
+
+  %% \item The (display) name and description of the property.
+  \item プロパティの(表示用の)名前とその説明。
+
+  %% \item A list of categories to which the property belongs.
+  \item プロパティが属するカテゴリのリスト。
+
+  %% \item The name (valid TPCL identifier) of the property.
+  \item プロパティの(TPCLの識別しとして使える形式の)名前。
+
+  %% \item The rank of the property.
+  \item プロパティのランク。
+
+  %% \item \code{Calculate} and \code{Requirements} functions, in Thousand Parsec Component Language (TPCL).
+  \item \code{Calculate}関数および\code{Requirements}関数。Thousand Parsec Component Language (TPCL)形式。
+
+\end{aosaitemize}
+
+%% The rank of a property is used to distinguish a hierarchy of
+%% dependencies. In TPCL, a function may not depend on any property which
+%% has a rank less than or equal to this property. This means that if one
+%% had an Armor property of rank 1 and an Invisibility property of rank
+%% 0, then the Invisibility property could not directly depend on the
+%% Armor property. This ranking was implemented as a method of curtailing
+%% circular dependencies. The \code{Calculate} function is used to define
+%% how a property is displayed, differentiating the methods of
+%% measurement. \code{Missile and Torpedo Wars} uses XML to import game
+%% properties from a game data file. \aosafigref{fig.tp.prop} shows an
+%% example property from that game data.
+プロパティのランクは、依存関係の階層を識別するために利用する。
+TPCLでは、ある関数がこのプロパティのランク以下のプロパティには依存していないことがある。
+つまり、何かがランク1のArmorプロパティとランク0のInvisibilityプロパティを持っていた場合、
+Invisibilityプロパティは直接Armorプロパティに依存することができない。
+ランクを導入したのは、循環依存の問題を回避するためだった。
+\code{Calculate}関数を使ってそのプロパティの表示方法を定義し、
+測定方法を差別化する。
+\code{Missile and Torpedo Wars}は、ゲームのデータファイルからXML形式で
+プロパティをインポートする。ゲームデータにあるプロパティの例を\aosafigref{fig.tp.prop}
+に示す。
 
 \begin{figure}
 \begin{verbatim}
@@ -1078,47 +1126,71 @@ example property from that game data.
 \label{fig.tp.prop}
 \end{figure}
 
-In this example, we have a property belonging to the Ships category,
-of rank~0. This property is called Colonise, and relates to the
-ability of a ship to colonize planets. A quick look at the TPCL
-\code{Calculate} function (listed here as \code{tpclDisplayFunction})
-reveals that this property outputs either ``Yes'' or ``No'' depending
-on whether the ship in question has said capability. Adding properties
-in this fashion gives the ruleset designer granular control over
-metrics of the game and the ability to easily compare them and output
-them in a player-friendly format.
+%% In this example, we have a property belonging to the Ships category,
+%% of rank~0. This property is called Colonise, and relates to the
+%% ability of a ship to colonize planets. A quick look at the TPCL
+%% \code{Calculate} function (listed here as \code{tpclDisplayFunction})
+%% reveals that this property outputs either ``Yes'' or ``No'' depending
+%% on whether the ship in question has said capability. Adding properties
+%% in this fashion gives the ruleset designer granular control over
+%% metrics of the game and the ability to easily compare them and output
+%% them in a player-friendly format.
+この例では、Shipsカテゴリに属するランク0のプロパティを扱っている。
+プロパティの名前はColoniseで、その船が惑星を占領できるかどうかに関わるものだ。
+TPCLの\code{Calculate}関数(\code{tpclDisplayFunction})をざっと眺めてみるとわかるとおり、
+このプロパティの出力は``Yes''か``No''のいずれかで、船がその機能を持っているかどうかを表す。
+このようにプロパティを追加していくことで、ルールセットを作る人がゲームをよりきめ細やかに作り込めるようになり、
+ユーザーにわかりやすい形式でそのプロパティを表示できるようにもなる。
 
-The actual design of ships, weapons, and other game artifacts are
-created and manipulated using the \code{Design} frame and related
-frames. In all current rulesets, these are used for building ships and
-weaponry using the existing pool of components and properties. Since
-the rules for designs are already handled in TPCL \code{Requirements}
-functions in both properties and components, the creation of a design
-is a bit simpler. A \code{Design} frame contains the following
-information:
+%% The actual design of ships, weapons, and other game artifacts are
+%% created and manipulated using the \code{Design} frame and related
+%% frames. In all current rulesets, these are used for building ships and
+%% weaponry using the existing pool of components and properties. Since
+%% the rules for designs are already handled in TPCL \code{Requirements}
+%% functions in both properties and components, the creation of a design
+%% is a bit simpler. A \code{Design} frame contains the following
+%% information:
+船や兵器などの実際のデザインを作ったり操作したりするときに使うのが、
+\code{Design}フレームとそれに関連するフレーム群だ。
+いま出回っているすべてのルールセットは、これらを使って
+既存のコンポーネントプールおよびプロパティプールから船や兵器を組み立てている。
+プロパティやコンポーネントに関するデザイン時のルールは
+TPCLの\code{Requirements}関数で処理されているので、デザインを作ることは少しシンプルになる。
+\code{Design}フレームの内容は次のとおりだ。
 
 \begin{aosaitemize}
 
-  \item The name and description of the design.
+  %% \item The name and description of the design.
+  \item デザインの名前とその説明。
 
-  \item A list of categories to which the design belongs.
+  %% \item A list of categories to which the design belongs.
+  \item デザインが属するカテゴリのリスト。
 
-  \item A count of the number of instances of the design.
+  %% \item A count of the number of instances of the design.
+  \item デザインのインスタンス数のカウンタ。
 
-  \item The owner of the design.
+  %% \item The owner of the design.
+  \item デザインの所有者。
 
-  \item A list of component IDs and their corresponding counts.
+  %% \item A list of component IDs and their corresponding counts.
+  \item コンポーネントIDとそれに対応するカウントのリスト。
 
-  \item A list of properties and their corresponding display string.
+  %% \item A list of properties and their corresponding display string.
+  \item プロパティとそれに対応する表示用文字列のリスト。
 
-  \item The feedback on the design.
+  %% \item The feedback on the design.
+  \item デザインへのフィードバック。
 
 \end{aosaitemize}
 
-This frame is a bit different from the others. Most notably, since a
-design is an owned item in the game, there is a relation to the owner
-of each design. A design also tracks the number of its instantiations
-with a counter.
+%% This frame is a bit different from the others. Most notably, since a
+%% design is an owned item in the game, there is a relation to the owner
+%% of each design. A design also tracks the number of its instantiations
+%% with a counter.
+このフレームはその他のフレームとは少し違う。
+最も注目すべきなのは、デザインというのはゲーム内で誰かが所有するアイテムだという点だ。
+つまり、個々のデザインには所有者がいることになる。
+また、個々のデザインは自分自身のインスタンスが作られた回数を覚えている。
 
 \end{aosasect2}
 
