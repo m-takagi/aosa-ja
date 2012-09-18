@@ -1197,41 +1197,66 @@ TPCLの\code{Requirements}関数で処理されているので、デザインを
 %% \begin{aosasect2}{Server Administration}
 \begin{aosasect2}{サーバー管理}
 
-A server administration protocol extension is also available, allowing
-for remote live control of supporting servers. The standard use case
-is to connect to the server via an administration client---perhaps a
-shell-like command interface or a GUI configuration panel---to change
-settings or perform other maintenance tasks. However, other, more
-specialized uses are possible, such as behind-the-scenes management
-for single-player games.
+%% A server administration protocol extension is also available, allowing
+%% for remote live control of supporting servers. The standard use case
+%% is to connect to the server via an administration client---perhaps a
+%% shell-like command interface or a GUI configuration panel---to change
+%% settings or perform other maintenance tasks. However, other, more
+%% specialized uses are possible, such as behind-the-scenes management
+%% for single-player games.
+サーバー管理プロトコルの拡張も用意されており、
+それに対応したサーバーをリモート制御できるようになっている。
+一般的な使い道は、管理クライアント(シェル風のコマンドラインインターフェイスだったり、
+あるいはGUIの設定パネルだったりするだろう)経由でサーバーに接続して
+設定の変更やその他の保守作業をこなすことだ。
+しかし、それ以外の使い方もできる。シングルプレイヤーのゲームで裏方の処理を管理することなどだ。
 
-As with the game protocol described in the preceding sections, the
-administration client first negotiates a connection (on a port
-separate from the normal game port) and authenticates using
-\code{Connect} and \code{Login} requests. Once connected, the client
-can receive log messages from and issue commands to the server.
+%% As with the game protocol described in the preceding sections, the
+%% administration client first negotiates a connection (on a port
+%% separate from the normal game port) and authenticates using
+%% \code{Connect} and \code{Login} requests. Once connected, the client
+%% can receive log messages from and issue commands to the server.
+先のセクションで説明したゲームのプロトコルと同様、管理クライアントもまずは
+接続のネゴシエーション(ゲームで使っているポートとは別のポートを利用する)
+を行ってから認証に進む。利用するのは\code{Connect}リクエストと\code{Login}リクエストだ。
+接続を確立したら、サーバーからログメッセージを受け取ったりサーバーにコマンドを発行したりできるようになる。
 
-Log messages are pushed to the client via \code{Log Message}
-frames. These contain a severity level and text; as appropriate to the
-context, the client can choose to display all, some, or none of the
-log messages it receives.
+%% Log messages are pushed to the client via \code{Log Message}
+%% frames. These contain a severity level and text; as appropriate to the
+%% context, the client can choose to display all, some, or none of the
+%% log messages it receives.
+ログメッセージをクライアントに送るときに使うのが\code{Log Message}フレームだ。
+この中には、深刻度とメッセージ本文が含まれている。コンテキストに合わせて、
+クライアント側ではそれを全部表示してもいいし一部だけを表示することもある。
+あるいは一切メッセージを無視することもある。
 
-The server may also issue a \code{Command Update} frame instructing
-the client to populate or update its local command set; supported
-commands are exposed to the client in the server's response to a
-\code{Get Command Description IDs} frame. Individual command
-descriptions must then be obtained by issuing a \code{Get Command
-Description} frame for each, to which the server responds with a
-\code{Command Description} frame.
+%% The server may also issue a \code{Command Update} frame instructing
+%% the client to populate or update its local command set; supported
+%% commands are exposed to the client in the server's response to a
+%% \code{Get Command Description IDs} frame. Individual command
+%% descriptions must then be obtained by issuing a \code{Get Command
+%% Description} frame for each, to which the server responds with a
+%% \code{Command Description} frame.
+サーバーは、\code{Command Update}フレームを発行してクライアント側の
+ローカルコマンドセットを更新することもある。サーバー側でサポートするコマンドは、
+クライアントからの\code{Get Command Description IDs}フレームへのレスポンスとして公開する。
+個々のコマンドの詳細を取得するには、\code{Get Command Description}フレームを発行しなければいけない。
+サーバーはそれに対して\code{Command Description}フレームで応答する。
 
-This exchange is functionally quite similar to (and, in fact, was
-originally based on) that of the order frames used in the main game
-protocol. It allows commands to be described to the user and vetted
-locally to some degree, minimizing network usage. The administration
-protocol was conceived at a time when the game protocol was already
-mature; rather than starting from scratch, the developers found
-existing functionality in the game protocol which did almost what was
-needed, and added the code to the same protocol libraries.
+%% This exchange is functionally quite similar to (and, in fact, was
+%% originally based on) that of the order frames used in the main game
+%% protocol. It allows commands to be described to the user and vetted
+%% locally to some degree, minimizing network usage. The administration
+%% protocol was conceived at a time when the game protocol was already
+%% mature; rather than starting from scratch, the developers found
+%% existing functionality in the game protocol which did almost what was
+%% needed, and added the code to the same protocol libraries.
+このやりとりは、ゲーム本体で使われていた命令関連のフレーム群とよく似ている
+(実際、それをもとにして作ったものだ)。これらを使えばコマンドをユーザー側で吟味でき、
+ネットワークの流量を抑えられる。管理プロトコルができたのは、
+ゲームプロトコルが既に成熟しきった頃だった。そのため、
+必要な機能の大半は既にゲームプロトコルにそろっており、
+ちょっとしたプロトコルライブラリのコードを追加するだけでよかった。
 
 \end{aosasect2}
 
