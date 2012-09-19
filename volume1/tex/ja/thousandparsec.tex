@@ -153,7 +153,7 @@ Thousand Parsecは、ゲーマーだけでなく開発者にとってもエキ�
 は、「伝統的な」4X宇宙ゲームを実装するためのよい見本となる。
 
 %% \begin{aosasect1}{Anatomy of a Star Empire}
-\begin{aosasect1}{スターエンパイアの世界観}
+\begin{aosasect1}{スターエンパイアの世界}
 
 %% In order to properly introduce the things that make up a Thousand
 %% Parsec universe, it makes sense first to give a quick overview of a
@@ -1268,55 +1268,85 @@ TPCLの\code{Requirements}関数で処理されているので、デザインを
 %% \begin{aosasect2}{Server Persistence}
 \begin{aosasect2}{サーバーの永続化}
 
-Thousand Parsec games, like many in the turn-based strategy genre,
-have the potential to last for quite some time. Besides often running
-far longer than the circadian rhythms of the players' species, during
-this extended period the server process might be prematurely
-terminated for any number of reasons. To allow players to pick up a
-game where they left off, Thousand Parsec servers provide persistence
-by storing the entire state of the universe (or even multiple
-universes) in a database. This functionality is also used in a related
-way for saving single-player games, which will be covered in more
-detail later in this section.
+%% Thousand Parsec games, like many in the turn-based strategy genre,
+%% have the potential to last for quite some time. Besides often running
+%% far longer than the circadian rhythms of the players' species, during
+%% this extended period the server process might be prematurely
+%% terminated for any number of reasons. To allow players to pick up a
+%% game where they left off, Thousand Parsec servers provide persistence
+%% by storing the entire state of the universe (or even multiple
+%% universes) in a database. This functionality is also used in a related
+%% way for saving single-player games, which will be covered in more
+%% detail later in this section.
+Thousand Parsecのゲームは、ターン制の戦略型ゲームの多くがそうであるように、
+それなりに時間をかけてプレイする可能性がある。プレイヤーの日々の生活周期を越えて
+長時間実行されることもあるので、その間さまざまな理由でサーバープロセスが終了してしまうこともあるだろう。
+切断されてしまった時点からゲームを再開できるようにするため、
+Thousand Parsecサーバーは永続化機能を提供している。
+ゲーム世界全体の状態をデータベースに格納しているのだ。
+この機能はシングルプレイヤーゲームを保存する仕組みとしても使われており、
+それについては後で詳しく説明する。
 
-The flagship server, \code{tpserver-cpp}, provides an abstract
-persistence interface and a modular plugin system to allow for various
-database back ends. At the time of writing, \code{tpserver-cpp} ships
-with modules for MySQL and SQLite.
+%% The flagship server, \code{tpserver-cpp}, provides an abstract
+%% persistence interface and a modular plugin system to allow for various
+%% database back ends. At the time of writing, \code{tpserver-cpp} ships
+%% with modules for MySQL and SQLite.
+最先端のサーバーである\code{tpserver-cpp}では抽象化永続インターフェイスが提供されており、
+さまざまなデータベースをバックエンドとして使うためのプラグインを作れるシステムもある。
+本章の執筆時点で\code{tpserver-cpp}に同梱されているのはMySQL用とSQLite用のプラグインモジュールだ。
 
-The abstract \code{Persistence} class describes the functionality
-allowing the server to save, update, and retrieve the various elements
-of a game (as described in the Anatomy of a Star Empire section). The
-database is updated continuously from various places in the server
-code where the game state changes, and no matter the point at which
-the server is terminated or crashes, all information to that point
-should be recovered when the server starts again from the saved data.
+%% The abstract \code{Persistence} class describes the functionality
+%% allowing the server to save, update, and retrieve the various elements
+%% of a game (as described in the Anatomy of a Star Empire section). The
+%% database is updated continuously from various places in the server
+%% code where the game state changes, and no matter the point at which
+%% the server is terminated or crashes, all information to that point
+%% should be recovered when the server starts again from the saved data.
+抽象クラス\code{Persistence}で、サーバーがゲームのさまざまな要素(『スターエンパイアの世界』で説明したもの)
+を扱うための仕組みを提供している。保存したり更新したり、現状を取得したりといった機能だ。
+データベースは、ゲームの状態が変わるたびにサーバーのコードのさまざまな場所から継続的に更新される。
+どの段階でサーバーが止まったりクラッシュしたりしても、サーバーを再開させれば
+その時点でのすべての情報を復旧できなければいけない。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Thousand Parsec Component Language}
 \begin{aosasect2}{Thousand Parsec Component Language}
 
-The Thousand Parsec Component Language (TPCL) exists to allow clients
-to create designs locally without server interaction---allowing for
-instant feedback about the properties, makeup, and validity of the
-designs. This allows the player to interactively create, for example,
-new classes of starship, by customizing structure, propulsion,
-instrumentation, defenses, armaments, and more according to available
-technology.
+%% The Thousand Parsec Component Language (TPCL) exists to allow clients
+%% to create designs locally without server interaction---allowing for
+%% instant feedback about the properties, makeup, and validity of the
+%% designs. This allows the player to interactively create, for example,
+%% new classes of starship, by customizing structure, propulsion,
+%% instrumentation, defenses, armaments, and more according to available
+%% technology.
+Thousand Parsec Component Language (TPCL)は、
+サーバーとのやりとりなしでクライアントがデザインを作成できるように用意された。
+プロパティや見た目、デザインの妥当性などに関するフィードバックをその場で得られるようにしたのだ。
+プレイヤーは、たとえば新たなクラスの宇宙船を作ったり
+その構造や推力、機材、防御、武装などをカスタマイズできたりする。
 
-TPCL is a subset of Scheme, with a few minor changes, though close
-enough to the Scheme R5RS standard that any compatible interpreter can
-be used. Scheme was originally chosen because of its simplicity, a
-host of precedents for using it as an embedded language, the
-availability of interpreters implemented in many other languages, and,
-most importantly to an open source project, vast documentation both on
-using it and on developing interpreters for it.
+%% TPCL is a subset of Scheme, with a few minor changes, though close
+%% enough to the Scheme R5RS standard that any compatible interpreter can
+%% be used. Scheme was originally chosen because of its simplicity, a
+%% host of precedents for using it as an embedded language, the
+%% availability of interpreters implemented in many other languages, and,
+%% most importantly to an open source project, vast documentation both on
+%% using it and on developing interpreters for it.
+TPCLはSchemeのサブセットである。多少手を加えてはいるものの
+Scheme R5RS規格にほぼ沿っており、R5RS互換のインタプリタならなんでも使える。
+Schemeを採用した理由はいくつかある。シンプルであること。
+組み込み言語としての採用事例があったこと、
+さまざまな他の言語でインタプリタが実装されていること、
+そして何よりも重要なのがオープンソースプロジェクトであったことだ。
+言語の使い方に関してもインタプリタの開発法に関しても大量のドキュメントがあった。
 
-Consider the following example of a \code{Requirements} function in
-TPCL, used by components and properties, which would be included with
-a ruleset on the server side and communicated to the client over the
-game protocol:
+%% Consider the following example of a \code{Requirements} function in
+%% TPCL, used by components and properties, which would be included with
+%% a ruleset on the server side and communicated to the client over the
+%% game protocol:
+次の例はTPCLの\code{Requirements}関数で、コンポーネントやプロパティで使われているものだ。
+これをサーバー側のルールセットに組み込み、ゲームのプロトコルを使ってクライアントと通信する。
 
 \begin{verbatim}
 (lambda (design)
@@ -1330,14 +1360,21 @@ game protocol:
 )
 \end{verbatim}
 
-Readers familiar with Scheme will no doubt find this code easy to
-understand. The game (both client and server) uses it to check other
-component properties (\code{MaxSize}, \code{Size}, and
-\code{Num-Hulls}) to verify that this component can be added to a
-design. It first verifies that the \code{Size} of the component is
-within the maximum size of the design, then ensures that there are no
-other hulls in the design (the latter test tips us off that this is
-the \code{Requirements} function from a ship hull).
+%% Readers familiar with Scheme will no doubt find this code easy to
+%% understand. The game (both client and server) uses it to check other
+%% component properties (\code{MaxSize}, \code{Size}, and
+%% \code{Num-Hulls}) to verify that this component can be added to a
+%% design. It first verifies that the \code{Size} of the component is
+%% within the maximum size of the design, then ensures that there are no
+%% other hulls in the design (the latter test tips us off that this is
+%% the \code{Requirements} function from a ship hull).
+Schemeになじみのある人なら、ぱっと見ればすぐに理解できるはずだ。
+ゲームのクライアントとサーバーは、これを使って他のコンポーネントのプロパティ
+(\code{MaxSize}や\code{Size}、そして\code{Num-Hulls})
+をチェックし、このコンポーネントをデザインに追加できるかどうかを調べる。
+まず最初に、コンポーネントの\code{Size}がデザインの最大サイズにおさまるかどうかを調べ、
+次にそのデザインに既に他の船体が存在しないことを確かめる
+(後者のテストを見れば、この\code{Requirements}関数が船体のものであることがわかる)。
 
 \end{aosasect2}
 
