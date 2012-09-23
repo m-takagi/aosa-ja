@@ -1381,75 +1381,126 @@ Schemeになじみのある人なら、ぱっと見ればすぐに理解でき�
 %% \begin{aosasect2}{BattleXML}
 \begin{aosasect2}{BattleXML}
 
-In war, every battle counts, from the short skirmish in deep space
-between squadrons of small lightly-armed scout craft, to the massive
-final clash of two flagship fleets in the sky above a capital
-world. On the Thousand Parsec framework, the details of combat are
-handled within the ruleset, and there is no explicit client-side
-functionality regarding combat details---typically, the player will be
-informed of the initiation and results of combat via messages, and the
-appropriate changes to the objects will take place (e.g., removal of
-destroyed ships). Though the player's focus will normally be on a
-higher level, under rulesets with complex combat mechanics, it may
-prove advantageous (or, at least, entertaining) to examine the battle
-in more detail.
+%% In war, every battle counts, from the short skirmish in deep space
+%% between squadrons of small lightly-armed scout craft, to the massive
+%% final clash of two flagship fleets in the sky above a capital
+%% world. On the Thousand Parsec framework, the details of combat are
+%% handled within the ruleset, and there is no explicit client-side
+%% functionality regarding combat details---typically, the player will be
+%% informed of the initiation and results of combat via messages, and the
+%% appropriate changes to the objects will take place (e.g., removal of
+%% destroyed ships). Though the player's focus will normally be on a
+%% higher level, under rulesets with complex combat mechanics, it may
+%% prove advantageous (or, at least, entertaining) to examine the battle
+%% in more detail.
+戦争では、あらゆる戦いが大切になる。
+深宇宙での軽武装な偵察機同士の小競り合いであろうが
+首都上空での主力艦隊同士の最終決戦であろうが、それは変わらない。
+Thousand Parsecフレームワークでは、戦闘の詳細をルールセットで扱う。
+戦闘の詳細に関してクライアント側から明示的に何かできる機能は存在しない。
+通常、プレイヤーに知らされるのは、戦闘が始まったこととその結果を表すメッセージだけであり、
+それにまつわるオブジェクトへの変更(破壊された船の削除など)もそこで行われる。
+プレイヤーが注力するのはもっと上位レベルのことになるが、
+ルールセットの内部では複雑な戦闘の仕組みが動いており、
+その戦いの内容を詳しく吟味するのも有益(少なくとも興味は持ってもらえる)だろう。
 
-This is where BattleXML comes in. Battle data is split into two major
-parts: the media definition, which provides details about the graphics
-to be used, and the battle definition, which specifies what actually
-occurred during a battle. These are intended to be read by a battle
-viewer, of which Thousand Parsec currently has two: one in 2D and the
-other in 3D\@. Of course, since the nature of battles are entirely a
-feature of a ruleset, the ruleset code is responsible for actually
-producing BattleXML data.
+%% This is where BattleXML comes in. Battle data is split into two major
+%% parts: the media definition, which provides details about the graphics
+%% to be used, and the battle definition, which specifies what actually
+%% occurred during a battle. These are intended to be read by a battle
+%% viewer, of which Thousand Parsec currently has two: one in 2D and the
+%% other in 3D\@. Of course, since the nature of battles are entirely a
+%% feature of a ruleset, the ruleset code is responsible for actually
+%% producing BattleXML data.
+ここで使われているのがBattleXMLだ。
+戦闘データは、大きく二つの部分に分かれる。
+メディアの定義(利用するグラフィックなどの詳細)
+と戦いの定義(戦闘中に実際に発生する出来事)だ。
+このデータはバトルビューアが読むことを想定している。現在
+Thousand Parsecには二種類のバトルビューアがあり、ひとつは2Dでもうひとつが3Dである。
+もちろん、戦いの性質はルールセットで定義するものなので、
+実際にBattleXMLのデータを作るのはルールセットのコードの役割となる。
 
-The media definition is tied to the nature of the viewer, and is
-stored in a directory or an archive containing the XML data and any
-graphics or model files it references. The data itself describes what
-media should be used for each ship (or other object) type, its
-animations for actions such as firing and death, and the media and
-details of its weapons. File locations are assumed to be relative to
-the XML file itself, and cannot reference parent directories.
+%% The media definition is tied to the nature of the viewer, and is
+%% stored in a directory or an archive containing the XML data and any
+%% graphics or model files it references. The data itself describes what
+%% media should be used for each ship (or other object) type, its
+%% animations for actions such as firing and death, and the media and
+%% details of its weapons. File locations are assumed to be relative to
+%% the XML file itself, and cannot reference parent directories.
+メディアの定義はビューアの特性に結びつけられており。
+ディレクトリあるいはアーカイブで格納されている。
+その内容は、XMLデータおよびそこから参照するグラフィックやモデルのファイルである。
+データ自体に記述しているのは、船(あるいはその他のオブジェクト)の型ごとに必要なメディア、
+炎上や死亡といったアクションに対応するアニメーション、
+そして武器のメディアや詳細である。
+ファイルの位置はXMLファイルからの相対パスで参照し、親ディレクトリを参照することはできない。
 
-The battle definition is independent of the viewer and media. First,
-it describes a series of entities on each side at the start of the
-battle, with unique identifiers and information such as name,
-description, and type. Then, each round of the battle is described:
-object movement, weapons fire (with source and target), damage to
-objects, death of objects, and a log message. How much detail is used
-to describe each round of battle is dictated by the ruleset.
+%% The battle definition is independent of the viewer and media. First,
+%% it describes a series of entities on each side at the start of the
+%% battle, with unique identifiers and information such as name,
+%% description, and type. Then, each round of the battle is described:
+%% object movement, weapons fire (with source and target), damage to
+%% objects, death of objects, and a log message. How much detail is used
+%% to describe each round of battle is dictated by the ruleset.
+戦いの定義は、ビューアやメディアからは独立している。
+まず、戦闘開始時の両陣営のエンティティについてのIDと情報
+(名前や説明、そして型など)を記述する。
+次に、戦闘の各ラウンドについて記述する。
+オブジェクトの移動や武器の使用(攻撃元と攻撃先)、オブジェクトへのダメージ、
+オブジェクトの死亡、ログメッセージなどである。
+各ラウンドをどの程度詳細に記述するかはルールセットが決めることだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Metaserver}
 \begin{aosasect2}{メタサーバー}
 
-Finding a public Thousand Parsec server to play on 
-is much like locating a lone stealth scout in deep space---a
-daunting prospect if one doesn't know where to look. Fortunately,
-public servers can announce themselves to a metaserver, whose
-location, as a central hub, should ideally be well-known to players.
+%% Finding a public Thousand Parsec server to play on 
+%% is much like locating a lone stealth scout in deep space---a
+%% daunting prospect if one doesn't know where to look. Fortunately,
+%% public servers can announce themselves to a metaserver, whose
+%% location, as a central hub, should ideally be well-known to players.
+公開されているThousand Parsecサーバーを探すというのは、
+まるで深宇宙でステルス偵察機を探すようなものだ。
+場所を知っていなければ、成功する見込みは薄い。
+幸いにも、公開サーバーはメタサーバーにアナウンスできるようになっている。
+その場所を中央ハブとしてアナウンスすることで、プレイヤーから見つけられるようにできるのだ。
 
-The current implementation is \code{metaserver-lite}, a PHP script,
-which lives at some central place like the Thousand Parsec
-website. Supporting servers send an HTTP request specifying the update
-action and containing the type, location (protocol, host, and port),
-ruleset, number of players, object count, administrator, and other
-optional information. Server listings expire after a specified timeout
-(by default, 10 minutes), so servers are expected to update the
-metaserver periodically.
+%% The current implementation is \code{metaserver-lite}, a PHP script,
+%% which lives at some central place like the Thousand Parsec
+%% website. Supporting servers send an HTTP request specifying the update
+%% action and containing the type, location (protocol, host, and port),
+%% ruleset, number of players, object count, administrator, and other
+%% optional information. Server listings expire after a specified timeout
+%% (by default, 10 minutes), so servers are expected to update the
+%% metaserver periodically.
+現在の実装は\code{metaserver-lite}というPHPスクリプトで、
+Thousand Parsecのウェブサイトなどいくつかの場所で公開されている。
+サポートするサーバーは、HTTPリクエストを送ってupdateアクションを指定し、
+型や場所(プロトコル、ホスト、ポート)、ルールセット、プレイヤー数、オブジェクト数、
+管理者などの情報を伝える。サーバー一覧の情報は一定期間(デフォルトでは10分)
+でタイムアウトとなるので、サーバーは定期的にメタサーバーを更新することが求められる。
 
-The script can then, when called with no specified action, be used to
-embed the list of servers with details into a web site, presenting
-clickable URLs (typically with the \code{tp://} scheme
-name). Alternatively, the badge action presents server listings in a
-compact ``badge'' format.
+%% The script can then, when called with no specified action, be used to
+%% embed the list of servers with details into a web site, presenting
+%% clickable URLs (typically with the \code{tp://} scheme
+%% name). Alternatively, the badge action presents server listings in a
+%% compact ``badge'' format.
+このスクリプトに何もアクションを指定せずに呼ぶと、
+サーバーの一覧とその詳細をウェブサイトに組み込むことができる。
+そしてそこに、クリッカブルなURL(通常は\code{tp://}スキームとなる)を含めることができる。
+あるいは、badgeアクションを指定すれば、サーバー一覧をコンパクトな「バッジ」形式で表示できる。
 
-Clients may issue a request to a metaserver using the get action to
-obtain a list of available servers. In this case, the metaserver
-returns one or more \code{Game} frames for each server in the list to
-the client. In \code{tpclient-pywx}, the resulting list is presented
-through a server browser in the initial connection window.
+%% Clients may issue a request to a metaserver using the get action to
+%% obtain a list of available servers. In this case, the metaserver
+%% returns one or more \code{Game} frames for each server in the list to
+%% the client. In \code{tpclient-pywx}, the resulting list is presented
+%% through a server browser in the initial connection window.
+クライアントからメタサーバーに対してgetアクションのリクエストを発行すれば、
+利用可能なサーバーの一覧を取得できる。このときメタサーバーがクライアントに返すのは、
+一覧の各サーバーについての\code{Game}フレームである。
+\code{tpclient-pywx}では、この結果一覧を初期接続ウィンドウのサーバーブラウザに表示する。
 
 \end{aosasect2}
 
