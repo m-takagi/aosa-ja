@@ -1507,157 +1507,254 @@ Thousand Parsecのウェブサイトなどいくつかの場所で公開され�
 %% \begin{aosasect2}{Single-Player Mode}
 \begin{aosasect2}{シングルプレイヤーモード}
 
-Thousand Parsec is designed from the ground up to support networked
-multiplayer games. However, there is nothing preventing a player from
-firing up a local server, connecting a few AI clients, and
-hyperjumping into a custom single-player universe ready to be
-conquered. The project defines some standard metadata and
-functionality to support streamlining this process, making setup as
-easy as running a GUI wizard or double-clicking a scenario file.
+%% Thousand Parsec is designed from the ground up to support networked
+%% multiplayer games. However, there is nothing preventing a player from
+%% firing up a local server, connecting a few AI clients, and
+%% hyperjumping into a custom single-player universe ready to be
+%% conquered. The project defines some standard metadata and
+%% functionality to support streamlining this process, making setup as
+%% easy as running a GUI wizard or double-clicking a scenario file.
+Thousand Parsecは、ネットワーク対応のマルチプレイヤーゲームとして作られたものだ。
+しかし別に、ローカルサーバーを立ち上げた一人のプレイヤーがそこに数台のAIクライアントを接続し、
+単独でその世界に飛び込んで征服しようとしたっていっこうにかまわない。
+そんなときのための標準的なメタデータや機能も用意されており、
+GUIのウィザードを実行するかシナリオファイルをダブルクリックするだけで準備できる。
 
-At the core of this functionality is an XML DTD specifying the format
-for metadata regarding the capabilities and properties of each
-component (e.g., server, AI client, ruleset). Component packages ship
-with one or more such XML files, and eventually all of this metadata
-is aggregated into an associative array divided into two major
-portions: servers and AI clients. Within a server's metadata will
-typically be found metadata for one or more rulesets---they are found
-here because even though a ruleset may be implemented for more than
-one server, some configuration details may differ, so
-separate metadata is needed in general for each implementation.
-Each entry for one of these components contains the following information:
+%% At the core of this functionality is an XML DTD specifying the format
+%% for metadata regarding the capabilities and properties of each
+%% component (e.g., server, AI client, ruleset). Component packages ship
+%% with one or more such XML files, and eventually all of this metadata
+%% is aggregated into an associative array divided into two major
+%% portions: servers and AI clients. Within a server's metadata will
+%% typically be found metadata for one or more rulesets---they are found
+%% here because even though a ruleset may be implemented for more than
+%% one server, some configuration details may differ, so
+%% separate metadata is needed in general for each implementation.
+%% Each entry for one of these components contains the following information:
+この機能の中核となるのが、各コンポーネント(サーバー、AIクライアント、ルールセット)
+の機能やプロパティにまつわるメタデータ用のフォーマットを指定したXML DTDである。
+コンポーネントのパッケージにはこういったXMLファイルが同梱されており、
+最終的にこれらのメタデータがすべて連想配列にとりまとめられる。
+この連想配列は大きく二つの部分に分かれている。サーバーとAIクライアントだ。
+サーバーのメタデータの中には、一般的にはいくつかのルールセットのメタデータが入っている。
+ルールセットの実装は複数のサーバーを対象にしたものだがその細かい設定はサーバーによって異なるかもしれないので、
+実装ごとに個別のメタデータが必要になるのだ。
+これらのコンポーネントの各エントリには、次の情報が含まれている。
 
 \begin{aosaitemize}
 
-  \item Descriptive data, including a short (binary) name, a long
-  (descriptive) name, and a description.
+  %% \item Descriptive data, including a short (binary) name, a long
+  %% (descriptive) name, and a description.
+  \item 説明のデータ。短い名前や長い名前そして説明文など。
 
-  \item The installed version of the component, and the earliest
-  version whose save data is compatible with the installed version.
+  %% \item The installed version of the component, and the earliest
+  %% version whose save data is compatible with the installed version.
+  \item インストールされているコンポーネントのバージョン、そしてそのバージョンで互換性があるのはどのバージョン以降で作ったセーブデータか。
 
-  \item The command string (if applicable) and any forced parameters
-  passed to it.
+  %% \item The command string (if applicable) and any forced parameters
+  %% passed to it.
+  \item 渡すコマンド文字列(もし受け付けているなら)および強制パラメータ。
 
-  \item A set of parameters which can be specified by the player.
+  %% \item A set of parameters which can be specified by the player.
+  \item プレイヤーが設定できるパラメータ群。
 
 \end{aosaitemize}
 
-Forced parameters are not player-configurable and are typically
-options which allow the components to function appropriately for a
-local, single-player context. The player parameters have their own
-format indicating such details as the name and description, the data
-type, default, and range of the value, and the format string to append
-to the main command string.
+%% Forced parameters are not player-configurable and are typically
+%% options which allow the components to function appropriately for a
+%% local, single-player context. The player parameters have their own
+%% format indicating such details as the name and description, the data
+%% type, default, and range of the value, and the format string to append
+%% to the main command string.
+強制パラメータはプレイヤーが設定することはできない。
+一般的には、コンポーネントがシングルプレイヤーモードに合わせて適切に機能するよう設定されている。
+プレイヤーが設定ｄけいるパラメータはそれぞれ独自のフォーマットで、
+たとえば名前や説明、データ型、デフォルト、値の範囲、コマンド文字列に付加する書式文字列などを指定する。
 
-While specialized cases are possible (e.g., preset game configurations
-for ruleset-specific clients), the typical process for constructing a
-single-player game involves selecting a set of compatible
-components. Selection of the client is implicit, as the player will
-have already launched one in order to play a game; a well-designed
-client follows a user-centric workflow to set up the remainder. The
-next natural choice to make is the ruleset, so the player is presented
-with a list---at this point, there is no need to bother with server
-details. In the event that the chosen ruleset is implemented by
-multiple installed servers (probably a rare condition), the player is
-prompted to select one; otherwise, the appropriate server is selected
-automatically. Next, the player is prompted to configure options for
-the ruleset and server, with sane defaults pulled from the
-metadata. Finally, if any compatible AI clients are installed, the
-player is prompted to configure one or more of them to play against.
+%% While specialized cases are possible (e.g., preset game configurations
+%% for ruleset-specific clients), the typical process for constructing a
+%% single-player game involves selecting a set of compatible
+%% components. Selection of the client is implicit, as the player will
+%% have already launched one in order to play a game; a well-designed
+%% client follows a user-centric workflow to set up the remainder. The
+%% next natural choice to make is the ruleset, so the player is presented
+%% with a list---at this point, there is no need to bother with server
+%% details. In the event that the chosen ruleset is implemented by
+%% multiple installed servers (probably a rare condition), the player is
+%% prompted to select one; otherwise, the appropriate server is selected
+%% automatically. Next, the player is prompted to configure options for
+%% the ruleset and server, with sane defaults pulled from the
+%% metadata. Finally, if any compatible AI clients are installed, the
+%% player is prompted to configure one or more of them to play against.
+特殊な場合(そのルールセット固有のクライアント用のプリセット設定でゲームをする場合など)もあり得るが、
+一般的なシングルプレイヤーゲームの手順は互換性のあるコンポーネント群を選ぶところから始まる。
+クライアントの選択は暗黙のうちに行われる。というのもプレイヤーは既に、
+ゲームをプレイするためにひとつのクライアントを立ち上げているからである。
+きちんと設計されたクライアントが、ユーザー中心のワークフローに沿って残りを準備する。
+次に選ばなければいけないのは当然、ルールセットだ。そこで、ルールセットの一覧をプレイヤーに表示する。
+この時点では、サーバーの詳細を気にする必要はない。
+選択したルールセットが複数のサーバーで実装されている場合(おそらくめったにないことだろう)は、
+そのうちのいずれかを選ぶようプレイヤーに問いかける。
+そうでなければ、適切なサーバーが自動的に選ばれる。
+次にプレイヤーは、ルールセットとサーバーのオプションを設定するよう指示を受ける。
+あらかじめメタデータからのデフォルト値が設定されているものだ。
+最後に、もし互換性のあるAIクライアントがインストールされていれば、
+それらの対戦相手の設定を行う。
 
-With the game so configured, the client launches the local server with
-appropriate configuration parameters (including the ruleset, its
-parameters, and any parameters it adds to the server's configuration),
-using the command string information from the metadata. Once it has
-verified that the server is running and accepting connections, perhaps
-using the administration protocol extension discussed previously, it
-launches each of the specified AI clients similarly, and verifies that
-they have successfully connected to the game. If all goes well, the
-client will then connect to the server---just as if it were connecting
-to an online game---and the player can begin exploring, trading,
-conquering, and any of a universe of other possibilities.
+%% With the game so configured, the client launches the local server with
+%% appropriate configuration parameters (including the ruleset, its
+%% parameters, and any parameters it adds to the server's configuration),
+%% using the command string information from the metadata. Once it has
+%% verified that the server is running and accepting connections, perhaps
+%% using the administration protocol extension discussed previously, it
+%% launches each of the specified AI clients similarly, and verifies that
+%% they have successfully connected to the game. If all goes well, the
+%% client will then connect to the server---just as if it were connecting
+%% to an online game---and the player can begin exploring, trading,
+%% conquering, and any of a universe of other possibilities.
+ゲームの設定をするとともに、クライアントはローカルサーバーを立ち上げる。
+メタデータから取得したコマンド文字列の情報を使って、適切なパラメータ
+(ルールセットやそのパラメータ、その他サーバーに関する設定項目)
+を設定する。サーバーが立ち上がって接続を受け付ける状態になったら、
+先ほど説明した管理プロトコルの拡張を使って
+AIクライアントも同様に立ち上げる。そして、それらもきちんとゲームに接続できたことを確かめる。
+すべてがうまくいけば、クライアントが(オンラインゲームのときと同じように)サーバーに接続し、
+プレイヤーはゲームの世界で動き出せるようになる。
 
-An alternate---and very important---use for the single-player
-functionality is the saving and loading of games, and, more or less
-equivalently, the loading of ready-to-play scenarios. In this case,
-the save data (probably, though not necessarily, a single file) stores
-the single-player game configuration data alongside the persistence
-data for the game itself. Provided all appropriate components in
-compatible versions are installed on the player's system, launching a
-saved game or scenario is completely automatic. Scenarios in
-particular thus provide an attractive one-click entry into a
-game. Although Thousand Parsec does not currently have a dedicated
-scenario editor or a client with an edit mode, the concept is to
-provide some means of crafting the persistence data outside of the
-normal functioning of the ruleset, and verifying its consistency and
-compatibility.
+%% An alternate---and very important---use for the single-player
+%% functionality is the saving and loading of games, and, more or less
+%% equivalently, the loading of ready-to-play scenarios. In this case,
+%% the save data (probably, though not necessarily, a single file) stores
+%% the single-player game configuration data alongside the persistence
+%% data for the game itself. Provided all appropriate components in
+%% compatible versions are installed on the player's system, launching a
+%% saved game or scenario is completely automatic. Scenarios in
+%% particular thus provide an attractive one-click entry into a
+%% game. Although Thousand Parsec does not currently have a dedicated
+%% scenario editor or a client with an edit mode, the concept is to
+%% provide some means of crafting the persistence data outside of the
+%% normal functioning of the ruleset, and verifying its consistency and
+%% compatibility.
+シングルプレイヤーモードのもうひとつの(そしてとても重要な)機能は、ゲームをセーブしたりロードしたりできることだ。
+そしてそれと同じくらい大切なのが、すぐにプレイできる状態のシナリオを読み込む機能である。
+このときのセーブデータ(必須ではないが、おそらくひとつのファイルになるだろう)に格納される内容は、
+シングルプレイヤーゲームの設定データやゲーム自体の永続データである。
+すべてのコンポーネントについて互換性のあるバージョンがインストールされてさえいれば、
+セーブしたゲームやシナリオを自動的に立ち上げることができる。
+特にシナリオに関しては、ワンクリックでゲームを始められるような仕組みを提供している。
+今のところThousand Parsecには専用のシナリオエディタはないし、
+エディットモードつきのクライアントも存在しない。
+しかし、何らかの手段を用意して通常のルールセットとの機能とは別に永続データを作れるようにする考えはある。
+その一貫性や互換性も検証できるようにするつもりだ。
 
-So far, the description of this functionality has been rather
-abstract. On a more concrete level, the Python client helper library,
-\code{libtpclient-py}, is currently home to the only full realization
-of single-player mechanics in the Thousand Parsec project. The library
-provides the \code{SinglePlayerGame} class, which upon instantiation
-automatically aggregates all available single-player metadata on the
-system (naturally, there are certain guidelines as to where the XML
-files should be installed on a given platform). The object can then be
-queried by the client for various information on the available
-components; servers, rulesets, AI clients, and parameters are stored
-as dictionaries (Python's associative arrays). Following the general
-game building process outlined above, a typical client might perform
-the following:
+%% So far, the description of this functionality has been rather
+%% abstract. On a more concrete level, the Python client helper library,
+%% \code{libtpclient-py}, is currently home to the only full realization
+%% of single-player mechanics in the Thousand Parsec project. The library
+%% provides the \code{SinglePlayerGame} class, which upon instantiation
+%% automatically aggregates all available single-player metadata on the
+%% system (naturally, there are certain guidelines as to where the XML
+%% files should be installed on a given platform). The object can then be
+%% queried by the client for various information on the available
+%% components; servers, rulesets, AI clients, and parameters are stored
+%% as dictionaries (Python's associative arrays). Following the general
+%% game building process outlined above, a typical client might perform
+%% the following:
+ここまでに説明した内容は、あくまでも抽象レベルのものだ。実装レベルで見ると、
+Thousand ParsecプロジェクトのPythonクライアントヘルパーライブラリである\code{libtpclient-py}が
+今のところ唯一シングルプレイヤーモードのすべての仕組みを理解できるものである。
+このライブラリには\code{SinglePlayerGame}クラスがある。
+これは自動的にインスタンス化されてシステム上のすべてのシングルプレイヤー用メタデータを収集する
+(当然、システム上のどこにXMLファイルをインストールするかについてはプラットフォームごとにガイドラインがある)。
+クライアントからは、利用可能なコンポーネント
+(サーバーやルールセット、AIクライアント、そしてPythonの連想配列であるディクショナリに格納されているパラメータなど)
+に関するさまざまな情報を問い合わせられるようになる。
+先ほど説明したゲームの組み立て手順に照らし合わせると、一般的なクライアントの動きは次のようになる。
 
 \begin{aosaenumerate}
 
-  \item Query a list of available rulesets via
-  \code{SinglePlayerGame.rulesets}, and configure the object with
-  the chosen ruleset by setting \code{SinglePlayerGame.rname}.
+  %% \item Query a list of available rulesets via
+  %% \code{SinglePlayerGame.rulesets}, and configure the object with
+  %% the chosen ruleset by setting \code{SinglePlayerGame.rname}.
+  \item 利用できるルールセットの一覧を\code{SinglePlayerGame.rulesets}
+  で問い合わせ、選択したルールセットのオブジェクトを\code{SinglePlayerGame.rname}で設定する。
 
-  \item Query a list of servers implementing the ruleset via
-  \code{SinglePlayerGame.list\_servers\_with\-\_ruleset}, prompt the
-  user to select one if necessary, and configure the object with the
-  chosen (or only) server by setting \code{SinglePlayerGame.sname}.
+  %% \item Query a list of servers implementing the ruleset via
+  %% \code{SinglePlayerGame.list\_servers\_with\-\_ruleset}, prompt the
+  %% user to select one if necessary, and configure the object with the
+  %% chosen (or only) server by setting \code{SinglePlayerGame.sname}.
+  \item 選択したルールセットを実装するサーバーを\code{SinglePlayerGame.list\_servers\_with\-\_ruleset}
+  で問い合わせ、複数存在する場合はその中からユーザーに選ばせる。
+  そして、選んだサーバーのオブジェクトを\code{SinglePlayerGame.sname}で設定する。
 
-  \item Obtain the set of parameters for the server and ruleset via
-  \code{SinglePlayerGame.list\_rparams} and
-  \code{SinglePlayerGame.list\_sparams}, respectively, and prompt
-  the player to configure them.
+  %% \item Obtain the set of parameters for the server and ruleset via
+  %% \code{SinglePlayerGame.list\_rparams} and
+  %% \code{SinglePlayerGame.list\_sparams}, respectively, and prompt
+  %% the player to configure them.
+  \item そのサーバーとルールセット用のパラメータセットをそれぞれ\code{SinglePlayerGame.list\_rparams}
+  \code{SinglePlayerGame.list\_sparams}で取得し、プレイヤーに設定させる。
 
-  \item Find available AI clients supporting the ruleset
-  via \code{SinglePlayerGame.list\_aiclients\_\-with\_ruleset}, and
-  prompt the player to configure one or more of them using the
-  parameters obtained via \code{SinglePlayerGame.list\_aiparams}.
+  %% \item Find available AI clients supporting the ruleset
+  %% via \code{SinglePlayerGame.list\_aiclients\_\-with\_ruleset}, and
+  %% prompt the player to configure one or more of them using the
+  %% parameters obtained via \code{SinglePlayerGame.list\_aiparams}.
+  \item そのルールセットに対応しているAIクライアントを\code{SinglePlayerGame.list\_aiclients\_\-with\_ruleset}
+  で探し、\code{SinglePlayerGame.list\_aiparams}で取得したパラメータを使ってプレイヤーに設定させる。
 
-  \item Launch the game by calling \code{SinglePlayerGame.start},
-  which will return a TCP/IP port to connect on if successful.
+  %% \item Launch the game by calling \code{SinglePlayerGame.start},
+  %% which will return a TCP/IP port to connect on if successful.
+  \item \code{SinglePlayerGame.start}を呼んでゲームを始める。
+  これは、成功した場合に接続先のTCP/IPポートを返す。
 
-  \item Eventually, end the game (and kill any launched server and AI
-  client processes) by calling \code{SinglePlayerGame.stop}.
+  %% \item Eventually, end the game (and kill any launched server and AI
+  %% client processes) by calling \code{SinglePlayerGame.stop}.
+  \item 最終的にゲームを終了させる
+  (そして、立ち上がっているサーバーとAIクライアントのプロセスを終了させる)
+  には\code{SinglePlayerGame.stop}を呼ぶ。
 
 \end{aosaenumerate}
 
-Thousand Parsec's flagship client, \code{tpclient-pywx}, presents a
-user-friendly wizard which follows such a procedure, initially
-prompting instead for a saved game or scenario file to load. The
-user-centric workflow developed for this wizard is an example of good
-design arising from the open source development process of the
-project: the developer initially proposed a very different process
-more closely aligned with how things were working under the hood, but
-community discussion and some collaborative development produced a
-result much more usable for the player.
+%% Thousand Parsec's flagship client, \code{tpclient-pywx}, presents a
+%% user-friendly wizard which follows such a procedure, initially
+%% prompting instead for a saved game or scenario file to load. The
+%% user-centric workflow developed for this wizard is an example of good
+%% design arising from the open source development process of the
+%% project: the developer initially proposed a very different process
+%% more closely aligned with how things were working under the hood, but
+%% community discussion and some collaborative development produced a
+%% result much more usable for the player.
+Thousand Parsecのフラッグシップクライアントである\code{tpclient-pywx}
+には使いやすいウィザードが組み込まれており、
+セーブしたゲームやシナリオファイルを読み込むところからこれらの手順を進めてくれる。
+このウィザードに組み込まれたユーザー主導のワークフローはまさに、
+オープンソースプロジェクトの開発の成果の一例と言えるだろう。
+開発者が最初に用意したのはもっと違う手順で、実際の内部的な動きにより近いものだった。
+コミュニティでの議論や共同開発などのおかげで、それがよりユーザーに使いやすいものになったのだ。
 
-Finally, saved games and scenarios are currently implemented in
-practice in \code{tpserver-cpp}, with supporting functionality in
-\code{libtpclient-py} and an interface in \code{tpclient-pywx}. This
-is achieved through a persistence module using SQLite, a public domain
-open source RDBMS which requires no external process and stores
-databases in a single file. The server is configured, via a forced
-parameter, to use the SQLite persistence module if it is available,
-and as usual, the database file (living in a temporary location) is
-constantly updated throughout the game. When the player opts to save
-the game, the database file is copied to the specified location, and a
-special table is added to it containing the single player
-configuration data. It should be fairly obvious to the reader how this
-is subsequently loaded.
+%% Finally, saved games and scenarios are currently implemented in
+%% practice in \code{tpserver-cpp}, with supporting functionality in
+%% \code{libtpclient-py} and an interface in \code{tpclient-pywx}. This
+%% is achieved through a persistence module using SQLite, a public domain
+%% open source RDBMS which requires no external process and stores
+%% databases in a single file. The server is configured, via a forced
+%% parameter, to use the SQLite persistence module if it is available,
+%% and as usual, the database file (living in a temporary location) is
+%% constantly updated throughout the game. When the player opts to save
+%% the game, the database file is copied to the specified location, and a
+%% special table is added to it containing the single player
+%% configuration data. It should be fairly obvious to the reader how this
+%% is subsequently loaded.
+最後に、保存されたゲームやシナリオについては、現在は
+\code{tpserver-cpp}で実装されており、\code{libtpclient-py}
+のサポート機能や\code{tpclient-pywx}のインターフェイスを使っている。
+SQLiteを使う永続化モジュールでこれを実現した。SQLiteは
+パブリックドメインなオープンソースのRDBMSで、外部のプロセスを必要としないし
+データベースを単一のファイルとして格納できる。
+サーバーの設定を強制パラメータ経由で行うときには、もし使えればSQLiteの永続化モジュールを利用する。
+そして、データベースのファイル(テンポラリディレクトリにある)はゲームの実行中常に更新される。
+プレイヤーがゲームのセーブをするときにはデータベースファイルを指定の場所にコピーし、
+シングルプレイヤーの設定データを格納するための特別なテーブルを追加する。
+これをあとでどうやって読み込むのかは、リーダーがよく知っているはずだ。
 
 \end{aosasect2}
 
