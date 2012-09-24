@@ -1763,72 +1763,108 @@ SQLiteを使う永続化モジュールでこれを実現した。SQLiteは
 %% \begin{aosasect1}{Lessons Learned}
 \begin{aosasect1}{教訓}
 
-The creation and growth of the extensive Thousand Parsec framework has
-allowed the developers plenty of opportunity to look back and assess
-the design decisions that were made along the way. The original core
-developers (Tim Ansell and Lee Begg) built the original framework from
-scratch and have shared with us some suggestions on starting a similar
-project.
+%% The creation and growth of the extensive Thousand Parsec framework has
+%% allowed the developers plenty of opportunity to look back and assess
+%% the design decisions that were made along the way. The original core
+%% developers (Tim Ansell and Lee Begg) built the original framework from
+%% scratch and have shared with us some suggestions on starting a similar
+%% project.
+大規模なThousand Parsecフレームワークを作って成長させていく過程を振り返ると、
+開発者達が設計に関する決断を下す場面が数多く存在した。
+最初のコアデベロッパー(Tim AnsellとLee Begg)はフレームワークをスクラッチから構築し、
+私たちが同様のプロジェクトを始めるにあたっていろんな提案をしてくれた。
 
 %% \begin{aosasect2}{What Worked}
 \begin{aosasect2}{うまくいったこと}
 
-A major key to the development of Thousand Parsec was the decision to
-define and build a subset of the framework, followed by the
-implementation. This iterative and incremental design process allowed
-the framework to grow organically, with new features added
-seamlessly. This led directly to the decision to version the
-Thousand Parsec protocol, which is credited with a number of major
-successes of the framework. Versioning the protocol allowed the
-framework to grow over time, enabling new methods of gameplay along
-the way.
+%% A major key to the development of Thousand Parsec was the decision to
+%% define and build a subset of the framework, followed by the
+%% implementation. This iterative and incremental design process allowed
+%% the framework to grow organically, with new features added
+%% seamlessly. This led directly to the decision to version the
+%% Thousand Parsec protocol, which is credited with a number of major
+%% successes of the framework. Versioning the protocol allowed the
+%% framework to grow over time, enabling new methods of gameplay along
+%% the way.
+Thousand Parsecの開発における大切なポイントは、
+フレームワークのサブセットを定義および構築してからそれを実装すると決めたことだった。
+イテレーティブかつインクリメンタルな設計プロセスを使ったことでフレームワークは組織的に成長し、
+新機能もシームレスに追加できるようになった。その流れでThousand Parsecプロトコルも
+バージョンで管理することになり、これもフレームワークの成功に大きく貢献した。
+プロトコルをバージョンで管理したおかげで、フレームワークを日々成長させてゲーム用のメソッドもどんどん追加できるようになったのだ。
 
-When developing such an expansive framework, it is important to have a
-very short-term approach for goals and iterations. Short iterations, on the order of weeks for a minor release,
-allowed the project to move forward quickly with immediate returns
-along the way. Another success of the
-implementation was the client-server model, which allowed for the
-clients to be developed away from any game logic. The separation of
-game logic from client software was important to the overall success
-of Thousand Parsec.
+%% When developing such an expansive framework, it is important to have a
+%% very short-term approach for goals and iterations. Short iterations, on the order of weeks for a minor release,
+%% allowed the project to move forward quickly with immediate returns
+%% along the way. Another success of the
+%% implementation was the client-server model, which allowed for the
+%% clients to be developed away from any game logic. The separation of
+%% game logic from client software was important to the overall success
+%% of Thousand Parsec.
+広範囲の及ぶフレームワークを開発するときに重要なのは、
+イテレーションごとの短期的なゴールを定めてそこに向かっていくことだ。
+数週間レベルの短いイテレーションでマイナーリリースをするようにすると、
+プロジェクトの進み具合も速くなるし、すぐに反応が得られるようになる。
+もうひとつうまくいったことがあって、それは実装にクライアント・サーバーモデルを採用したことだ。
+そのおかげで、クライアントの開発をゲームのロジックとは切り離して考えられるようになった。
+ゲームのロジックとクライアントソフトウェアを分離したことがThousand Parsecの大成功につながった。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{What Didn't Work}
 \begin{aosasect2}{うまくいかなかったこと}
 
-A major downfall of the Thousand Parsec framework was the decision to
-use a binary protocol. As you can imagine, debugging a binary protocol
-is not a fun task and this has lead to many prolonged debugging
-sessions. We would highly recommend that nobody take this path in the
-future. The protocol has also grown to have too much flexibility; when
-creating a protocol, it is important to implement only the basic
-features that are required.
+%% A major downfall of the Thousand Parsec framework was the decision to
+%% use a binary protocol. As you can imagine, debugging a binary protocol
+%% is not a fun task and this has lead to many prolonged debugging
+%% sessions. We would highly recommend that nobody take this path in the
+%% future. The protocol has also grown to have too much flexibility; when
+%% creating a protocol, it is important to implement only the basic
+%% features that are required.
+Thousand Parsecフレームワークの最大の失敗は、バイナリプロトコルを使ったことだ。
+だいたい想像できるだろうが、バイナリプロトコルのデバッグは決して楽しい作業じゃない。
+デバッグにかかる時間もどんどん伸びてしまう。
+これから何かを実装しようとする人たちには、バイナリプロトコルは使わないようお勧めしたい。
+さらに、このプロトコルはどんどん成長して、必要以上に柔軟性を持ちすぎるようになってしまった。
+何かのプロトコルを作る際には、必要最小限の基本的な機能だけを実装することが大切だ。
 
-Our iterations have at times grown too large. When managing such a
-large framework on an open source development schedule, it is
-important to have a small subset of added features in each iteration
-to keep development flowing.
+%% Our iterations have at times grown too large. When managing such a
+%% large framework on an open source development schedule, it is
+%% important to have a small subset of added features in each iteration
+%% to keep development flowing.
+私たちの開発のイテレーションは、たまに長くなりすぎることもあった。
+巨大なフレームワークの開発をオープンソースの開発スケジュールで管理するときに大切なのは、
+追加された機能の小さなサブセットを各イテレーションで扱うようにして、開発をうまく流れるようにしていくことだ。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Conclusion}
 \begin{aosasect2}{結論}
 
-Like a construction skiff inspecting the skeletal hull of a massive
-prototype battleship in an orbital construction yard, we have passed
-over the various details of the architecture of Thousand Parsec. While
-the general design criteria of flexibility and extensibility have been
-in the minds of the developers from the very beginning, it is evident
-to us, looking at the history of the framework, that only an open
-source ecosystem, teeming with fresh ideas and points of view, could
-have produced the sheer volume of possibilities while remaining
-functional and cohesive. It is a singularly ambitious project, and as
-with many of its peers on the open source landscape, much remains to
-be done; it is our hope and expectation that over time, Thousand
-Parsec will continue to evolve and expand its capabilities while new
-and ever more complex games are developed upon it. After all, a
-journey of a thousand parsecs begins with a single step.
+%% Like a construction skiff inspecting the skeletal hull of a massive
+%% prototype battleship in an orbital construction yard, we have passed
+%% over the various details of the architecture of Thousand Parsec. While
+%% the general design criteria of flexibility and extensibility have been
+%% in the minds of the developers from the very beginning, it is evident
+%% to us, looking at the history of the framework, that only an open
+%% source ecosystem, teeming with fresh ideas and points of view, could
+%% have produced the sheer volume of possibilities while remaining
+%% functional and cohesive. It is a singularly ambitious project, and as
+%% with many of its peers on the open source landscape, much remains to
+%% be done; it is our hope and expectation that over time, Thousand
+%% Parsec will continue to evolve and expand its capabilities while new
+%% and ever more complex games are developed upon it. After all, a
+%% journey of a thousand parsecs begins with a single step.
+軌道上の造船所で小舟に乗って巨大戦艦のプロトタイプの船体を調査するがごとく、
+本章ではThousand Parsecのアーキテクチャの詳細をいろいろ見てきた。
+全体的な設計指針として、柔軟性と拡張性を重視するということが最初からずっと開発者達の念頭にあった。
+ここまでの流れを振り返っても明らかなように、オープンソースのエコシステムに身を置いて
+仲間たちのいろいろなアイデアや観点を取り入れたからこそこのフレームワークができあがったのだ。
+さまざまな可能性を秘めつつ、機能的にも優れていてきちんとまとまっている。
+これは非常に野心的なプロジェクトなので、オープンソースの世界の仲間たちと同様に、私たちにもまだまだやるべきことが残っている。
+Thousand Parsecは今後も成長を続けるだろうし、その機能を拡張し続けるだろう。
+それを使って、新たなゲーム・より複雑なゲームも開発されるはずだ。
+結局のところ、1000パーセクの旅と言ってもはじめの一歩は小さなものなんだ。
 
 \end{aosasect2}
 
