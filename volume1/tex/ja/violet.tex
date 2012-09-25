@@ -65,7 +65,7 @@ Javaのオブジェクト参照を示すものだ(\aosafigref{fig.vio.diagram})�
 %% (a) useful to students and (b) an example of an extensible framework
 %% that students can understand and modify. Thus, Violet was born.
 そこで、シンプルなエディタを自前で作ってしまうことにした。このエディタは
-「学習に便利であること」「拡張可能なフレームワークとして、学生がその内容を学んで手を加えられること」
+「学生にとって有用であること」「拡張可能なフレームワークとして、学生がその内容を学んで手を加えられること」
 を目指した。その結果として誕生したのがVioletである。
 
 %% \begin{aosasect1}{Introducing Violet}
@@ -158,23 +158,31 @@ Eclipseプラグインやインターフェイスの改善に貢献してくれ�
 \end{aosasect1}
 
 %% \begin{aosasect1}{The Graph Framework}
-\begin{aosasect1}{Graph Framework}
+\begin{aosasect1}{グラフフレームワーク}
 
-Violet is based on a general graph editing framework that can render
-and edit nodes and edges of arbitrary shapes. The Violet UML editor
-has nodes for classes, objects, activation bars (in sequence
-diagrams), and so on, and edges for the various edge shapes in UML
-diagrams. Another instance of the graph framework might display
-entity-relationship diagrams or railroad diagrams.
+%% Violet is based on a general graph editing framework that can render
+%% and edit nodes and edges of arbitrary shapes. The Violet UML editor
+%% has nodes for classes, objects, activation bars (in sequence
+%% diagrams), and so on, and edges for the various edge shapes in UML
+%% diagrams. Another instance of the graph framework might display
+%% entity-relationship diagrams or railroad diagrams.
+Violetのベースになっているのは汎用的なグラフ編集フレームワークで、
+このフレームワークは任意の形状のノードやエッジを表示したり編集したりできる。
+Violet UMLエディタにはクラスやオブジェクト、アクティベーションバー(シーケンス図用)などのノードがあり、
+UML図に登場するさまざまな形状のエッジもある。グラフフレームワークの利用例としては、ER図や路線図などの表示も考えられる。
 
 %% \aosafigure{../images/violet/Ch8-06.eps}{A Simple Instance of the Editor Framework}{fig.vio.editor}
-\aosafigure{../images/violet/Ch8-06.eps}{Editor Frameworkのシンプルな例}{fig.vio.editor}
+\aosafigure{../images/violet/Ch8-06.eps}{エディタフレームワークのシンプルな例}{fig.vio.editor}
 
-In order to illustrate the framework, let us consider an editor for
-very simple graphs, with black and white circular nodes and straight
-edges (\aosafigref{fig.vio.editor}).
-The \code{SimpleGraph} class specifies prototype objects for the node
-and edge types, illustrating the prototype pattern:
+%% In order to illustrate the framework, let us consider an editor for
+%% very simple graphs, with black and white circular nodes and straight
+%% edges (\aosafigref{fig.vio.editor}).
+%% The \code{SimpleGraph} class specifies prototype objects for the node
+%% and edge types, illustrating the prototype pattern:
+このフレームワークを解説する前に、非常にシンプルなグラフを描くだけのエディタを考えてみよう。
+白と黒の円形のノード、そして直線のエッジだけを使えるようなものだ(\aosafigref{fig.vio.editor})。
+\code{SimpleGraph}クラスはノードとエッジの型を表すプロトタイプオブジェクトを指定するもので、
+プロトタイプパターンに沿っている。
 
 \pagebreak
 
@@ -199,50 +207,74 @@ public class SimpleGraph extends AbstractGraph
 }
 \end{verbatim}
 
-Prototype objects are used to draw the node and edge buttons at the
-top of \aosafigref{fig.vio.editor}. They are cloned whenever the
-user adds a new node or edge instance to the graph.
-\code{Node} and \code{Edge} are interfaces with the following
-key methods:
+%% Prototype objects are used to draw the node and edge buttons at the
+%% top of \aosafigref{fig.vio.editor}. They are cloned whenever the
+%% user adds a new node or edge instance to the graph.
+%% \code{Node} and \code{Edge} are interfaces with the following
+%% key methods:
+プロトタイプオブジェクトを使って、ノードやエッジのボタンを\aosafigref{fig.vio.editor}
+の上部に描画する。ユーザーがノードやエッジのインスタンスを追加するたびに、
+プロトタイプオブジェクトがクローンされる。
+\code{Node}と\code{Edge}はインターフェイスで、それぞれ次のようなメソッドを持つ。
 
 \begin{aosaitemize}
 
-\item Both interfaces have a \code{getShape} method that returns a
-  Java2D \code{Shape} object of the node or edge shape.
+%% \item Both interfaces have a \code{getShape} method that returns a
+%%   Java2D \code{Shape} object of the node or edge shape.
+\item どちらのインターフェイスにも\code{getShape}メソッドがあり、これはそのノードあるいはエッジの形状を表す
+  Java2D \code{Shape}オブジェクトを返す。
 
-\item The \code{Edge} interface has methods that yield the nodes at
-  the start and end of the edge.
+%% \item The \code{Edge} interface has methods that yield the nodes at
+%%   the start and end of the edge.
+\item \code{Edge}インターフェイスには、エッジの先頭と最後にノードを追加するためのメソッドがある。
 
-\item The \code{getConnectionPoint} method in the Node interface type
-  computes an optimal attachment point on the boundary of a node (see
-  \aosafigref{fig.vio.connection}).
+%% \item The \code{getConnectionPoint} method in the Node interface type
+%%   computes an optimal attachment point on the boundary of a node (see
+%%   \aosafigref{fig.vio.connection}).
+\item Nodeインターフェイスの\code{getConnectionPoint}メソッドは、ノードの境界上での
+  最適な接続ポイントを計算する(\aosafigref{fig.vio.connection}を参照)。
 
-\item The \code{getConnectionPoints} method of the \code{Edge}
-  interface yields the two end points of the edge. This method is
-  needed to draw the ``grabbers'' that mark the currently selected edge.
+%% \item The \code{getConnectionPoints} method of the \code{Edge}
+%%   interface yields the two end points of the edge. This method is
+%%   needed to draw the ``grabbers'' that mark the currently selected edge.
+\item \code{Edge}インターフェイスの\code{getConnectionPoints}メソッドは、
+  そのエッジの二つの端点を作る。このメソッドが必要なのは、現在選択中のエッジをマークする
+  「grabber」を描画するときである。
 
-\item A node can have children that move together with the parent. A number
-  of methods are provided for enumerating and managing children.
+%% \item A node can have children that move together with the parent. A number
+%%   of methods are provided for enumerating and managing children.
+\item ノードは子供を持つことができ、子供は親とともに移動する。
+  子供たちを列挙したり操作したりするための、一連のメソッドが用意されている。
 
 \end{aosaitemize}
 
 %% \aosafigure[200pt]{../images/violet/Ch8-07.eps}{Finding a Connection Point on the Boundary of the Node Shape}{fig.vio.connection}
-\aosafigure[200pt]{../images/violet/Ch8-07.eps}{ノードシェイプの境界上での接続ポイントを探す}{fig.vio.connection}
+\aosafigure[200pt]{../images/violet/Ch8-07.eps}{ノードの境界上での接続ポイントを探す}{fig.vio.connection}
 
-Convenience classes \code{AbstractNode} and \code{AbstractEdge}
-implement a number of these methods, and classes
-\code{RectangularNode} and \code{SegmentedLineEdge} provide complete
-implementations of rectangular nodes with a title string and edges
-that are made up of line segments.
+%% Convenience classes \code{AbstractNode} and \code{AbstractEdge}
+%% implement a number of these methods, and classes
+%% \code{RectangularNode} and \code{SegmentedLineEdge} provide complete
+%% implementations of rectangular nodes with a title string and edges
+%% that are made up of line segments.
+便利なクラスである\code{AbstractNode}と\code{AbstractEdge}には
+これらのメソッドの多くが実装されている。そして\code{RectangularNode}
+や\code{SegmentedLineEdge}では、
+それぞれタイトル文字列つきの矩形ノードや破線エッジの完全な実装を提供している。
 
-In the case of our simple graph editor, we would need to supply
-subclasses \code{CircleNode} and \code{LineEdge} that provide a
-\code{draw} method, a \code{contains} method, and the
-\code{getConnectionPoint} method that describes the shape of the node
-boundary.
-The code is given below,
-and \aosafigref{fig.vio.classdiag} shows a class diagram of these classes
-(drawn, of course, with Violet).
+%% In the case of our simple graph editor, we would need to supply
+%% subclasses \code{CircleNode} and \code{LineEdge} that provide a
+%% \code{draw} method, a \code{contains} method, and the
+%% \code{getConnectionPoint} method that describes the shape of the node
+%% boundary.
+%% The code is given below,
+%% and \aosafigref{fig.vio.classdiag} shows a class diagram of these classes
+%% (drawn, of course, with Violet).
+ここで扱うシンプルなグラフエディタの場合は、
+\code{CircleNode}や\code{LineEdge}といったサブクラスを用意する必要があるだろう。
+これらのクラスが\code{draw}メソッドや\code{contains}メソッドを提供し、
+さらにノードの境界の形状を示す\code{getConnectionPoint}メソッドも用意する。
+そのコードを次に示す。\aosafigref{fig.vio.classdiag}はこれらのクラスのクラス図である
+(もちろんVioletで描いたものだ)。
 
 \begin{verbatim}
 public class CircleNode extends AbstractNode
@@ -306,16 +338,24 @@ public class LineEdge extends AbstractEdge
 %% \aosafigure{../images/violet/SimpleGraph-in-Violet.eps}{Class Diagram for a Simple Graph}{fig.vio.classdiag}
 \aosafigure{../images/violet/SimpleGraph-in-Violet.eps}{Simple Graphのクラス図}{fig.vio.classdiag}
 
-In summary, Violet provides a simple framework for producing graph
-editors.  To obtain an editor instance, define node and edge classes
-and provide methods in a graph class that yield prototype node and
-edge objects.
+%% In summary, Violet provides a simple framework for producing graph
+%% editors.  To obtain an editor instance, define node and edge classes
+%% and provide methods in a graph class that yield prototype node and
+%% edge objects.
+ここまでをまとめよう。Violetでは、グラフエディタを作るためのシンプルなフレームワークを提供している。
+エディタのインスタンスを取得するには、ノードやエッジのクラス群を定義して
+グラフ内でのメソッドを用意し、ノードオブジェクトやエッジオブジェクトの
+プロトタイプを作れるようにする。
 
-Of course, there are other graph frameworks available, such as
-JGraph~\cite{bib:alder:jgraph} and
-JUNG\footnote{\url{http://jung.sourceforge.net}}. However, those
-frameworks are considerably more complex, and they provide frameworks
-for drawing graphs, not for applications that draw graphs.
+%% Of course, there are other graph frameworks available, such as
+%% JGraph~\cite{bib:alder:jgraph} and
+%% JUNG\footnote{\url{http://jung.sourceforge.net}}. However, those
+%% frameworks are considerably more complex, and they provide frameworks
+%% for drawing graphs, not for applications that draw graphs.
+もちろんグラフ用のフレームワークは他にも存在する。
+JGraph~\cite{bib:alder:jgraph}やJUNG\footnote{\url{http://jung.sourceforge.net}}などだ。
+でも、これらのフレームワークはかなり複雑だし、あくまでもグラフを描画するためのフレームワークであって
+グラフ描画アプリケーションを作るためのフレームワークではない。
 
 \end{aosasect1}
 
