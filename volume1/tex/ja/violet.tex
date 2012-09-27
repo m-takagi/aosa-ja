@@ -184,7 +184,7 @@ UML図に登場するさまざまな形状のエッジもある。グラフフ�
 \code{SimpleGraph}クラスはノードとエッジの型を表すプロトタイプオブジェクトを指定するもので、
 プロトタイプパターンに沿っている。
 
-\pagebreak
+%% \pagebreak
 
 \begin{verbatim}
 public class SimpleGraph extends AbstractGraph
@@ -362,31 +362,47 @@ JGraph~\cite{bib:alder:jgraph}やJUNG\footnote{\url{http://jung.sourceforge.net}
 %% \begin{aosasect1}{Use of JavaBeans Properties}
 \begin{aosasect1}{JavaBeansのプロパティの利用}
 
-In the golden days of client-side Java, the JavaBeans specification
-was developed in order to provide portable mechanisms for editing GUI
-components in visual GUI builder environments. The vision was that a
-third-party GUI component could be dropped into any GUI builder, where
-its properties could be configured in the same way as the standard
-buttons, text components, and so on.
+%% In the golden days of client-side Java, the JavaBeans specification
+%% was developed in order to provide portable mechanisms for editing GUI
+%% components in visual GUI builder environments. The vision was that a
+%% third-party GUI component could be dropped into any GUI builder, where
+%% its properties could be configured in the same way as the standard
+%% buttons, text components, and so on.
+クライアントサイドでのJavaが花盛りだった頃に、
+JavaBeansの仕様が策定された。ビジュアルGUIビルダー環境で、
+GUIコンポーネントを編集するポータブルな仕組みを提供するためだ。
+サードパーティのGUIコンポーネントをGUIビルダーにドロップして、
+標準のボタンやテキストボックスなどと同様にプロパティを設定できるようにするというのが狙いだった。
 
-Java does not have native properties. Instead, JavaBeans properties
-can be discovered as pairs of getter and setter methods, or specified
-with companion BeanInfo classes. Moreover, \emph{property editors} can
-be specified for visually editing property values. The JDK even
-contains a few basic property editors, for example for the type
-\code{java.awt.Color}.
+%% Java does not have native properties. Instead, JavaBeans properties
+%% can be discovered as pairs of getter and setter methods, or specified
+%% with companion BeanInfo classes. Moreover, \emph{property editors} can
+%% be specified for visually editing property values. The JDK even
+%% contains a few basic property editors, for example for the type
+%% \code{java.awt.Color}.
+Javaでは、プロパティという仕組みはネイティブで提供されていない。
+JavaBeansのプロパティはゲッターメソッドとセッターメソッドのペアになっていたり、
+付随するBeanInfoクラスで指定されていたりする。
+さらに、\emph{プロパティエディタ}を指定してビジュアルにプロパティの値を編集できる。
+JDKにも基本的なプロパティエディタが含まれている。\code{java.awt.Color}
+がその一例だ。
 
-The Violet framework makes full use of the 
-JavaBeans specification. For example, the \code{CircleNode} class can
-expose a color property simply by providing two methods:
+%% The Violet framework makes full use of the 
+%% JavaBeans specification. For example, the \code{CircleNode} class can
+%% expose a color property simply by providing two methods:
+VioletフレームワークはJavaBeansの仕様をフル活用している。
+たとえば\code{CircleNode}クラスは、次の二つのメソッドを用意すれば
+colorプロパティを公開できる。
 
 \begin{verbatim}
 public void setColor(Color newValue)
 public Color getColor()
 \end{verbatim}
 
-\noindent No further work is necessary. The graph editor can now edit node
-colors of circle nodes (\aosafigref{fig.vio.circlecolors}).
+%% \noindent No further work is necessary. The graph editor can now edit node
+%% colors of circle nodes (\aosafigref{fig.vio.circlecolors}).
+\noindent
+たったこれだけだ。グラフエディタは、これで円ノードの色を編集できるようになった(\aosafigref{fig.vio.circlecolors})。
 
 %% \aosafigure{../images/violet/Ch8-11.eps}{Editing Circle Colors with the default JavaBeans Color Editor}{fig.vio.circlecolors}
 \aosafigure{../images/violet/Ch8-11.eps}{デフォルトのJavaBeans Color Editorによる円の色の編集}{fig.vio.circlecolors}
