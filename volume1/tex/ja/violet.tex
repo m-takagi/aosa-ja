@@ -410,24 +410,39 @@ public Color getColor()
 \end{aosasect1}
 
 %% \begin{aosasect1}{Long-Term Persistence}
-\begin{aosasect1}{Long-Term Persistence}
+\begin{aosasect1}{長期持続性}
 
-Just like any editor program, Violet must save the user's creations in
-a file and reload them later. I had a look at the XMI
-specification\footnote{\url{http://www.omg.org/technology/documents/formal/xmi.htm}}
-which was designed as a common interchange format for UML models. I
-found it cumbersome, confusing, and hard to consume. I don't think I
-was the only one---XMI had a reputation for poor interoperability even
-with the simplest models~\cite{bib:persson:osstools}.
+%% Just like any editor program, Violet must save the user's creations in
+%% a file and reload them later. I had a look at the XMI
+%% specification\footnote{\url{http://www.omg.org/technology/documents/formal/xmi.htm}}
+%% which was designed as a common interchange format for UML models. I
+%% found it cumbersome, confusing, and hard to consume. I don't think I
+%% was the only one---XMI had a reputation for poor interoperability even
+%% with the simplest models~\cite{bib:persson:osstools}.
+どんなエディタプログラムでもそうだが、Violetは
+ユーザーが作った図をファイルに保存したり図をファイルから読み込めるようにしたりしないといけない。
+そこで私は、XMIの仕様
+\footnote{\url{http://www.omg.org/technology/documents/formal/xmi.htm}}
+を調べてみた。これはUMLのモデル用のデータ交換フォーマットとして作られたものだ。
+その結果わかったことは、こいつはやたら面倒くさくて紛らわしくて、
+処理しづらいものだということだった。そう思ったのは私だけではないと思う。
+XMIを使うと、極めてシンプルなモデルであっても相互運用性に乏しくなるという評価がある\cite{bib:persson:osstools}。
 
-I considered simply using Java serialization, but it is difficult to
-read old versions of a serialized object whose implementation has
-changed over time.  This problem was also anticipated by the JavaBeans
-architects, who developed a standard XML format for long-term
-persistence\footnote{\url{http://jcp.org/en/jsr/detail?id=57}}.  A
-Java object---in the case of Violet, the UML diagram---is serialized
-as a sequence of statements for constructing and modifying it. Here is
-an example:
+%% I considered simply using Java serialization, but it is difficult to
+%% read old versions of a serialized object whose implementation has
+%% changed over time.  This problem was also anticipated by the JavaBeans
+%% architects, who developed a standard XML format for long-term
+%% persistence\footnote{\url{http://jcp.org/en/jsr/detail?id=57}}.  A
+%% Java object---in the case of Violet, the UML diagram---is serialized
+%% as a sequence of statements for constructing and modifying it. Here is
+%% an example:
+単純にJavaのシリアライズ機能を使おうかとも考えた。
+しかし、旧バージョンでシリアライズしたオブジェクトを読み込むのが難しい。
+シリアライズの実装は変化し続けているからである。
+同じ問題を心配していたJavaBeansアーキテクトたちは、
+標準化したXMLフォーマットで長期持続性を確保しようとした\footnote{\url{http://jcp.org/en/jsr/detail?id=57}}。
+Javaオブジェクト(Violetの場合ならUML図)を、それを構築したり修正したりするための一連の文で表すというものだ。
+例を示そう。
 
 \begin{verbatim}
 <?xml version="1.0" encoding="UTF-8"?>
@@ -464,8 +479,10 @@ an example:
 </java>
 \end{verbatim}
 
-When the \code{XMLDecoder} class reads this file, it executes these
-statements (package names are omitted for simplicity).
+%% When the \code{XMLDecoder} class reads this file, it executes these
+%% statements (package names are omitted for simplicity).
+\code{XMLDecoder}クラスがこのファイルを読み込むと、こんな文を実行する
+(単純にするために、パッケージ名は省略した)。
 
 \begin{verbatim}
 ClassDiagramGraph obj1 = new ClassDiagramGraph();
@@ -480,18 +497,27 @@ obj2.setEndArrowHead(ArrowHead.TRIANGLE);
 obj1.connect(obj2, ClassNode0, ClassNode1);
 \end{verbatim}
 
-As long as the semantics of the constructors, properties, and methods
-has not changed, a newer version of the program can read a file that
-has been produced by an older version.
+%% As long as the semantics of the constructors, properties, and methods
+%% has not changed, a newer version of the program can read a file that
+%% has been produced by an older version.
+コンストラクタやプロパティそしてメソッドといった構文が変わらない限り、
+プログラムのバージョンが新しくなっても旧バージョンで保存したファイルを読み込める。
 
-Producing such files is quite straightforward. The encoder
-automatically enumerates the properties of each object and writes
-setter statements for those property values that differ from the
-default. Most basic datatypes are handled by the Java platform;
-however, I had to supply special handlers for \code{Point2D},
-\code{Line2D}, and \code{Rectangle2D}. Most importantly,
-the encoder must know that a graph can be serialized as a sequence of
-\code{addNode} and \code{connect} method calls:
+%% Producing such files is quite straightforward. The encoder
+%% automatically enumerates the properties of each object and writes
+%% setter statements for those property values that differ from the
+%% default. Most basic datatypes are handled by the Java platform;
+%% however, I had to supply special handlers for \code{Point2D},
+%% \code{Line2D}, and \code{Rectangle2D}. Most importantly,
+%% the encoder must know that a graph can be serialized as a sequence of
+%% \code{addNode} and \code{connect} method calls:
+こんなファイルを作るのは極めて簡単なことだ。
+エンコーダーが自動的にオブジェクトのプロパティを列挙し、
+デフォルトと違う値が設定されているプロパティについてその値を設定するセッターを書き出せばよい。
+ほとんどの基本データ型はJavaプラットフォームが処理してくれる。しかし、
+\code{Point2D}や\code{Line2D}そして\code{Rectangle2D}については特別なハンドラを用意しなければいけなかった。
+最も大切なのは、グラフが一連の\code{addNode}メソッドと\code{connect}メソッドに
+シリアライズできるということをエンコーダーが知っておく必要があるということだ。
 
 \begin{verbatim}
 encoder.setPersistenceDelegate(Graph.class, new DefaultPersistenceDelegate()
@@ -516,27 +542,36 @@ encoder.setPersistenceDelegate(Graph.class, new DefaultPersistenceDelegate()
  });
 \end{verbatim}
 
-Once the encoder has been configured, saving a graph is as simple as:
+%% Once the encoder has been configured, saving a graph is as simple as:
+エンコーダーをきちんと設定してしまえば、グラフを保存するのは簡単で、単にこのようにするだけだ。
 
 \begin{verbatim}
 encoder.writeObject(graph);
 \end{verbatim}
 
-\noindent Since the decoder simply executes statements, it requires no
-configuration.  Graphs are simply read with:
+%% \noindent Since the decoder simply executes statements, it requires no
+%% configuration.  Graphs are simply read with:
+\noindent
+デコーダーは単純に文を実行するだけなので、設定は何もいらない。
+グラフを読むにはこうするだけでいい。
 
 \begin{verbatim}
 Graph graph = (Graph) decoder.readObject();
 \end{verbatim}
 
-This approach has worked exceedingly well over numerous versions of
-Violet, with one exception. A recent refactoring changed
-some package names and thereby broke backwards compatibility.
-One option would have been to keep the classes in the original packages,
-even though they no longer matched the new package structure.
-Instead, the maintainer provided an XML
-transformer for rewriting the package names when reading a legacy
-file.
+%% This approach has worked exceedingly well over numerous versions of
+%% Violet, with one exception. A recent refactoring changed
+%% some package names and thereby broke backwards compatibility.
+%% One option would have been to keep the classes in the original packages,
+%% even though they no longer matched the new package structure.
+%% Instead, the maintainer provided an XML
+%% transformer for rewriting the package names when reading a legacy
+%% file.
+この手法は大成功を収め、これまでのさまざまなバージョンのVioletでうまく動いてきたが、唯一の例外があった。
+最近施したリファクタリングでパッケージ名を変更してしまい、過去との互換性が崩れてしまったのだ。
+新しいパッケージ構成からは外れてしまうが、旧パッケージのクラスをそのまま残しておくという選択肢もあった。
+そうはせず、メンテナ—がXMLトランスレーターを用意することにした。
+旧バージョンのファイルを読み込むときにパッケージ名を自動的に書き換えるようにしたのだ。
 
 \end{aosasect1}
 
