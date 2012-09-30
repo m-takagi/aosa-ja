@@ -576,64 +576,107 @@ Graph graph = (Graph) decoder.readObject();
 \end{aosasect1}
 
 %% \begin{aosasect1}{Java WebStart}
-\begin{aosasect1}{Java WebStart}
+\begin{aosasect1}{Java Web Start}
 
-Java WebStart is a technology for launching an application from a web
-browser. The deployer posts a JNLP file that triggers a helper
-application in the browser which downloads and runs the Java
-program. The application can be digitally signed, in which case the
-user must accept the certificate, or it can be unsigned, in which case
-the program runs in a sandbox that is slightly more permissive than
-the applet sandbox.
+%% Java WebStart is a technology for launching an application from a web
+%% browser. The deployer posts a JNLP file that triggers a helper
+%% application in the browser which downloads and runs the Java
+%% program. The application can be digitally signed, in which case the
+%% user must accept the certificate, or it can be unsigned, in which case
+%% the program runs in a sandbox that is slightly more permissive than
+%% the applet sandbox.
+Java Web Startを使えば、アプリケーションをWebブラウザから起動することができる。
+JNLPファイルをデプロイしておけばこれがブラウザ内でヘルパーアプリケーションを起動し、
+Javaのプログラムをダウンロードして実行してくれる。アプリケーションにデジタル署名を施すこともできる。
+その場合、ユーザーは証明書を受け入れないとアプリケーションを実行できない。
+署名なしの場合は、プログラムはサンドボックス内で実行される。
+このサンドボックスは、アプレットのサンドボックスより若干制限の緩いものだ。
 
-I do not think that end users can or should be trusted to judge the
-validity of a digital certificate and its security implications. One
-of the strengths of the Java platform is its security, and I feel it
-is important to play to that strength.
+%% I do not think that end users can or should be trusted to judge the
+%% validity of a digital certificate and its security implications. One
+%% of the strengths of the Java platform is its security, and I feel it
+%% is important to play to that strength.
+私は、デジタル証明書の妥当性やそのセキュリティ的に意味するところを一般の利用者が判断できるとは思っていないし、
+またそんな判断をさせるべきではないと考える。Javaプラットフォームの強みの一つが
+そのセキュリティなのだから、その強みを利用することが重要だろう。
 
-The Java WebStart sandbox is sufficiently powerful to enable users to
-carry out useful work, including loading and saving files and
-printing.  These operations are handled securely and conveniently from
-the user perspective. The user is alerted that the application wants
-to access the local filesystem and then chooses the file to be read
-or written. The application merely receives a stream object, without
-having an opportunity to peek at the filesystem during the file
-selection process.
+%% The Java WebStart sandbox is sufficiently powerful to enable users to
+%% carry out useful work, including loading and saving files and
+%% printing.  These operations are handled securely and conveniently from
+%% the user perspective. The user is alerted that the application wants
+%% to access the local filesystem and then chooses the file to be read
+%% or written. The application merely receives a stream object, without
+%% having an opportunity to peek at the filesystem during the file
+%% selection process.
+Java Web Startのサンドボックスは、一般の利用者が作業を進めるのには十分なほど強力で、
+ファイルの読み込みや保存もできるし印刷もできる。利用者から見たときに、
+これらの操作は安全かつ便利に利用できる。アプリケーションがローカルのファイルシステムに
+アクセスしようとしたときには確認のメッセージが出るので、それを見て
+ファイルの読み書きをさせるかどうかを選べるようになる。
+アプリケーションは単にストリームオブジェクトを受け取るだけであり、
+ファイル選択の間にも実際にファイルシステムを見ることはない。
 
-It is annoying that the developer must write
-custom code to interact with a \code{FileOpenService} and a
-\code{FileSaveService} when the application is running under WebStart,
-and it is even more annoying that there is no WebStart API call to
-find out whether the application was launched by WebStart.
+%% It is annoying that the developer must write
+%% custom code to interact with a \code{FileOpenService} and a
+%% \code{FileSaveService} when the application is running under WebStart,
+%% and it is even more annoying that there is no WebStart API call to
+%% find out whether the application was launched by WebStart.
+開発者にとっては少し面倒になる。アプリケーションをWeb Startの配下で実行させるには
+\code{FileOpenService}や\code{FileSaveService}を使うコードを書かなければいけないからである。
+さらに面倒なのは、アプリケーションがWeb Start経由で起動されたのかどうかを調べるための
+Web Start APIが存在しないということだ。
 
-Similarly, saving user preferences must be implemented in two ways:
-using the Java preferences API when the application runs normally, or
-using the WebStart preferences service when the application is under
-WebStart. Printing, on the other hand, is entirely transparent to the
-application programmer.
+%% Similarly, saving user preferences must be implemented in two ways:
+%% using the Java preferences API when the application runs normally, or
+%% using the WebStart preferences service when the application is under
+%% WebStart. Printing, on the other hand, is entirely transparent to the
+%% application programmer.
+同様に、ユーザーの設定項目を保存するにも二通りの実装方法がある。
+アプリケーションを普通に実行している場合はJava preferences APIを使うし、
+Web Start配下で動いている場合はWeb Start preferences serviceを使うことになる。
+一方印刷については、アプリケーションのプログラマー側からはまったく同じように扱える。
 
-Violet provides simple abstraction layers over these services to
-simplify the lot of the application programmer. For example, here is
-how to open a file:
+%% Violet provides simple abstraction layers over these services to
+%% simplify the lot of the application programmer. For example, here is
+%% how to open a file:
+Violetではこれらのサービスの上にシンプルな抽象化層を提供し、
+アプリケーションのプログラマーの作業を単純化させている。
+たとえばファイルを開くには次のようにすればよい。
 
+%% \begin{verbatim}
+%% FileService service = FileService.getInstance(initialDirectory);
+%%   // detects whether we run under WebStart
+%% FileService.Open open = fileService.open(defaultDirectory, defaultName, 
+%%   extensionFilter);
+%% InputStream in = open.getInputStream();
+%% String title = open.getName();
+%% \end{verbatim}
 \begin{verbatim}
 FileService service = FileService.getInstance(initialDirectory);
-  // detects whether we run under WebStart
+  // Web Starth配下で動いているかどうかを検出する
 FileService.Open open = fileService.open(defaultDirectory, defaultName, 
   extensionFilter);
 InputStream in = open.getInputStream();
 String title = open.getName();
 \end{verbatim}
 
-\noindent The \code{FileService.Open} interface is implemented by two classes: a
-wrapper over \code{JFileChooser} or the JNLP \code{FileOpenService}.
+%% \noindent The \code{FileService.Open} interface is implemented by two classes: a
+%% wrapper over \code{JFileChooser} or the JNLP \code{FileOpenService}.
+\noindent
+\code{FileService.Open}インターフェイスを実装しているクラスは二つで、\code{JFileChooser}
+のラッパーかあるいはJNLPの\code{FileOpenService}である。
 
-No such convenience is a part of the JNLP API itself, but that API has
-received little love over its lifetime and has been widely
-ignored. Most projects simply use a self-signed certificate for their
-WebStart application, which gives users no security. This is a
-shame---open source developers should embrace the JNLP sandbox as a
-risk-free way to try out a project.
+%% No such convenience is a part of the JNLP API itself, but that API has
+%% received little love over its lifetime and has been widely
+%% ignored. Most projects simply use a self-signed certificate for their
+%% WebStart application, which gives users no security. This is a
+%% shame---open source developers should embrace the JNLP sandbox as a
+%% risk-free way to try out a project.
+この便利な仕組みはJNLP APIそのものの機能だというわけではない。
+しかしこのAPIはこれまでほとんど顧みられることがなく、無視され続けてきた。
+大半のプロジェクトは自己署名の証明書を使ってWeb Startアプリケーションを公開しており、利用者側のセキュリティを無視している。
+これは恥ずべきことだ。オープンソースの開発者は、
+JNLPのサンドボックスを受け入れてリスクなくプログラムを動かせるようにするべきだ。
 
 \end{aosasect1}
 
