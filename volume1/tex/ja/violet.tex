@@ -683,18 +683,26 @@ JNLPのサンドボックスを受け入れてリスクなくプログラムを�
 %% \begin{aosasect1}{Java 2D}
 \begin{aosasect1}{Java 2D}
 
-Violet makes intensive use of the Java2D library, one of the lesser
-known gems in the Java API\@. Every node and edge has a method
-\code{getShape} that yields a \code{java.awt.Shape}, the common
-interface of all Java2D shapes. This interface is implemented by
-rectangles, circles, paths, and their unions, intersections, and
-differences. The \code{GeneralPath} class is useful for making shapes
-that are composed of arbitrary line and quadratic/cubic curve
-segments, such as straight and curved arrows.
+%% Violet makes intensive use of the Java2D library, one of the lesser
+%% known gems in the Java API\@. Every node and edge has a method
+%% \code{getShape} that yields a \code{java.awt.Shape}, the common
+%% interface of all Java2D shapes. This interface is implemented by
+%% rectangles, circles, paths, and their unions, intersections, and
+%% differences. The \code{GeneralPath} class is useful for making shapes
+%% that are composed of arbitrary line and quadratic/cubic curve
+%% segments, such as straight and curved arrows.
+VioletはJava2Dライブラリを徹底的に使いまくっている。このライブラリは、Java APIの中でも認知度の低いもののひとつだ。
+すべてのノードやエッジには\code{getShape}メソッドがあり、\code{java.awt.Shape}
+を返すようになっている。これは、Java2Dのすべての図形の共通インターフェイスだ。
+このインターフェイスを実装して、矩形や円やパスそしてそれらの和集合や積集合、差分などができあがる。
+\code{GeneralPath}クラスは、任意の直線および二次曲線・三次曲線を合成した図形(直線の矢印や曲線の矢印など)
+を作るのに有用なクラスだ。
 
-To appreciate the flexibility of the Java2D API, consider the
-following code for drawing a
-shadow in the \code{AbstractNode.draw} method:
+%% To appreciate the flexibility of the Java2D API, consider the
+%% following code for drawing a
+%% shadow in the \code{AbstractNode.draw} method:
+Java2D APIの柔軟性を理解するために、次のコードを見てみよう。
+これは\code{AbstractNode.draw}メソッドで影を描画するためのコードだ。
 
 \begin{verbatim}
 Shape shape = getShape();
@@ -707,18 +715,28 @@ g2.setColor(BACKGROUND_COLOR);
 g2.fill(shape);
 \end{verbatim}
 
-\noindent A few lines of code produce a shadow for any shape, even shapes that a
-developer may add at a later point.
+%% \noindent A few lines of code produce a shadow for any shape, even shapes that a
+%% developer may add at a later point.
+\noindent
+ほんの数行のコードで、あらゆる図形に影をつけることができる。
+開発者が後から追加した図形でも同じだ。
 
-Of course, Violet saves bitmap images in any format that the
-\code{javax.imageio} package supports; that is, GIF, PNG, JPEG, and so
-on. When my publisher asked me for vector images, I noted another
-advantage of the Java 2D library. When you print to a PostScript
-printer, the Java2D operations are translated into PostScript vector
-drawing operations. If you print to a file, the result can be consumed
-by a program such as \code{ps2eps} and then imported into Adobe
-Illustrator or Inkscape. Here is the code, where \code{comp} is the
-Swing component whose \code{paintComponent} method paints the graph:
+%% Of course, Violet saves bitmap images in any format that the
+%% \code{javax.imageio} package supports; that is, GIF, PNG, JPEG, and so
+%% on. When my publisher asked me for vector images, I noted another
+%% advantage of the Java 2D library. When you print to a PostScript
+%% printer, the Java2D operations are translated into PostScript vector
+%% drawing operations. If you print to a file, the result can be consumed
+%% by a program such as \code{ps2eps} and then imported into Adobe
+%% Illustrator or Inkscape. Here is the code, where \code{comp} is the
+%% Swing component whose \code{paintComponent} method paints the graph:
+もちろん、Violetが保存する画像はビットマップ形式だ。\code{javax.imageio}
+パッケージがサポートするあらゆるフォーマット、つまりGIFやPNGそしてJPEGなどに対応している。
+出版社からベクター形式の画像を求められたときには、Java 2Dライブラリを使う別のメリットを説明した。
+PostScriptプリンタに印字するときに、Java2Dでの操作はPostScriptのベクター描画操作に変換されるのだ。
+ファイルに印刷すれば、その結果を\code{ps2eps}などに食わせてAdobe IllustratorあるいはInkscapeにインポートできるようになる。
+そのコード例を示す。ここで\code{comp}はSwingコンポーネントであり、その\code{paintComponent}
+メソッドがグラフを描画する。
 
 \begin{verbatim}
 DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PRINTABLE;
@@ -749,11 +767,14 @@ PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
 job.print(doc, attributes);
 \end{verbatim}
 
-At the beginning, I was concerned that there might be a performance
-penalty when using general shapes, but that has proven not to be the
-case. Clipping works well enough that only those shape operations
-that are required for updating the current viewport are actually
-executed.
+%% At the beginning, I was concerned that there might be a performance
+%% penalty when using general shapes, but that has proven not to be the
+%% case. Clipping works well enough that only those shape operations
+%% that are required for updating the current viewport are actually
+%% executed.
+当初私が気にかけていたのは、汎用的な図形クラスを使えばパフォーマンスが落ちるのではないかということだった。
+しかし、実際はそうでもないことがわかった。クリッピングを使って、
+現在のビューポイントの更新に必要な図形だけを処理するようにすればよかったのだ。
 
 \end{aosasect1}
 
