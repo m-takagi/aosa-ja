@@ -779,23 +779,37 @@ job.print(doc, attributes);
 \end{aosasect1}
 
 %% \begin{aosasect1}{No Swing Application Framework}
-\begin{aosasect1}{No Swing Application Framework}
+\begin{aosasect1}{Swingアプリケーションのフレームワークがない}
 
-Most GUI frameworks have some notion of an application that manages a
-set of documents that deals with menus, toolbars, status bars,
-etc. However, this was never a part of the Java
-API\@. JSR~296\footnote{\url{http://jcp.org/en/jsr/detail?id=296}} was
-supposed to supply a basic framework for Swing applications, but it is
-currently inactive.  Thus, a Swing application author has two choices:
-reinvent a good number of wheels or base itself on a third party
-framework. At the time that Violet was written, the primary choices
-for an application framework were the Eclipse and NetBeans platform,
-both of which seemed too heavyweight at the time. (Nowadays, there are
-more choices, among them JSR~296 forks such as
-GUTS\footnote{\url{http://kenai.com/projects/guts}}.)  Thus, Violet
-had to reinvent mechanisms for handling menus and internal frames.
+%% Most GUI frameworks have some notion of an application that manages a
+%% set of documents that deals with menus, toolbars, status bars,
+%% etc. However, this was never a part of the Java
+%% API\@. JSR~296\footnote{\url{http://jcp.org/en/jsr/detail?id=296}} was
+%% supposed to supply a basic framework for Swing applications, but it is
+%% currently inactive.  Thus, a Swing application author has two choices:
+%% reinvent a good number of wheels or base itself on a third party
+%% framework. At the time that Violet was written, the primary choices
+%% for an application framework were the Eclipse and NetBeans platform,
+%% both of which seemed too heavyweight at the time. (Nowadays, there are
+%% more choices, among them JSR~296 forks such as
+%% GUTS\footnote{\url{http://kenai.com/projects/guts}}.)  Thus, Violet
+%% had to reinvent mechanisms for handling menus and internal frames.
+たいていのGUIフレームワークでは、メニューやツールバーそしてステータスバーなどを
+使ってドキュメント群を扱うアプリケーションを作ることを想定している。
+しかし、Java APIにはそんな仕組みはなかった。
+かつてJSR~296\footnote{\url{http://jcp.org/en/jsr/detail?id=296}}
+でSwingアプリケーション用の基本的なフレームワークを提供しようとしていたが、
+今では活動していない。そこで、Swingアプリケーションの作者は二つの選択肢のいずれかを選ぶことになる。
+車輪の再発明を大量に繰り返すか、あるいはサードパーティのフレームワークを使うかだ。
+Violetを書き始めた頃、アプリケーションフレームワークとして最も有力な選択肢は
+EclipseとNetBeansだった。しかし当時は、どちらも重量級過ぎるように感じられた
+(最近は他の選択肢も増えた。中にはJSR~296からのフォークである
+GUTS\footnote{\url{http://kenai.com/projects/guts}}のようなものもある)。
+そのため、Violetでは車輪の再発明をする道を選ばざるを得なかった。
+メニューや内部ウィンドウを扱う仕組みを自前で用意したのだ。
 
-In Violet, you specify menu items in property files, like this:
+%% In Violet, you specify menu items in property files, like this:
+Violetでは、メニューの項目はプロパティファイルで次のように指定する。
 
 \begin{verbatim}
 file.save.text=Save
@@ -804,46 +818,78 @@ file.save.accelerator=ctrl S
 file.save.icon=/icons/16x16/save.png
 \end{verbatim}
 
-\noindent A utility method creates the menu item from the prefix (here
-\code{file.save}). The suffixes \code{.text}, \code{.mnemonic}, and so
-on, are what nowadays would be called ``convention over
-configuration''.  Using resource files for describing these settings
-is obviously far superior to setting up menus with API calls because
-it allows for easy localization. I reused that mechanism in another
-open source project, the GridWorld environment for high school
-computer science
-education\footnote{\url{http://horstmann.com/gridworld}}.
+%% \noindent A utility method creates the menu item from the prefix (here
+%% \code{file.save}). The suffixes \code{.text}, \code{.mnemonic}, and so
+%% on, are what nowadays would be called ``convention over
+%% configuration''.  Using resource files for describing these settings
+%% is obviously far superior to setting up menus with API calls because
+%% it allows for easy localization. I reused that mechanism in another
+%% open source project, the GridWorld environment for high school
+%% computer science
+%% education\footnote{\url{http://horstmann.com/gridworld}}.
+\noindent
+ユーティリティメソッドが、メニューの項目をプレフィックス(ここでは\code{file.save})から作る。
+サフィックスである\code{.text}や\code{.mnemonic}などは、
+今風に言うと「設定より規約」というやつだ。
+リソースファイルを使ってこれらの設定をするという方法は、
+APIを呼んでメニューを作る方法よりも遙かに優れている。
+ローカライゼーションが簡単にできるからだ。
+私は別のオープンソースプロジェクトでもこの仕組みを流用した。ハイスクールでのコンピュータサイエンス教育用環境である
+GridWorld\footnote{\url{http://horstmann.com/gridworld}}だ。
 
-An application such as Violet allows users to open multiple
-``documents'', each containing a graph. When Violet was first written,
-the multiple document interface (MDI) was still commonly used.  With
-MDI, the main frame has a menu bar, and each view of a document is
-displayed in an internal frame with a title but no menu bar. Each
-internal frame is contained in the main frame and can be resized or
-minimized by the user. There are operations for cascading and tiling
-windows.
+%% An application such as Violet allows users to open multiple
+%% ``documents'', each containing a graph. When Violet was first written,
+%% the multiple document interface (MDI) was still commonly used.  With
+%% MDI, the main frame has a menu bar, and each view of a document is
+%% displayed in an internal frame with a title but no menu bar. Each
+%% internal frame is contained in the main frame and can be resized or
+%% minimized by the user. There are operations for cascading and tiling
+%% windows.
+Violetのようなアプリケーションでは、複数の「ドキュメント」を開くことができる。
+そしてそれぞれのドキュメントにグラフが含まれる。
+Violetを最初に書いた頃は、マルチドキュメントインターフェイス(MDI)がまだ主流だった。
+MDIではメインウィンドウがメニューバーを持っており、
+個々のドキュメントはその内部ウィンドウに表示される。タイトルはあるがメニューバーは持っていない。
+メインウィンドウに含まれる内部ウィンドウは、ユーザーがサイズを変更したり最小化させたりできる。
+さらに、ウィンドウを重ねて表示したり並べて表示したりすることもできる。
 
-Many developers disliked MDI, and so this style user interface has 
-gone out of fashion. For a while, a single document interface (SDI), in which an
-application displays multiple top level frames, was considered
-superior, presumably because those frames can be manipulated with the
-standard window management tools of the host operating system. When it
-became clear that having lots of top level windows isn't so great
-after all, tabbed interfaces started to appear, in which multiple
-documents are again contained in a single frame, but now all displayed
-at full size and selectable with tabs. This does not allow users
-to compare two documents side by side, but seems to have won out.
+%% Many developers disliked MDI, and so this style user interface has 
+%% gone out of fashion. For a while, a single document interface (SDI), in which an
+%% application displays multiple top level frames, was considered
+%% superior, presumably because those frames can be manipulated with the
+%% standard window management tools of the host operating system. When it
+%% became clear that having lots of top level windows isn't so great
+%% after all, tabbed interfaces started to appear, in which multiple
+%% documents are again contained in a single frame, but now all displayed
+%% at full size and selectable with tabs. This does not allow users
+%% to compare two documents side by side, but seems to have won out.
+開発者の多くはMDIを嫌っており、この形式のユーザーインターフェイスは時代遅れになってしまった。
+しばらくすると、シングルドキュメントインターフェイス(SDI)
+つまり一つのアプリケーションが複数のトップレベルウィンドウを表示する形式のほうが優れていると見なされるようになった。
+これはおそらく、SDIのウィンドウならホストOSの標準的なウィンドウ管理ツールで管理できるようになるからだろう。
+トップレベルウィンドウが多すぎるのも考え物だということがはっきりしてきた頃に登場したのが
+タブインターフェイスだ。ここにきて再び、複数のドキュメントを一つのウィンドウにまとめるようになった。
+しかし今度はそのすべてをフルサイズで表示して、タブで選択できるようにする方式だ。
+二つのドキュメントを並べて比較することはできなくなったが、最終的にこの方式が勝ち残ったようだ。
 
-The original version of Violet used an MDI interface. The Java API has
-a internal frames feature, but I had to add support for tiling and
-cascading.  Alexandre switched to a tabbed interface, which is
-somewhat better-supported by the Java API\@. It would be desirable to
-have an application framework where the document display policy was
-transparent to the developer and perhaps selectable by the user.
+%% The original version of Violet used an MDI interface. The Java API has
+%% a internal frames feature, but I had to add support for tiling and
+%% cascading.  Alexandre switched to a tabbed interface, which is
+%% somewhat better-supported by the Java API\@. It would be desirable to
+%% have an application framework where the document display policy was
+%% transparent to the developer and perhaps selectable by the user.
+Violetの最初のバージョンはMDI形式だった。
+Java APIには内部ウィンドウの機能があったが、ウィンドウを並べて表示したり重ねて表示したりする
+機能は自分で追加する必要があった。そして、後にAlexandreがタブインターフェイスに変更した。
+こちらのインターフェイスはJava APIできちんとサポートされていた。
+ドキュメントの表示ポリシーが開発者から透過的に扱え、
+そして利用者からも選択可能なアプリケーションフレームワークが求められる。
 
-Alexandre also added support for sidebars, a status bar, a welcome
-panel, and a splash screen. All this should ideally be a part of a
-Swing application framework.
+%% Alexandre also added support for sidebars, a status bar, a welcome
+%% panel, and a splash screen. All this should ideally be a part of a
+%% Swing application framework.
+Alexandreはさらに、サイドバーやステータスバー、ようこそ画面、スプラッシュスクリーンなどにも対応した。
+これらはすべて、本来ならSwingアプリケーションフレームワークに含まれているべきものだ。
 
 \end{aosasect1}
 
