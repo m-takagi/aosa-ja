@@ -896,65 +896,102 @@ Alexandreはさらに、サイドバーやステータスバー、ようこそ�
 %% \begin{aosasect1}{Undo/Redo}
 \begin{aosasect1}{Undo/Redo}
 
-Implementing multiple undo/redo seems like a daunting task, but the
-Swing undo package (\cite{bib:topley:coreswing}, Chapter 9) gives good
-architectural guidance. An \code{UndoManager} manages a stack of
-\code{UndoableEdit} objects. Each of them has an \code{undo} method
-that undoes the effect of the edit operation, and a \code{redo} method
-that undoes the undo (that is, carries out the original edit
-operation). A \code{CompoundEdit} is a sequence of \code{UndoableEdit}
-operations that should be undone or redone in their entirety. You are
-encouraged to define small, atomic edit operations (such as adding or
-removing a single edge or node in the case of a graph) that are
-grouped into compound edits as necessary.
+%% Implementing multiple undo/redo seems like a daunting task, but the
+%% Swing undo package (\cite{bib:topley:coreswing}, Chapter 9) gives good
+%% architectural guidance. An \code{UndoManager} manages a stack of
+%% \code{UndoableEdit} objects. Each of them has an \code{undo} method
+%% that undoes the effect of the edit operation, and a \code{redo} method
+%% that undoes the undo (that is, carries out the original edit
+%% operation). A \code{CompoundEdit} is a sequence of \code{UndoableEdit}
+%% operations that should be undone or redone in their entirety. You are
+%% encouraged to define small, atomic edit operations (such as adding or
+%% removing a single edge or node in the case of a graph) that are
+%% grouped into compound edits as necessary.
+複数回のundo/redoを実装するのは手強い作業に思えるが、
+Swing undoパッケージ(\cite{bib:topley:coreswing}, Chapter 9)
+がよい設計指針になる。
+\code{UndoManager}が\code{UndoableEdit}オブジェクトのスタックを管理する。
+それぞれのオブジェクトが\code{undo}メソッドを持ち、このメソッドが編集操作を取り消す。
+そして\code{redo}メソッドは、取り消し自体を取り消す
+(つまり、本来の編集操作をもう一度実行する)。
+\code{CompoundEdit}は一連の\code{UndoableEdit}操作で、
+undoやredoは全体をひとまとめにして行わないといけない。
+小規模でアトミックな編集操作(グラフの場合だと、単一のエッジやノードの追加・削除など)
+を定義し、それを必要に応じて複合編集にまとめるとよい。
 
-A challenge is to define a small set of atomic operations, each of
-which can be undone easily. In Violet, they are:
+%% A challenge is to define a small set of atomic operations, each of
+%% which can be undone easily. In Violet, they are:
+小規模でアトミック、そして簡単にundoできる操作を定義するのは難しい。
+Violetではこんな感じになる。
 
 \begin{aosaitemize}
 
-  \item adding or removing a node or edge
+  %% \item adding or removing a node or edge
+  \item ノードやエッジの追加あるいは削除
 
-  \item attaching or detaching a node's child
+  %% \item attaching or detaching a node's child
+  \item 子ノードのアタッチあるいはデタッチ
 
-  \item moving a node
+  %% \item moving a node
+  \item ノードの移動
 
-  \item changing a property of a node or edge
+  %% \item changing a property of a node or edge
+  \item ノードあるいはエッジのプロパティの変更
 
 \end{aosaitemize}
 
-Each of these operations has an obvious undo. For example the undo of
-adding a node is the node's removal. The undo of moving a node is to
-move it by the opposite vector.
+%% Each of these operations has an obvious undo. For example the undo of
+%% adding a node is the node's removal. The undo of moving a node is to
+%% move it by the opposite vector.
+これらの操作はどれも、undoの方法がはっきりしている。
+たとえばノードの追加をundoしたければ、そのノードを削除すればよい。
+ノードの移動をundoしたければ、逆向きのベクターを使って移動させればよい。
 
 %% \aosafigure{../images/violet/undo.eps}{An Undo Operation Must Undo Structural Changes in the Model}{fig.vio.undo}
 \aosafigure{../images/violet/undo.eps}{Undo操作はモデル内の構造の変更を取り消す必要がある}{fig.vio.undo}
 
-Note that these atomic operations are \emph{not} the same as the
-actions in the user interface or the methods of the \code{Graph}
-interface that the user interface actions invoke. For example,
-consider the sequence diagram in \aosafigref{fig.vio.undo},
-and suppose the user drags the mouse from the activation bar to the
-lifeline on the right. When the mouse button is released, the method:
+%% Note that these atomic operations are \emph{not} the same as the
+%% actions in the user interface or the methods of the \code{Graph}
+%% interface that the user interface actions invoke. For example,
+%% consider the sequence diagram in \aosafigref{fig.vio.undo},
+%% and suppose the user drags the mouse from the activation bar to the
+%% lifeline on the right. When the mouse button is released, the method:
+注意すべきなのは、こういったアトミックな操作が、
+ユーザーインターフェイス上での操作やその元となる\code{Graph}
+インターフェイスのメソッドと必ずしも一致するとは\emph{限らない}
+ということだ。たとえば\aosafigref{fig.vio.undo}のようなシーケンス図で、
+ユーザーがアクティベーションバーをドラッグして右側のライフラインに移動させたとしよう。
+マウスのボタンを離したときには、こんなメソッドが実行される。
 
 \begin{verbatim}
 public boolean addEdgeAtPoints(Edge e, Point2D p1, Point2D p2)
 \end{verbatim}
 
+%% \noindent
+%% is invoked. That method adds an edge, but it may also carry out other
+%% operations, as specified by the participating \code{Edge} and
+%% \code{Node} subclasses. In this case, an activation bar will be added
+%% to the lifeline on the right. Undoing the operation needs to remove
+%% that activation bar as well. Thus, the \emph{model} (in our case, the
+%% graph) needs to record the structural changes that need to be
+%% undone. It is not enough to collect controller operations.
 \noindent
-is invoked. That method adds an edge, but it may also carry out other
-operations, as specified by the participating \code{Edge} and
-\code{Node} subclasses. In this case, an activation bar will be added
-to the lifeline on the right. Undoing the operation needs to remove
-that activation bar as well. Thus, the \emph{model} (in our case, the
-graph) needs to record the structural changes that need to be
-undone. It is not enough to collect controller operations.
+このメソッドはエッジを追加するだけでなく、それ以外の操作も行う。
+その操作にかかわる\code{Edge}や\code{Node}のサブクラスで指定されているものだ。
+今回の場合だと、アクティベーションバーが右側のライフラインに追加されることになる。
+この操作をundoするには、アクティベーションバーも削除しなければいけない。
+つまり、\emph{モデル}(今回の場合はグラフ)自身がその構造の変更を記録して、
+あとで取り消せるようにしておく必要がある。コントローラの操作を記録するだけでは不十分だ。
 
-As envisioned by the Swing undo package, the graph, node, and edge
-classes should send \code{UndoableEditEvent} notifications to an
-\code{UndoManager} whenever a structural edit occurs. Violet has a
-more general design where the graph itself manages listeners for the
-following interface:
+%% As envisioned by the Swing undo package, the graph, node, and edge
+%% classes should send \code{UndoableEditEvent} notifications to an
+%% \code{UndoManager} whenever a structural edit occurs. Violet has a
+%% more general design where the graph itself manages listeners for the
+%% following interface:
+Swing undoパッケージが示すように、グラフやノードそしてエッジのクラスは、
+もし構造の変更があったら
+\code{UndoableEditEvent}通知を\code{UndoManager}に送らないといけない。
+Violetはもう少し汎用的な設計を採用しており、グラフ自身がこんなインターフェイスのリスナーを管理している。
 
 \begin{verbatim}
 public interface GraphModificationListener
@@ -970,17 +1007,26 @@ public interface GraphModificationListener
 }
 \end{verbatim}
 
-The framework installs a listener into each graph that is a bridge to
-the undo manager. For supporting undo, adding generic listener support to 
-the model is overdesigned---the graph operations could directly interact
-with the undo manager. However, I also wanted to support an experimental
-collaborative editing feature.
+%% The framework installs a listener into each graph that is a bridge to
+%% the undo manager. For supporting undo, adding generic listener support to 
+%% the model is overdesigned---the graph operations could directly interact
+%% with the undo manager. However, I also wanted to support an experimental
+%% collaborative editing feature.
+フレームワークが各グラフにリスナーをインストールし、それがundoマネージャーとの橋渡しをする。
+undoをサポートするだけなら、モデルにこんな汎用リスナーを追加するというのはやり過ぎだ。
+グラフ上の操作を直接undoマネージャーに通知すればいいのだから。
+しかし私は、将来的に共有編集機能を追加したいという希望もあったのだ。
 
-If you want to support undo/redo in your application, think carefully
-about the atomic operations in your model (and not your user
-interface).  In the model, fire events when a structural change
-happens, and allow the Swing undo manager to collect and group these
-events.
+%% If you want to support undo/redo in your application, think carefully
+%% about the atomic operations in your model (and not your user
+%% interface).  In the model, fire events when a structural change
+%% happens, and allow the Swing undo manager to collect and group these
+%% events.
+もしあなたが自分のアプリケーションでundo/redoをサポートしたいのなら、
+そのアプリケーションのモデルにおいてアトミックな操作とは何かを伸長に考えるようにしよう
+(ユーザーインターフェイス上でアトミックかどうか、ではない)。
+モデルの構造が変わったときにはイベントを発生させ、Swing undoマネージャーが
+イベントをとりまとめられるようにすればいい。
 
 \end{aosasect1}
 
