@@ -1033,37 +1033,58 @@ undoをサポートするだけなら、モデルにこんな汎用リスナー�
 %% \begin{aosasect1}{Plugin Architecture}
 \begin{aosasect1}{プラグインアーキテクチャ}
 
-For a programmer familiar with 2D graphics, it is not difficult to add
-a new diagram type to Violet. For example, the activity diagrams were
-contributed by a third party. When I needed to create railroad
-diagrams and ER diagrams, I found it faster to write Violet extensions
-instead of fussing with Visio or Dia. (Each diagram type took a day to
-implement.)
+%% For a programmer familiar with 2D graphics, it is not difficult to add
+%% a new diagram type to Violet. For example, the activity diagrams were
+%% contributed by a third party. When I needed to create railroad
+%% diagrams and ER diagrams, I found it faster to write Violet extensions
+%% instead of fussing with Visio or Dia. (Each diagram type took a day to
+%% implement.)
+2Dグラフィックになじみの深いプログラマーなら、新たな図形の型をVioletに追加するのも
+そんなに難しくない。たとえばアクティビティ図は、サードパーティから寄贈されたものだ。
+路線図やER図を描く必要が出てきたら、VisioやDiaをいじくり回すよりもVioletの拡張を書いたほうが
+よっぽど早い(どちらの型も、一日もあれば実装できる)。
 
-These implementations do not require knowledge of the full Violet
-framework.  Only the graph, node, and edge interfaces and convenience
-implementations are needed. In order to make it easier for
-contributors to decouple themselves from the evolution of the
-framework, I designed a simple plugin architecture.
+%% These implementations do not require knowledge of the full Violet
+%% framework.  Only the graph, node, and edge interfaces and convenience
+%% implementations are needed. In order to make it easier for
+%% contributors to decouple themselves from the evolution of the
+%% framework, I designed a simple plugin architecture.
+型を実装するのには、Violetフレームワーク全体を把握している必要はない。
+グラフとノード、そしてエッジのインターフェイスを知っていさえすれば、お手軽に実装できるのだ。
+貢献者たちがフレームワーク自体の変化を気にせずに済むように、私はシンプルなプラグインアーキテクチャを設計した。
 
-Of course, many programs have a plugin architecture, many quite
-elaborate.  When someone suggested that Violet should support OSGi, I
-shuddered and instead implemented the simplest thing that works.
+%% Of course, many programs have a plugin architecture, many quite
+%% elaborate.  When someone suggested that Violet should support OSGi, I
+%% shuddered and instead implemented the simplest thing that works.
+もちろんプラグインアーキテクチャを持つプログラムはいくらでもある。
+入念に作り込まれたアーキテクチャを持つものだ。
+VioletはOSGiに対応すべきだと誰かに言われたことがあったが、あのときは身震いしたね。
+代わりに、最小限の機能を持つ単純な仕組みを実装したんだ。
 
-Contributors simply produce a JAR file with their graph, node, and
-edge implementations and drop it into a \code{plugins} directory. When
-Violet starts, it loads those plugins, using the Java
-\code{ServiceLoader} class. That class was designed to load services
-such as JDBC drivers. A \code{ServiceLoader} loads JAR files that
-promise to provide a class implementing a given interface (in our
-case, the \code{Graph} interface.)
+%% Contributors simply produce a JAR file with their graph, node, and
+%% edge implementations and drop it into a \code{plugins} directory. When
+%% Violet starts, it loads those plugins, using the Java
+%% \code{ServiceLoader} class. That class was designed to load services
+%% such as JDBC drivers. A \code{ServiceLoader} loads JAR files that
+%% promise to provide a class implementing a given interface (in our
+%% case, the \code{Graph} interface.)
+貢献者たちは、単にグラフやノードそしてエッジの実装を含むJARファイルを作って
+それを\code{plugins}ディレクトリに置くだけでいい。
+Violetが起動するときにこれらのプラグインが読み込まれる。このときに使うのはJavaの\code{ServiceLoader}クラスだ。
+このクラスは、JDBCドライバのようなサービスを読み込むために作られたものである。
+\code{ServiceLoader}は、指定したインターフェイス(今回の場合は\code{Graph}インターフェイス)
+を実装しているであろうJARファイルを読み込む。
 
-Each JAR file must have a subdirectory \code{META-INF/services}
-containing a file whose name is the fully qualified classname of the
-interface (such as \code{com.horstmann.violet.Graph}), and that
-contains the names of all implementing classes, one per line.
-The \code{ServiceLoader} constructs a class loader for the plugin
-directory, and loads all plugins:
+%% Each JAR file must have a subdirectory \code{META-INF/services}
+%% containing a file whose name is the fully qualified classname of the
+%% interface (such as \code{com.horstmann.violet.Graph}), and that
+%% contains the names of all implementing classes, one per line.
+%% The \code{ServiceLoader} constructs a class loader for the plugin
+%% directory, and loads all plugins:
+個々のJARファイルはサブディレクトリ\code{META-INF/services}を持つ必要がある。
+この中には、インターフェイスの完全修飾名(\code{com.horstmann.violet.Graph}など)
+と同じ名前のファイルがあり、その中にはすべての実装クラスの名前が1行ずつ記されている。
+\code{ServiceLoader}はプラグインディレクトリ用のクラスローダーを作り、すべてのプラグインを読み込む。
 
 \begin{verbatim}
 ServiceLoader<Graph> graphLoader = ServiceLoader.load(Graph.class, classLoader);
@@ -1071,8 +1092,9 @@ for (Graph g : graphLoader) // ServiceLoader<Graph> implements Iterable<Graph>
   registerGraph(g); 
 \end{verbatim}
 
-This is a simple but useful facility of standard Java that you might
-find valuable for your own projects.
+%% This is a simple but useful facility of standard Java that you might
+%% find valuable for your own projects.
+これは標準のJavaが持つ単純ながらも便利な機能であり、あなた自身のプロジェクトでもうまく使えるかもしれない。
 
 \end{aosasect1}
 
