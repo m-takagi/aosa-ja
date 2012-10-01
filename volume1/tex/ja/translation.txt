@@ -28,7 +28,7 @@ snowflock.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
 socialcalc.tex      TAKAGI Masahiro <matakagi@gmail.com>      100
 telepathy.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
 thousandparsec.tex  TAKAGI Masahiro <matakagi@gmail.com>      100
-violet.tex          TAKAGI Masahiro <matakagi@gmail.com>       95
+violet.tex          TAKAGI Masahiro <matakagi@gmail.com>      100
 vistrails.tex
 vtk.tex
 wesnoth.tex
