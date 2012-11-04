@@ -1,5 +1,5 @@
 \begin{aosachapter}{Eclipse}{s:eclipse}{Kim Moir}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r1485
 
 Implementing software modularity is a notoriously difficult task.
 Interoperability with a large code base written by a diverse community
@@ -74,7 +74,7 @@ software developers, but few of them worked together. Eclipse sought
 to provide an open source platform for the creation of interoperable
 tools for application developers. This would allow
 developers to focus on writing new tools, instead of
-writing to code deal with infrastructure issues like interacting
+writing code to deal with infrastructure issues like interacting
 with the filesystem, providing software updates, and connecting to
 source code repositories. Eclipse is perhaps most famous for the Java
 Development Tools (JDT). The intent was that these exemplary Java
@@ -629,7 +629,7 @@ manages collections of self-describing bundles and manages their
 classloading. Each bundle has its own classloader. The classpath
 available to a bundle is constructed by examining the dependencies of
 the manifest and generating a classpath available to the bundle. OSGi
-applications are collections of bundles. In order to fully embrace of
+applications are collections of bundles. In order to fully embrace
 modularity, you must be able to express your dependencies in a
 reliable format for consumers. Thus the manifest describes exported
 packages that are available to clients of this bundle which
