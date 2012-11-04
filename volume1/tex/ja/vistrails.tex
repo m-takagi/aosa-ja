@@ -1,76 +1,125 @@
 \begin{aosachaptertoc}{VisTrails}{s:vistrails}{Juliana Freire, David Koop, Emanuele Santos, \\ Carlos Scheidegger, Claudio Silva, and Huy T.\ Vo}{Juliana Freire, David Koop, Emanuele Santos, \\ \hspace*{0.9cm} Carlos Scheidegger, Claudio Silva, and Huy T.\ Vo}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r272
 
-VisTrails\footnote{\url{http://www.vistrails.org}} is an open-source
-system that supports data exploration and visualization.  It includes
-and substantially extends useful features of scientific workflow and
-visualization systems.  Like scientific workflow systems such as
-Kepler and Taverna, VisTrails allows the specification of
-computational processes which integrate existing applications,
-loosely-coupled resources, and libraries according to a set of
-rules. Like visualization systems such as AVS and ParaView, VisTrails makes
-advanced scientific and information visualization techniques available
-to users, allowing them to explore and compare different visual
-representations of their data.  As a result, users can create complex
-workflows that encompass important steps of scientific discovery, from
-data gathering and manipulation to complex analyses and
-visualizations, all integrated in one system.
+%% VisTrails\footnote{\url{http://www.vistrails.org}} is an open-source
+%% system that supports data exploration and visualization.  It includes
+%% and substantially extends useful features of scientific workflow and
+%% visualization systems.  Like scientific workflow systems such as
+%% Kepler and Taverna, VisTrails allows the specification of
+%% computational processes which integrate existing applications,
+%% loosely-coupled resources, and libraries according to a set of
+%% rules. Like visualization systems such as AVS and ParaView, VisTrails makes
+%% advanced scientific and information visualization techniques available
+%% to users, allowing them to explore and compare different visual
+%% representations of their data.  As a result, users can create complex
+%% workflows that encompass important steps of scientific discovery, from
+%% data gathering and manipulation to complex analyses and
+%% visualizations, all integrated in one system.
+VisTrails\footnote{\url{http://www.vistrails.org}}は、データの調査や可視化をサポートする
+オープンソースのシステムである。科学ワークフローシステムやビジュアライゼーションシステムの便利な機能を
+含んでおり、今も成長を続けている。KeplerやTavernaといった科学ワークフローシステムと同様、
+VisTrailsでも計算プロセスの指定ができ、既存のアプリケーションや
+疎結合のリソースそしてライブラリなどをルールに沿って統合できる。
+AVSやParaViewなどのビジュアライゼーションシステムのように、
+VisTrailsでも科学的な情報の可視化ができるようになっている。
+それを使ってデータを調べたり、さまざまな可視化表現でデータを比較したりできる。
+結果としてユーザーは複雑なワークフローを作れるようになる。これは科学的な発見のための重要なステップだ。
+データの収集から複雑な解析や可視化まで、すべてが一つのシステムに統合されているのだ。
 
-A distinguishing feature of VisTrails is its provenance
-infrastructure~\cite{bib:freire:vistrails}.  VisTrails captures and maintains a detailed history 
-of the steps followed and data derived in the course of an exploratory
-task.  Workflows have traditionally been used to automate repetitive
-tasks, but in applications that are exploratory in nature, such as
-data analysis and visualization, very little is repeated---change is
-the norm. As a user generates and evaluates hypotheses about their
-data, a series of different, but related, workflows are created as
-they are adjusted iteratively.
+%% A distinguishing feature of VisTrails is its provenance
+%% infrastructure~\cite{bib:freire:vistrails}.  VisTrails captures and maintains a detailed history 
+%% of the steps followed and data derived in the course of an exploratory
+%% task.  Workflows have traditionally been used to automate repetitive
+%% tasks, but in applications that are exploratory in nature, such as
+%% data analysis and visualization, very little is repeated---change is
+%% the norm. As a user generates and evaluates hypotheses about their
+%% data, a series of different, but related, workflows are created as
+%% they are adjusted iteratively.
+VisTrailsの特徴は、その履歴管理基盤だ~\cite{bib:freire:vistrails}。
+VisTrailsは、調査作業中に発生したデータや作業手順を記録して
+その履歴を管理する。繰り返すタスクを自動化するときに従来使われてきたのは
+ワークフローだが、自然界の調査用のアプリケーション（データ解析や可視化など）
+では繰り返しはほとんど発生しない。変化するのが普通だ。
+ユーザーは、データに基づいた仮設をたててそれを検証する。
+それぞれ異なるけれども関連している一連のワークフローを作り、
+繰り返しながら調整していく。
 
-VisTrails was designed to manage these rapidly-evolving workflows: it
-maintains provenance of data products (e.g., visualizations, plots),
-of the workflows that derive these products, and their executions.
-The system also provides annotation capabilities so users can enrich
-the automatically-captured provenance.
+%% VisTrails was designed to manage these rapidly-evolving workflows: it
+%% maintains provenance of data products (e.g., visualizations, plots),
+%% of the workflows that derive these products, and their executions.
+%% The system also provides annotation capabilities so users can enrich
+%% the automatically-captured provenance.
+VisTrailsは、こういった常に成長し続けるワークフローを管理するために作られた。
+生成したデータ（可視化やプロットなど）、そこから派生するワークフロー、
+そしてその実行などの履歴を管理する。
+またアノテーション機能も提供しており、自動的にキャプチャした履歴を飾ることもできる。
 
-Besides enabling reproducible results, VisTrails leverages provenance
-information through a series of operations and intuitive user
-interfaces that help users to collaboratively analyze data.  Notably,
-the system supports reflective reasoning by storing temporary results,
-allowing users to examine the actions that led to a result and to
-follow chains of reasoning backward and forward.  Users can navigate
-workflow versions in an intuitive way, undo changes without losing
-results, visually compare multiple workflows and show their results
-side-by-side in a visualization spreadsheet.
+%% Besides enabling reproducible results, VisTrails leverages provenance
+%% information through a series of operations and intuitive user
+%% interfaces that help users to collaboratively analyze data.  Notably,
+%% the system supports reflective reasoning by storing temporary results,
+%% allowing users to examine the actions that led to a result and to
+%% follow chains of reasoning backward and forward.  Users can navigate
+%% workflow versions in an intuitive way, undo changes without losing
+%% results, visually compare multiple workflows and show their results
+%% side-by-side in a visualization spreadsheet.
+結果を再生できるようにするだけでなく、
+VisTrailsはその履歴情報を一連の操作として活用する。
+直感的なユーザーインターフェイスを使って、共同でデータを解析できるのだ。
+特筆すべきなのは、このシステムでは一時的な結果を保存しており、
+それを反映した推論にも対応しているという点だ。
+これを利用すると、何かの結果に至った操作を吟味して前の推論や次の推論につなげられる。
+ユーザーはワークフローの各バージョンを直感的に移動でき、変更を取り消しても一切結果を失わずに済む。
+また、複数のワークフローをビジュアルに比較して、その結果をビジュアライゼーションスプレッドシートに並べて表示できる。
 
-VisTrails addresses important usability issues that have hampered a
-wider adoption of workflow and visualization systems.  To cater to a
-broader set of users, including many who do not have programming
-expertise, it provides a series of operations and user interfaces that
-simplify workflow design and use~\cite{bib:freire:vistrails}, including the ability to create and
-refine workflows by analogy, to query workflows by example, and to
-suggest workflow completions as users interactively construct their
-workflows using a recommendation
-system~\cite{bib:scheidegger:analogy}. We have also developed a new
-framework that allows the creation of custom applications that can be
-more easily deployed to (non-expert) end users.
+%% VisTrails addresses important usability issues that have hampered a
+%% wider adoption of workflow and visualization systems.  To cater to a
+%% broader set of users, including many who do not have programming
+%% expertise, it provides a series of operations and user interfaces that
+%% simplify workflow design and use~\cite{bib:freire:vistrails}, including the ability to create and
+%% refine workflows by analogy, to query workflows by example, and to
+%% suggest workflow completions as users interactively construct their
+%% workflows using a recommendation
+%% system~\cite{bib:scheidegger:analogy}. We have also developed a new
+%% framework that allows the creation of custom applications that can be
+%% more easily deployed to (non-expert) end users.
+VisTrailsは、ワークフローシステムやビジュアライゼーションシステムを広く取り入れるときの障害になる
+重大な使い勝手問題にも対応している。プログラミングの専門知識がない人も含めた幅広いユーザー層に対応するため、
+ワークフローの設計や利用を簡単にする一連の操作やユーザーインターフェイスを用意したのだ\cite{bib:freire:vistrails}。
+ワークフローの作成や修正にアナロジーを使えるようにしたり、実例でワークフローを問い合わせられるようにしたり、
+リコメンデーションシステムで対話的にワークフローを作っていけるようにしたりといったものだ\cite{bib:scheidegger:analogy}。
+また、新たなフレームワークも作った。これを使えば、プログラミングに詳しくないエンドユーザーでも
+カスタムアプリケーションを作って配布できるようになる。
 
-The extensibility of VisTrails comes from an infrastructure that makes
-it simple for users to integrate tools and libraries, as well as to
-quickly prototype new functions. This has been instrumental in
-enabling the use of the system in a wide range of application areas,
-including environmental sciences, psychiatry, astronomy, cosmology,
-high-energy physics, quantum physics, and molecular modeling.
+%% The extensibility of VisTrails comes from an infrastructure that makes
+%% it simple for users to integrate tools and libraries, as well as to
+%% quickly prototype new functions. This has been instrumental in
+%% enabling the use of the system in a wide range of application areas,
+%% including environmental sciences, psychiatry, astronomy, cosmology,
+%% high-energy physics, quantum physics, and molecular modeling.
+VisTrailsの拡張性の元になっているのはその基盤で、ユーザーにとってシンプルになるように作られている。
+ツールやライブラリを組み込んだり、お手軽に新機能のプロトタイプを作ったりできるようになっている。
+これは、このシステムをさまざまな分野に適用するのに役立っており、
+環境科学や精神医学、天文学、宇宙論、高エネルギー物理学、量子物理学、分子モデリングなどで使われ散る。
 
-To keep the system open-source and free for all, we have built
-VisTrails using only free, open-source packages. VisTrails is written
-in Python and uses Qt as its GUI toolkit (through PyQt Python
-bindings).  Because of the broad range of users and applications, we
-have designed the system from the ground up with portability in
-mind. VisTrails runs on Windows, Mac and Linux.
+%% To keep the system open-source and free for all, we have built
+%% VisTrails using only free, open-source packages. VisTrails is written
+%% in Python and uses Qt as its GUI toolkit (through PyQt Python
+%% bindings).  Because of the broad range of users and applications, we
+%% have designed the system from the ground up with portability in
+%% mind. VisTrails runs on Windows, Mac and Linux.
+システムをオープンソースで自由に使えるようにするため、私たちはVisTrails
+を作るときに、自由なオープンソースのパッケージだけを使うようにした。
+VisTrailsはPythonで書かれており、GUIツールキットにはQtを(そのPythonバインディングであるPyQtと通して)使っている。
+さまざまなユーザーがいるしさまざまなアプリケーションがあるので、
+システムを設計するときにはポータビリティを重視した。
+VisTrailsはWindowsでもMacでもLinuxでも動く。
 
-\aosafigure{../images/vistrails/overview.eps}{Components of the VisTrails User Interface}{fig.vistrails.overview}
+%% \aosafigure{../images/vistrails/overview.eps}{Components of the VisTrails User Interface}{fig.vistrails.overview}
+\aosafigure{../images/vistrails/overview.eps}{VisTrailsのユーザーインターフェイスのコンポーネント}{fig.vistrails.overview}
 
-\begin{aosasect1}{System Overview}
+%% \begin{aosasect1}{System Overview}
+\begin{aosasect1}{システムの概要}
 
 Data exploration is an inherently creative process that requires users
 to locate relevant data, to integrate and visualize this data, to
@@ -88,7 +137,8 @@ solve a problem, these tools must have the ability to systematically
 capture provenance. VisTrails was designed with these requirements in
 mind.
 
-\begin{aosasect2}{Workflows and Workflow-Based Systems}
+%% \begin{aosasect2}{Workflows and Workflow-Based Systems}
+\begin{aosasect2}{ワークフローおよびワークフローベースのシステム}
 
 Workflow systems support the creation of pipelines (workflows) that
 combine multiple tools. As such, they enable the automation of
@@ -129,7 +179,8 @@ of areas, integrating multiple tools, libraries, and services.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Data and Workflow Provenance}
+%% \begin{aosasect2}{Data and Workflow Provenance}
+\begin{aosasect2}{データおよびワークフローの履歴}
 
 The importance of keeping provenance information for results (and data
 products) is well recognized in the scientific community.  The
@@ -153,11 +204,13 @@ provenance.  While early workflow systems have been \emph{extended} to
 capture provenance, VisTrails was \emph{designed} to support
 provenance.
 
-\aosafigure{../images/vistrails/overview-tree.eps}{Provenance of Exploration Enhanced by Annotations}{fig.vistrails.tree}
+%% \aosafigure{../images/vistrails/overview-tree.eps}{Provenance of Exploration Enhanced by Annotations}{fig.vistrails.tree}
+\aosafigure{../images/vistrails/overview-tree.eps}{探索の履歴のアノテーションによる拡張}{fig.vistrails.tree}
 
 \end{aosasect2}
 
-\begin{aosasect2}{User Interface and Basic Functionality}
+%% \begin{aosasect2}{User Interface and Basic Functionality}
+\begin{aosasect2}{ユーザーインターフェイスおよび基本機能}
 
 The different user interface components of the system are illustrated
 in \aosafigref{fig.vistrails.overview} and
@@ -191,13 +244,15 @@ created a particular workflow and the creation date, but users may
 also provide additional metadata, including a tag to identify the
 workflow and a written description.
 
-\aosafigureTop[400pt]{../images/vistrails/system-interaction.eps}{VisTrails Architecture}{fig.vistrails.arch}
+%% \aosafigureTop[400pt]{../images/vistrails/system-interaction.eps}{VisTrails Architecture}{fig.vistrails.arch}
+\aosafigureTop[400pt]{../images/vistrails/system-interaction.eps}{VisTrailsのアーキテクチャ}{fig.vistrails.arch}
 
 \end{aosasect2}
 
 \end{aosasect1}
 
-\begin{aosasect1}{Project History}
+%% \begin{aosasect1}{Project History}
+\begin{aosasect1}{プロジェクトの歴史}
 
 Initial versions of versions of VisTrails were written in Java and
 C++~\cite{bib:bavoil:vistrails}.  The C++ version was distributed to a few early adopters, whose 
@@ -225,7 +280,8 @@ thousand times.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Inside VisTrails}
+%% \begin{aosasect1}{Inside VisTrails}
+\begin{aosasect1}{インサイドVisTrails}
 
 The internal components that support the user-interface functionality
 described above are depicted in the high-level architecture of
@@ -255,9 +311,11 @@ number of scenarios, including the creation of Web-based interfaces
 that allows users to interact with workflows and the ability to run
 workflows in high-performance computing environments.
 
-\begin{aosasect2}{The Version Tree: Change-Based Provenance}
+%% \begin{aosasect2}{The Version Tree: Change-Based Provenance}
+\begin{aosasect2}{バージョンツリー: 変更ベースの履歴}
 
-\aosafigure{../images/vistrails/change-based-prov.eps}{Change-Based Provenance Model}{fig.vistrails.changeprov}
+%% \aosafigure{../images/vistrails/change-based-prov.eps}{Change-Based Provenance Model}{fig.vistrails.changeprov}
+\aosafigure{../images/vistrails/change-based-prov.eps}{変更ベースの履歴モデル}{fig.vistrails.changeprov}
 
 A new concept we introduced with VisTrails is the notion of provenance
 of workflow evolution~\cite{bib:freire:vistrails}. In contrast to previous workflow and 
@@ -328,7 +386,8 @@ data which can then be shared with other users.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Workflow Execution and Caching}
+%% \begin{aosasect2}{Workflow Execution and Caching}
+\begin{aosasect2}{ワークフローの実行とキャッシュ}
 \label{sec.vistrails.exec-cache}
 
 The execution engine in VisTrails was designed to allow the
@@ -381,7 +440,8 @@ files.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Data Serialization and Storage}
+%% \begin{aosasect2}{Data Serialization and Storage}
+\begin{aosasect2}{データのシリアライズと格納}
 
 One of the key components of any system supporting provenance is the
 serialization and storage of data.  VisTrails originally stored data
@@ -445,7 +505,8 @@ overrides provide a flexible means for defining local changes.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Extensibility Through Packages and Python}
+%% \begin{aosasect2}{Extensibility Through Packages and Python}
+\begin{aosasect2}{パッケージやPythonによる拡張性}
 \label{sec.vistrails.packages}
 
 The first prototype of VisTrails had a fixed set of modules. It was an
@@ -513,7 +574,8 @@ extremely attractive language for software extensibility.
 
 \end{aosasect2}
 
-\begin{aosasect2}{VisTrails Packages and Bundles}
+%% \begin{aosasect2}{VisTrails Packages and Bundles}
+\begin{aosasect2}{VisTrailsのパッケージおよびバンドル}
 
 A VisTrails package encapsulates a set of modules. Its most
 common representation in disk is the same representation as a Python
@@ -607,7 +669,8 @@ and the results can be reused.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Passing Data as Modules}
+%% \begin{aosasect2}{Passing Data as Modules}
+\begin{aosasect2}{データをモジュールとして渡す}
 
 One peculiar feature of VisTrails modules and their communication is
 that the data that is passed between VisTrails modules are themselves
@@ -639,7 +702,8 @@ corresponding to the parameter. Since the output of a constant
 evaluates to itself, the behavior is exactly the same as if the value
 had actually been specified as a constant.
 
-\aosafigure{../images/vistrails/python-source.eps}{Prototyping New Functionality with the \code{PythonSource} Module}{fig.vistrails.pysource}
+%% \aosafigure{../images/vistrails/python-source.eps}{Prototyping New Functionality with the \code{PythonSource} Module}{fig.vistrails.pysource}
+\aosafigure{../images/vistrails/python-source.eps}{新機能のプロトタイピングを\code{PythonSource}モジュールで行う}{fig.vistrails.pysource}
 
 There are other considerations involved in designing constants. 
 Each constant type has a different ideal GUI interface for
@@ -663,7 +727,8 @@ Python code that is to be executed.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Components and Features}
+%% \begin{aosasect1}{Components and Features}
+\begin{aosasect1}{コンポーネントおよび機能}
 
 As discussed above, VisTrails provides a set of functionalities and
 user interfaces that simplify the creation and execution of
@@ -674,8 +739,9 @@ publications. For a more comprehensive description of VisTrails and its features
 see VisTrails' online documentation\footnote{\url{http://www.vistrails.org/usersguide}}.
 
 %% \aosafigure{../images/vistrails/spreadsheet.pdf}{The Visual Spreadsheet}{fig.vistrails.spreadsheet}
-\aosafigure{../images/vistrails/spreadsheet.eps}{The Visual Spreadsheet}{fig.vistrails.spreadsheet}
+\aosafigure{../images/vistrails/spreadsheet.eps}{Visual Spreadsheet}{fig.vistrails.spreadsheet}
 
+%% \begin{aosasect2}{Visual Spreadsheet}
 \begin{aosasect2}{Visual Spreadsheet}
 
 VisTrails allows users to explore and compare results from multiple
@@ -744,7 +810,8 @@ from parameter explorations.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Visual Differences and Analogies}
+%% \begin{aosasect2}{Visual Differences and Analogies}
+\begin{aosasect2}{Visual DifferencesおよびAnalogies}
 \label{sec.vistrails.diff}
 
 As we designed VisTrails, we wanted to enable the \emph{use} of
@@ -811,7 +878,8 @@ using a threshold to leave very dissimilar modules unpaired.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Querying Provenance}
+%% \begin{aosasect2}{Querying Provenance}
+\begin{aosasect2}{履歴の問い合わせ}
 
 The provenance captured by VisTrails includes a set of workflows, each
 with its own structure, 
@@ -839,7 +907,8 @@ initiating another query or clicking a reset button.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Persistent Data}
+%% \begin{aosasect2}{Persistent Data}
+\begin{aosasect2}{永続データ}
 
 VisTrails saves the provenance of how results were derived and the
 specification of each step. However, reproducing a workflow run can be
@@ -893,7 +962,8 @@ versions as provenance so that a specific execution can be reproduced.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Upgrades}
+%% \begin{aosasect2}{Upgrades}
+\begin{aosasect2}{アップグレード}
 \label{sec.vistrails.upgrades}
 
 With provenance at the core of VisTrails, the ability to upgrade old
@@ -964,6 +1034,7 @@ persist the upgrade.
 
 \end{aosasect2}
 
+%% \begin{aosasect2}{Sharing and Publishing Provenance-Rich Results}
 \begin{aosasect2}{Sharing and Publishing Provenance-Rich Results}
 \label{sec.vistrails.publish}
 
@@ -1047,7 +1118,8 @@ powers crowdLabs. For more details on how VisTrails is used to created reproduci
 
 \end{aosasect1}
 
-\begin{aosasect1}{Lessons Learned}
+%% \begin{aosasect1}{Lessons Learned}
+\begin{aosasect1}{教訓}
 
 Luckily, back in 2004 when we started thinking about building a data
 exploration and visualization system that supported provenance, we
@@ -1090,7 +1162,8 @@ as the concept of provenance becomes more widespread, it will be
 easier for users to understand the philosophy that we have adopted in
 developing VisTrails.
 
-\begin{aosasect2}{Acknowledgments}
+%% \begin{aosasect2}{Acknowledgments}
+\begin{aosasect2}{謝辞}
 
 We would like to thank all the talented developers that contributed to
 VisTrails: Erik Anderson, Louis Bavoil, Clifton Brooks, Jason
