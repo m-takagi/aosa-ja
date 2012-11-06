@@ -121,88 +121,138 @@ VisTrailsはWindowsでもMacでもLinuxでも動く。
 %% \begin{aosasect1}{System Overview}
 \begin{aosasect1}{システムの概要}
 
-Data exploration is an inherently creative process that requires users
-to locate relevant data, to integrate and visualize this data, to
-collaborate with peers while exploring different solutions, and to
-disseminate results.  Given the size of data and complexity of
-analyses that are common in scientific exploration, tools are needed
-that better support creativity.
+%% Data exploration is an inherently creative process that requires users
+%% to locate relevant data, to integrate and visualize this data, to
+%% collaborate with peers while exploring different solutions, and to
+%% disseminate results.  Given the size of data and complexity of
+%% analyses that are common in scientific exploration, tools are needed
+%% that better support creativity.
+データの調査は本質的にクリエイティブな作業であり、いろんなことをしなければならない。
+関連するデータを特定したり、そのデータを組み合わせて可視化したり、
+別の解法を追求する仲間と共同作業をしたり、自分の成果を広めたりといったことだ。
+科学調査の世界での一般的なデータ量や分析の複雑性を考慮すると、
+そのクリエイティビティをサポートするためには何らかのツールが必要となる。
 
-There are two basic requirements for these tools that go hand in
-hand. First, it is important to be able to specify the exploration
-processes using formal descriptions, which ideally, are
-executable. Second, to reproduce the results of these
-processes as well as reason about the different steps followed to
-solve a problem, these tools must have the ability to systematically
-capture provenance. VisTrails was designed with these requirements in
-mind.
+%% There are two basic requirements for these tools that go hand in
+%% hand. First, it is important to be able to specify the exploration
+%% processes using formal descriptions, which ideally, are
+%% executable. Second, to reproduce the results of these
+%% processes as well as reason about the different steps followed to
+%% solve a problem, these tools must have the ability to systematically
+%% capture provenance. VisTrails was designed with these requirements in
+%% mind.
+こういったツールがうまく協調できるようにするためには次の二つの基本要件を満たさないといけない。
+まず、調査の手順をフォーマルな形式で指定できること。それが実行可能ならさらに望ましい。
+次に、その調査手順をそのまま再生したり、すこし変更して実行したりできること。
+作業の履歴を体系的に記録するための仕組みが必要だ。
+VisTrailsは、こういった要件を念頭に置いて作られた。
 
 %% \begin{aosasect2}{Workflows and Workflow-Based Systems}
 \begin{aosasect2}{ワークフローおよびワークフローベースのシステム}
 
-Workflow systems support the creation of pipelines (workflows) that
-combine multiple tools. As such, they enable the automation of
-repetitive tasks and result reproducibility. Workflows are rapidly
-replacing primitive shell scripts in a wide range of tasks, as
-evidenced by a number of workflow-based applications, both commercial
-(e.g., Apple's Mac OS X Automator and Yahoo!  Pipes) and academic
-(e.g., NiPype, Kepler, and Taverna).
+%% Workflow systems support the creation of pipelines (workflows) that
+%% combine multiple tools. As such, they enable the automation of
+%% repetitive tasks and result reproducibility. Workflows are rapidly
+%% replacing primitive shell scripts in a wide range of tasks, as
+%% evidenced by a number of workflow-based applications, both commercial
+%% (e.g., Apple's Mac OS X Automator and Yahoo!  Pipes) and academic
+%% (e.g., NiPype, Kepler, and Taverna).
+ワークフローシステムがサポートするのは、複数のツールを組み合わせたパイプライン(ワークフロー)づくりだ。
+繰り返し作業を自動化したり、作業を再生できるようにしたりする。
+さまざまなタスクに関するワークフローはすぐにプリミティブなシェルスクリプトに置き換えることができ、
+さまざまなワークフローベースのアプリケーションで確かめることができる。
+商用ツール(AppleのMac OS X AutomatorやYahoo! Pipesなど)でも学術ツール(NiPypeやKeplerそしてTavernaなど)
+でもかまわない。
 
-Workflows have a number of advantages compared to scripts and programs
-written in high-level languages. They provide a simple programming
-model whereby a sequence of tasks is composed by connecting the
-outputs of one task to the inputs of another.
-\aosafigref{fig.vistrails.overview} shows a workflow which reads a CSV
-file that contains weather observations and creates a scatter plot of
-the values.
+%% Workflows have a number of advantages compared to scripts and programs
+%% written in high-level languages. They provide a simple programming
+%% model whereby a sequence of tasks is composed by connecting the
+%% outputs of one task to the inputs of another.
+%% \aosafigref{fig.vistrails.overview} shows a workflow which reads a CSV
+%% file that contains weather observations and creates a scatter plot of
+%% the values.
+ワークフローにはさまざまな利点があり、スクリプトや高級言語でのプログラムよりも優れている。
+シンプルなプログラミングモデルが用意されており、一連のタスクを作るのは
+単にあるタスクの出力と別のタスクの入力をつなぐだけのことだ。
+\aosafigref{fig.vistrails.overview}は、気象情報を含むCSVファイルを読み込んで
+散布図を作るワークフローの例だ。
 
-This simpler programming model allows workflow systems to provide
-intuitive visual programming interfaces, which make them more
-\emph{suitable for users who do not have substantial programming
-  expertise}.  Workflows also have an \emph{explicit structure}: they
-can be viewed as graphs, where nodes represent processes (or modules)
-along with their parameters and edges capture the flow of data between
-the processes. In the example of \aosafigref{fig.vistrails.overview},
-the module \code{CSVReader} takes as a parameter a filename
-(\code{/weather/temp\_precip.dat}), reads the file, and feeds its
-contents into the modules \code{GetTemperature} and
-\code{GetPrecipitation}, which in turn send the temperature and
-precipitation values to a matplotlib function that generates a scatter
-plot.
+%% This simpler programming model allows workflow systems to provide
+%% intuitive visual programming interfaces, which make them more
+%% \emph{suitable for users who do not have substantial programming
+%%   expertise}.  Workflows also have an \emph{explicit structure}: they
+%% can be viewed as graphs, where nodes represent processes (or modules)
+%% along with their parameters and edges capture the flow of data between
+%% the processes. In the example of \aosafigref{fig.vistrails.overview},
+%% the module \code{CSVReader} takes as a parameter a filename
+%% (\code{/weather/temp\_precip.dat}), reads the file, and feeds its
+%% contents into the modules \code{GetTemperature} and
+%% \code{GetPrecipitation}, which in turn send the temperature and
+%% precipitation values to a matplotlib function that generates a scatter
+%% plot.
+このシンプルなプログラミングモデルのおかげで直感的なビジュアルプログラミングインターフェイスを提供でき、
+\emph{プログラミングの経験が浅いユーザーにもより使いやすい}ものとなった。
+また、ワークフローは\emph{明確な構造}を持っている。
+グラフとして表すことができ、このとき各ノードはプロセス(あるいはモジュール)とそのパラメータを表す。
+またエッジはプロセス間のデータの流れを捕らえたものとなる。
+\aosafigref{fig.vistrails.overview}の例で考えると、\code{CSVReader}モジュールが
+ファイル名(\code{/weather/temp\_precip.dat})をパラメータとして受け取ってそのファイルを読み、
+ファイルの中身を\code{GetTemperature}モジュールと\code{GetPrecipitation}
+モジュールに渡すことになる。これらがそれぞれ気温と降水量の値をmatplotlibの関数に送って、
+散布図を生成する。
 
-Most workflow systems are designed for a specific application
-area. For example, Taverna targets bioinformatics workflows, and
-NiPype allows the creation of neuroimaging workflows.  While VisTrails
-supports much of the functionality provided by other workflow systems,
-it was designed to support general exploratory tasks in a broad range
-of areas, integrating multiple tools, libraries, and services.
+%% Most workflow systems are designed for a specific application
+%% area. For example, Taverna targets bioinformatics workflows, and
+%% NiPype allows the creation of neuroimaging workflows.  While VisTrails
+%% supports much of the functionality provided by other workflow systems,
+%% it was designed to support general exploratory tasks in a broad range
+%% of areas, integrating multiple tools, libraries, and services.
+ほとんどのワークフローシステムは、特定の領域に特化した作りになっている。
+たとえばTavernaのターゲットはバイオインフォマティクスのワークフローだし、
+NiPypeは神経画像のワークフローを作れるようになっている。
+VisTrailsは他のワークフローシステムが持つ機能の多くに対応しているが、
+より幅広い分野の汎用的な調査タスクに対応するよう作られている。
+複数のツールやライブラリ、サービスの統合にも対応している。
 
 \end{aosasect2}
 
 %% \begin{aosasect2}{Data and Workflow Provenance}
 \begin{aosasect2}{データおよびワークフローの履歴}
 
-The importance of keeping provenance information for results (and data
-products) is well recognized in the scientific community.  The
-provenance (also referred to as the audit trail, lineage, and
-pedigree) of a data product contains information about the process and
-data used to derive the data product. Provenance provides important
-documentation that is key to preserving the data, to determining the
-data's quality and authorship, and to reproducing as well as
-validating the results~\cite{bib:freire:provenance}.
+%% The importance of keeping provenance information for results (and data
+%% products) is well recognized in the scientific community.  The
+%% provenance (also referred to as the audit trail, lineage, and
+%% pedigree) of a data product contains information about the process and
+%% data used to derive the data product. Provenance provides important
+%% documentation that is key to preserving the data, to determining the
+%% data's quality and authorship, and to reproducing as well as
+%% validating the results~\cite{bib:freire:provenance}.
+結果(や生成データ)の履歴情報を保持しておくことの重要性は、自然科学の世界ではよく知られている。
+生成データの履歴(あるいは監査証跡や系統、血統などとも呼ばれる)には、
+プロセスに関する情報やデータを生成するために利用したデータなどの情報が含まれる。
+履歴に含まれる情報は、データを永続化させたりその品質や所有者を調べたり、
+結果を再現して検証したりするための重要な鍵となる\cite{bib:freire:provenance}。
 
-An important component of provenance is information about
-\emph{causality}, i.e., a description of a process (sequence of steps)
-which, together with input data and parameters, caused the creation of
-a data product. Thus, the structure of provenance mirrors the
-structure of the workflow (or set of workflows) used to derive a given
-result set.
+%% An important component of provenance is information about
+%% \emph{causality}, i.e., a description of a process (sequence of steps)
+%% which, together with input data and parameters, caused the creation of
+%% a data product. Thus, the structure of provenance mirrors the
+%% structure of the workflow (or set of workflows) used to derive a given
+%% result set.
+履歴の中で重要となる情報の一つが、\emph{因果関係}だ。
+これは、プロセス(一連の手順)に関する説明と入力データおよびパラメータをまとめたものであり、
+生成データを作るもとになったものだ。
+従って、履歴の構造は、指定した結果セットを作るもとになったワークフロー(あるいはワークフロー群)の構造を反映したものとなる。
 
-In fact, a catalyst for the widespread use of workflow systems in
-science has been that they can be easily used to automatically capture
-provenance.  While early workflow systems have been \emph{extended} to
-capture provenance, VisTrails was \emph{designed} to support
-provenance.
+%% In fact, a catalyst for the widespread use of workflow systems in
+%% science has been that they can be easily used to automatically capture
+%% provenance.  While early workflow systems have been \emph{extended} to
+%% capture provenance, VisTrails was \emph{designed} to support
+%% provenance.
+実際、自然科学の分野でワークフローシステムが幅広く使われるようになったきっかけは、
+履歴情報の取得を簡単に自動化できることだった。初期のワークフローシステムは、
+履歴情報を取り込むように\emph{拡張して}使っていた。
+一方VisTrailsは、\emph{はじめから}履歴の取得に対応するように作られている。
 
 %% \aosafigure{../images/vistrails/overview-tree.eps}{Provenance of Exploration Enhanced by Annotations}{fig.vistrails.tree}
 \aosafigure{../images/vistrails/overview-tree.eps}{探索の履歴のアノテーションによる拡張}{fig.vistrails.tree}
@@ -212,37 +262,58 @@ provenance.
 %% \begin{aosasect2}{User Interface and Basic Functionality}
 \begin{aosasect2}{ユーザーインターフェイスおよび基本機能}
 
-The different user interface components of the system are illustrated
-in \aosafigref{fig.vistrails.overview} and
-\aosafigref{fig.vistrails.tree}. Users create and edit workflows using
-the Workflow Editor.
-%
-To build the workflow graphs, users can drag modules from the Module
-Registry and drop them into the Workflow Editor canvas. VisTrails
-provides a series of built-in modules, and users can also add their
-own (see \aosasecref{sec.vistrails.packages} for details). When a
-module is selected, VisTrails displays its parameters (in the
-Parameter Edits area) where the user can set and modify their values.
+%% The different user interface components of the system are illustrated
+%% in \aosafigref{fig.vistrails.overview} and
+%% \aosafigref{fig.vistrails.tree}. Users create and edit workflows using
+%% the Workflow Editor.
+%% %
+%% To build the workflow graphs, users can drag modules from the Module
+%% Registry and drop them into the Workflow Editor canvas. VisTrails
+%% provides a series of built-in modules, and users can also add their
+%% own (see \aosasecref{sec.vistrails.packages} for details). When a
+%% module is selected, VisTrails displays its parameters (in the
+%% Parameter Edits area) where the user can set and modify their values.
+システムで使われているさまざまなユーザーインターフェイスコンポーネントを
+\aosafigref{fig.vistrails.overview}と\aosafigref{fig.vistrails.tree}にまとめた。
+ユーザーは、ワークフローを作ったり編集したりするときにワークフローエディタを使う。
+ワークフローグラフを作るには、モジュールレジストリからモジュールをドラッグして、
+それをワークフローエディタのキャンバスにドロップする。
+VisTrailsには組み込みのモジュールが用意されており、
+それ以外にユーザーが自分でモジュールを追加することもできる
+(詳細は\aosasecref{sec.vistrails.packages}を参照)。
+モジュールを選ぶと、VisTrailsはそのパラメータをパラメータ編集領域に表示する。
+ユーザーは、その値を設定したり変更したりできる。
 
-As a workflow specification is refined, the system captures the
-changes and presents them to the user in the Version Tree View
-described below.  Users may interact with the workflows and their
-results in the VisTrails Spreadsheet.  Each cell in the spreadsheet
-represents a view that corresponds to a workflow instance.  In
-\aosafigref{fig.vistrails.overview}, the results of the workflow shown
-in the Workflow Editor are displayed on the top-left cell of the
-spreadsheet.  Users can directly modify the parameters of a workflow
-as well as synchronize parameters across different cells in the
-spreadsheet.
+%% As a workflow specification is refined, the system captures the
+%% changes and presents them to the user in the Version Tree View
+%% described below.  Users may interact with the workflows and their
+%% results in the VisTrails Spreadsheet.  Each cell in the spreadsheet
+%% represents a view that corresponds to a workflow instance.  In
+%% \aosafigref{fig.vistrails.overview}, the results of the workflow shown
+%% in the Workflow Editor are displayed on the top-left cell of the
+%% spreadsheet.  Users can directly modify the parameters of a workflow
+%% as well as synchronize parameters across different cells in the
+%% spreadsheet.
+ワークフローを修正すると、システムがその変更を捕捉して、後述するバージョンツリービューで確認できるようになる。
+また、Vistrails Spreadsheetを使えば、ワークフローやその結果を対話的に操作することもできる。
+スプレッドシートの各セルが、ワークフローのインスタンスを表す。
+\aosafigref{fig.vistrails.overview}では、ワークフローエディタの例で示したワークフローが
+スプレッドシートの左上のセルに表示されている。ワークフローのパラメータを直接変更することもできるし、
+そのパラメータをスプレッドシート内の別のセルと同期させることもできる。
 
-The Version Tree View helps users to navigate through the different
-workflow versions. As shown in \aosafigref{fig.vistrails.tree}, by
-clicking on a node in the version tree, users can view a workflow, its
-associated result (Visualization Preview), and metadata. Some of the
-metadata is automatically captured, e.g., the id of the user who
-created a particular workflow and the creation date, but users may
-also provide additional metadata, including a tag to identify the
-workflow and a written description.
+%% The Version Tree View helps users to navigate through the different
+%% workflow versions. As shown in \aosafigref{fig.vistrails.tree}, by
+%% clicking on a node in the version tree, users can view a workflow, its
+%% associated result (Visualization Preview), and metadata. Some of the
+%% metadata is automatically captured, e.g., the id of the user who
+%% created a particular workflow and the creation date, but users may
+%% also provide additional metadata, including a tag to identify the
+%% workflow and a written description.
+バージョンツリービューを使えば、一つのワークフローのさまざまなバージョンを渡り歩ける。
+\aosafigref{fig.vistrails.tree}に示すように、バージョンツリーのノードをクリックすれば、
+ワークフローやそれに関連する結果(ビジュアライゼーションプレビュー)およびメタデータを確認できる。
+メタデータの中には自動的に記録されるものもある(ワークフローを作ったユーザーのidや作成日など)が、
+自分でメタデータを追加することもできる。たとえば、ワークフローを識別するためのタグやワークフローについての説明などを追加できる。
 
 %% \aosafigureTop[400pt]{../images/vistrails/system-interaction.eps}{VisTrails Architecture}{fig.vistrails.arch}
 \aosafigureTop[400pt]{../images/vistrails/system-interaction.eps}{VisTrailsのアーキテクチャ}{fig.vistrails.arch}
