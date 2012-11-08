@@ -371,33 +371,54 @@ VisTrailsシステムのベータ版が最初に公開されたのは2007年1月
 %% \begin{aosasect1}{Inside VisTrails}
 \begin{aosasect1}{インサイドVisTrails}
 
-The internal components that support the user-interface functionality
-described above are depicted in the high-level architecture of
-VisTrails, shown in \aosafigref{fig.vistrails.arch}.  Workflow
-execution is controlled by the Execution Engine, which keeps track of
-invoked operations and their respective parameters and captures the
-provenance of workflow execution (Execution Provenance). As part of
-the execution, VisTrails also allows the caching of intermediate
-results both in memory and on disk. As we discuss in
-\aosasecref{sec.vistrails.exec-cache}, only new combinations of
-modules and parameters are re-run, and these are executed by invoking
-the appropriate functions from the underlying libraries (e.g.,
-matplotlib).  Workflow results, connected to their provenance, can
-then be included in electronic documents
-(\aosasecref{sec.vistrails.publish}).
+%% The internal components that support the user-interface functionality
+%% described above are depicted in the high-level architecture of
+%% VisTrails, shown in \aosafigref{fig.vistrails.arch}.  Workflow
+%% execution is controlled by the Execution Engine, which keeps track of
+%% invoked operations and their respective parameters and captures the
+%% provenance of workflow execution (Execution Provenance). As part of
+%% the execution, VisTrails also allows the caching of intermediate
+%% results both in memory and on disk. As we discuss in
+%% \aosasecref{sec.vistrails.exec-cache}, only new combinations of
+%% modules and parameters are re-run, and these are executed by invoking
+%% the appropriate functions from the underlying libraries (e.g.,
+%% matplotlib).  Workflow results, connected to their provenance, can
+%% then be included in electronic documents
+%% (\aosasecref{sec.vistrails.publish}).
+ここまでで取り上げてユーザーインターフェイスの機能をサポートする内部コンポーネントは、
+VisTrailsの上位アーキテクチャ内で\aosafigref{fig.vistrails.arch}のような構成になっている。
+Workflowの実行を制御するのが実行エンジンで、実行された操作やそのパラメータを追跡したり
+ワークフローの実行履歴を記録したりする。実行中に、VisTrailsでは
+中間結果をメモリやディスクにキャッシュすることもできる。
+\aosasecref{sec.vistrails.exec-cache}で説明するように、
+モジュールとパラメータの組み合わせがこれまでとは異なる場合にだけ再実行をする。
+このときの実行は、ベースになるライブラリ(matplotlibなど)の適切な関数を起動する。
+ワークフローの結果、およびそれに関連づけられた履歴は、電子文書にもできる(\aosasecref{sec.vistrails.publish})。
 
-Information about changes to workflows is captured in a Version Tree,
-which can be persisted using different storage back ends, including an
-XML file store in a local directory and a relational database.
-VisTrails also provides a query engine that allows users to explore
-the provenance information.
+%% Information about changes to workflows is captured in a Version Tree,
+%% which can be persisted using different storage back ends, including an
+%% XML file store in a local directory and a relational database.
+%% VisTrails also provides a query engine that allows users to explore
+%% the provenance information.
+ワークフローへの変更に関する情報を捕捉するのはバージョンツリーで、
+これはさまざまなストレージバックエンドを使って永続化できる。
+ローカルディレクトリのXMLファイルに保存してもかまわないし、
+リレーショナルデータベースを使ってもかまわない。
+VisTrailsにはクエリエンジンも搭載されており、
+ユーザーが履歴情報を問い合わせることもできる。
 
-We note that, although VisTrails was designed as an interactive tool,
-it can also be used in server mode.  Once workflows are created, they
-can be executed by a VisTrails server. This feature is useful in a
-number of scenarios, including the creation of Web-based interfaces
-that allows users to interact with workflows and the ability to run
-workflows in high-performance computing environments.
+%% We note that, although VisTrails was designed as an interactive tool,
+%% it can also be used in server mode.  Once workflows are created, they
+%% can be executed by a VisTrails server. This feature is useful in a
+%% number of scenarios, including the creation of Web-based interfaces
+%% that allows users to interact with workflows and the ability to run
+%% workflows in high-performance computing environments.
+特筆すべきことがある。
+VisTrailsはもともと対話的に操作するツールとして作られたものだが、サーバーモードでも使えるということだ。
+ワークフローをいったん作ったら、それをVisTrailsサーバーで実行できる。
+この機能は、さまざまな場面で便利に使える。たとえばWebベースのインターフェイスを作って
+ユーザーにワークフローを操作させることもできるし、
+ワークフローをハイパフォーマンスコンピューティング環境で実行することもできる。
 
 %% \begin{aosasect2}{The Version Tree: Change-Based Provenance}
 \begin{aosasect2}{バージョンツリー: 変更ベースの履歴}
