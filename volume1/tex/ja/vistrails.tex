@@ -325,29 +325,46 @@ VisTrailsには組み込みのモジュールが用意されており、
 %% \begin{aosasect1}{Project History}
 \begin{aosasect1}{プロジェクトの歴史}
 
-Initial versions of versions of VisTrails were written in Java and
-C++~\cite{bib:bavoil:vistrails}.  The C++ version was distributed to a few early adopters, whose 
-feedback was instrumental in shaping our requirements for the system.
+%% Initial versions of versions of VisTrails were written in Java and
+%% C++~\cite{bib:bavoil:vistrails}.  The C++ version was distributed to a few early adopters, whose 
+%% feedback was instrumental in shaping our requirements for the system.
+VisTrailsの最初のバージョンは、JavaとC++で書かれていた\cite{bib:bavoil:vistrails}。
+C++版はごく一部のアーリーアダプターに向けて公開したのだが、
+システムの要件を固めるうえで、そのフィードバックはとても有用だった。
 
-Having observed a trend in the increase of the number of Python-based
-libraries and tools in multiple scientific communities, we opted to
-use Python as the basis for VisTrails. Python is quickly becoming a
-universal modern glue language for scientific software. Many libraries
-written in different languages such as Fortran, C, and C++ use Python
-bindings as a way to provide scripting capabilities. Since VisTrails
-aims to facilitate the orchestration of many different software
-libraries in workflows, a pure Python implementation makes this much
-easier. In particular, Python has dynamic code loading features
-similar to the ones seen in LISP environments, while having a much
-bigger developer community, and an extremely rich standard
-library. Late in 2005, we started the development of the current
-system using Python/PyQt/Qt. This choice has greatly simplified
-extensions to the system, in particular, the addition of new modules
-and packages.
+%% Having observed a trend in the increase of the number of Python-based
+%% libraries and tools in multiple scientific communities, we opted to
+%% use Python as the basis for VisTrails. Python is quickly becoming a
+%% universal modern glue language for scientific software. Many libraries
+%% written in different languages such as Fortran, C, and C++ use Python
+%% bindings as a way to provide scripting capabilities. Since VisTrails
+%% aims to facilitate the orchestration of many different software
+%% libraries in workflows, a pure Python implementation makes this much
+%% easier. In particular, Python has dynamic code loading features
+%% similar to the ones seen in LISP environments, while having a much
+%% bigger developer community, and an extremely rich standard
+%% library. Late in 2005, we started the development of the current
+%% system using Python/PyQt/Qt. This choice has greatly simplified
+%% extensions to the system, in particular, the addition of new modules
+%% and packages.
+Pythonベースのライブラリやツールがさまざまな科学技術コミュニティで使われるようになってきたので、
+VisTraisの基盤もその後Pythonに移行することにした。Pythonは、科学技術ソフトウェアでの
+モダンなグルー言語としての地位を急速に固めていった。
+FortranやC、C++などで書かれたさまざまなライブラリが、Pythonバインディングを使って
+スクリプト機能を提供するようになったのだ。VisTrailsの狙いは
+ワークフローで使うさまざまなソフトウェアライブラリの協調を促進することだったので、
+Pythonで実装してしまったほうが作業がずっと楽になった。
+特に訳だったのが、Pythonの動的コードローディング機能だ。これはかつてLISP環境にあったのと同じものだが、
+Pythonの開発者コミュニティのほうがずっと規模が大きいし、Pythonは標準ライブラリが非常に充実している。
+2005年後半に、Python/PyQt/Qtを使った現在の版の開発が始まった。
+この選択のおかげで、システムの拡張がとてもシンプルにできるようになった。
+特に、新たなモジュールやパッケージを追加するのがシンプルになった。
 
-A beta version of the VisTrails system was first released in January
-2007. Since then, the system has been downloaded over twenty-five
-thousand times.
+%% A beta version of the VisTrails system was first released in January
+%% 2007. Since then, the system has been downloaded over twenty-five
+%% thousand times.
+VisTrailsシステムのベータ版が最初に公開されたのは2007年1月だ。
+その後、かれこれ25,000回以上はダウンロードされている。
 
 \end{aosasect1}
 
