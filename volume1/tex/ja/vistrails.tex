@@ -426,72 +426,120 @@ VisTrailsはもともと対話的に操作するツールとして作られた�
 %% \aosafigure{../images/vistrails/change-based-prov.eps}{Change-Based Provenance Model}{fig.vistrails.changeprov}
 \aosafigure{../images/vistrails/change-based-prov.eps}{変更ベースの履歴モデル}{fig.vistrails.changeprov}
 
-A new concept we introduced with VisTrails is the notion of provenance
-of workflow evolution~\cite{bib:freire:vistrails}. In contrast to previous workflow and 
-workflow-based visualization systems, which maintain provenance only
-for derived data products, VisTrails treats the workflows as
-first-class data items and also captures their provenance. The
-availability of workflow-evolution provenance supports reflective
-reasoning. Users can explore multiple chains of reasoning without
-losing any results, and because the system stores intermediate
-results, users can reason about and make inferences from this
-information.  It also enables a series of operations which simplify
-exploratory processes. For example, users can easily navigate through
-the space of workflows created for a given task, visually compare the
-workflows and their results (see
-\aosafigref{fig.vistrails.changeprov}), and explore (large) parameter
-spaces. In addition, users can query the provenance information and
-learn by example.
+%% A new concept we introduced with VisTrails is the notion of provenance
+%% of workflow evolution~\cite{bib:freire:vistrails}. In contrast to previous workflow and 
+%% workflow-based visualization systems, which maintain provenance only
+%% for derived data products, VisTrails treats the workflows as
+%% first-class data items and also captures their provenance. The
+%% availability of workflow-evolution provenance supports reflective
+%% reasoning. Users can explore multiple chains of reasoning without
+%% losing any results, and because the system stores intermediate
+%% results, users can reason about and make inferences from this
+%% information.  It also enables a series of operations which simplify
+%% exploratory processes. For example, users can easily navigate through
+%% the space of workflows created for a given task, visually compare the
+%% workflows and their results (see
+%% \aosafigref{fig.vistrails.changeprov}), and explore (large) parameter
+%% spaces. In addition, users can query the provenance information and
+%% learn by example.
+VisTrailsで導入した新たな概念の一つが、ワークフローの変化の履歴だ\cite{bib:freire:vistrails}。
+これまでのワークフローシステムやワークフローベースの可視化システムはどれも、
+生成されたデータの履歴しか管理できなかった。
+VisTrailsはワークフローをファーストクラスのデータ項目として扱い、その履歴を保持する。
+ワークフローの変化の履歴を管理できるようになったことで、内省的な推論をしやすくなった。
+ユーザーは複数の推論を同時に進めることができ、その際に一切結果を失うこともない。
+また、中間の結果もシステムが保持しているので、その情報を使った推定もできる。
+一連の操作をまとめられるようにもなっており、調査プロセスを単純化できる。
+たとえば、何かのタスク用に作られたワークフローの中をあちこち移動しながら
+ワークフローやその結果をビジュアルに比較したり(\aosafigref{fig.vistrails.changeprov}を参照)、
+大規模なパラメータ空間を調べたりといったことが簡単にできるようになる。
+さらに、履歴情報を問い合わせてその結果から学ぶこともできる。
 
-The workflow evolution is captured using the change-based provenance
-model.  As illustrated in \aosafigref{fig.vistrails.changeprov},
-VisTrails stores the operations or changes that are applied to
-workflows (e.g., the addition of a module, the modification of a
-parameter, etc.), akin to a database transaction log.  This
-information is modeled as a tree, where each node corresponds to a
-workflow version, and an edge between a parent and a child node
-represents the change applied to the parent to obtain the child. We
-use the terms version tree and vistrail (short for \emph{visual
-trail}) interchangeably to refer to this tree.  Note that the
-change-based model uniformly captures both changes to parameter values
-and to workflow definitions. This sequence of changes is sufficient to
-determine the provenance of data products and it also captures
-information about how a workflow evolves over time.  The model is both
-simple and compact---it uses substantially less space than the
-alternative of storing multiple \emph{versions} of a workflow.
+%% The workflow evolution is captured using the change-based provenance
+%% model.  As illustrated in \aosafigref{fig.vistrails.changeprov},
+%% VisTrails stores the operations or changes that are applied to
+%% workflows (e.g., the addition of a module, the modification of a
+%% parameter, etc.), akin to a database transaction log.  This
+%% information is modeled as a tree, where each node corresponds to a
+%% workflow version, and an edge between a parent and a child node
+%% represents the change applied to the parent to obtain the child. We
+%% use the terms version tree and vistrail (short for \emph{visual
+%% trail}) interchangeably to refer to this tree.  Note that the
+%% change-based model uniformly captures both changes to parameter values
+%% and to workflow definitions. This sequence of changes is sufficient to
+%% determine the provenance of data products and it also captures
+%% information about how a workflow evolves over time.  The model is both
+%% simple and compact---it uses substantially less space than the
+%% alternative of storing multiple \emph{versions} of a workflow.
+ワークフローの変化を記録するために使うのが、変更ベースの履歴モデルだ。
+\aosafigref{fig.vistrails.changeprov}に示すとおり、VisTrailsはワークフローへの操作や変更
+(モジュールの追加やパラメータの変更など)をデータベースのトランザクションログと同様に扱う。
+この情報は木構造で表され、各ノードがワークフローのバージョンに対応する。
+そして、親ノードと子ノードの間のエッジが、親のワークフローから子のワークフローを得るために適用した変更を表す。
+私たちは、この木構造を表す用語としてバージョンツリーとvistrail(\emph{visual trail}を短縮したもの)
+を同じ意味で使っている。変更ベースのモデルは、パラメータの値への変更とワークフロー定義への変更を同じ形式で扱うことに注意しよう。
+この一連の変更の情報があれば、生成データの履歴を得るのに十分だし、
+ワークフローがどのように変化してきたかの情報も記録できる。
+このモデルはシンプルかつコンパクトにできている。
+ワークフローの複数の\emph{バージョン}を保持するシステムは他にもあるが、
+それらに比べて必要な容量は大幅に少なくなった。
 
-There are a number of benefits that come from the use of this model.
-\aosafigref{fig.vistrails.changeprov} shows the visual difference
-functionality that VisTrails provides for comparing two
-workflows. Although the workflows are represented as graphs, using the
-change-based model, comparing two workflows becomes very simple: it
-suffices to navigate the version tree and identify the series of
-actions required to transform one workflow into the other.
+%% There are a number of benefits that come from the use of this model.
+%% \aosafigref{fig.vistrails.changeprov} shows the visual difference
+%% functionality that VisTrails provides for comparing two
+%% workflows. Although the workflows are represented as graphs, using the
+%% change-based model, comparing two workflows becomes very simple: it
+%% suffices to navigate the version tree and identify the series of
+%% actions required to transform one workflow into the other.
+この方式を採用したことによる利点は数多い。
+\aosafigref{fig.vistrails.changeprov}は、VisTrailsで二つのワークフローを比較するときの
+ビジュアル差分機能を示したものだ。ワークフローそのものがグラフで表されていたとしても、
+変更ベースのモデルを使えば二つのワークフローは極めて単純に比較できる。
+バージョンツリーをたどって、あるワークフローから別のワークフローへの変換に要する操作群を特定すれば、
+それで十分だ。
 
-Another important benefit of the change-based provenance model is that
-the underlying version tree can serve as a mechanism to support
-collaboration. Because designing workflows is a notoriously difficult
-task, it often requires multiple users to collaborate.  Not only does
-the version tree provide an intuitive way to visualize the
-contribution of different users (e.g., by coloring nodes according to
-the user who created the corresponding workflow), but the monotonicity
-of the model allows for simple algorithms for synchronizing changes
-performed by multiple users.
+%% Another important benefit of the change-based provenance model is that
+%% the underlying version tree can serve as a mechanism to support
+%% collaboration. Because designing workflows is a notoriously difficult
+%% task, it often requires multiple users to collaborate.  Not only does
+%% the version tree provide an intuitive way to visualize the
+%% contribution of different users (e.g., by coloring nodes according to
+%% the user who created the corresponding workflow), but the monotonicity
+%% of the model allows for simple algorithms for synchronizing changes
+%% performed by multiple users.
+さらにもう一つ、重要な利点がある。
+ベースとなるバージョンツリーを使って、複数での共同作業ができるという点だ。
+ワークフローの設計はとても難しい作業だと言われており、
+複数名での共同作業が必要になることが多い。
+バージョンツリーのおかげで、別のユーザーの作業内容を直感的に可視化できる
+(対応するワークフローを作ったユーザーのノードだけに色を付けるなど)
+だけでなく、モデルの単調性のおかげで、複数のユーザーの変更を同期させるアルゴリズムも単純にできる。
 
-Provenance information can be easily captured while a workflow
-is being executed. Once the execution completes, it is also important
-to maintain \emph{strong} links between a data product and its
-provenance, i.e., the workflow, parameters and input files used to
-derive the data product. When data files or provenance are moved or
-modified, it can be difficult to find the data associated with the
-provenance or to find the provenance associated with the data.
-VisTrails provides a persistent storage mechanism that manages input,
-intermediate, and output data files, strengthening the links between
-provenance and data.  This mechanism provides better support for
-reproducibility because it ensures the data referenced in provenance
-information can be readily (and correctly) located.  Another important
-benefit of such management is that it allows caching of intermediate
-data which can then be shared with other users.
+%% Provenance information can be easily captured while a workflow
+%% is being executed. Once the execution completes, it is also important
+%% to maintain \emph{strong} links between a data product and its
+%% provenance, i.e., the workflow, parameters and input files used to
+%% derive the data product. When data files or provenance are moved or
+%% modified, it can be difficult to find the data associated with the
+%% provenance or to find the provenance associated with the data.
+%% VisTrails provides a persistent storage mechanism that manages input,
+%% intermediate, and output data files, strengthening the links between
+%% provenance and data.  This mechanism provides better support for
+%% reproducibility because it ensures the data referenced in provenance
+%% information can be readily (and correctly) located.  Another important
+%% benefit of such management is that it allows caching of intermediate
+%% data which can then be shared with other users.
+ワークフローを実行したら、履歴の情報は簡単に記録できる。
+いったん実行が完了したら、生成データとその履歴との\emph{強い}つながりを維持することも大切になる。
+つまり、そのデータを生成するために使ったワークフローとパラメータそして入力ファイルの情報だ。
+データファイルや履歴情報を移動したり変更したりしたら、
+その履歴に関連するデータを探したり、データに関連する履歴を探したりするのが難しくなることもある。
+VisTrailsでは永続ストレージの仕組みを提供しており、
+入力データや中間データそして出力データのファイルを管理できる。
+これで、履歴とデータの関連を強化しているのだ。
+この仕組みのおかげで、データの再生可能性がより高まった。
+履歴情報が参照するデータをすぐに(そして正確に)特定できることが保証されるからだ。
+この方式で管理する大きな利点はもう一つある。中間データをキャッシュして他のユーザーと共有できることだ。
 
 \end{aosasect2}
 
