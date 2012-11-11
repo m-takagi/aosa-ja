@@ -547,53 +547,88 @@ VisTrailsでは永続ストレージの仕組みを提供しており、
 \begin{aosasect2}{ワークフローの実行とキャッシュ}
 \label{sec.vistrails.exec-cache}
 
-The execution engine in VisTrails was designed to allow the
-integration of new and existing tools and libraries.  We tried to
-accommodate different styles commonly used for wrapping third-party
-scientific visualization and computation software. In particular,
-VisTrails can be integrated with application libraries that exist
-either as pre-compiled binaries that are executed on a shell and use
-files as input/outputs, or as C++/Java/Python class libraries that
-pass internal objects as input/output.
+%% The execution engine in VisTrails was designed to allow the
+%% integration of new and existing tools and libraries.  We tried to
+%% accommodate different styles commonly used for wrapping third-party
+%% scientific visualization and computation software. In particular,
+%% VisTrails can be integrated with application libraries that exist
+%% either as pre-compiled binaries that are executed on a shell and use
+%% files as input/outputs, or as C++/Java/Python class libraries that
+%% pass internal objects as input/output.
+VisTrailsの実行エンジンは、新しいツールやライブラリを既存のものと統合できるように作られた。
+サードパーティの視覚化ソフトや科学計算ソフトをラップするさまざまな手法に対応するよう試みた。
+特に、VisTrailsはコンパイル済みのバイナリ
+(シェル上で実行したり入出力ファイルとして使うもの)
+とC++/Java/Pythonのクラスライブラリ
+(入出力の内部オブジェクトとして使うもの)
+の両方を統合できるようになっている。
 
-VisTrails adopts a dataflow execution model, where each module
-performs a computation and the data produced by a module flows through
-the connections that exist between modules. Modules are executed in a
-bottom-up fashion; each input is generated on-demand by recursively
-executing upstream modules (we say module A is \emph{upstream} of B
-when there is a sequence of connections that goes from A to B).  The
-intermediate data is temporarily stored either in memory (as a Python
-object) or on disk (wrapped by a Python object that contains
-information on accessing the data).
+%% VisTrails adopts a dataflow execution model, where each module
+%% performs a computation and the data produced by a module flows through
+%% the connections that exist between modules. Modules are executed in a
+%% bottom-up fashion; each input is generated on-demand by recursively
+%% executing upstream modules (we say module A is \emph{upstream} of B
+%% when there is a sequence of connections that goes from A to B).  The
+%% intermediate data is temporarily stored either in memory (as a Python
+%% object) or on disk (wrapped by a Python object that contains
+%% information on accessing the data).
+VisTrailsが採用しているデータフロー実行モデルでは、
+各モジュールが計算を行って、その結果生成されるデータがモジュール間の接続を通じて流れる。
+モジュールの実行はボトムアップ形式になり、各入力は、その場で上位モジュールを再帰的に実行して得る
+(モジュールAがモジュールBの\emph{上位モジュール}であるとは、AからBへとつながる接続の流れがあることを意味する)。
+中間データは一時的に、(Pythonオブジェクトとして)メモリに格納されるか、
+あるいは(データにアクセスするための情報を含むPythonオブジェクトでラップして)ディスクに格納される。
 
-To allow users to add their own functionality to VisTrails, we built
-an extensible package system (see
-\aosasecref{sec.vistrails.packages}).  Packages allow users to include
-their own or third-party modules in VisTrails workflows.  A package
-developer must identify a set of computational modules and for each,
-identify the input and output ports as well as define the computation.
-For existing libraries, a compute method needs to specify the
-translation from input ports to parameters for the existing function
-and the mapping from result values to output ports.
+%% To allow users to add their own functionality to VisTrails, we built
+%% an extensible package system (see
+%% \aosasecref{sec.vistrails.packages}).  Packages allow users to include
+%% their own or third-party modules in VisTrails workflows.  A package
+%% developer must identify a set of computational modules and for each,
+%% identify the input and output ports as well as define the computation.
+%% For existing libraries, a compute method needs to specify the
+%% translation from input ports to parameters for the existing function
+%% and the mapping from result values to output ports.
+ユーザーが自分でVisTrailsに機能を追加できるように、
+拡張可能なパッケージシステムも作った(\aosasecref{sec.vistrails.packages}を参照)。
+パッケージを使えば、自作のモジュールやサードパーティのモジュールをVisTrailsのワークフローに組み込める。
+パッケージの開発者は、計算用のモジュール群を特定しないといけない。
+そして、個々のモジュールについて、入出力のポートと計算の定義を示す。
+既存のライブラリの場合は、入力ポートからの入力を既存の関数へのパラメータに変換したり、
+結果の値を出力ポート用にマップしたりする計算メソッドが必要になる。
 
-In exploratory tasks, similar workflows, which share common
-sub-structures, are often executed in close succession. To improve the
-efficiency of workflow execution, VisTrails caches intermediate
-results to minimize recomputation.  Because we reuse previous
-execution results, we implicitly assume that cacheable modules are
-functional: given the same inputs, modules will produce the same
-outputs. This requirement imposes definite behavior restrictions on
-classes, but we believe they are reasonable. 
+%% In exploratory tasks, similar workflows, which share common
+%% sub-structures, are often executed in close succession. To improve the
+%% efficiency of workflow execution, VisTrails caches intermediate
+%% results to minimize recomputation.  Because we reuse previous
+%% execution results, we implicitly assume that cacheable modules are
+%% functional: given the same inputs, modules will produce the same
+%% outputs. This requirement imposes definite behavior restrictions on
+%% classes, but we believe they are reasonable. 
+調査作業では、同じ構造を共有するよく似たワークフローを続けて実行することがよくある。
+ワークフローの実行効率を上げるために、VisTrailsは中間結果をキャッシュして再計算の量を最小限に抑える。
+前の実行結果を再利用するので、キャッシュできるモジュールが機能することが前提となる。
+つまり、同じ入力を与えたときには同じ出力を生成するようになっているということだ。
+この要件のせいで、クラスの振る舞いには大きな制約が課されることになる。
+しかし私たちは、その制約は妥当なものであると考えている。
 
-There are, however, obvious situations where this behavior
-is unattainable.  For example, a module that uploads a file to a
-remote server or saves a file to disk has a significant side effect
-while its output is relatively unimportant.  Other modules might use
-randomization, and their non-determinism might be desirable; such
-modules can be flagged as non-cacheable. However, some modules that
-are not naturally functional can be converted; a function that writes
-data to two files might be wrapped to output the contents of the
-files.
+%% There are, however, obvious situations where this behavior
+%% is unattainable.  For example, a module that uploads a file to a
+%% remote server or saves a file to disk has a significant side effect
+%% while its output is relatively unimportant.  Other modules might use
+%% randomization, and their non-determinism might be desirable; such
+%% modules can be flagged as non-cacheable. However, some modules that
+%% are not naturally functional can be converted; a function that writes
+%% data to two files might be wrapped to output the contents of the
+%% files.
+しかし、どうがんばってもこの挙動を実現できない場面もある。
+たとえば、リモートサーバーにファイルをアップロードするモジュールや
+ファイルをディスクに保存するモジュールは、
+大きな副作用を持つモジュールである割にはその出力はあまり重要ではない。
+あるいは、乱数を使うモジュールがあって、結果が予測できないことが要件にあったとしよう。
+そんなモジュールについては、キャッシュ不能だというフラグを立てることができる。
+しかし、自然に機能させることができないものでもキャッシュできるよう変換することもできる。
+たとえば、データを二つのファイルに書き出す関数をラップして、
+ファイルの内容を出力するように変換するといったものだ。
 
 \end{aosasect2}
 
