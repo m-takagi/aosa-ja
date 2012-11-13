@@ -749,68 +749,107 @@ Pythonのコードとメタスキーマの変数を使っていた。
 \begin{aosasect2}{パッケージやPythonによる拡張性}
 \label{sec.vistrails.packages}
 
-The first prototype of VisTrails had a fixed set of modules. It was an
-ideal environment to develop basic ideas about the VisTrails version
-tree and the caching of multiple execution runs, but it severely
-limited long-term utility.
+%% The first prototype of VisTrails had a fixed set of modules. It was an
+%% ideal environment to develop basic ideas about the VisTrails version
+%% tree and the caching of multiple execution runs, but it severely
+%% limited long-term utility.
+VisTrailsの最初のプロトタイプは、あらかじめ用意したモジュール群だけが付属していた。
+VisTrailsのバージョンツリーや複数の実行結果のキャッシュなどのアイデアを試すにはよい環境だったが、
+長期的な視点での実用性には大きな制約があった。
 
-We see VisTrails as infrastructure for computational science, and that
-means, literally, that the system should provide scaffolding for other
-tools and processes to be developed. An essential requirement of this
-scenario is extensibility.  A typical way to achieve this involves
-defining a target language and writing an appropriate
-interpreter. This is appealing because of the intimate control it
-offers over execution. This appeal is amplified in light of our
-caching requirements.  However, implementing a full-fledged
-programming language is a large endeavor that has never been our
-primary goal. More importantly, forcing users who are just trying to
-use VisTrails to learn an entirely new language was out of the
-question.
+%% We see VisTrails as infrastructure for computational science, and that
+%% means, literally, that the system should provide scaffolding for other
+%% tools and processes to be developed. An essential requirement of this
+%% scenario is extensibility.  A typical way to achieve this involves
+%% defining a target language and writing an appropriate
+%% interpreter. This is appealing because of the intimate control it
+%% offers over execution. This appeal is amplified in light of our
+%% caching requirements.  However, implementing a full-fledged
+%% programming language is a large endeavor that has never been our
+%% primary goal. More importantly, forcing users who are just trying to
+%% use VisTrails to learn an entirely new language was out of the
+%% question.
+私たちはVisTrailsを、計算科学用の基盤だととらえている。
+つまり、文字通り、他のシステムやプロセスを使っていく上での足場となる機能を用意すべきだということだ。
+そう考えたときに本質的に必要になるのが、システムの拡張性である。
+拡張性を持たせるための一般的な方法は、何らかの言語を用意して適切なインタプリタを書くことだ。
+実行時にきめ細やかな制御ができるので、この方法は魅力的だ。
+キャッシュに関する要件を考えると、この魅力はさらに増す。
+しかし、本格的なプログラミング言語を実装するというのは多大な努力を要する作業だし、
+そもそもの目標はそんなことではなかった。
+さらに重要なのは、ちょっとVisTrailsを試してみたいという人が
+まったく新しい言語の学習を強いられるというのは問題外だということだ。
 
-We wanted a system which made it easy for a user to add custom
-functionality. At the same time, we needed the system to be powerful
-enough to express fairly complicated pieces of software. As an
-example, VisTrails supports the VTK visualization library\footnote{\url{http://www.vtk.org}}. VTK
-contains about 1000 classes, which change depending on compilation,
-configuration, and operating system. Since it seems counterproductive
-and ultimately hopeless to write different code paths for all these
-cases, we decided it was necessary to dynamically determine the set of
-VisTrails modules provided by any given package, and VTK naturally
-became our model target for a complex package.
+%% We wanted a system which made it easy for a user to add custom
+%% functionality. At the same time, we needed the system to be powerful
+%% enough to express fairly complicated pieces of software. As an
+%% example, VisTrails supports the VTK visualization library\footnote{\url{http://www.vtk.org}}. VTK
+%% contains about 1000 classes, which change depending on compilation,
+%% configuration, and operating system. Since it seems counterproductive
+%% and ultimately hopeless to write different code paths for all these
+%% cases, we decided it was necessary to dynamically determine the set of
+%% VisTrails modules provided by any given package, and VTK naturally
+%% became our model target for a complex package.
+私たちが欲しかったシステムは、ユーザーが独自の機能を簡単に追加できるようなものだった。
+また、ソフトウェアの複雑なパーツもうまく表現できるような強力な機能も必要だった。
+一例として、VisTrailsではVTKビジュアライゼーションライブラリ\footnote{\url{http://www.vtk.org}}に対応している。
+VTKは約1000個のクラス群から構成されており、コンパイル時の設定やOSによってその数は変わる。
+それぞれの場合について個別にコードを書くというのは生産的が悪いし、まったくもって非現実的だった。
+必要なのは、何らかのパッケージが提供するVisTrailsモジュール群を動的に定義できる機能だった。
+自然な流れで、VTKを複雑なパッケージのモデルとして考えるようになった。
 
-Computational science was one of the areas we originally targeted, and
-at the time we designed the system, Python was becoming popular as
-"glue code" among these scientists. By specifying the behavior of
-user-defined VisTrails modules using Python itself, we would all but
-eliminate a large barrier for adoption.  As it turns out, Python
-offers a nice infrastructure for dynamically-defined classes and
-reflection. Almost every definition in Python has an equivalent form
-as a first-class expression. The two important reflection features of
-Python for our package system are:
+%% Computational science was one of the areas we originally targeted, and
+%% at the time we designed the system, Python was becoming popular as
+%% "glue code" among these scientists. By specifying the behavior of
+%% user-defined VisTrails modules using Python itself, we would all but
+%% eliminate a large barrier for adoption.  As it turns out, Python
+%% offers a nice infrastructure for dynamically-defined classes and
+%% reflection. Almost every definition in Python has an equivalent form
+%% as a first-class expression. The two important reflection features of
+%% Python for our package system are:
+私たちが最初にターゲットとしていた分野の一つが計算科学で、
+システムを設計した当時はPythonが「グルーコード」としての地位を確立しつつあるころだった。
+ユーザー定義のVisTrailsモジュールの挙動をPythonで指定できるようにすれば、
+利用するためのハードルを下げられるだろう。
+実際やってみると、Pythonは動的定義クラス群やリフレクション用のすばらしい基盤になってくれた。
+Pythonのほぼすべての定義は、ファーストクラスの式として同じように扱える。
+Pythonのリフレクションにあるこの二つの機能が、パッケージシステムで重要な役割を果たしている。
 
 \begin{aosaitemize}
 
-  \item Python classes can be defined dynamically via function calls to
-  the \code{type} callable. The return value is a representation of a
-  class that can be used in exactly the same way that a
-  typically-defined Python class can.
+  %% \item Python classes can be defined dynamically via function calls to
+  %% the \code{type} callable. The return value is a representation of a
+  %% class that can be used in exactly the same way that a
+  %% typically-defined Python class can.
+  \item Pythonのクラスは\code{type} callableを呼んで動的に定義できる。
+  その戻り値がクラスを表すものとなり、一般的な方法で定義したPythonのクラスとまったく同じように使える。
 
-  \item Python modules can be imported via function calls to
-  \code{\_\_import\_\_}, and the resulting value behaves in the same
-  way as the identifier in a standard \code{import} statement. The
-  path from which these modules come from can also be specified at runtime.
+  %% \item Python modules can be imported via function calls to
+  %% \code{\_\_import\_\_}, and the resulting value behaves in the same
+  %% way as the identifier in a standard \code{import} statement. The
+  %% path from which these modules come from can also be specified at runtime.
+  \item Pythonのモジュールは\code{\_\_import\_\_}関数を呼んで簡単にインポートでき、
+  その戻り値は、標準の\code{import}文で指定したものとまったく同じように振る舞う。
+  モジュールのあるパスも、実行時に定義できる。
 
 \end{aosaitemize}
 
-Using Python as our target has a few disadvantages, of course. First
-of all, this dynamic nature of Python means that while we would like
-to ensure some things like type safety of VisTrails packages, this is
-in general not possible.  More importantly, some of the requirements
-for VisTrails modules, notably the ones regarding referential
-transparency (more on that later) cannot be enforced in Python. Still,
-we believe that it is worthwhile to restrict the allowed constructs in
-Python via cultural mechanisms, and with this caveat, Python is an
-extremely attractive language for software extensibility.
+%% Using Python as our target has a few disadvantages, of course. First
+%% of all, this dynamic nature of Python means that while we would like
+%% to ensure some things like type safety of VisTrails packages, this is
+%% in general not possible.  More importantly, some of the requirements
+%% for VisTrails modules, notably the ones regarding referential
+%% transparency (more on that later) cannot be enforced in Python. Still,
+%% we believe that it is worthwhile to restrict the allowed constructs in
+%% Python via cultural mechanisms, and with this caveat, Python is an
+%% extremely attractive language for software extensibility.
+もちろん、Pythonを使えばいいことずくめというわけではない。
+まず、Pythonが持つ動的な性質のせいで、
+たとえばVisTrailsのパッケージの型安全性を保証したくても、それは一般的に無理な話になる。
+さらに重要なのが、VisTrailsモジュールの要件の中にはPythonでは実現できないものがあるということだ。
+後述する参照透過性に関する要件などがそれにあたる。
+それでも、Pythonの文化的にそういった制約が課されるのは仕方がないと考える。
+そんな問題はあるが、Pythonはソフトウェアの拡張性を実現する上でとても魅力的な言語だ。
 
 \end{aosasect2}
 
