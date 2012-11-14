@@ -1020,56 +1020,94 @@ VisTrailsモジュールツリーの中では、菱形継承は使えない。
 %% \begin{aosasect2}{Passing Data as Modules}
 \begin{aosasect2}{データをモジュールとして渡す}
 
-One peculiar feature of VisTrails modules and their communication is
-that the data that is passed between VisTrails modules are themselves
-VisTrails modules. In VisTrails, there is a single hierarchy for
-module and data classes. For example, a module can provide
-\emph{itself} as an output of a computation (and, in fact, every
-module provides a default "self" output port). The main disadvantage
-is the loss of conceptual separation between computation and data that
-is sometimes seen in dataflow-based architectures. There are, however,
-two big advantages.  The first is that this closely mimics the object
-type systems of Java and C++, and the choice was not accidental: it
-was very important for us to support automatic wrapping of large class
-libraries such as VTK.  These libraries allow objects to produce
-other objects as computational results, making a wrapping that
-distinguishes between computation and data more complicated.
+%% One peculiar feature of VisTrails modules and their communication is
+%% that the data that is passed between VisTrails modules are themselves
+%% VisTrails modules. In VisTrails, there is a single hierarchy for
+%% module and data classes. For example, a module can provide
+%% \emph{itself} as an output of a computation (and, in fact, every
+%% module provides a default "self" output port). The main disadvantage
+%% is the loss of conceptual separation between computation and data that
+%% is sometimes seen in dataflow-based architectures. There are, however,
+%% two big advantages.  The first is that this closely mimics the object
+%% type systems of Java and C++, and the choice was not accidental: it
+%% was very important for us to support automatic wrapping of large class
+%% libraries such as VTK.  These libraries allow objects to produce
+%% other objects as computational results, making a wrapping that
+%% distinguishes between computation and data more complicated.
+VisTrailsモジュールとその通信に独特な特徴の一つが、
+モジュール間で受け渡しされるデータ自体もまたVisTrailsモジュールだという点だ。
+VisTrailsでは、モジュールクラスとデータクラスが一つの階層にまとまっている。
+たとえば、モジュールは、\emph{自分自身}を計算結果として出力できる
+(そして実際のところ、すべてのモジュールはデフォルトで、出力ポート"self"を提供している)。
+この方式の主なデメリットは計算とデータを概念的に切り離せなくなることだ
+(データフローベースのアーキテクチャなら、これらはきちんと分離できる)。
+しかし、二つの大きなメリットがある。
+まず、このようにすると、JavaやC++のオブジェクトの型システムに限りなく近づけることができる。
+これは決して偶然の産物ではなく、狙った結果だ。
+VTKのような巨大なクラスライブラリを自動でラップするためには、この機能が非常に重要だったのだ。
+これらのライブラリでは、オブジェクトの計算結果として別のオブジェクトを作れるようになっており、
+計算とデータを分離する方式でこれをラップしようとすると、とても複雑になってしまう。
 
-The second advantage this decision brings is that defining constant
-values and user-settable parameters in workflows becomes easier and
-more uniformly integrated with the rest of the system. Consider, for
-example, a workflow that loads a file from a location on the Web
-specified by a constant. This is currently specified by a GUI in which
-the URL can be specified as a parameter (see the Parameter Edits area
-in \aosafigref{fig.vistrails.overview}). A natural modification of
-this workflow is to use it to fetch a URL that is \emph{computed}
-somewhere upstream. We would like the rest of the workflow to change
-as little as possible. By assuming modules can output themselves, we
-can simply connect a string with the right value to the port
-corresponding to the parameter. Since the output of a constant
-evaluates to itself, the behavior is exactly the same as if the value
-had actually been specified as a constant.
+%% The second advantage this decision brings is that defining constant
+%% values and user-settable parameters in workflows becomes easier and
+%% more uniformly integrated with the rest of the system. Consider, for
+%% example, a workflow that loads a file from a location on the Web
+%% specified by a constant. This is currently specified by a GUI in which
+%% the URL can be specified as a parameter (see the Parameter Edits area
+%% in \aosafigref{fig.vistrails.overview}). A natural modification of
+%% this workflow is to use it to fetch a URL that is \emph{computed}
+%% somewhere upstream. We would like the rest of the workflow to change
+%% as little as possible. By assuming modules can output themselves, we
+%% can simply connect a string with the right value to the port
+%% corresponding to the parameter. Since the output of a constant
+%% evaluates to itself, the behavior is exactly the same as if the value
+%% had actually been specified as a constant.
+もう一つのメリットは、ワークフローの中で
+定数を設定したりユーザーが変更できるパラメータを設定したりするのが簡単になるということだ。
+システムの他の部分に、違和感なく組み込めるようになる。
+こんな例を考えてみよう。あるワークフローで、定数で指定したWeb上の場所からファイルを読み込むとする。
+今はこの定数をGUIで指定している。URLはパラメータとして指定できる
+(\aosafigref{fig.vistrails.overview}のパラメータ編集領域を参照)。
+このワークフローを変更する自然な方法は、この仕組みを使って、
+どこか別の上位モジュールで\emph{計算した}URLを取得するようにすることだ。
+ワークフローのその他の部分への変更は、可能な限り抑えたい。
+モジュールが自分自身を出力できるという前提なら、
+単に適切な値の文字列をパラメータに対応するポートにつなぐだけでよくなる。
+定数を出力した結果を自分自身で評価するので、
+その振る舞いは値を定数として渡された場合とまったく同じになる。
 
 %% \aosafigure{../images/vistrails/python-source.eps}{Prototyping New Functionality with the \code{PythonSource} Module}{fig.vistrails.pysource}
 \aosafigure{../images/vistrails/python-source.eps}{新機能のプロトタイピングを\code{PythonSource}モジュールで行う}{fig.vistrails.pysource}
 
-There are other considerations involved in designing constants. 
-Each constant type has a different ideal GUI interface for
-specifying values. For example, in VisTrails, a file constant module
-provides a file chooser dialog; a Boolean value is specified by a
-checkbox; a color value has a color picker native to each operating
-system.  To achieve this generality, a developer must subclass a
-custom constant from the \code{Constant} base class and provide
-overrides which define an appropriate GUI widget and a string
-representation (so that arbitrary constants can be serialized to
-disk).
+%% There are other considerations involved in designing constants. 
+%% Each constant type has a different ideal GUI interface for
+%% specifying values. For example, in VisTrails, a file constant module
+%% provides a file chooser dialog; a Boolean value is specified by a
+%% checkbox; a color value has a color picker native to each operating
+%% system.  To achieve this generality, a developer must subclass a
+%% custom constant from the \code{Constant} base class and provide
+%% overrides which define an appropriate GUI widget and a string
+%% representation (so that arbitrary constants can be serialized to
+%% disk).
+定数の設計に関しては、他にも考慮すべきことがある。
+定数の型によって、値を設定するために最適なGUIインターフェイスは異なる。
+たとえば、VisTrailsの場合は、ファイル定数モジュールではファイル選択ダイアログを使う。
+Boolean値はチェックボックスで指定するし、色の値はOSネイティブの色選択ダイアログを使う。
+これを実現するには、開発者が\code{Constant}を継承したカスタム定数を作って、
+適切なGUIウィジェットの定義と定数の文字列表現
+(定数をディスクにシリアライズするときに使うもの)
+をオーバーライドしないといけない。
 
-We note that, for simple prototyping tasks, VisTrails provides a
-built-in \code{PythonSource} module.  A PythonSource module can be
-used to directly insert scripts into a workflow. The configuration
-window for PythonSource (see \aosafigref{fig.vistrails.pysource})
-allows multiple input and output ports to be specified along with the
-Python code that is to be executed.
+%% We note that, for simple prototyping tasks, VisTrails provides a
+%% built-in \code{PythonSource} module.  A PythonSource module can be
+%% used to directly insert scripts into a workflow. The configuration
+%% window for PythonSource (see \aosafigref{fig.vistrails.pysource})
+%% allows multiple input and output ports to be specified along with the
+%% Python code that is to be executed.
+あと、シンプルなプロトタイピング用として、VisTrailsでは組み込みの\code{PythonSource}モジュールを提供している。
+このモジュールを使えば、スクリプトを直接ワークフローに流し込める。
+PythonSourceの設定ウィンドウ(\aosafigref{fig.vistrails.pysource}を参照)
+から複数の入出力ポートを指定し、実行したいPythonコードも指定する。
 
 \end{aosasect2}
 
