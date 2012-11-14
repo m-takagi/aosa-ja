@@ -856,95 +856,164 @@ Pythonのリフレクションにあるこの二つの機能が、パッケー�
 %% \begin{aosasect2}{VisTrails Packages and Bundles}
 \begin{aosasect2}{VisTrailsのパッケージおよびバンドル}
 
-A VisTrails package encapsulates a set of modules. Its most
-common representation in disk is the same representation as a Python
-package (in a possibly unfortunate naming clash). A Python package
-consists of a set of Python files which define Python values such as
-functions and classes. A VisTrails package is a Python package that
-respects a particular interface. It has files that define specific
-functions and variables. In its simplest form, a VisTrails package
-should be a directory containing two files: \code{\_\_init\_\_.py} and
-\code{init.py}.
+%% A VisTrails package encapsulates a set of modules. Its most
+%% common representation in disk is the same representation as a Python
+%% package (in a possibly unfortunate naming clash). A Python package
+%% consists of a set of Python files which define Python values such as
+%% functions and classes. A VisTrails package is a Python package that
+%% respects a particular interface. It has files that define specific
+%% functions and variables. In its simplest form, a VisTrails package
+%% should be a directory containing two files: \code{\_\_init\_\_.py} and
+%% \code{init.py}.
+VisTrailsパッケージは、モジュール群にカプセル化されている。
+ディスク上では、Pythonパッケージと同じような状態だ(しかしこれ、まぎらわしい名前だな…)。
+PythonパッケージはPythonファイル群で構成されており、そのファイルの中でPythonの関数やクラスなどが定義されている。
+VisTrailsパッケージは、特定のインターフェイスを備えたPythonパッケージとなる。
+つまり、特定の関数や変数を定義したファイルを含んでいる。
+最も単純な状態のVisTrailsパッケージは、一つのディレクトリ内に二つのファイル\code{\_\_init\_\_.py}と\code{init.py}を含むものだ。
 
-The first file \code{\_\_init\_\_.py} is a requirement of Python
-packages, and should only contain a few definitions which should be
-constant. Although there is no way to guarantee that this is the case,
-VisTrails packages failing to obey this are considered buggy. The
-values defined in the file include a globally unique identifier for
-the package which is used to distinguish modules when workflows are
-serialized, and package versions (package versions become important
-when handling workflow and package upgrades, see
-\aosasecref{sec.vistrails.upgrades}). This file can also include
-functions called \code{package\_dependencies} and
-\code{package\_requirements}. Since we allow VisTrails modules to
-subclass from other VisTrails modules beside the root \code{Module}
-class, it is conceivable for one VisTrails package to extend the
-behavior of another, and so one package needs to be initialized before
-another. These inter-package dependencies are specified by
-\code{package\_dependencies}. The \code{package\_requirements}
-function, on the other hand, specifies system-level library
-requirements which VisTrails, in some cases, can try to automatically
-satisfy, through its bundle abstraction.
+%% The first file \code{\_\_init\_\_.py} is a requirement of Python
+%% packages, and should only contain a few definitions which should be
+%% constant. Although there is no way to guarantee that this is the case,
+%% VisTrails packages failing to obey this are considered buggy. The
+%% values defined in the file include a globally unique identifier for
+%% the package which is used to distinguish modules when workflows are
+%% serialized, and package versions (package versions become important
+%% when handling workflow and package upgrades, see
+%% \aosasecref{sec.vistrails.upgrades}). This file can also include
+%% functions called \code{package\_dependencies} and
+%% \code{package\_requirements}. Since we allow VisTrails modules to
+%% subclass from other VisTrails modules beside the root \code{Module}
+%% class, it is conceivable for one VisTrails package to extend the
+%% behavior of another, and so one package needs to be initialized before
+%% another. These inter-package dependencies are specified by
+%% \code{package\_dependencies}. The \code{package\_requirements}
+%% function, on the other hand, specifies system-level library
+%% requirements which VisTrails, in some cases, can try to automatically
+%% satisfy, through its bundle abstraction.
+最初のファイル\code{\_\_init\_\_.py}はPythonパッケージに必須のファイルで、
+いくつかの定義を書かないといけない。内容は固定だ。
+検出する手立てはないものの、これに従わないVisTrailsパッケージがあるとすればそれはバグだろう。
+このファイルで定義する値は、そのパッケージに関するグローバルに一意な識別子
+(ワークフローをシリアライズするときにモジュールを区別するために使うもの)
+とパッケージのバージョンだ
+(パッケージのバージョンは、ワークフローやパッケージをアップグレードするときに重要となる。
+\aosasecref{sec.vistrails.upgrades}を参照)。
+このファイルには、関数\code{package\_dependencies}と\code{package\_requirements}
+を含めることもできる。
+VisTrailsモジュールは、ルートクラスである\code{Module}
+以外の別のVisTrailsモジュールのサブクラスとしても作れるようにしている。
+そのため、あるVisTrailsパッケージが別のパッケージの振る舞いを継承していることもあり、
+あるパッケージの初期化をしてから別のパッケージを初期化しないといけないなどということも考えられる。
+こういった、パッケージ間の依存関係を指定するのが\code{package\_dependencies}だ。
+一方\code{package\_requirements}関数は、システムレベルでのライブラリの要件を指定する。
+これがあれば、Vistrailsはバンドルを使って自動的に要件を満たすようにできる。
 
-A bundle is a system-level package that VisTrails manages via
-system-specific tools such as RedHat's RPM or Ubuntu's APT\@.  When
-these properties are satisfied, VisTrails can determine the package
-properties by directly importing the Python module and accessing the
-appropriate variables.
+%% A bundle is a system-level package that VisTrails manages via
+%% system-specific tools such as RedHat's RPM or Ubuntu's APT\@.  When
+%% these properties are satisfied, VisTrails can determine the package
+%% properties by directly importing the Python module and accessing the
+%% appropriate variables.
+バンドルとはシステムレベルのパッケージで、
+VisTrailsがシステム固有のツールを管理するためのものである。
+RedHatのRPMやUbuntuのAPTのようなものだ。
+これらのプロパティがあれば、VisTrailsが
+Pythonモジュールを直接インポートして適切な変数にアクセスするだけで
+パッケージのプロパティを定義できる。
 
-The second file, \code{init.py}, contains the entry points for all the
-actual VisTrails module definitions. The most important feature of
-this file is the definition of two functions, \code{initialize} and
-\code{finalize}. The \code{initialize} function is called when a
-package is enabled, after all the dependent packages have themselves
-been enabled. It performs setup tasks for all of the modules in a
-package. The \code{finalize} function, on the other hand, is usually
-used to release runtime resources (for example, temporary files
-created by the package can be cleaned up).
+%% The second file, \code{init.py}, contains the entry points for all the
+%% actual VisTrails module definitions. The most important feature of
+%% this file is the definition of two functions, \code{initialize} and
+%% \code{finalize}. The \code{initialize} function is called when a
+%% package is enabled, after all the dependent packages have themselves
+%% been enabled. It performs setup tasks for all of the modules in a
+%% package. The \code{finalize} function, on the other hand, is usually
+%% used to release runtime resources (for example, temporary files
+%% created by the package can be cleaned up).
+もう一つのファイルである\code{init.py}には、実際のVistrailsモジュール定義のエントリポイントが含まれる。
+このファイルの最も重要な機能は、二つの関数\code{initialize}と\code{finalize}の定義だ。
+\code{initialize}関数は、すべての依存パッケージを有効にした後で
+そのパッケージ自身を有効にするときに呼ばれる。パッケージ内のすべてのモジュールの準備を、この関数で行う。
+もう一方の\code{finalize}関数は、通常はランタイムリソースの解放に使う
+(たとえば、そのパッケージが作った一時ファイルの削除などができる)。
 
-Each VisTrails module is represented in a package by one Python
-class. To register this class in VisTrails, a package developer calls
-the \code{add\_module} function once for each VisTrails module.  These
-VisTrails modules can be arbitrary Python classes, but they must
-respect a few requirements. The first of these is that each must be a
-subclass of a basic Python class defined by VisTrails called, perhaps
-boringly, \code{Module}.  VisTrails modules can use multiple
-inheritance, but only one of the classes should be a VisTrails
-module---no diamond hierarchies in the VisTrails module tree are
-allowed. Multiple inheritance becomes useful in particular to define
-class mix-ins: simple behaviors encoded by parent classes which can be
-composed together to create more complicated behaviors.
+%% Each VisTrails module is represented in a package by one Python
+%% class. To register this class in VisTrails, a package developer calls
+%% the \code{add\_module} function once for each VisTrails module.  These
+%% VisTrails modules can be arbitrary Python classes, but they must
+%% respect a few requirements. The first of these is that each must be a
+%% subclass of a basic Python class defined by VisTrails called, perhaps
+%% boringly, \code{Module}.  VisTrails modules can use multiple
+%% inheritance, but only one of the classes should be a VisTrails
+%% module---no diamond hierarchies in the VisTrails module tree are
+%% allowed. Multiple inheritance becomes useful in particular to define
+%% class mix-ins: simple behaviors encoded by parent classes which can be
+%% composed together to create more complicated behaviors.
+各VisTrailsモジュールは、パッケージ内で一つのPythonクラスとして表される。
+このクラスをVisTrailsに登録するには、パッケージ開発者が\code{add\_module}
+関数をモジュールごとに呼ぶことになる。VisTrailsモジュールはPythonクラスであればどんなものでもかまわないが、
+いくつかの要件を満たさないといけない。
+その一つは、VisTrailsが定義する基本Pythonクラスのサブクラスでないといけないということである。
+基本クラスの名前は、何のひねりもない\code{Module}だ。
+VisTrailsモジュールでは多重継承も使える。しかし、
+そのクラスの中の一つだけがVisTrailsモジュールにならないといけない。
+VisTrailsモジュールツリーの中では、菱形継承は使えない。
+多重継承は、クラスのmix-inを定義するときに特に有用だ。
+親クラスで定義されたシンプルな振る舞いを組み合わせて、より込み入った振る舞いを作ることができる。
 
-The set of available ports determine the interface of a VisTrails
-module, and so impact not only the display of these modules but also
-their connectivity to other modules. These ports, then, must be
-explicitly described to the VisTrails infrastructure. This can be done
-either by making appropriate calls to \code{add\_input\_port} and
-\code{add\_output\_port} during the call to \code{initialize}, or by
-specifying the per-class lists \code{\_input\_ports} and
-\code{\_output\_ports} for each VisTrails module.
+%% The set of available ports determine the interface of a VisTrails
+%% module, and so impact not only the display of these modules but also
+%% their connectivity to other modules. These ports, then, must be
+%% explicitly described to the VisTrails infrastructure. This can be done
+%% either by making appropriate calls to \code{add\_input\_port} and
+%% \code{add\_output\_port} during the call to \code{initialize}, or by
+%% specifying the per-class lists \code{\_input\_ports} and
+%% \code{\_output\_ports} for each VisTrails module.
+利用できるポートがVisTrailsモジュールのインターフェイスを決める。
+そしてそれは、モジュールの見た目だけでなく他のモジュールとの接続性にも影響する。
+そのため、どのポートを使うのかは明示的にVisTrails基盤に示さないといけない。
+その方法は、\code{initialize}のときに\code{add\_input\_port}と
+\code{add\_output\_port}を適切に呼び出すか、あるいは
+クラスごとのリスト\code{\_input\_ports}と\code{\_output\_ports}
+をVisTrailsごとに指定する。
 
-Each module specifies the computation to be performed by overriding
-the \code{compute} method. Data is passed between modules through
-ports, and accessed through the \code{get\_input\_from\_port} and
-\code{set\_result} methods.  In traditional dataflow environments,
-execution order is specified on-demand by the data requests. In our
-case, the execution order is specified by the topological sorting of the workflow
-modules. Since the caching algorithm requires an acyclic graph, we
-schedule the execution in reverse topological sorted order, so the
-calls to these functions do not trigger executions of upstream
-modules. We made this decision deliberately: it makes it simpler to
-consider the behavior of each module separately from all the others,
-which makes our caching strategy simpler and more robust.
+%% Each module specifies the computation to be performed by overriding
+%% the \code{compute} method. Data is passed between modules through
+%% ports, and accessed through the \code{get\_input\_from\_port} and
+%% \code{set\_result} methods.  In traditional dataflow environments,
+%% execution order is specified on-demand by the data requests. In our
+%% case, the execution order is specified by the topological sorting of the workflow
+%% modules. Since the caching algorithm requires an acyclic graph, we
+%% schedule the execution in reverse topological sorted order, so the
+%% calls to these functions do not trigger executions of upstream
+%% modules. We made this decision deliberately: it makes it simpler to
+%% consider the behavior of each module separately from all the others,
+%% which makes our caching strategy simpler and more robust.
+各モジュールで行う計算は、\code{compute}メソッドをオーバーライドして指定する。
+モジュール間でのデータの受け渡しにはポート経由で行い、
+\code{get\_input\_from\_port}メソッドと\code{set\_result}メソッドを利用する。
+昔ながらのデータフロー環境の場合、実行順はリクエストがやってきた順で決まっていた。
+私たちの場合は、実行順を決めるのにワークフローモジュールをトポロジカル整列した。
+キャッシングアルゴリズムを機能させるためには非巡回グラフが必要なので、
+実行スケジュールはトポロジカル整列の逆順にした。
+これで、関数を呼ぶときに上位モジュールを実行してしまうことがなくなる。
+あえてこの方法を選んだ。これによって、各モジュールの振る舞いを他とは切り離して考えやすくなり、
+キャッシュ戦略もよりシンプルかつ堅牢にできた。
 
-As a general guideline, VisTrails modules should refrain from using
-functions with side-effects during the evaluation of the
-\code{compute} method. As discussed in
-\aosasecref{sec.vistrails.exec-cache}, this requirement makes caching
-of partial workflow runs possible: if a module respects this property,
-then its behavior is a function of the outputs of upstream
-modules. Every acyclic subgraph then only needs to be computed once,
-and the results can be reused.
+%% As a general guideline, VisTrails modules should refrain from using
+%% functions with side-effects during the evaluation of the
+%% \code{compute} method. As discussed in
+%% \aosasecref{sec.vistrails.exec-cache}, this requirement makes caching
+%% of partial workflow runs possible: if a module respects this property,
+%% then its behavior is a function of the outputs of upstream
+%% modules. Every acyclic subgraph then only needs to be computed once,
+%% and the results can be reused.
+全体的な指針として、VisTrailsモジュールでは、
+\code{compute}メソッドの評価中に副作用のある関数を使わないようにしている。
+\aosasecref{sec.vistrails.exec-cache}で説明したとおり、
+この要件のおかげでワークフローの一部だけをキャッシュできるようになった。
+各モジュールがこの性質を尊重すれば、その振る舞いは上位モジュールの出力となる。
+下位にあるすべての非巡回グラフは単に一度ずつ計算するだけでよく、その結果は再利用できる。
 
 \end{aosasect2}
 
