@@ -1116,13 +1116,19 @@ PythonSourceの設定ウィンドウ(\aosafigref{fig.vistrails.pysource}を参�
 %% \begin{aosasect1}{Components and Features}
 \begin{aosasect1}{コンポーネントおよび機能}
 
-As discussed above, VisTrails provides a set of functionalities and
-user interfaces that simplify the creation and execution of
-exploratory computational tasks. Below, we describe some of these. We
-also briefly discuss how VisTrails is being used as the basis for an
-infrastructure that supports the creation of provenance-rich
-publications. For a more comprehensive description of VisTrails and its features,
-see VisTrails' online documentation\footnote{\url{http://www.vistrails.org/usersguide}}.
+%% As discussed above, VisTrails provides a set of functionalities and
+%% user interfaces that simplify the creation and execution of
+%% exploratory computational tasks. Below, we describe some of these. We
+%% also briefly discuss how VisTrails is being used as the basis for an
+%% infrastructure that supports the creation of provenance-rich
+%% publications. For a more comprehensive description of VisTrails and its features,
+%% see VisTrails' online documentation\footnote{\url{http://www.vistrails.org/usersguide}}.
+先述のとおり、VisTrailsの提供する機能やユーザーインターフェイスを使うと、
+調査や計算のタスクを作ったり実行したりする作業を単純化できる。
+そのいくつかについて、ここで説明する。
+また、VisTrailsを基盤として使って、履歴情報を含めて公開する方法についても簡単に説明する。
+VisTrailsやその機能についてのより詳しい説明は、オンラインドキュメントを参照してほしい
+\footnote{\url{http://www.vistrails.org/usersguide}}。
 
 %% \aosafigure{../images/vistrails/spreadsheet.pdf}{The Visual Spreadsheet}{fig.vistrails.spreadsheet}
 \aosafigure{../images/vistrails/spreadsheet.eps}{Visual Spreadsheet}{fig.vistrails.spreadsheet}
@@ -1130,69 +1136,120 @@ see VisTrails' online documentation\footnote{\url{http://www.vistrails.org/users
 %% \begin{aosasect2}{Visual Spreadsheet}
 \begin{aosasect2}{Visual Spreadsheet}
 
-VisTrails allows users to explore and compare results from multiple
-workflows using the Visual Spreadsheet (see
-\aosafigref{fig.vistrails.spreadsheet}). The spreadsheet is a
-VisTrails package with its own interface composed of sheets and
-cells. Each sheet contains a set of cells and has a customizable
-layout.  A cell contains the visual representation of a result
-produced by a workflow, and can be customized to display diverse types
-of data.
+%% VisTrails allows users to explore and compare results from multiple
+%% workflows using the Visual Spreadsheet (see
+%% \aosafigref{fig.vistrails.spreadsheet}). The spreadsheet is a
+%% VisTrails package with its own interface composed of sheets and
+%% cells. Each sheet contains a set of cells and has a customizable
+%% layout.  A cell contains the visual representation of a result
+%% produced by a workflow, and can be customized to display diverse types
+%% of data.
+VisTrailsで複数のワークフローをたどったり結果を比較したりするには、
+Visual Spreadsheetを使う(\aosafigref{fig.vistrails.spreadsheet}を参照)。
+このスプレッドシートはVisTrailsのパッケージで、シートとセルからなる独自のインターフェイスを用意している。
+各シートにはセルのセットが含まれ、そのレイアウトもカスタマイズできる。
+セルの中身はワークフローが生成した結果をビジュアルに表現したもので、
+データの種類によって表示方法をカスタマイズできる。
 
-To display a cell on the spreadsheet, a workflow must contain a module
-that is derived from the base \code{SpreadsheetCell} module.  Each
-\code{SpreadsheetCell} module corresponds to a cell in the
-spreadsheet, so one workflow can generate multiple cells.  The
-\code{compute} method of the \code{SpreadsheetCell} module handles the
-communication between the Execution Engine
-(\aosafigref{fig.vistrails.arch}) and the spreadsheet.  During
-execution, the spreadsheet creates a cell according to its type
-on-demand by taking advantage of Python's dynamic class instantiation.
-Thus, custom visual representations can be achieved by creating a
-subclass of \code{SpreadsheetCell} and having its \code{compute}
-method send a custom cell type to the spreadsheet. For example, the
-workflow in \aosafigref{fig.vistrails.overview}, \code{MplFigureCell}
-is a \code{SpreadsheetCell} module designed to display images created
-by matplotlib.
+%% To display a cell on the spreadsheet, a workflow must contain a module
+%% that is derived from the base \code{SpreadsheetCell} module.  Each
+%% \code{SpreadsheetCell} module corresponds to a cell in the
+%% spreadsheet, so one workflow can generate multiple cells.  The
+%% \code{compute} method of the \code{SpreadsheetCell} module handles the
+%% communication between the Execution Engine
+%% (\aosafigref{fig.vistrails.arch}) and the spreadsheet.  During
+%% execution, the spreadsheet creates a cell according to its type
+%% on-demand by taking advantage of Python's dynamic class instantiation.
+%% Thus, custom visual representations can be achieved by creating a
+%% subclass of \code{SpreadsheetCell} and having its \code{compute}
+%% method send a custom cell type to the spreadsheet. For example, the
+%% workflow in \aosafigref{fig.vistrails.overview}, \code{MplFigureCell}
+%% is a \code{SpreadsheetCell} module designed to display images created
+%% by matplotlib.
+スプレッドシート上にセルを表示するには、ワークフローに
+\code{SpreadsheetCell}の派生モジュールを含めないといけない。
+個々の\code{SpreadsheetCell}モジュールがスプレッドシート内の一つのセルに対応するので、
+一つのワークフローが複数のセルを生成することになる。
+\code{SpreadsheetCell}モジュールの\code{compute}メソッドが、
+実行エンジン(\aosafigref{fig.vistrails.arch})とスプレッドシートの間の通信を担当する。
+実行中に、スプレッドシートはその型に合わせたセルをその場で作る。
+このときには、Pythonの動的クラス生成機能を活用する。
+したがって、独自のビジュアル表現を作りたければ、
+\code{SpreadsheetCell}のサブクラスを作って、
+その\code{compute}メソッドでスプレッドシートにカスタムセルタイプを送ればいい。
+たとえば、\aosafigref{fig.vistrails.overview}のワークフローにある
+\code{MplFigureCell}は、matplotlibが作った画像を表示するために用意した\code{SpreadsheetCell}モジュールだ。
 
-Since the spreadsheet uses PyQt as its GUI back end, custom cell
-widgets must be subclassed from PyQt's \code{QWidget}.  They must also
-define the \code{updateContents} method, which is invoked by the
-spreadsheet to update the widget when new data arrives. Each cell
-widget may optionally define a custom toolbar by implementing the
-\code{toolbar} method; it will be displayed in the spreadsheet
-toolbar area when the cell is selected.
+%% Since the spreadsheet uses PyQt as its GUI back end, custom cell
+%% widgets must be subclassed from PyQt's \code{QWidget}.  They must also
+%% define the \code{updateContents} method, which is invoked by the
+%% spreadsheet to update the widget when new data arrives. Each cell
+%% widget may optionally define a custom toolbar by implementing the
+%% \code{toolbar} method; it will be displayed in the spreadsheet
+%% toolbar area when the cell is selected.
+スプレッドシートのGUIバックエンドとしてPyQtを使っているので、
+カスタムセルウィジェットはPyQtの\code{QWidget}を継承したクラスにしないといけない。
+また、\code{updateContents}メソッドも定義する必要がある。
+このメソッドはスプレッドシートが実行するもので、
+新しいデータがやってきたときにそのウィジェットを更新する。
+各セルウィジェットでは、オプションでカスタムツールバーを用意することもできる。
+そのときには\code{toolbar}メソッドを実装する。
+このツールバーは、セルが選択されたときにスプレッドシートのツールバー領域に表示される。
 
-\aosafigref{fig.vistrails.spreadsheet} shows the spreadsheet when a
-VTK cell is selected, in this case, the toolbar provides specific
-widgets to export PDF images, save camera positions back to the
-workflow, and create animations.  The spreadsheet package defines a
-customizable \code{QCellWidget}, which provides common features such
-as history replay (animation) and multi-touch events forwarding. This
-can be used in place of \code{QWidget} for faster development of new
-cell types.
+%% \aosafigref{fig.vistrails.spreadsheet} shows the spreadsheet when a
+%% VTK cell is selected, in this case, the toolbar provides specific
+%% widgets to export PDF images, save camera positions back to the
+%% workflow, and create animations.  The spreadsheet package defines a
+%% customizable \code{QCellWidget}, which provides common features such
+%% as history replay (animation) and multi-touch events forwarding. This
+%% can be used in place of \code{QWidget} for faster development of new
+%% cell types.
+\aosafigref{fig.vistrails.spreadsheet}は、VTKセルを選択したときのスプレッドシートの様子を示すものだ。
+このときのツールバーには、PDFにエクスポートしたりカメラの位置を保存してワークフローに戻ったりアニメーションを作ったりといった、
+専用のウィジェットが表示される。スプレッドシートパッケージではカスタマイズ可能な\code{QCellWidget}を用意しており、
+履歴の再生(アニメーション)やマルチタッチのイベント転送などの共通機能を提供している。
+これを\code{QWidget}のかわりに使えば、新たなセルタイプを手っ取り早く開発できる。
 
-Even though the spreadsheet only accepts PyQt widgets as cell types,
-it is possible to integrate widgets written with other GUI toolkits.
-To do so, the widget must export its elements to the native platform,
-and PyQt can then be used to grab it. We use this approach for the
-\code{VTKCell} widget because the actual widget is written in C++. At
-run-time, the \code{VTKCell} grabs the window id, a Win32, X11, or
-Cocoa/Carbon handle depending on the system, and maps it to the
-spreadsheet canvas.
+%% Even though the spreadsheet only accepts PyQt widgets as cell types,
+%% it is possible to integrate widgets written with other GUI toolkits.
+%% To do so, the widget must export its elements to the native platform,
+%% and PyQt can then be used to grab it. We use this approach for the
+%% \code{VTKCell} widget because the actual widget is written in C++. At
+%% run-time, the \code{VTKCell} grabs the window id, a Win32, X11, or
+%% Cocoa/Carbon handle depending on the system, and maps it to the
+%% spreadsheet canvas.
+スプレッドシートで使えるセルタイプはPyQtウィジェットだけではあるが、
+他のGUIツールキットで書かれたウィジェットを組み込むこともできる。
+そのためには、ウィジェットが自分の要素をネイティブプラットフォームに公開しないといけない。
+PyQtはそれを使ってウィジェットを操作する。
+私たちは\code{VTKCell}でこの手法を使った。実際のウィジェットがC++で書かれたものだったからだ。
+実行時に\code{VTKCell}が、ウィンドウIDと(Win32、X11、Cocoa/Carbonなどの)ハンドルを取得する。
+そしてそれをスプレッドシートのキャンバスにマップする。
 
-Like cells, sheets may also be customized. By default, each sheet
-lives in a tabbed view and has a tabular layout.  However, any sheet
-can be undocked from the spreadsheet window, allowing multiple sheets
-to be visible at once.  It is also possible to create a different
-sheet layout by subclassing the \code{StandardWidgetSheet}, also a
-PyQt widget. The \code{StandardWidgetSheet} manages cell layouts as
-well as interactions with the spreadsheet in editing mode. In editing
-mode, users can manipulate the cell layout and perform advanced
-actions on the cells, rather than interacting with cell contents.  Such
-actions include applying analogies (see
-\aosasecref{sec.vistrails.diff}) and creating new workflow versions
-from parameter explorations.
+%% Like cells, sheets may also be customized. By default, each sheet
+%% lives in a tabbed view and has a tabular layout.  However, any sheet
+%% can be undocked from the spreadsheet window, allowing multiple sheets
+%% to be visible at once.  It is also possible to create a different
+%% sheet layout by subclassing the \code{StandardWidgetSheet}, also a
+%% PyQt widget. The \code{StandardWidgetSheet} manages cell layouts as
+%% well as interactions with the spreadsheet in editing mode. In editing
+%% mode, users can manipulate the cell layout and perform advanced
+%% actions on the cells, rather than interacting with cell contents.  Such
+%% actions include applying analogies (see
+%% \aosasecref{sec.vistrails.diff}) and creating new workflow versions
+%% from parameter explorations.
+セルと同様、シートもカスタマイズできる。デフォルトでは、各シートはタブビューの上に
+テーブルレイアウトで配置されている。
+しかし、スプレッドシートウィンドウからシートを切り離すこともでき、
+そうすれば複数のシートを同時に見ることができるようになる。
+また、新たなシートレイアウトを作ることもできる。そのためには
+\code{StandardWidgetSheet}のサブクラスを作ればいい。これもまたPyQtウィジェットだ。
+\code{StandardWidgetSheet}は、セルのレイアウトだけを管理するのではない。
+編集モードでのスプレッドシートとセルのやりとりも管理する。
+編集モードでは、ユーザーがセルのレイアウトを操作して、
+複数のセルに対してより高度な操作を実行できる。単にセルの中身を扱う以上のことができるのだ。
+たとえば、類推を適用したり(\aosasecref{sec.vistrails.diff}を参照)、
+パラメータを変えた新しいバージョンのワークフローを作ったりといった操作ができる。
 
 \end{aosasect2}
 
