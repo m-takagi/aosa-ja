@@ -1254,70 +1254,116 @@ PyQtはそれを使ってウィジェットを操作する。
 \end{aosasect2}
 
 %% \begin{aosasect2}{Visual Differences and Analogies}
-\begin{aosasect2}{Visual DifferencesおよびAnalogies}
+\begin{aosasect2}{Visual Differencesおよび類推}
 \label{sec.vistrails.diff}
 
-As we designed VisTrails, we wanted to enable the \emph{use} of
-provenance information in addition to its capture.  First, we wanted
-users to see the exact differences between versions, but we then realized that
-a more helpful feature was being able to apply these differences to other
-workflows.  Both of these tasks are possible because VisTrails tracks
-the evolution of workflows.
+%% As we designed VisTrails, we wanted to enable the \emph{use} of
+%% provenance information in addition to its capture.  First, we wanted
+%% users to see the exact differences between versions, but we then realized that
+%% a more helpful feature was being able to apply these differences to other
+%% workflows.  Both of these tasks are possible because VisTrails tracks
+%% the evolution of workflows.
+VisTrailsを作るときに私たちが考えたのは、履歴情報をただ取得するだけではなく、
+それを\emph{活用}できるようにすることだった。
+まずは、バージョン間の正確な差分をユーザーが見られるようにしたかった。
+ただ、他のワークフローとの差分に関しては、もっと便利な機能も追加できることがわかってきた。
+これらが可能となったのは、VisTrailsが履歴の変化を追跡していたからだ。
 
-Because the version tree captures all of the changes and we can invert
-each action, we can find a complete sequence of actions that transform one
-version to another.  Note that some changes will cancel each other
-out, making it possible to compress this sequence. For example, the
-addition of a module that was later deleted need not be examined when
-computing the difference.  Finally, we have some heuristics to further
-simplify the sequence: when the same module occurs in both workflows
-but was added through separate actions, we we cancel the adds and
-deletes.
+%% Because the version tree captures all of the changes and we can invert
+%% each action, we can find a complete sequence of actions that transform one
+%% version to another.  Note that some changes will cancel each other
+%% out, making it possible to compress this sequence. For example, the
+%% addition of a module that was later deleted need not be examined when
+%% computing the difference.  Finally, we have some heuristics to further
+%% simplify the sequence: when the same module occurs in both workflows
+%% but was added through separate actions, we we cancel the adds and
+%% deletes.
+バージョンツリーがすべての変更を記録していていつでも元に戻せるので、
+あるバージョンから別のバージョンに変換するためのアクション群を探すことができる。
+中には他の変更をキャンセルするような変更もあるので、それを使ってアクション群をコンパクトにまとめることもできる。
+たとえば、あるモジュールを追加したけれども後にそれを削除したという場合は、
+差分を算出するときにそれらの変更を考慮しなくてもかまわない。
+最後に、ちょっとした経験則でアクション群を単純化する。
+両方のモジュールのそれぞれ別のアクションで同じモジュールが追加されている場合は、
+その追加と削除をキャンセルする。
 
-From the set of changes, we can create a visual representation
-that shows similar and different modules, connections, and parameters.
-This is illustrated in 
-\aosafigref{fig.vistrails.changeprov}. Modules and connections that
-appear in both workflows are colored gray, and those appearing in only
-one are colored according to the workflow they appear in.  Matching
-modules with different parameters are shaded a lighter gray and a user
-can inspect the parameter differences for a specific module in a table
-that shows the values in each workflow.
+%% From the set of changes, we can create a visual representation
+%% that shows similar and different modules, connections, and parameters.
+%% This is illustrated in 
+%% \aosafigref{fig.vistrails.changeprov}. Modules and connections that
+%% appear in both workflows are colored gray, and those appearing in only
+%% one are colored according to the workflow they appear in.  Matching
+%% modules with different parameters are shaded a lighter gray and a user
+%% can inspect the parameter differences for a specific module in a table
+%% that shows the values in each workflow.
+変更のセットをビジュアルに表せば、モジュールや接続そしてパラメータなどの
+共通点と相違点を示せる。その様子を\aosafigref{fig.vistrails.changeprov}に示す。
+両方のワークフローに登場するモジュールや接続はグレーで表示され、
+どちらか一方にしか登場しないものは、そのワークフローに対応する色で表示される。
+同じモジュールに別のパラメータが渡されている場合は明るめのグレーで表示され、
+そのモジュールのパラメータの違いを表で確認できる。
+この表には、それぞれのワークフローでのパラメータの値が表示される。
 
-The analogy operation allows users to take these differences and apply
-them to other workflows.  If a user has made a set of changes to an
-existing workflow (e.g., changing the resolution and file format of an
-output image), he can apply the same changes to other workflows via an
-analogy.  To do so, the user selects a source and a target workflow,
-which delimits the set of desired changes, as well as the workflow
-they wish to apply the analogy to.  VisTrails computes the difference
-between the first two workflows as a template, and then determines 
-how to remap this difference in order to apply it to the third
-workflow.  Because it is possible to apply differences to workflows
-that do not exactly match the starting workflow, we need a soft
-matching that allows correspondences between similar modules.  With
-this matching, we can remap the difference so the sequence of changes
-can be applied to the selected
-workflow~\cite{bib:scheidegger:analogy}.  The method is not foolproof
-and may generate new workflows that are not exactly what was desired.
-In such cases, a user may try to fix any introduced mistakes, or go
-back to the previous version and apply the changes manually.
+%% The analogy operation allows users to take these differences and apply
+%% them to other workflows.  If a user has made a set of changes to an
+%% existing workflow (e.g., changing the resolution and file format of an
+%% output image), he can apply the same changes to other workflows via an
+%% analogy.  To do so, the user selects a source and a target workflow,
+%% which delimits the set of desired changes, as well as the workflow
+%% they wish to apply the analogy to.  VisTrails computes the difference
+%% between the first two workflows as a template, and then determines 
+%% how to remap this difference in order to apply it to the third
+%% workflow.  Because it is possible to apply differences to workflows
+%% that do not exactly match the starting workflow, we need a soft
+%% matching that allows correspondences between similar modules.  With
+%% this matching, we can remap the difference so the sequence of changes
+%% can be applied to the selected
+%% workflow~\cite{bib:scheidegger:analogy}.  The method is not foolproof
+%% and may generate new workflows that are not exactly what was desired.
+%% In such cases, a user may try to fix any introduced mistakes, or go
+%% back to the previous version and apply the changes manually.
+類推操作を使えば、これらの差分を別のワークフローに適用できるようになる。
+既存のワークフローに対する変更群(精度の変更や出力画像のファイルフォーマットの変更など)
+があれば、それを別のワークフローにも適用できるのだ。
+そのためには、まず変換前と変換後のワークフローを選んで変更の範囲を絞り込み、
+さらにその類推を適用先のワークフローも指定する。
+VisTrailsは最初の二つのワークフローの差分を算出してそれをテンプレートとし、
+その差分を三番目のワークフローにどのように適用するかを調べる。
+最初の状態が完全に一致していないワークフローであっても差分は適用できるので、
+ソフトなマッチングを使って同じモジュールの対応を判断できる必要があった。
+このマッチングを使えば差分をマップしなおせるので、選択したワークフローに変更群を適用できる~\cite{bib:scheidegger:analogy}。
+この方法が必ずうまくいくというわけではなく、できあがるワークフローが望みのものとは違ってしまう可能性もある。
+そんな場合は、間違っている部分を修正したり、前のバージョンに戻って変更を手動で適用したりもできる。
 
-To compute the soft matching used in analogies, we want to balance
-local matches (identical or very similar modules) with the overall
-workflow structure.  Note that the computation of even the identical
-matching is inefficient due to the hardness of subgraph isomorphism,
-so we need to employ a heuristic.  In short, if two somewhat-similar
-modules in the two workflows share similar neighbors, we might
-conclude that these two modules function similarly and should be
-matched as well.  More formally, we construct a product graph where
-each node is a possible pairing of modules in the original workflows
-and an edge denotes shared connections.  Then, we run steps diffusing
-the scores at each node across the edges to neighboring nodes.  This
-is a Markov process similar to Google's PageRank, and will eventually
-converge leaving a set of scores that now includes some global
-information.  From these scores, we can determine the best matching,
-using a threshold to leave very dissimilar modules unpaired.
+%% To compute the soft matching used in analogies, we want to balance
+%% local matches (identical or very similar modules) with the overall
+%% workflow structure.  Note that the computation of even the identical
+%% matching is inefficient due to the hardness of subgraph isomorphism,
+%% so we need to employ a heuristic.  In short, if two somewhat-similar
+%% modules in the two workflows share similar neighbors, we might
+%% conclude that these two modules function similarly and should be
+%% matched as well.  More formally, we construct a product graph where
+%% each node is a possible pairing of modules in the original workflows
+%% and an edge denotes shared connections.  Then, we run steps diffusing
+%% the scores at each node across the edges to neighboring nodes.  This
+%% is a Markov process similar to Google's PageRank, and will eventually
+%% converge leaving a set of scores that now includes some global
+%% information.  From these scores, we can determine the best matching,
+%% using a threshold to leave very dissimilar modules unpaired.
+類推の際にソフトマッチングを算出するには、
+ローカルマッチ(完全に一致するのか、ほぼ同じモジュールなのか)とワークフロー全体の構造とのバランスをとっておきたい。
+完全一致の算出は(部分グラフの写像が難しいから)非効率的なので、
+経験則を使う必要がある。
+簡単に言うと、二つのワークフローでよく似たモジュールが同じ隣接モジュールを共有している場合は、
+その二つのモジュールの機能は同じであると判断し、一致すると見なすということだ。
+もう少し正確に言うと、二つのワークフローの積グラフを作る。
+各ノードは元のワークフロー内で考え得るモジュールのペアを表し、
+エッジは共有している接続を表す。
+そして各ノードからエッジ越しの隣接ノードへスコアを拡散する。
+これはGoogleのPageRankとよく似たマルコフ過程であり、
+最終的に収束したスコア群には何らかのグローバル情報が含まれている。
+このスコアを使って一番よいマッチングを判断し、
+閾値に満たないモジュールのペアを切り離す。
 
 \end{aosasect2}
 
