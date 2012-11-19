@@ -1370,29 +1370,48 @@ VisTrailsは最初の二つのワークフローの差分を算出してそれ�
 %% \begin{aosasect2}{Querying Provenance}
 \begin{aosasect2}{履歴の問い合わせ}
 
-The provenance captured by VisTrails includes a set of workflows, each
-with its own structure, 
-metadata, and execution logs. It is important that users can access
-and explore these data.  VisTrails provides both text-based and visual
-(WYSIWYG) query interfaces.  For information like tags, annotations,
-and dates, a user can use keyword search with optional markup. For
-example, look for all workflows with the keyword \code{plot} that were
-created by \code{user:{\textasciitilde}dakoop}.  However, queries for specific subgraphs of
-a workflow are more easily represented through a visual, query-by-example interface, where users can
-either build the query from scratch or copy and modify an existing
-piece of a pipeline.
+%% The provenance captured by VisTrails includes a set of workflows, each
+%% with its own structure, 
+%% metadata, and execution logs. It is important that users can access
+%% and explore these data.  VisTrails provides both text-based and visual
+%% (WYSIWYG) query interfaces.  For information like tags, annotations,
+%% and dates, a user can use keyword search with optional markup. For
+%% example, look for all workflows with the keyword \code{plot} that were
+%% created by \code{user:{\textasciitilde}dakoop}.  However, queries for specific subgraphs of
+%% a workflow are more easily represented through a visual, query-by-example interface, where users can
+%% either build the query from scratch or copy and modify an existing
+%% piece of a pipeline.
+VisTrailsが記録する履歴に含まれる内容は、ワークフロー群の構造やメタデータそして実行ログだ。
+ユーザーがこれらのデータにアクセスして調べられるようにすることが重要になる。
+VisTrailsは、テキストベースとビジュアル(WYSIWYG)なものとの二種類の問い合わせインターフェイスを用意している。
+タグやアノテーションそして日付といった情報について、オプションのマークアップでキーワード検索ができる。
+たとえば、キーワード\code{plot}を含むすべてのワークフローの中で\code{user:{\textasciitilde}dakoop}
+が作ったものを探すといった検索だ。
+しかし、あるワークフローの中の特定の部分グラフへの問い合わせについては、
+もっと簡単に表現できる。ビジュアルな、例示による問い合わせのインターフェイスを使ったもので、
+問い合わせをスクラッチから組み立てたり既存のパイプラインのパーツをコピーして修正したりできる。
 
-In designing this query-by-example interface, we kept most of the code
-from the existing Workflow Editor, with a few changes to parameter
-construction.  For parameters, it is often useful to search for ranges
-or keywords rather than exact values.  Thus, we added modifiers to the
-parameter value fields; when a user adds or edits a parameter value,
-they may choose to select one of these modifiers which default to
-exact matches.  In addition to visual query construction, query
-results are shown visually.  Matching versions are highlighted in the
-version tree, and any selected workflow is displayed with the matching
-portion highlighted.  The user can exit query results mode by
-initiating another query or clicking a reset button.
+%% In designing this query-by-example interface, we kept most of the code
+%% from the existing Workflow Editor, with a few changes to parameter
+%% construction.  For parameters, it is often useful to search for ranges
+%% or keywords rather than exact values.  Thus, we added modifiers to the
+%% parameter value fields; when a user adds or edits a parameter value,
+%% they may choose to select one of these modifiers which default to
+%% exact matches.  In addition to visual query construction, query
+%% results are shown visually.  Matching versions are highlighted in the
+%% version tree, and any selected workflow is displayed with the matching
+%% portion highlighted.  The user can exit query results mode by
+%% initiating another query or clicking a reset button.
+この例示による問い合わせのインターフェイスを作るにあたり、
+大半のコードは既存のワークフローエディタのものを流用した。
+パラメータの構築あたりを多少変更しただけだ。
+パラメータに関しては、実際の値を指定するよりも値の範囲やキーワードで検索できたほうが便利なことが多い。
+そこで、パラメータの値フィールドを修正子を追加した。
+ユーザーがパラメータの値を追加したり変更したりしたときに、
+この修正子を選べるようになっている。デフォルトは、値をそのまま使うというものだ。
+ビジュアルに問い合わせを作るだけでなく、問い合わせの結果もビジュアルに表示される。
+マッチするバージョンがバージョンツリー内で強調表示され、選択したワークフローのなかでマッチする部分も強調される。
+別の問い合わせを開始したりリセットボタンをクリックしたりすると、問い合わせ結果のモードから抜けられる。
 
 \end{aosasect2}
 
