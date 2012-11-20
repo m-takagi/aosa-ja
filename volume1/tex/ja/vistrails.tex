@@ -1418,55 +1418,92 @@ VisTrailsは、テキストベースとビジュアル(WYSIWYG)なものとの�
 %% \begin{aosasect2}{Persistent Data}
 \begin{aosasect2}{永続データ}
 
-VisTrails saves the provenance of how results were derived and the
-specification of each step. However, reproducing a workflow run can be
-difficult if the data needed by the workflow is no longer available.
-In addition, for long-running workflows, it may be useful to store
-intermediate data as a persistent cache across sessions in order to
-avoid recomputation.
+%% VisTrails saves the provenance of how results were derived and the
+%% specification of each step. However, reproducing a workflow run can be
+%% difficult if the data needed by the workflow is no longer available.
+%% In addition, for long-running workflows, it may be useful to store
+%% intermediate data as a persistent cache across sessions in order to
+%% avoid recomputation.
+VisTrailsは、ある結果がどのような経緯で導かれたのかや、各ステップでどのように指定したのかんどといった履歴を保存する。
+しかし、ワークフローの実行の再現は、そのワークフローで使うデータが残っていないと難しい。
+さらに、実行に時間のかかるワークフローの場合は、
+中間データをキャッシュとして保存して複数セッション間で使い回せるようにしておけば、
+再計算の手間を省ける。
 
-Many workflow systems store filesystem paths to data as provenance,
-but this approach is problematic.  A user might rename a file, move
-the workflow to another system without copying the data, or change the
-data contents.  In any of these cases, storing the path as provenance
-is not sufficient.  Hashing the data and storing
-the hash as provenance helps to determine whether the data might have
-changed, but does not help one locate the data if it exists.  To solve
-this problem, we created the Persistence Package, a VisTrails package
-that uses version control infrastructure to store data that can be
-referenced from provenance.  Currently we use Git to manage the data,
-although other systems could easily be employed.
+%% Many workflow systems store filesystem paths to data as provenance,
+%% but this approach is problematic.  A user might rename a file, move
+%% the workflow to another system without copying the data, or change the
+%% data contents.  In any of these cases, storing the path as provenance
+%% is not sufficient.  Hashing the data and storing
+%% the hash as provenance helps to determine whether the data might have
+%% changed, but does not help one locate the data if it exists.  To solve
+%% this problem, we created the Persistence Package, a VisTrails package
+%% that uses version control infrastructure to store data that can be
+%% referenced from provenance.  Currently we use Git to manage the data,
+%% although other systems could easily be employed.
+多くのワークフローシステムは、ファイルシステムでのデータへのパスを履歴に保存する。しかしこの方式には問題がある。
+ユーザーがファイル名を変更するかもしれないし、ワークフローを別のシステムに移動するときにデータをコピーしないかもしれない。
+あるいはデータの中身を変更してしまうかもしれない。
+いずれの場合にも、パスを履歴に含めていると不都合が起こる。
+データのハッシュを計算してそれを履歴として保存しておけば、データが変更されたかどうかを判断する助けにはなる。
+しかし、そんなデータがあったとして、それを見つける助けにはならない。
+この問題を解決するために、私たちはPersistenceパッケージを作った。
+このVisTrailsパッケージは、バージョン管理システムの基盤を使ってデータを格納し、
+履歴から参照できるようにする。現在はGitを使ってデータを管理しているが、
+他のシステムに対応するのも簡単だ。
 
-We use universally unique identifiers (UUIDs) to identify data, and
-commit hashes from git to reference versions.  If the data changes
-from one execution to another, a new version is checked in to the
-repository.  Thus, the \code{(uuid, version)} tuple is a compound identifier
-to retrieve the data in any state.  In addition, we store the hash of
-the data as well as the signature of the upstream portion of the
-workflow that generated it (if it is not an input).  This allows one
-to link data that might be identified differently as well as reuse
-data when the same computation is run again.
+%% We use universally unique identifiers (UUIDs) to identify data, and
+%% commit hashes from git to reference versions.  If the data changes
+%% from one execution to another, a new version is checked in to the
+%% repository.  Thus, the \code{(uuid, version)} tuple is a compound identifier
+%% to retrieve the data in any state.  In addition, we store the hash of
+%% the data as well as the signature of the upstream portion of the
+%% workflow that generated it (if it is not an input).  This allows one
+%% to link data that might be identified differently as well as reuse
+%% data when the same computation is run again.
+データの特定にはUUID(Universally Unique Identifier)を使い、
+gitのコミットハッシュで特定のバージョンを参照する。
+あるワークフローの実行と別の実行でデータが変わったときには、
+新しいバージョンをリポジトリにチェックインする。
+つまり、\code{(uuid, version)}のタプルを複合キーとして、
+あらゆる状態のデータを取得できるようになる。
+データのハッシュを格納するだけでなく、さらにそのデータを生成した
+上位のワークフロー(入力ではない場合)のシグネチャも保存する。
+これで、別のデータへリンクできるようになり、同じ計算を再実行するときにもデータを再利用できるようになる。
 
-The main concern when designing this package was the way users were
-able to select and retrieve their data.  Also, we wished to keep all
-data in the same repository, regardless of whether it is used as
-input, output, or intermediate data (an output of one workflow might
-be used as the input of another).  There are two main modes a user
-might employ to identify data: choosing to create a new reference or
-using an existing one.  Note that after the first execution, a new
-reference will become an existing one as it has been persisted during
-execution; a user may later choose to create another reference if
-they wish but this is a rare case.  Because a user often wishes to
-always use the latest version of data, a reference identified without
-a specific version will default to the latest version.
+%% The main concern when designing this package was the way users were
+%% able to select and retrieve their data.  Also, we wished to keep all
+%% data in the same repository, regardless of whether it is used as
+%% input, output, or intermediate data (an output of one workflow might
+%% be used as the input of another).  There are two main modes a user
+%% might employ to identify data: choosing to create a new reference or
+%% using an existing one.  Note that after the first execution, a new
+%% reference will become an existing one as it has been persisted during
+%% execution; a user may later choose to create another reference if
+%% they wish but this is a rare case.  Because a user often wishes to
+%% always use the latest version of data, a reference identified without
+%% a specific version will default to the latest version.
+このパッケージを作るときにまず考えたのは、ユーザーがデータを選んだり取得したりする方法をどうするかということだった。
+また、すべてのデータは同じリポジトリにまとめておきたかった。入力として使うものであろうが出力であろうが
+中間データ(あるワークフローの結果を別のワークフローへの入力として使う場合)であろうが同じにしたかったのだ。
+ユーザーがデータを特定する方法には大きく二つのモードがある。新しい参照を作るか既存の参照を使うかだ。
+最初の実行の後で、新しい参照は既存の参照となる。というのも、実行中に永続化されるからだ。
+ユーザーは、それを使って別の参照を作ることもできる。ただ、あまりそんなことはない。
+ユーザーは最新版のデータを使いたがることが多いので、
+バージョンを指定せずに参照を指したときは最新バージョンを指すことになっている。
 
-Recall that before executing a module, we recursively update all of
-its inputs.  A persistent data module will not update its inputs if
-the upstream computations have already been run.  To determine this,
-we check the signature of the upstream subworkflow against the
-persistent repository and retrieve the precomputed data if the
-signature exists.  In addition, we record the data identifiers and
-versions as provenance so that a specific execution can be reproduced.
+%% Recall that before executing a module, we recursively update all of
+%% its inputs.  A persistent data module will not update its inputs if
+%% the upstream computations have already been run.  To determine this,
+%% we check the signature of the upstream subworkflow against the
+%% persistent repository and retrieve the precomputed data if the
+%% signature exists.  In addition, we record the data identifiers and
+%% versions as provenance so that a specific execution can be reproduced.
+モジュールを実行する前に、そのすべての入力を再帰的にアップデートしたことを思いだそう。
+永続データモジュールは、もし上流の計算が既に実行済みの場合は、入力をアップデートしない。
+アップデートするかしないかを判断するために、上流の部分ワークフローのシグネチャを永続リポジトリのものと比較し、
+もしそのシグネチャが存在すれば、計算済みの結果を取得する。
+さらに、データのIDとバージョンを履歴として記録し、その実行を再現できるようにする。
 
 \end{aosasect2}
 
