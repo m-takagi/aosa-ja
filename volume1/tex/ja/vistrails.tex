@@ -1511,35 +1511,62 @@ gitのコミットハッシュで特定のバージョンを参照する。
 \begin{aosasect2}{アップグレード}
 \label{sec.vistrails.upgrades}
 
-With provenance at the core of VisTrails, the ability to upgrade old
-workflows so they will run with new versions of packages is a key
-concern.  Because packages can be created by third-parties, we need
-both the infrastructure for upgrading workflows as well as the hooks
-for package developers to specify the upgrade paths.  The core action
-involved in workflow upgrades is the replacement of one module with a
-new version.  Note that this action is complicated because we must
-replace all of the connections and parameters from the old module.  In
-addition, upgrades may need to reconfigure, reassign, or rename these
-parameters or connections for a module, e.g., when the module
-interface changes.
+%% With provenance at the core of VisTrails, the ability to upgrade old
+%% workflows so they will run with new versions of packages is a key
+%% concern.  Because packages can be created by third-parties, we need
+%% both the infrastructure for upgrading workflows as well as the hooks
+%% for package developers to specify the upgrade paths.  The core action
+%% involved in workflow upgrades is the replacement of one module with a
+%% new version.  Note that this action is complicated because we must
+%% replace all of the connections and parameters from the old module.  In
+%% addition, upgrades may need to reconfigure, reassign, or rename these
+%% parameters or connections for a module, e.g., when the module
+%% interface changes.
+VisTrailsの肝となる履歴機能を使えば、
+古いバージョンのワークフローをアップグレードして
+新しいバージョンのパッケージで動かせるようになる。
+パッケージはサードパーティが作ることもあるので、
+ワークフローをアップグレードするための仕組みだけではなく
+パッケージ開発者がアップグレード方法を指定するためのフックも必要になる。
+ワークフローのアップグレードで中心となる操作は、何かのモジュールを新しいバージョンで置き換えることだ。
+古いモジュールのすべての接続やそのパラメータを置き換えないといけないので、
+この操作は込み入ったものとなる。
+さらに、モジュールのインターフェイスが変わったりしたときには、
+パラメータや接続を再設定したり代入しなおしたり名前を変更したりしないといけなくなるかもしれない。
 
-Each package (together with its associated modules) is tagged by a
-version, and if that version changes, we assume that the modules in
-that package may have changed.  Note that some, or even most, may not
-have changed, but without doing our own code analysis, we cannot check
-this.  We, however, attempt to automatically upgrade any module
-whose interface has not changed.  To do this, we try replacing the
-module with the new version and throw an exception if it does not
-work.  When developers have changed the interface of a module or
-renamed a module, we allow them to specify these changes explicitly.
-To make this more manageable, we have created a \code{remap\_module}
-method that allows developers to define only the places where the
-default upgrade behavior needs to be modified.  For example, a
-developer that renamed an input port `file' to `value' can specify
-that specific remapping so when the new module is created, any
-connections to `file' in the old module will now connect to
-`value'. Here is an example of an upgrade path for a built-in
-VisTrails module:
+%% Each package (together with its associated modules) is tagged by a
+%% version, and if that version changes, we assume that the modules in
+%% that package may have changed.  Note that some, or even most, may not
+%% have changed, but without doing our own code analysis, we cannot check
+%% this.  We, however, attempt to automatically upgrade any module
+%% whose interface has not changed.  To do this, we try replacing the
+%% module with the new version and throw an exception if it does not
+%% work.  When developers have changed the interface of a module or
+%% renamed a module, we allow them to specify these changes explicitly.
+%% To make this more manageable, we have created a \code{remap\_module}
+%% method that allows developers to define only the places where the
+%% default upgrade behavior needs to be modified.  For example, a
+%% developer that renamed an input port `file' to `value' can specify
+%% that specific remapping so when the new module is created, any
+%% connections to `file' in the old module will now connect to
+%% `value'. Here is an example of an upgrade path for a built-in
+%% VisTrails module:
+各パッケージ(およびそれに関連するモジュール)はバージョン番号のタグが付いており、
+バージョンが変わるということは、そのパッケージ内のモジュールも変わる可能性がある。
+中には変わらないものだってあるだろうし、場合によっては大半が変わらないままということだってある
+
+でも、それを判断するにはコードを解析しないといけない。
+しかし私たちは、インターフェイスが変わっていないモジュールも自動的にアップグレードする方法にひかれた。
+そのために、まずはモジュールを新しいバージョンに置き換えて、
+うまく動かないときは例外を投げるようにした。
+開発者がモジュールのインターフェイスを変えたり名前を変えたりするときには、
+その変更を明示的に指定できるようにもした。
+これを管理しやすくするために、作ったのが\code{remap\_module}メソッドだ。
+このメソッドを使えば、デフォルトのアップグレードで変更すべき箇所を開発者が定義できる。
+たとえば、入力のポート名を`file'から`value'に変更した場合は、
+その再マッピングを指定することができる。そうしておけば、
+新しいモジュールを作った時にも、古いバージョンの'file'への接続がすべて
+'value'につながるようになる。組み込みのVisTrailsモジュールでのアップグレードパスの例を示す。
 
 % JF: avoid spreading this over 2 pages
 % Commenting minipage out for now because code is now in the middle of a page
@@ -1559,23 +1586,36 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
 \end{verbatim}
 % \end{minipage}
 
-This piece of code upgrades workflows that use the old
-\code{GetItemsFromDirectory} (any version up to 1.6) module to use the
-\code{Directory} module instead.  It maps the \code{dir} port from the
-old module to \code{value} and the \code{itemlist} port to
-\code{itemList}.
+%% This piece of code upgrades workflows that use the old
+%% \code{GetItemsFromDirectory} (any version up to 1.6) module to use the
+%% \code{Directory} module instead.  It maps the \code{dir} port from the
+%% old module to \code{value} and the \code{itemlist} port to
+%% \code{itemList}.
+このコード片は、古いバージョンの\code{GetItemsFromDirectory}モジュール(1.6以前のもの)
+を使っているワークフローをアップグレードして、代わりに\code{Directory}モジュールを使わせるようにするものだ。
+旧モジュールの\code{dir}ポートを\code{value}にマップし、\code{itemlist}ポートを\code{itemList}
+にマップする。
 
-Any upgrade creates a new version in the version tree so that
-executions before and after upgrades can be differentiated and
-compared.  It is possible that the upgrades change the execution of
-the workflow (e.g., if a bug is fixed by a package developer), and we
-need to track this as provenance information.  Note that in older
-vistrails, it may be necessary to upgrade every version in the tree.
-In order to reduce clutter, we only upgrade versions that a user has
-navigated to.  In addition, we provide a preference that allows a user
-to delay the persistence of any upgrade until the workflow is modified
-or executed; if a user just views that version, there is no need to
-persist the upgrade.
+%% Any upgrade creates a new version in the version tree so that
+%% executions before and after upgrades can be differentiated and
+%% compared.  It is possible that the upgrades change the execution of
+%% the workflow (e.g., if a bug is fixed by a package developer), and we
+%% need to track this as provenance information.  Note that in older
+%% vistrails, it may be necessary to upgrade every version in the tree.
+%% In order to reduce clutter, we only upgrade versions that a user has
+%% navigated to.  In addition, we provide a preference that allows a user
+%% to delay the persistence of any upgrade until the workflow is modified
+%% or executed; if a user just views that version, there is no need to
+%% persist the upgrade.
+アップグレードのたびに新たなバージョンツリーを作り、
+これでアップグレード前後の実行を区別したり比較したりできるようにする。
+アップグレードによってワークフローの実行結果が変わることもあり
+(パッケージ開発者がバグを修正した場合など)、
+その履歴情報を追いかけられるようにする必要がある。
+古いバージョンのvistrailsでは、ツリー内のすべてのバージョンをアップグレードしないといけないこともあった。
+無駄ながらくたを減らすため、最近はユーザーが選んだものだけをアップグレードするようにした。
+さらに、実際にワークフローを変更したり実行したりするときまでアップグレード結果を保存しないようにするという
+設定も選べるようにした。単に見るだけなら、アップグレードを保存する必要はない。
 
 \end{aosasect2}
 
