@@ -1620,30 +1620,47 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
 \end{aosasect2}
 
 %% \begin{aosasect2}{Sharing and Publishing Provenance-Rich Results}
-\begin{aosasect2}{Sharing and Publishing Provenance-Rich Results}
+\begin{aosasect2}{履歴を含めた結果の共有と公開}
 \label{sec.vistrails.publish}
 
-While reproducibility is the cornerstone of the scientific method,
-current publications that describe computational experiments 
-often fail to provide enough information to enable the results
-to be repeated or generalized. Recently, there has been a renewed
-interest in the publication of reproducible results. A major roadblock
-to the more widespread adoption of this practice is the fact that it
-is hard to create a bundle that includes all of the components (e.g.,
-data, code, parameter settings) needed to reproduce a result as well
-as verify that result.
+%% While reproducibility is the cornerstone of the scientific method,
+%% current publications that describe computational experiments 
+%% often fail to provide enough information to enable the results
+%% to be repeated or generalized. Recently, there has been a renewed
+%% interest in the publication of reproducible results. A major roadblock
+%% to the more widespread adoption of this practice is the fact that it
+%% is hard to create a bundle that includes all of the components (e.g.,
+%% data, code, parameter settings) needed to reproduce a result as well
+%% as verify that result.
+科学的方法は、再現できることが何よりも重要だ。
+その一方で、コンピュータによる実験結果を公開するときには、
+同じ実験を繰り返したり一般化したりするための十分な情報が提供されてこなかった。
+最近は、再現可能な結果を公開しようという動きが出ている。
+この方針に従おうとしたときの大きな問題は、
+結果を再現したり検証したりするのに必要な全コンポーネント
+(データ、コード、そしてパラメータ設定)
+をひとまとめにするのが難しいという事実だ。
 
-By capturing detailed provenance, and through many of the features
-described above, VisTrails simplifies this process for computational
-experiments that are carried out within the system. However,
-mechanisms are needed to both link documents to and share the
-provenance information.
+%% By capturing detailed provenance, and through many of the features
+%% described above, VisTrails simplifies this process for computational
+%% experiments that are carried out within the system. However,
+%% mechanisms are needed to both link documents to and share the
+%% provenance information.
+詳細な履歴を記録する機能、そしてこれまでに紹介したさまざまな機能を活用することで、
+VisTrailsはこのプロセスを単純化した。コンピュータによる実験の結果を
+システムの外部に持ち出しやすくしたのだ。
+しかし、ドキュメントをリンクしたり、履歴情報を共有したりするための仕組みが必要になる。
 
-We have developed VisTrails packages that enable results present in
-papers to be linked to their provenance, like a deep caption. Using
-the LaTeX package we developed, users can include figures that link to
-VisTrails workflows.  The following LaTeX code will generate a figure
-that contains a workflow result:
+%% We have developed VisTrails packages that enable results present in
+%% papers to be linked to their provenance, like a deep caption. Using
+%% the LaTeX package we developed, users can include figures that link to
+%% VisTrails workflows.  The following LaTeX code will generate a figure
+%% that contains a workflow result:
+そこで、そんなVisTrailsパッケージを作った。
+結果を紙に出力するときに、その履歴情報にリンクできるようにするものだ。
+私たちが作ったLaTeXパッケージを使えば、
+VisTrailsのワークフローにリンクした図を組み込める。
+次のLaTeXコードは、ワークフローの結果を含む図を生成するものだ。
 
 \begin{verbatim}
 \begin{figure}[t]
@@ -1656,48 +1673,86 @@ that contains a workflow result:
 \end{figure}
 \end{verbatim}
 
-When the document is compiled using pdflatex, the
-\code{{\textbackslash}vistrail} command will invoke a Python script
-with the parameters received, which sends an XML-RPC message to a
-VisTrails server to execute the workflow with \code{id 119}. This same
-Python script downloads the results of the workflow from the server
-and includes them in the resulting PDF document by generating
-hyperlinked LaTeX \code{{\textbackslash}includegraphics} commands
-using the specified layout options
-(\code{width=0.9{\textbackslash}linewidth}).
+%% When the document is compiled using pdflatex, the
+%% \code{{\textbackslash}vistrail} command will invoke a Python script
+%% with the parameters received, which sends an XML-RPC message to a
+%% VisTrails server to execute the workflow with \code{id 119}. This same
+%% Python script downloads the results of the workflow from the server
+%% and includes them in the resulting PDF document by generating
+%% hyperlinked LaTeX \code{{\textbackslash}includegraphics} commands
+%% using the specified layout options
+%% (\code{width=0.9{\textbackslash}linewidth}).
+この文書をpdflatexでコンパイルすると、受け取ったパラメータを使って
+\code{{\textbackslash}vistrail}コマンドがPythonスクリプトを実行する。
+このスクリプトがXML-RPCメッセージをVisTrailsサーバーに送って、
+\code{id 119}のワークフローを実行する。
+同じPythonスクリプトがワークフローの結果をサーバーからダウンロードし、
+LaTeXの\code{{\textbackslash}includegraphics}コマンドにレイアウトオプション
+(\code{width=0.9{\textbackslash}linewidth})を指定したものを生成して
+結果をPDF文書に組み込む。
 
-It is also possible to include VisTrails results into Web pages,
-wikis, Word documents and PowerPoint presentations. The linking
-between Microsoft PowerPoint and VisTrails was done through the
-Component Object Model (COM) and Object Linking and Embedding (OLE)
-interface. In order for an object to interact with PowerPoint, at
-least the \code{IOleObject}, \code{IDataObject} and
-\code{IPersistStorage} interface of COM must be implemented. As we use
-the \code{QAxAggregated} class of Qt, which is an abstraction for
-implementing COM interfaces, to build our OLE object, both
-\code{IDataObject} and \code{IPersistStorage} are automatically
-handled by Qt. Thus, we only need to implement the \code{IOleObject}
-interface. The most important call in this interface is
-\code{DoVerb}. It lets VisTrails react to certain actions from
-PowerPoint, such as object activation. In our implementation, when the
-VisTrails object is activated, we load the VisTrails application and
-allow users to open, interact with and select a pipeline that they
-want to insert. After they close VisTrails, the pipeline result will
-be shown in PowerPoint. Pipeline information is also stored with the
-OLE object.
+%% It is also possible to include VisTrails results into Web pages,
+%% wikis, Word documents and PowerPoint presentations. The linking
+%% between Microsoft PowerPoint and VisTrails was done through the
+%% Component Object Model (COM) and Object Linking and Embedding (OLE)
+%% interface. In order for an object to interact with PowerPoint, at
+%% least the \code{IOleObject}, \code{IDataObject} and
+%% \code{IPersistStorage} interface of COM must be implemented. As we use
+%% the \code{QAxAggregated} class of Qt, which is an abstraction for
+%% implementing COM interfaces, to build our OLE object, both
+%% \code{IDataObject} and \code{IPersistStorage} are automatically
+%% handled by Qt. Thus, we only need to implement the \code{IOleObject}
+%% interface. The most important call in this interface is
+%% \code{DoVerb}. It lets VisTrails react to certain actions from
+%% PowerPoint, such as object activation. In our implementation, when the
+%% VisTrails object is activated, we load the VisTrails application and
+%% allow users to open, interact with and select a pipeline that they
+%% want to insert. After they close VisTrails, the pipeline result will
+%% be shown in PowerPoint. Pipeline information is also stored with the
+%% OLE object.
+VisTrailsの実行結果はWebページやWikiに組み込むこともできるし、
+Wordの文書やPowerPointのプレゼンテーションにも組み込める。
+Microsoft PowerPointとVisTrailsとのリンクには、COM()Component Object Model)
+やOLEObject Linking and Embedding)などのインターフェイスを使った。
+PowerPointで使えるオブジェクトにするには、最低限のCOMインターフェイス
+\code{IOleObject}、\code{IDataObject}そして\code{IPersistStorage}を実装しないといけない。
+私たちがOLEオブジェクトを作るために使ったのはQtの\code{QAxAggregated}クラスで、
+これはCOMインターフェイスの実装を抽象化したものなので、
+\code{IDataObject}や\code{IPersistStorage}はQtが自動的に処理してくれる。
+したがって、唯一実装する必要があるのは\code{IOleObject}インターフェイスだけになる。
+このインターフェイスで一番重要な呼び出しが\code{DoVerb}だ。
+これを使って、VisTrailsがPowerPointからのアクション
+(オブジェクトのアクティブ化など)に対応できるようにする。
+VisTrailsオブジェクトをアクティブにすると、
+VisTrailsアプリケーションを読み込んで、
+ワークフローを開いたり操作したり挿入するパイプラインを選んだりできるようになる。
+VisTrailsを閉じると、パイプラインの結果がPowerPointに反映される。
+パイプラインの情報も、OLEオブジェクトとして保存される。
 
-To enable users to freely share their results together with the
-associated provenance, we have created
-crowdLabs.\footnote{\url{http://www.crowdlabs.org}} crowdLabs is a
-social Web site that integrates a set of usable tools and a scalable
-infrastructure to provide an environment for scientists to
-collaboratively analyze and visualize data.  crowdLabs is tightly
-integrated with VisTrails. If a user wants to share any results
-derived in VisTrails, she can connect to the crowdLabs server directly
-from VisTrails to upload the information. Once the information is
-uploaded, users can interact with and execute the workflows through a
-Web browser---these workflows are executed by a VisTrails server that
-powers crowdLabs. For more details on how VisTrails is used to created reproducible publications, see \url{http://www.vistrails.org}.
+%% To enable users to freely share their results together with the
+%% associated provenance, we have created
+%% crowdLabs.\footnote{\url{http://www.crowdlabs.org}} crowdLabs is a
+%% social Web site that integrates a set of usable tools and a scalable
+%% infrastructure to provide an environment for scientists to
+%% collaboratively analyze and visualize data.  crowdLabs is tightly
+%% integrated with VisTrails. If a user wants to share any results
+%% derived in VisTrails, she can connect to the crowdLabs server directly
+%% from VisTrails to upload the information. Once the information is
+%% uploaded, users can interact with and execute the workflows through a
+%% Web browser---these workflows are executed by a VisTrails server that
+%% powers crowdLabs. For more details on how VisTrails is used to created reproducible publications, see \url{http://www.vistrails.org}.
+実行結果とそれに関連する履歴をユーザーが自由に共有できるようにするために作ったのがcrowdLabsだ。
+\footnote{\url{http://www.crowdlabs.org}}
+crowdLabsはソーシャルなWebサイトで、便利なツールやスケーラブルな基盤からなるものだ。
+科学者たちが共同作業で、データの分析や可視化をできるようにする環境を提供する。
+crowdLabsはVisTrailsと密接に統合されている。
+VisTrailsの実行結果を共有したければ、VisTrailsから直接
+crowdLabsサーバーに接続して情報をアップロードできる。
+情報のアップロードが完了すれば、Webブラウザ上で
+ワークフローを操作したり実行したりできるようになる。
+ワークフローの実行は、crowdLabsを動かしているVisTrailsサーバーが行う。
+VisTrailsを使って再実行可能な形式で公開する方法についての詳細は、
+\url{http://www.vistrails.org}を見てほしい。
 
 \end{aosasect2}
 
