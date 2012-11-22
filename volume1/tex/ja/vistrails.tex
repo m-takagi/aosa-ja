@@ -1761,64 +1761,103 @@ VisTrailsを使って再実行可能な形式で公開する方法について�
 %% \begin{aosasect1}{Lessons Learned}
 \begin{aosasect1}{教訓}
 
-Luckily, back in 2004 when we started thinking about building a data
-exploration and visualization system that supported provenance, we
-never envisioned how challenging it would be, or how long it would
-take to get to the point we are at now. If we had, we probably would
-never have started.
+%% Luckily, back in 2004 when we started thinking about building a data
+%% exploration and visualization system that supported provenance, we
+%% never envisioned how challenging it would be, or how long it would
+%% take to get to the point we are at now. If we had, we probably would
+%% never have started.
+データの調査と可視化ができて、履歴に対応したシステムを作ろうと考えだしたのは2004年だった。
+その当時はそれがいかに大変なことかも知らなかったし、今のような状態まで持ち込むのにどれくらいかかるかも見当がつかなかった。
+これが幸いした。もし当時の私たちがそれを知っていたら、そもそも作り始める気にもならなかっただろう。
 
-Early on, one strategy that worked well was quickly prototyping new
-features and showing them to a select set of users. The initial
-feedback and the encouragement we received from these users was
-instrumental in driving the project forward. It would have been
-impossible to design VisTrails without user feedback. If there is one
-aspect of the project that we would like to highlight is that most
-features in the system were designed as direct response to user
-feedback. However, it is worthy to note that many times what a user
-asks for is not the best solution for his/her need---being responsive
-to users does not necessarily mean doing exactly what they ask for.
-Time and again, we have had to design and re-design features to make
-sure they would be useful and properly integrated in the system.
+%% Early on, one strategy that worked well was quickly prototyping new
+%% features and showing them to a select set of users. The initial
+%% feedback and the encouragement we received from these users was
+%% instrumental in driving the project forward. It would have been
+%% impossible to design VisTrails without user feedback. If there is one
+%% aspect of the project that we would like to highlight is that most
+%% features in the system were designed as direct response to user
+%% feedback. However, it is worthy to note that many times what a user
+%% asks for is not the best solution for his/her need---being responsive
+%% to users does not necessarily mean doing exactly what they ask for.
+%% Time and again, we have had to design and re-design features to make
+%% sure they would be useful and properly integrated in the system.
+最初の頃は、何かうまくいきそうな手が見つかったらすぐに新機能のプロトタイプを作って、
+それをユーザーに使ってもらっていた。ユーザーからのフィードバックや励ましのことばが
+プロジェクトの原動力だった。ユーザーからのフィードバックなしにVisTrailsを作るのは不可能だっただろう。
+このプロジェクトの特徴として特筆すべき点は、
+システムの大半の機能がユーザーからの要望に応じて作られたものであるということだ。
+しかし、ユーザーからの要望の中には、彼ら/彼女らが本当にやりたいこととはずれているものも少なくなかった。
+ユーザーの要望に応えるというのは、単にユーザーの指示通りに作るってことじゃない。
+何度となく機能の設計を繰り返し、ほんとうに便利でうまくシステムに組み込めるようなものにしていった。
 
-Given our user-centric approach, one might expect that every feature
-we have developed would be heavily used. Unfortunately this has not
-been the case.  Sometimes the reason for this is that the feature is
-highly "unusual", since it is not found in other tools. For instance,
-analogies and even the version tree are not concepts that most users
-are familiar with, and it takes a while for them to get comfortable
-with them. Another important issue is documentation, or lack
-thereof. As with many other open source projects, we have been much
-better at developing new features than at documenting the existing
-ones. This lag in documentation leads not only to the underutilization
-of useful features, but also to many questions on our mailing lists.
+%% Given our user-centric approach, one might expect that every feature
+%% we have developed would be heavily used. Unfortunately this has not
+%% been the case.  Sometimes the reason for this is that the feature is
+%% highly "unusual", since it is not found in other tools. For instance,
+%% analogies and even the version tree are not concepts that most users
+%% are familiar with, and it takes a while for them to get comfortable
+%% with them. Another important issue is documentation, or lack
+%% thereof. As with many other open source projects, we have been much
+%% better at developing new features than at documenting the existing
+%% ones. This lag in documentation leads not only to the underutilization
+%% of useful features, but also to many questions on our mailing lists.
+こんな風にユーザー主導の開発を進めているんだから、すべての機能が実際によく使われているのだろうと思うかもしれない。
+しかし残念ながら、そうでもない。
+その理由のひとつは、追加した機能の中にはあまりにも「独特な」機能、
+つまり他のツールにはまず見られないものもあったということだ。
+たとえば、類推機能は大半のユーザーにとってあまりなじみのないものだろうし、
+恐らくバージョンツリーだってそうだ。ユーザーがそういった機能に慣れるのには時間がかかる。
+さらにもうひとつ重要な理由は、ドキュメントが貧弱なことやそもそもドキュメントがないことだ。
+オープンソースのプロジェクトにはよくあることだが、
+新機能を開発しているほうが既存機能のドキュメントを書いているよりもずっと楽しかった。
+ドキュメントに問題があるせいで便利な機能がうまく活用されないこともあったし、
+それだけではなくメーリングリストへの質問も増加した。
 
-One of the challenges of using a system like VisTrails is that it is
-very general. Despite our best efforts to improve usability, VisTrails
-is a complex tool and requires a steep learning curve for some
-users. We believe that over time, with improved documentation, further
-refinements to the system, and more application- and domain-specific
-examples, the adoption bar for any given field will get lower. Also,
-as the concept of provenance becomes more widespread, it will be
-easier for users to understand the philosophy that we have adopted in
-developing VisTrails.
+%% One of the challenges of using a system like VisTrails is that it is
+%% very general. Despite our best efforts to improve usability, VisTrails
+%% is a complex tool and requires a steep learning curve for some
+%% users. We believe that over time, with improved documentation, further
+%% refinements to the system, and more application- and domain-specific
+%% examples, the adoption bar for any given field will get lower. Also,
+%% as the concept of provenance becomes more widespread, it will be
+%% easier for users to understand the philosophy that we have adopted in
+%% developing VisTrails.
+VisTrailsのようなシステムを使ううえで難しいのが、システムが汎用的なものであるという点だ。
+使い勝手を改良しようと最善の努力をしたところで、
+VisTrailsは複雑なツールなので、使いこなすための学習曲線は急勾配になる。
+ドキュメントやシステムを改良したり、アプリケーションよりのサンプルや
+分野ごとのサンプル用意したりなどして、できるだけ学習の障壁を下げるようにしてきた。
+また、履歴の概念が一般に広まるにつれて、
+VisTrailsの開発思想をユーザーがより理解しやすくなった。
 
 %% \begin{aosasect2}{Acknowledgments}
 \begin{aosasect2}{謝辞}
 
-We would like to thank all the talented developers that contributed to
-VisTrails: Erik Anderson, Louis Bavoil, Clifton Brooks, Jason
-Callahan, Steve Callahan, Lorena Carlo, Lauro Lins, Tommy Ellkvist,
-Phillip Mates, Daniel Rees, and Nathan Smith. Special thanks to
-Antonio Baptista who was instrumental in helping us develop the vision
-for the project; and Matthias Troyer, whose collaboration has helped
-us to improve the system, and in particular has provided much of the
-impetus for the development and release of the provenance-rich
-publication functionality. The research and development of the
-VisTrails system has been funded by the National Science Foundation under grants IIS 1050422, IIS-0905385, IIS 0844572, ATM-0835821,
-IIS-0844546, IIS-0746500, CNS-0751152, IIS-0713637, OCE-0424602,
-IIS-0534628, CNS-0514485, IIS-0513692, CNS-0524096, CCF-0401498,
-OISE-0405402, CCF-0528201, CNS-0551724,
-the Department of Energy SciDAC (VACET and SDM centers), and IBM Faculty Awards.
+%% We would like to thank all the talented developers that contributed to
+%% VisTrails: Erik Anderson, Louis Bavoil, Clifton Brooks, Jason
+%% Callahan, Steve Callahan, Lorena Carlo, Lauro Lins, Tommy Ellkvist,
+%% Phillip Mates, Daniel Rees, and Nathan Smith. Special thanks to
+%% Antonio Baptista who was instrumental in helping us develop the vision
+%% for the project; and Matthias Troyer, whose collaboration has helped
+%% us to improve the system, and in particular has provided much of the
+%% impetus for the development and release of the provenance-rich
+%% publication functionality. The research and development of the
+%% VisTrails system has been funded by the National Science Foundation under grants IIS 1050422, IIS-0905385, IIS 0844572, ATM-0835821,
+%% IIS-0844546, IIS-0746500, CNS-0751152, IIS-0713637, OCE-0424602,
+%% IIS-0534628, CNS-0514485, IIS-0513692, CNS-0524096, CCF-0401498,
+%% OISE-0405402, CCF-0528201, CNS-0551724,
+%% the Department of Energy SciDAC (VACET and SDM centers), and IBM Faculty Awards.
+VisTrailsに貢献してくれた優秀な開発者たちに感謝する。Erik Anderson、Louis Bavoil、Clifton Brooks、
+Jason Callahan、Steve Callahan、Lorena Carlo、Lauro Lins、Tommy Ellkvist、Phillip Mates、Daniel Rees、そしてNathan Smithだ。
+Antonio Baptistaに感謝する。このプロジェクトのビジョンを確立する上で大きな助けになってくれた。
+さらにMatthias Troyerにも感謝する。彼の助けのおかげでこのシステムはよりよいものとなり、
+特に履歴つきの公開機能の開発やリリースの大きな原動力になってくれた。
+VisTrailsシステムの研究や開発にはNational Science Foundationからの支援を受けた。
+IIS 1050422、IIS-0905385、IIS 0844572、ATM-0835821、IIS-0844546、IIS-0746500、CNS-0751152、
+IIS-0713637、OCE-0424602、IIS-0534628、CNS-0514485、IIS-0513692、CNS-0524096、CCF-0401498、
+OISE-0405402、CCF-0528201、CNS-0551724だ。
+また、Department of Energy SciDAC (VACET and SDM centers)やIBM Faculty Awardsからも支援を受けた。
 
 \end{aosasect2}
 
