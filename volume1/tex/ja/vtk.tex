@@ -1,5 +1,5 @@
 \begin{aosachapter}{VTK}{s:vtk}{Berk Geveci and Will Schroeder}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r272
 
 The Visualization Toolkit (VTK) is a widely used software system for
 data processing and visualization. It is used in scientific computing,
@@ -49,7 +49,8 @@ major design decisions to make relative to any software system is the
 choice of copyright license. It's important to review the goals of the
 project and then address IP issues appropriately.
 
-\begin{aosasect1}{What Is VTK?}
+%% \begin{aosasect1}{What Is VTK?}
+\begin{aosasect1}{VTKとは}
 
 VTK was initially conceived as a scientific data visualization
 system. Many people outside of the field naively consider
@@ -87,7 +88,8 @@ components that can be combined to process a wide variety of data.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Architectural Features}
+%% \begin{aosasect1}{Architectural Features}
+\begin{aosasect1}{アーキテクチャの機能}
 
 Before getting too far into the specific architectural features of
 VTK, there are high-level concepts that have significant impact on
@@ -112,7 +114,8 @@ development environments. In addition, web pages, wiki, mailing lists
 (user and developer), documentation generation facilities (i.e.,
 Doxygen) and a bug tracker (Mantis) round out the development tools.
 
-\begin{aosasect2}{Core Features}
+%% \begin{aosasect2}{Core Features}
+\begin{aosasect2}{コア機能}
 
 As VTK is an object-oriented system, the access of class and instance
 data members is carefully controlled in VTK\@. In general, all data
@@ -269,7 +272,8 @@ numerics library.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Representing Data}
+%% \begin{aosasect2}{Representing Data}
+\begin{aosasect2}{データ表現}
 
 One of the strengths of VTK is its ability to represent complex forms
 of data. These data forms range from simple tables to complex
@@ -278,7 +282,8 @@ subclasses of \code{vtkDataObject} as shown in
 \aosafigref{fig.vtk.dataclass} (note this is a partial inheritance
 diagram of the many data object classes).
 
-\aosafigure{../images/vtk/dataclasses.eps}{Data Object Classes}{fig.vtk.dataclass}
+%% \aosafigure{../images/vtk/dataclasses.eps}{Data Object Classes}{fig.vtk.dataclass}
+\aosafigure{../images/vtk/dataclasses.eps}{データオブジェクトクラス}{fig.vtk.dataclass}
 
 One of the most important characteristics of \code{vtkDataObject} is
 that it can be processed in a visualization pipeline (next
@@ -290,11 +295,13 @@ used to represent polygonal meshes; \code{vtkUnstructuredGrid} to
 represent meshes, and \code{vtkImageData} represents 2D and 3D pixel
 and voxel data.
 
-\aosafigure[250pt]{../images/vtk/dataset.eps}{Data Set Classes}{fig.vtk.dataset}
+%% \aosafigure[250pt]{../images/vtk/dataset.eps}{Data Set Classes}{fig.vtk.dataset}
+\aosafigure[250pt]{../images/vtk/dataset.eps}{データセットクラス}{fig.vtk.dataset}
 
 \end{aosasect2}
 
-\begin{aosasect2}{Pipeline Architecture}
+%% \begin{aosasect2}{Pipeline Architecture}
+\begin{aosasect2}{パイプラインのアーキテクチャ}
 
 VTK consists of several major subsystems. Probably the subsystem most
 associated with visualization packages is the data flow/pipeline
@@ -307,7 +314,8 @@ filter or map data objects from one form into another
 data and process objects (i.e., the
 pipeline). \aosafigref{fig.vtk.pipeline} depicts a typical pipeline.
 
-\aosafigure{../images/vtk/pipeline.eps}{Typical Pipeline}{fig.vtk.pipeline}
+%% \aosafigure{../images/vtk/pipeline.eps}{Typical Pipeline}{fig.vtk.pipeline}
+\aosafigure{../images/vtk/pipeline.eps}{典型的なパイプライン}{fig.vtk.pipeline}
 
 While conceptually simple, actually implementing the pipeline
 architecture is challenging. One reason is that the representation of
@@ -480,7 +488,8 @@ filter) can ignore the piece request and ask for the whole data.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Rendering Subsystem}
+%% \begin{aosasect2}{Rendering Subsystem}
+\begin{aosasect2}{レンダリングサブシステム}
 
 At first glance VTK has a simple object-oriented rendering model with
 classes corresponding to the components that make up a 3D scene. For
@@ -557,7 +566,8 @@ recent years it has been replaced with a sophisticated graphics
 pipeline referred to as the ``painter'' pipeline illustrated in
 \aosafigref{fig.vtk.painter}.
 
-\aosafigure{../images/vtk/painter.eps}{Display Classes}{fig.vtk.painter}
+%% \aosafigure{../images/vtk/painter.eps}{Display Classes}{fig.vtk.painter}
+\aosafigure{../images/vtk/painter.eps}{ディスプレイクラス}{fig.vtk.painter}
 
 The painter design supports a variety of techniques for rendering data
 that can be combined to provide special rendering effects. This
@@ -577,7 +587,8 @@ geometry.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Events and Interaction}
+%% \begin{aosasect2}{Events and Interaction}
+\begin{aosasect2}{イベントとインタラクション}
 
 Interacting with data is an essential part of visualization. In VTK
 this occurs in a variety of ways. At its simplest level, users can
@@ -670,7 +681,8 @@ and there are more than 50 different widgets currently in the system.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Summary of Libraries}
+%% \begin{aosasect2}{Summary of Libraries}
+\begin{aosasect2}{ライブラリのまとめ}
 
 VTK is a large software toolkit. Currently the system consists of
 approximately 1.5 million lines of code (including comments but not
@@ -708,7 +720,8 @@ provides.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Looking Back/Looking Forward}
+%% \begin{aosasect1}{Looking Back/Looking Forward}
+\begin{aosasect1}{ふりかえり/今後の展望}
 
 VTK has been an enormously successful system. While the first line of code was written in
 1993, at the time of this writing VTK is still growing strong and if anything
@@ -716,7 +729,8 @@ the pace of development is increasing.\footnote{See the latest VTK code
 analysis at \url{http://www.ohloh.net/p/vtk/analyses/latest}.} In this section
 we talk about some lessons learned and future challenges.
 
-\begin{aosasect2}{Managing Growth}
+%% \begin{aosasect2}{Managing Growth}
+\begin{aosasect2}{プロジェクトの発展}
 
 One of the most surprising aspects to the VTK adventure has been the
 project's longevity. The pace of development is due to several major
@@ -776,7 +790,8 @@ periphery while maintaining core stability.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Technology Additions}
+%% \begin{aosasect2}{Technology Additions}
+\begin{aosasect2}{技術的な補足}
 
 Besides the software process, there are many technological innovations
 in the development pipeline.
@@ -816,7 +831,8 @@ in the development pipeline.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Open Science}
+%% \begin{aosasect2}{Open Science}
+\begin{aosasect2}{オープンサイエンス}
 
 Finally Kitware and more generally the VTK community are committed to
 Open Science. Pragmatically this is a way of saying we will promulgate
@@ -836,7 +852,8 @@ well as human reviews of the submission.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Lessons Learned}
+%% \begin{aosasect2}{Lessons Learned}
+\begin{aosasect2}{教訓}
 
 While VTK has been successful there are many things we didn't do
 right:

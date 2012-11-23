@@ -30,5 +30,5 @@ telepathy.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
 thousandparsec.tex  TAKAGI Masahiro <matakagi@gmail.com>      100
 violet.tex          TAKAGI Masahiro <matakagi@gmail.com>      100
 vistrails.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
-vtk.tex
+vtk.tex             TAKAGI Masahiro <matakagi@gmail.com>        0
 wesnoth.tex
