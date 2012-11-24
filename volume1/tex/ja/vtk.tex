@@ -1,53 +1,88 @@
 \begin{aosachapter}{VTK}{s:vtk}{Berk Geveci and Will Schroeder}
 %% Based on EN-Revision r272
 
-The Visualization Toolkit (VTK) is a widely used software system for
-data processing and visualization. It is used in scientific computing,
-medical image analysis, computational geometry, rendering, image
-processing and informatics. In this chapter we provide a brief
-overview of VTK, including some of the basic design patterns that make
-it a successful system.
+%% The Visualization Toolkit (VTK) is a widely used software system for
+%% data processing and visualization. It is used in scientific computing,
+%% medical image analysis, computational geometry, rendering, image
+%% processing and informatics. In this chapter we provide a brief
+%% overview of VTK, including some of the basic design patterns that make
+%% it a successful system.
+Visualization Toolkit (VTK)は、データ処理や可視化用のソフトウェアシステムとして幅広く使われているものだ。
+科学計算や医用画像解析、計算幾何学、レンダリング、画像処理や情報科学などの分野で使われている。
+この章では、VTKの概要とその基本的な設計パターンに関して説明する。
 
-To really understand a software system it is essential to not only
-understand what problem it solves, but also the particular culture in
-which it emerged. In the case of VTK, the software was ostensibly
-developed as a 3D visualization system for scientific data. But the
-cultural context in which it emerged adds a significant back story to
-the endeavor, and helps explains why the software was designed and
-deployed as it was.
+%% To really understand a software system it is essential to not only
+%% understand what problem it solves, but also the particular culture in
+%% which it emerged. In the case of VTK, the software was ostensibly
+%% developed as a 3D visualization system for scientific data. But the
+%% cultural context in which it emerged adds a significant back story to
+%% the endeavor, and helps explains why the software was designed and
+%% deployed as it was.
+何かのソフトウェアシステムについて完全に理解するには、
+単にそのソフトウェアが解決しようとしている問題が何かを理解するだけでは不十分だ。
+そのソフトウェアが生み出す文化も理解しないといけない。
+VTKに関して言うと、上っ面だけを見れば、科学データ用の3D可視化システムに過ぎない。
+しかし、それが生み出す文化を踏まえるとその背景には大きなストーリーがあり、
+なぜ開発されたのかやなぜこの形で公開されたのかなどを理解する助けになるだろう。
 
-At the time VTK was conceived and written, its initial authors (Will
-Schroeder, Ken Martin, Bill Lorensen) were researchers at GE Corporate
-R\&D\@. We were heavily invested in a precursor system known as LYMB
-which was a Smalltalk-like environment implemented in the C
-programming language. While this was a great system for its time, as
-researchers we were consistently frustrated by two major barriers when
-trying to promote our work: 1) IP issues and 2) non-standard,
-proprietary software. IP issues were a problem because trying to
-distribute the software outside of GE was nearly impossible once the
-corporate lawyers became involved. Second, even if we were deploying
-the software inside of GE, many of our customers balked at learning a
-proprietary, non-standard system since the effort to master it did not
-transition with an employee once she left the company, and it did not
-have the widespread support of a standard tool set. Thus in the end
-the primary motivation for VTK was to develop an open standard, or
-\emph{collaboration platform} through which we could easily transition
-technology to our customers. Thus choosing an open source license for
-VTK was probably the most important design decision that we made.
+%% At the time VTK was conceived and written, its initial authors (Will
+%% Schroeder, Ken Martin, Bill Lorensen) were researchers at GE Corporate
+%% R\&D\@. We were heavily invested in a precursor system known as LYMB
+%% which was a Smalltalk-like environment implemented in the C
+%% programming language. While this was a great system for its time, as
+%% researchers we were consistently frustrated by two major barriers when
+%% trying to promote our work: 1) IP issues and 2) non-standard,
+%% proprietary software. IP issues were a problem because trying to
+%% distribute the software outside of GE was nearly impossible once the
+%% corporate lawyers became involved. Second, even if we were deploying
+%% the software inside of GE, many of our customers balked at learning a
+%% proprietary, non-standard system since the effort to master it did not
+%% transition with an employee once she left the company, and it did not
+%% have the widespread support of a standard tool set. Thus in the end
+%% the primary motivation for VTK was to develop an open standard, or
+%% \emph{collaboration platform} through which we could easily transition
+%% technology to our customers. Thus choosing an open source license for
+%% VTK was probably the most important design decision that we made.
+VTKの元になる概念が生まれて実際に書き始めた当時、作者(Will Schroeder、Ken Martin、Bill Lorensen)
+はみなGE Corporate R\&Dの研究者だった。
+当時の私たちが使っていたのは、LYMBという先進的なシステムだった。
+これはSmalltalk風の環境で、C言語で実装されていた。
+当時としてはすばらしいシステムだったが、研究者としての私たちは二つの大きな障害に悩まされていた。
+知的所有権の問題と、非標準のプロプライエタリなソフトウェアを使っているという問題だ。
+知的所有権の問題のせいで、いったん顧問弁護士に口出しされると
+ソフトウェアをGEの外部に公開することは事実上不可能だった。
+さらに、ソフトウェアをGEの内部でだけ公開することにしたとしても、
+顧客の多くはプロプライエタリで非標準なシステムを覚えようとはしたがらないだろう。
+がんばってマスターしたところで、転職してしまえば何の役にも立たなくなる。
+さらに、標準のツールセットの恩恵を受けることもできない。
+そんな状況があったので、VTKを開発する最大の動機として「オープンな標準規格を使うこと」
+つまり「\emph{コラボレーションプラットフォーム}として開発し、
+その技術を顧客にも使ってもらいやすくすること」がうまれた。
+VTKにオープンソースライセンスを適用したことは、
+これまでの設計上の判断の中でもおそらく最も重要なものだった。
 
-The final choice of a non-reciprocal, permissive license (i.e., BSD
-not GPL) in hindsight was an exemplary decision made by the authors
-because it ultimately enabled the service and consulting based
-business that became Kitware. At the time we made the decision we were
-mostly interested in reduced barriers to collaborating with academics,
-research labs, and commercial entities. We have since discovered that
-reciprocal licenses are avoided by many organizations because of the
-potential havoc they can wreak. In fact we would argue that reciprocal
-licenses do much to slow the acceptance of open source software, but
-that is an argument for another time. The point here is: one of the
-major design decisions to make relative to any software system is the
-choice of copyright license. It's important to review the goals of the
-project and then address IP issues appropriately.
+%% The final choice of a non-reciprocal, permissive license (i.e., BSD
+%% not GPL) in hindsight was an exemplary decision made by the authors
+%% because it ultimately enabled the service and consulting based
+%% business that became Kitware. At the time we made the decision we were
+%% mostly interested in reduced barriers to collaborating with academics,
+%% research labs, and commercial entities. We have since discovered that
+%% reciprocal licenses are avoided by many organizations because of the
+%% potential havoc they can wreak. In fact we would argue that reciprocal
+%% licenses do much to slow the acceptance of open source software, but
+%% that is an argument for another time. The point here is: one of the
+%% major design decisions to make relative to any software system is the
+%% choice of copyright license. It's important to review the goals of the
+%% project and then address IP issues appropriately.
+最終的に、伝播性のないライセンスを選んだ(つまり、GPLではなくBSDを選んだ)
+ことは、今思えばとてもよい判断だった。そのおかげで、サービスやコンサルのビジネスもできるようになり、
+それが後のKitwareにつながったのだから。
+当時の私たちが重視していたのは、学校や研究所そして企業などが共同作業をするための障壁を下げることだった。
+多くの組織では、伝播性のあるライセンスが避けられていた。問題に巻き込まれる恐れがあったからだ。
+実際私たちも、伝播性のあるライセンスのせいでオープンソースソフトウェアの普及がなかなか進まないと思っている。
+まあ、それはまた別の話。
+言いたいのは、ソフトウェアシステムを作るときにはライセンスの選択が重要のポイントの一つになるっていうことだ。
+プロジェクトのゴールを見定めて、知的所有権の問題に適切に対応することが大切だ。
 
 %% \begin{aosasect1}{What Is VTK?}
 \begin{aosasect1}{VTKとは}
