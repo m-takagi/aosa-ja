@@ -87,39 +87,65 @@ VTKにオープンソースライセンスを適用したことは、
 %% \begin{aosasect1}{What Is VTK?}
 \begin{aosasect1}{VTKとは}
 
-VTK was initially conceived as a scientific data visualization
-system. Many people outside of the field naively consider
-visualization a particular type of geometric rendering: examining
-virtual objects and interacting with them. While this is indeed part
-of visualization, in general data visualization includes the whole
-process of transforming data into sensory input, typically images, but
-also includes tactile, auditory, and other forms. The data forms not
-only consist of geometric and topological constructs, including such
-abstractions as meshes or complex spatial decompositions, but
-attributes to the core structure such as scalars (e.g., temperature or
-pressure), vectors (e.g., velocity), tensors (e.g., stress and strain)
-plus rendering attributes such as surface normals and texture
-coordinate.
+%% VTK was initially conceived as a scientific data visualization
+%% system. Many people outside of the field naively consider
+%% visualization a particular type of geometric rendering: examining
+%% virtual objects and interacting with them. While this is indeed part
+%% of visualization, in general data visualization includes the whole
+%% process of transforming data into sensory input, typically images, but
+%% also includes tactile, auditory, and other forms. The data forms not
+%% only consist of geometric and topological constructs, including such
+%% abstractions as meshes or complex spatial decompositions, but
+%% attributes to the core structure such as scalars (e.g., temperature or
+%% pressure), vectors (e.g., velocity), tensors (e.g., stress and strain)
+%% plus rendering attributes such as surface normals and texture
+%% coordinate.
+VTKは、もともとは科学データの可視化システムだと考えられていた。
+外野の人間のほとんどは、可視化を単なる幾何学的なレンダリングに過ぎないと考えている。
+仮想的な物体を調べたり、それを使ったやりとりをしたりするというものだ。
+まあそれも可視化の一つの側面ではあるが、
+一般にデータの可視化といえば、データを感覚入力に変換する作業全体を意味する。
+感覚入力の典型例は画像だが、それだけではない。触覚や聴覚に対応する形式も含む。
+データの形式は、幾何学的かつ位相的な構造
+(メッシュあるいは複雑な空間分解による抽象化など)
+だけで成り立っているわけではない。コア構造
+(温度や気圧などのスカラー値、速度などのベクター値、圧力やゆがみなどのテンソル値)
+やレンダリング属性(面法線やテクスチャ座標など)にも帰属する。
 
-Note that data representing spatial-temporal information is generally
-considered part of scientific visualization. However there are more
-abstract data forms such as marketing demographics, web pages,
-documents and other information that can only be represented through
-abstract (i.e., non-spatial temporal) relationships such as
-unstructured documents, tables, graphs, and trees. These abstract data
-are typically addressed by methods from information
-visualization. With the help of the community, VTK is now capable of
-both scientific and information visualization.
+%% Note that data representing spatial-temporal information is generally
+%% considered part of scientific visualization. However there are more
+%% abstract data forms such as marketing demographics, web pages,
+%% documents and other information that can only be represented through
+%% abstract (i.e., non-spatial temporal) relationships such as
+%% unstructured documents, tables, graphs, and trees. These abstract data
+%% are typically addressed by methods from information
+%% visualization. With the help of the community, VTK is now capable of
+%% both scientific and information visualization.
+時空間情報を表すデータも、一般的にはサイエンティフィック・ビジュアライゼーションの一部だと考えられていることに注意しよう。
+しかし、もっと抽象的なデータ形式もある。マーケティングの統計やWebページ、そしてドキュメントやその他情報で
+抽象的な関係(構造化されていない文書や表、グラフ、ツリーなど)でしか表せないものなどだ。
+こういった抽象データは、一般的にはインフォメーション・ビジュアライゼーションで対応する。
+これらのコミュニティの助けを得て、VTKは今やサイエンティフィック・ビジュアライゼーションと
+インフォメーション・ビジュアライゼーションの両方に対応できるようになった。
 
-As a visualization system, the role of VTK is to take data in these
-forms and ultimately transform them into forms comprehensible by the
-human sensory apparatus. Thus one of the core requirements of VTK is
-its ability to create data flow pipelines that are capable of
-ingesting, processing, representing and ultimately rendering
-data. Hence the toolkit is necessarily architected as a flexible
-system and its design reflects this on many levels. For example, we
-purposely designed VTK as a toolkit with many interchangeable
-components that can be combined to process a wide variety of data.
+%% As a visualization system, the role of VTK is to take data in these
+%% forms and ultimately transform them into forms comprehensible by the
+%% human sensory apparatus. Thus one of the core requirements of VTK is
+%% its ability to create data flow pipelines that are capable of
+%% ingesting, processing, representing and ultimately rendering
+%% data. Hence the toolkit is necessarily architected as a flexible
+%% system and its design reflects this on many levels. For example, we
+%% purposely designed VTK as a toolkit with many interchangeable
+%% components that can be combined to process a wide variety of data.
+ビジュアライゼーションシステムとしてのVTKの役割は、
+これらの形式のデータを受け取って、最終的にそれを
+人間の五感で理解しやすい形式に変換することだ。
+したがって、VTKの重要な要件の一つは、データフローパイプラインを作って
+データの取り込みから処理、表現、レンダリングまでをできるようにすることになる。
+そのため、ツールキットは柔軟なシステムとして作られている必要があり、
+ツールキットの設計がいろんなレベルに影響する。
+たとえば、私たちは交換可能なコンポーネント群をまとめた形式でVTKを作ったが、これは意図的なものだ。
+このコンポーネントを組み合わせることで、さまざまなデータを処理できるようにした。
 
 \end{aosasect1}
 
