@@ -152,28 +152,49 @@ VTKは、もともとは科学データの可視化システムだと考えら�
 %% \begin{aosasect1}{Architectural Features}
 \begin{aosasect1}{アーキテクチャの機能}
 
-Before getting too far into the specific architectural features of
-VTK, there are high-level concepts that have significant impact on
-developing and using the system. One of these is VTK's hybrid wrapper
-facility. This facility automatically generates language bindings to
-Python, Java, and Tcl from VTK's C++ implementation (additional
-languages could be and have been added). Most high-powered developers
-will work in C++. User and application developers may use C++ but
-often the interpreted languages mentioned above are preferred. This
-hybrid compiled/interpreted environment combines the best of both
-worlds: high performance compute-intensive algorithms and flexibility
-when prototyping or developing applications. In fact this approach to
-multi-language computing has found favor with many in the scientific
-computing community and they often use VTK as a template for
-developing their own software.
+%% Before getting too far into the specific architectural features of
+%% VTK, there are high-level concepts that have significant impact on
+%% developing and using the system. One of these is VTK's hybrid wrapper
+%% facility. This facility automatically generates language bindings to
+%% Python, Java, and Tcl from VTK's C++ implementation (additional
+%% languages could be and have been added). Most high-powered developers
+%% will work in C++. User and application developers may use C++ but
+%% often the interpreted languages mentioned above are preferred. This
+%% hybrid compiled/interpreted environment combines the best of both
+%% worlds: high performance compute-intensive algorithms and flexibility
+%% when prototyping or developing applications. In fact this approach to
+%% multi-language computing has found favor with many in the scientific
+%% computing community and they often use VTK as a template for
+%% developing their own software.
+VTKのアーキテクチャの詳細に深入りする前に、
+このシステムの開発と利用に大きな影響を与えた上位レベルの概念について説明する。
+そのひとつが、VTKのハイブリッドラッパー機能だ。
+この機能は、C++によるVTKの実装からPythonやJavaそしてTclなどの言語バインディングを自動生成する
+(それ以外の言語に対応することも可能だし、追加されつつある)。
+開発の主力メンバーはC++で作業する。
+ユーザーやアプリケーション開発者もC++を使うことはあるだろうが、
+たいていは先にあげたようなインタプリタ型の言語のほうをより好む。
+コンパイル型とインタプリタ型の環境を組み合わせることで、
+それぞれのいいとこどりを目指した。
+ハイパフォーマンスコンピューティングを重視したアルゴリズムも使えるし、
+プロトタイピングやアプリケーション開発のときにも柔軟に対応できる。
+実際、この方式でいろんな言語での計算処理に対応できるようにしたおかげで、
+科学計算のコミュニティの多くの人たちに喜んでもらえた。
+彼らがソフトウェアを自作するときのテンプレートとしてもVTKを使ってもらえることが多くなった。
 
-In terms of software process, VTK has adopted CMake to control the
-build; CDash/CTest for testing; and CPack for cross-platform
-deployment. Indeed VTK can be compiled on almost any computer
-including supercomputers which are often notoriously primitive
-development environments. In addition, web pages, wiki, mailing lists
-(user and developer), documentation generation facilities (i.e.,
-Doxygen) and a bug tracker (Mantis) round out the development tools.
+%% In terms of software process, VTK has adopted CMake to control the
+%% build; CDash/CTest for testing; and CPack for cross-platform
+%% deployment. Indeed VTK can be compiled on almost any computer
+%% including supercomputers which are often notoriously primitive
+%% development environments. In addition, web pages, wiki, mailing lists
+%% (user and developer), documentation generation facilities (i.e.,
+%% Doxygen) and a bug tracker (Mantis) round out the development tools.
+ソフトウェア開発の面から見ると、VTKはCMakeを使ってビルドを管理している。
+そして、テストにはCDash/CTestを使い、クロスプラットフォームのデプロイに関してはCPackを使っている。
+実際、VTKはありとあらゆるプラットフォームでコンパイルできる。
+あきれるほど原始的な開発環境しかないことで有名なスーパーコンピュータでもだいじょうぶだ。
+さらに、開発ツールだけではなくWebページやWiki、(ユーザー向けおよび開発者向けの)メーリングリスト、
+ドキュメント生成機能(Doxygen)、バグ追跡システム(Mantis)なども揃っている。
 
 %% \begin{aosasect2}{Core Features}
 \begin{aosasect2}{コア機能}
