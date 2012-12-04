@@ -199,158 +199,262 @@ VTKのアーキテクチャの詳細に深入りする前に、
 %% \begin{aosasect2}{Core Features}
 \begin{aosasect2}{コア機能}
 
-As VTK is an object-oriented system, the access of class and instance
-data members is carefully controlled in VTK\@. In general, all data
-members are either protected or private. Access to them is through
-\code{Set} and \code{Get} methods, with special variations for Boolean
-data, modal data, strings and vectors. Many of these methods are
-actually created by inserting macros into the class header files. So
-for example:
+%% As VTK is an object-oriented system, the access of class and instance
+%% data members is carefully controlled in VTK\@. In general, all data
+%% members are either protected or private. Access to them is through
+%% \code{Set} and \code{Get} methods, with special variations for Boolean
+%% data, modal data, strings and vectors. Many of these methods are
+%% actually created by inserting macros into the class header files. So
+%% for example:
+VTKはオブジェクト指向のシステムなので、クラスやインスタンスのメンバーへのアクセスはVTKがきちんと管理している。
+すべてのデータメンバーは、protectedあるいはprivateのどちらかになっている。
+これらにアクセスするには\code{Set}メソッドと\code{Get}メソッドを用い、
+Booleanデータやモデルのデータ、文字列、そしてベクター用にそれぞれ特化したバージョンが用意されている。
+これらのメソッドの多くは、実際にはマクロとしてクラスのヘッダファイルに組み込まれる。つまり、
+たとえば
 
 \begin{verbatim}
 vtkSetMacro(Tolerance,double);
 vtkGetMacro(Tolerance,double);
 \end{verbatim}
 
-\noindent become on expansion:
+%% \noindent become on expansion:
+\noindent
+これを展開すると、次のようになる。
 
 \begin{verbatim}
 virtual void SetTolerance(double);
 virtual double GetTolerance();
 \end{verbatim}
 
-There are many reasons for using these macros beyond simply code
-clarity. In VTK there are important data members controlling
-debugging, updating an object's modified time (MTime), and properly
-managing reference counting. These macros correctly manipulate these
-data and their use is highly recommended. For example, a particularly
-pernicious bug in VTK occurs when the object's MTime is not managed
-properly. In this case code may not execute when it should, or may
-execute too often.
+%% There are many reasons for using these macros beyond simply code
+%% clarity. In VTK there are important data members controlling
+%% debugging, updating an object's modified time (MTime), and properly
+%% managing reference counting. These macros correctly manipulate these
+%% data and their use is highly recommended. For example, a particularly
+%% pernicious bug in VTK occurs when the object's MTime is not managed
+%% properly. In this case code may not execute when it should, or may
+%% execute too often.
+これらのマクロを使う理由は、単にコードをわかりやすくするというだけではない。それ以外にもいろんな理由がある。
+VTKには、デバッグを制御したりオブジェクトの変更時刻(MTime)を更新したり参照カウンタを管理したりといった
+重要なデータメンバーが存在する。マクロを使えばこういったデータを正しく操作できるので、マクロを使うことが強く推奨される。
+たとえば、VTKのバグの中でも最もやっかいなものは、オブジェクトのMTimeをきちんと管理していないときに発生するものだ。
+本来実行されるべきコードが実行されなくなったり、逆に必要以上に実行されてしまうことになる。
 
-One of the strengths of VTK is its relatively simplistic means of
-representing and managing data. Typically various data arrays of
-particular types (e.g., \code{vtkFloatArray}) are used to represent
-contiguous pieces of information. For example, a list of three XYZ
-points would be represented with a \code{vtkFloatArray} of nine
-entries (x,y,z, x,y,z, etc.) There is the notion of a tuple in these
-arrays, so a 3D point is a 3-tuple, whereas a symmetric $3{\times}3$
-tensor matrix is represented by a 6-tuple (where symmetry space
-savings are possible). This design was adopted purposely because in
-scientific computing it is common to interface with systems
-manipulating arrays (e.g., Fortran) and it is much more efficient to
-allocate and deallocate memory in large contiguous chunks. Further,
-communication, serializing and performing IO is generally much more
-efficient with contiguous data. These core data arrays (of various
-types) represent much of the data in VTK and have a variety of
-convenience methods for inserting and accessing information, including
-methods for fast access, and methods that automatically allocate
-memory as needed when adding more data. Data arrays are subclasses of
-the \code{vtkDataArray} abstract class meaning that generic virtual
-methods can be used to simplify coding. However, for higher
-performance static, templated functions are used which switch based on
-type, with subsequent, direct access into the contiguous data arrays.
+%% One of the strengths of VTK is its relatively simplistic means of
+%% representing and managing data. Typically various data arrays of
+%% particular types (e.g., \code{vtkFloatArray}) are used to represent
+%% contiguous pieces of information. For example, a list of three XYZ
+%% points would be represented with a \code{vtkFloatArray} of nine
+%% entries (x,y,z, x,y,z, etc.) There is the notion of a tuple in these
+%% arrays, so a 3D point is a 3-tuple, whereas a symmetric $3{\times}3$
+%% tensor matrix is represented by a 6-tuple (where symmetry space
+%% savings are possible). This design was adopted purposely because in
+%% scientific computing it is common to interface with systems
+%% manipulating arrays (e.g., Fortran) and it is much more efficient to
+%% allocate and deallocate memory in large contiguous chunks. Further,
+%% communication, serializing and performing IO is generally much more
+%% efficient with contiguous data. These core data arrays (of various
+%% types) represent much of the data in VTK and have a variety of
+%% convenience methods for inserting and accessing information, including
+%% methods for fast access, and methods that automatically allocate
+%% memory as needed when adding more data. Data arrays are subclasses of
+%% the \code{vtkDataArray} abstract class meaning that generic virtual
+%% methods can be used to simplify coding. However, for higher
+%% performance static, templated functions are used which switch based on
+%% type, with subsequent, direct access into the contiguous data arrays.
+VTKの強みの一つが、データの表現や管理が比較的シンプルにできるという点だ。
+通常は、特定の型のデータ配列(\code{vtkFloatArray}など)を使って連続する情報を表す。
+たとえば、三つの三次元座標のリストを表すには、九個のエントリ(x,y,z, x,y,z, など)を持つ\code{vtkFloatArray}を使う。
+これらの配列にはタプルの概念が存在するので、三次元座標は3タプルになるし、対称な$3{\times}3$テンソルなら
+6タプルで表される(対称空間も保存できる)。この設計を選んだのは意図的なものだ。
+科学計算の世界では配列を操作するシステム(Fortranなど)とのやりとりが一般的だし、
+メモリを確保したり解放したりするときにも連続データの大きなチャンクで扱うほうがずっと効率的だからである。
+さらに、通信やシリアライズそしてIOといった操作は、一般に連続データのほうがずっと効率的になる。
+これらの(さまざまな型の)コアデータ配列がVTKのデータの大半を表す。便利なメソッドも多数用意されており、
+情報の追加や情報へのアクセスができるようになっている。高速アクセス用のメソッドもあるし、
+データの追加に合わせて必要に応じてメモリを自動的に確保するメソッドもある。
+データ配列は抽象クラス\code{vtkDataArray}のサブクラスである。
+これはつまり、汎用的な仮想メソッドを使ってシンプルにコーディングできるということだ。
+しかし、より高パフォーマンスを求める場合には、staticなテンプレート関数を使う。
+これを使えば、型に応じて実装を切り替えて連続データの配列に直接アクセスできるようになる。
 
-In general C++ templates are not visible in the public class API;
-although templates are used widely for performance reasons. This goes
-for STL as well: we typically employ the
-PIMPL\footnote{\url{http://en.wikipedia.org/wiki/Opaque\_pointer}.}
-design pattern to hide the complexities of a template implementation
-from the user or application developer. This has served us
-particularly well when it comes to wrapping the code into interpreted
-code as described previously. Avoiding the complexity of the templates
-in the public API means that the VTK implementation, from the
-application developer point of view, is mostly free of the
-complexities of data type selection. Of course under the hood the code
-execution is driven by the data type which is typically determined at
-run time when the data is accessed.
+%% In general C++ templates are not visible in the public class API;
+%% although templates are used widely for performance reasons. This goes
+%% for STL as well: we typically employ the
+%% PIMPL\footnote{\url{http://en.wikipedia.org/wiki/Opaque\_pointer}.}
+%% design pattern to hide the complexities of a template implementation
+%% from the user or application developer. This has served us
+%% particularly well when it comes to wrapping the code into interpreted
+%% code as described previously. Avoiding the complexity of the templates
+%% in the public API means that the VTK implementation, from the
+%% application developer point of view, is mostly free of the
+%% complexities of data type selection. Of course under the hood the code
+%% execution is driven by the data type which is typically determined at
+%% run time when the data is accessed.
+一般に、C++のテンプレートはクラスの公開APIからは見えないものだ。
+しかし、パフォーマンス上の理由でテンプレートは幅広く使われている。
+STLも同様だ。私たちは通常、PIMPL\footnote{\url{http://en.wikipedia.org/wiki/Opaque\_pointer}}
+パターンに従ってテンプレートの実装を隠蔽し、ユーザーやアプリケーション開発者からは見えないようにする。
+こうしておけば、先述のようにインタプリタ型言語のコードでラップすることになったとしてもうまくいく。
+テンプレートの複雑なところを公開APIからは見えないようにするということは、
+VTKの実装をアプリケーション開発者側から見たときには
+データ型を選ぶなんてことを気にせずに済むようになるということだ。
+もちろん、裏側では実際はデータ型を見て処理を切り替えているが、
+型の判定は実行時に実際にデータにアクセスするときに行っている。
 
-Some users wonder why VTK uses reference counting for memory
-management versus a more user-friendly approach such as garbage
-collection. The basic answer is that VTK needs complete control over
-when data is deleted, because the data sizes can be huge. For example,
-a volume of byte data $1000{\times}1000{\times}1000$ in size is a
-gigabyte in size. It is not a good idea to leave such data lying
-around while the garbage collector decides whether or not it is time
-to release it. In VTK most classes (subclasses of \code{vtkObject})
-have the built-in capability for reference counting. Every object
-contains a reference count that it initialized to one when the object
-is instantiated.  Every time a use of the object is registered, the
-reference count is increased by one. Similarly, when a use of the
-object is unregistered (or equivalently the object is deleted) the
-reference count is reduced by one. Eventually the object's reference
-count is reduced to zero, at which point it self destructs.  A typical
-example looks like the following:
+%% Some users wonder why VTK uses reference counting for memory
+%% management versus a more user-friendly approach such as garbage
+%% collection. The basic answer is that VTK needs complete control over
+%% when data is deleted, because the data sizes can be huge. For example,
+%% a volume of byte data $1000{\times}1000{\times}1000$ in size is a
+%% gigabyte in size. It is not a good idea to leave such data lying
+%% around while the garbage collector decides whether or not it is time
+%% to release it. In VTK most classes (subclasses of \code{vtkObject})
+%% have the built-in capability for reference counting. Every object
+%% contains a reference count that it initialized to one when the object
+%% is instantiated.  Every time a use of the object is registered, the
+%% reference count is increased by one. Similarly, when a use of the
+%% object is unregistered (or equivalently the object is deleted) the
+%% reference count is reduced by one. Eventually the object's reference
+%% count is reduced to zero, at which point it self destructs.  A typical
+%% example looks like the following:
+VTKではなぜ参照カウンタでメモリを管理しているんだろう？
+なぜ、ガベージコレクションのようなもっとユーザーにやさしい方法を使わないんだろう？
+そんなふうに思う人もいるだろう。手短に答えると、
+VTKではデータの削除を完全に管理する必要があり、そのデータは巨大なサイズになる可能性があるからだ。
+たとえば$1000{\times}1000{\times}1000$バイトのデータのサイズはギガバイト単位になる。
+こんな巨大なデータを置きっぱなしにして、いつ解放するのかをガベージコレクタに判断させるというのは得策ではない。
+VTKでは、ほとんどのクラス(\code{vtkObject}のサブクラス)が参照カウント機能を組み込みで持っている。
+すべてのオブジェクトが参照カウンタを持っており、オブジェクトのインスタンスを作ったときにカウンタが1で初期化される。
+オブジェクトを登録して使うたびに、参照カウンタはひとつ増える。
+同様に、使っていたオブジェクトの登録を解除した場合
+(あるいはオブジェクトを削除した場合)に、参照カウンタがひとつ減る。
+最終的にオブジェクトの参照カウンタがゼロになるのは、自分自身を破棄するときだ。
+一般的な例は、このようになる。
 
+%% \begin{verbatim}
+%% vtkCamera *camera = vtkCamera::New();   //reference count is 1
+%% camera->Register(this);                 //reference count is 2
+%% camera->Unregister(this);               //reference count is 1
+%% renderer->SetActiveCamera(camera);      //reference count is 2
+%% renderer->Delete();                     //ref count is 1 when renderer is deleted
+%% camera->Delete();                       //camera self destructs
+%% \end{verbatim}
 \begin{verbatim}
-vtkCamera *camera = vtkCamera::New();   //reference count is 1
-camera->Register(this);                 //reference count is 2
-camera->Unregister(this);               //reference count is 1
-renderer->SetActiveCamera(camera);      //reference count is 2
-renderer->Delete();                     //ref count is 1 when renderer is deleted
-camera->Delete();                       //camera self destructs
+vtkCamera *camera = vtkCamera::New();   // 参照カウンタは1
+camera->Register(this);                 // 参照カウンタは2
+camera->Unregister(this);               // 参照カウンタは1
+renderer->SetActiveCamera(camera);      // 参照カウンタは2
+renderer->Delete();                     // レンダラを削除した後の参照カウンタは1
+camera->Delete();                       // カメラ自身の破棄
 \end{verbatim}
 
-There is another important reason why reference counting is important
-to VTK---it provides the ability to efficiently copy data. For
-example, imagine a data object D1 that consists of a number of data
-arrays: points, polygons, colors, scalars and texture coordinates. Now
-imagine processing this data to generate a new data object D2 which is
-the same as the first plus the addition of vector data (located on the
-points). One wasteful approach is to completely (deep) copy D1 to
-create D2, and then add the new vector data array to
-D2. Alternatively, we create an empty D2 and then pass the arrays from
-D1 to D2 (shallow copy), using reference counting to keep track of
-data ownership, finally adding the new vector array to D2. The latter
-approach avoids copying data which, as we have argued previously, is
-essential to a good visualization system. As we will see later in this
-chapter, the data processing pipeline performs this type of operation
-routinely, i.e., copying data from the input of an algorithm to the
-output, hence reference counting is essential to VTK.
+%% There is another important reason why reference counting is important
+%% to VTK---it provides the ability to efficiently copy data. For
+%% example, imagine a data object D1 that consists of a number of data
+%% arrays: points, polygons, colors, scalars and texture coordinates. Now
+%% imagine processing this data to generate a new data object D2 which is
+%% the same as the first plus the addition of vector data (located on the
+%% points). One wasteful approach is to completely (deep) copy D1 to
+%% create D2, and then add the new vector data array to
+%% D2. Alternatively, we create an empty D2 and then pass the arrays from
+%% D1 to D2 (shallow copy), using reference counting to keep track of
+%% data ownership, finally adding the new vector array to D2. The latter
+%% approach avoids copying data which, as we have argued previously, is
+%% essential to a good visualization system. As we will see later in this
+%% chapter, the data processing pipeline performs this type of operation
+%% routinely, i.e., copying data from the input of an algorithm to the
+%% output, hence reference counting is essential to VTK.
+なぜそんなにもVTKにとって参照カウンタ方式が重要なのか。実はもう一つ別の理由がある。
+この方式のほうが、データを効率的にコピーできるからだ。
+たとえば、大量のデータ配列を含むデータオブジェクトD1があるとしよう。
+この中には点やポリゴン、色、スカラー、テクスチャ座標などが含まれる。
+このデータを処理して新たなデータオブジェクトD2を作ることを考える。
+このオブジェクトは、最初のデータオブジェクトに(点を指す)ベクターデータを追加したものだ。
+無駄の多いやりかたとしては、D1を完全にディープコピーしてD2を作ってから、
+新しいベクターデータの配列をD2に追加するという方法がある。
+それ以外には、まず空のD2を作ってD1からD2に配列をシャローコピーするという方法がある。
+参照カウンタを使えばデータの所有者をきちんと追えるので、あとはD2に新たなベクター配列を追加するだけだ。
+後者の手法だと、データのコピーを回避できる。既に述べたとおり、
+これは優れたビジュアライゼーションシステムに不可欠なものだ。
+この章の後半で解説するデータ処理パイプラインは、この手の操作
+(あるアルゴリズムへの入力から出力へとデータをコピーするという操作)をよく行う。
+そのため、VTKでは参照カウンタが必須になる。
 
-Of course there are some notorious problems with reference
-counting. Occasionally reference cycles can exist, with objects in the
-cycle referring to each other in a mutually supportive
-configuration. In this case, intelligent intervention is required, or
-in the case of VTK, the special facility implemented in
-\code{vtkGarbageCollector} is used to manage objects which are
-involved in cycles. When such a class is identified (this is
-anticipated during development), the class registers itself with the
-garbage collector and overloads its own \code{Register} and
-\code{UnRegister} methods. Then a subsequent object deletion (or
-unregister) method performs a topological analysis on the local
-reference counting network, searching for detached islands of mutually
-referencing objects. These are then deleted by the garbage collector.
+%% Of course there are some notorious problems with reference
+%% counting. Occasionally reference cycles can exist, with objects in the
+%% cycle referring to each other in a mutually supportive
+%% configuration. In this case, intelligent intervention is required, or
+%% in the case of VTK, the special facility implemented in
+%% \code{vtkGarbageCollector} is used to manage objects which are
+%% involved in cycles. When such a class is identified (this is
+%% anticipated during development), the class registers itself with the
+%% garbage collector and overloads its own \code{Register} and
+%% \code{UnRegister} methods. Then a subsequent object deletion (or
+%% unregister) method performs a topological analysis on the local
+%% reference counting network, searching for detached islands of mutually
+%% referencing objects. These are then deleted by the garbage collector.
+もちろん、参照カウント方式にもよく知られた問題はある。
+ときどき発生する循環参照がそのひとつだ。複数のオブジェクトがお互いに参照し合う状態になってしまうことがある。
+こんな場合には、きちんと考えた上での介入が必要になる。VTKの場合は、\code{vtkGarbageCollector}
+に組み込まれた特別な機能を使って循環参照状態のオブジェクトを管理する。
+循環参照のクラスが見つかると(開発中にはあり得ることだ)、そのクラスは自分自身をガベージコレクタに登録し、
+自身の\code{Register}メソッドと\code{UnRegister}メソッドをオーバーロードする。
+それ以降、オブジェクトの削除(あるいは登録解除)メソッドは、
+ローカルの参照カウンタネットワークでトポロジー解析をして、
+互いに参照し合うオブジェクトの孤島を探す。
+そして、それをガベージコレクタが削除する。
 
-Most instantiation in VTK is performed through an object factory
-implemented as a static class member. The typical syntax appears as
-follows:
+%% Most instantiation in VTK is performed through an object factory
+%% implemented as a static class member. The typical syntax appears as
+%% follows:
+VTKでのインスタンス作成の大半は、クラスのstaticメンバーとして実装されたオブジェクトファクトリー経由で行う。
+典型的な構文は、このようになる。
 
 \begin{verbatim}
 vtkLight *a = vtkLight::New();
 \end{verbatim}
 
-What is important to recognize here is what is actually instantiated
-may not be a \code{vtkLight}, it could be a subclass of
-\code{vtkLight} (e.g., \code{vtkOpenGLLight}). There are a variety of
-motivations for the object factory, the most important being
-application portability and device independence. For example, in the
-above we are creating a light in a rendered scene. In a particular
-application on a particular platform, \code{vtkLight::New} may result
-in an OpenGL light, however on different platforms there is potential
-for other rendering libraries or methods for creating a light in the
-graphics system. Exactly what derived class to instantiate is a
-function of run-time system information. In the early days of VTK
-there were a myriad of options including gl, PHIGS, Starbase, XGL, and
-OpenGL\@. While most of these have now vanished, new approaches have
-appeared including DirectX and GPU-based approaches. Over time, an
-application written with VTK has not had to change as developers have
-derived new device specific subclasses to \code{vtkLight} and other
-rendering classes to support evolving technology. Another important
-use of the object factory is to enable the run-time replacement of
-performance-enhanced variations. For example, a \code{vtkImageFFT} may
-be replaced with a class that accesses special-purpose hardware or a
-numerics library.
+%% What is important to recognize here is what is actually instantiated
+%% may not be a \code{vtkLight}, it could be a subclass of
+%% \code{vtkLight} (e.g., \code{vtkOpenGLLight}). There are a variety of
+%% motivations for the object factory, the most important being
+%% application portability and device independence. For example, in the
+%% above we are creating a light in a rendered scene. In a particular
+%% application on a particular platform, \code{vtkLight::New} may result
+%% in an OpenGL light, however on different platforms there is potential
+%% for other rendering libraries or methods for creating a light in the
+%% graphics system. Exactly what derived class to instantiate is a
+%% function of run-time system information. In the early days of VTK
+%% there were a myriad of options including gl, PHIGS, Starbase, XGL, and
+%% OpenGL\@. While most of these have now vanished, new approaches have
+%% appeared including DirectX and GPU-based approaches. Over time, an
+%% application written with VTK has not had to change as developers have
+%% derived new device specific subclasses to \code{vtkLight} and other
+%% rendering classes to support evolving technology. Another important
+%% use of the object factory is to enable the run-time replacement of
+%% performance-enhanced variations. For example, a \code{vtkImageFFT} may
+%% be replaced with a class that accesses special-purpose hardware or a
+%% numerics library.
+このとき重要なのは、ここで実際にインスタンス化されるのは\code{vtkLight}
+ではないかもしれないということだ。\code{vtkLight}のサブクラス(\code{vtkOpenGLLight}など)
+になる可能性もある。オブジェクトファクトリーを使う動機はいろいろあるが、
+中でも重要なのが、アプリケーションの可搬性を確保してデバイスに依存しなくできるということだ。
+たとえば先ほどの例では、レンダリングしたシーンの中にライトを作った。
+あるプラットフォーム上のあるアプリケーションでは\code{vtkLight::New}
+がOpenGLのライトになるかもしれないが、別のプラットフォームでは
+それ以外のレンダリングライブラリを使うことになるかもしれないし、
+そのグラフィックシステム上でライトを作る方法も違うかもしれない。
+実際にどの派生クラスのインスタンスを作るのかは、実行時のシステム情報に基づいて決める。
+初期のVTKには、glやPHIGS、Starbase、XGLそしてOpenGLなど無数のオプションがあった。
+今ではこれらの大半が削除され、DirectXやGPUベースなどの新たな方法が追加されている。
+VTKで書かれたアプリケーションは、新たなテクノロジーが登場しても書き換える必要がない。
+開発者は、新たなデバイスに対応した\code{vtkLight}のサブクラスやその他レンダリングクラスを作って
+そのテクノロジーに対応するだけでいい。
+オブジェクトファクトリーを使う重要な利点がもう一つある。
+実行時に、パフォーマンス重視の別バージョンに置き換えられるということだ。
+たとえば\code{vtkImageFFT}は、特化型のハードウェアや数値計算ライブラリを使うものに置き換えることができる。
 
 \end{aosasect2}
 
