@@ -461,25 +461,36 @@ VTKで書かれたアプリケーションは、新たなテクノロジーが�
 %% \begin{aosasect2}{Representing Data}
 \begin{aosasect2}{データ表現}
 
-One of the strengths of VTK is its ability to represent complex forms
-of data. These data forms range from simple tables to complex
-structures such as finite element meshes. All of these data forms are
-subclasses of \code{vtkDataObject} as shown in
-\aosafigref{fig.vtk.dataclass} (note this is a partial inheritance
-diagram of the many data object classes).
+%% One of the strengths of VTK is its ability to represent complex forms
+%% of data. These data forms range from simple tables to complex
+%% structures such as finite element meshes. All of these data forms are
+%% subclasses of \code{vtkDataObject} as shown in
+%% \aosafigref{fig.vtk.dataclass} (note this is a partial inheritance
+%% diagram of the many data object classes).
+VTKの強みのひとつが、複雑な形式のデータを表せることだ。
+シンプルな表形式から有限要素メッシュのような複雑な構造まで、幅広いデータを扱える。
+これらすべてのデータ形式は\code{vtkDataObject}のサブクラスになる。その様子を\aosafigref{fig.vtk.dataclass}
+に示す(さまざまなデータオブジェクトクラスの一部だけを抜き出した継承ダイアグラムであることに注意)。
 
 %% \aosafigure{../images/vtk/dataclasses.eps}{Data Object Classes}{fig.vtk.dataclass}
 \aosafigure{../images/vtk/dataclasses.eps}{データオブジェクトクラス}{fig.vtk.dataclass}
 
-One of the most important characteristics of \code{vtkDataObject} is
-that it can be processed in a visualization pipeline (next
-subsection). Of the many classes shown, there are just a handful that
-are typically used in most real world applications. \code{vtkDataSet}
-and derived classes are used for scientific visualization
-(\aosafigref{fig.vtk.dataset}). For example, \code{vtkPolyData} is
-used to represent polygonal meshes; \code{vtkUnstructuredGrid} to
-represent meshes, and \code{vtkImageData} represents 2D and 3D pixel
-and voxel data.
+%% One of the most important characteristics of \code{vtkDataObject} is
+%% that it can be processed in a visualization pipeline (next
+%% subsection). Of the many classes shown, there are just a handful that
+%% are typically used in most real world applications. \code{vtkDataSet}
+%% and derived classes are used for scientific visualization
+%% (\aosafigref{fig.vtk.dataset}). For example, \code{vtkPolyData} is
+%% used to represent polygonal meshes; \code{vtkUnstructuredGrid} to
+%% represent meshes, and \code{vtkImageData} represents 2D and 3D pixel
+%% and voxel data.
+\code{vtkDataObject}の重要な特徴は、
+次のセクションで扱うビジュアライゼーションパイプラインで処理できるということだ。
+ここで示した数多くのクラスの中で、現実のアプリケーションで実際に使われるクラスは一部だけである。
+\code{vtkDataSet}とその派生クラス群はサイエンティフィック・ビジュアライゼーションに使う
+(\aosafigref{fig.vtk.dataset})。たとえば\code{vtkPolyData}
+は多角形メッシュ、\code{vtkUnstructuredGrid}はメッシュ、
+そして\code{vtkImageData}は二次元のピクセルや三次元のボクセルのデータを表す。
 
 %% \aosafigure[250pt]{../images/vtk/dataset.eps}{Data Set Classes}{fig.vtk.dataset}
 \aosafigure[250pt]{../images/vtk/dataset.eps}{データセットクラス}{fig.vtk.dataset}
