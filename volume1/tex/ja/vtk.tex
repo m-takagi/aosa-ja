@@ -500,52 +500,84 @@ VTKの強みのひとつが、複雑な形式のデータを表せることだ�
 %% \begin{aosasect2}{Pipeline Architecture}
 \begin{aosasect2}{パイプラインのアーキテクチャ}
 
-VTK consists of several major subsystems. Probably the subsystem most
-associated with visualization packages is the data flow/pipeline
-architecture. In concept, the pipeline architecture consists of three
-basic classes of objects: objects to represent data (the
-\code{vtkDataObject}s discussed above), objects to process, transform,
-filter or map data objects from one form into another
-(\code{vtkAlgorithm}); and objects to execute a pipeline
-(\code{vtkExecutive}) which controls a connected graph of interleaved
-data and process objects (i.e., the
-pipeline). \aosafigref{fig.vtk.pipeline} depicts a typical pipeline.
+%% VTK consists of several major subsystems. Probably the subsystem most
+%% associated with visualization packages is the data flow/pipeline
+%% architecture. In concept, the pipeline architecture consists of three
+%% basic classes of objects: objects to represent data (the
+%% \code{vtkDataObject}s discussed above), objects to process, transform,
+%% filter or map data objects from one form into another
+%% (\code{vtkAlgorithm}); and objects to execute a pipeline
+%% (\code{vtkExecutive}) which controls a connected graph of interleaved
+%% data and process objects (i.e., the
+%% pipeline). \aosafigref{fig.vtk.pipeline} depicts a typical pipeline.
+VTKは、いくつかの主要なサブシステムで構成されている。
+ビジュアライゼーションパッケージと最も密接に関連するサブシステムは、データフロー/パイプラインのアーキテクチャだろう。
+概念的には、パイプラインアーキテクチャは三種類のオブジェクトで構成されている。
+ある形式のデータオブジェクトを処理したり変換したりフィルタしたりして別の形式にするオブジェクト
+(\code{vtkAlgorithm})、そしてパイプラインを実行するオブジェクト(\code{vtkExecutive})だ。
+パイプラインを実行するオブジェクトは、データオブジェクトとプロセスオブジェクトを交互に連結したグラフ(パイプライン)を制御する。
+典型的なパイプラインの様子を\aosafigref{fig.vtk.pipeline}に示す。
 
 %% \aosafigure{../images/vtk/pipeline.eps}{Typical Pipeline}{fig.vtk.pipeline}
 \aosafigure{../images/vtk/pipeline.eps}{典型的なパイプライン}{fig.vtk.pipeline}
 
-While conceptually simple, actually implementing the pipeline
-architecture is challenging. One reason is that the representation of
-data can be complex. For example, some datasets consist of hierarchies
-or grouping of data, so executing across the data requires non-trivial
-iteration or recursion. To compound matters, parallel
-processing (whether using shared-memory or scalable, distributed
-approaches) require partitioning data into pieces, where pieces may be
-required to overlap in order to consistently compute boundary
-information such as derivatives.
+%% While conceptually simple, actually implementing the pipeline
+%% architecture is challenging. One reason is that the representation of
+%% data can be complex. For example, some datasets consist of hierarchies
+%% or grouping of data, so executing across the data requires non-trivial
+%% iteration or recursion. To compound matters, parallel
+%% processing (whether using shared-memory or scalable, distributed
+%% approaches) require partitioning data into pieces, where pieces may be
+%% required to overlap in order to consistently compute boundary
+%% information such as derivatives.
+概念的には単純なものだが、パイプラインを実際に実装しようとするといろいろ大変だ。
+その理由のひとつが、データの表現方法が複雑に複雑になってしまう可能性があるということである。
+たとえば、データセットの中には階層構造やグループ構造のデータを含むものもあるので、
+データを処理するときには、込み入った反復処理や再帰処理が必要になる。
+合成に関して言うと、並列処理をするには
+(共有メモリを使うにせよスケーラブルな分散方式を使うにせよ)
+データを分割しないといけない。このとき、分割した各部分が重なるようにしておかないと、
+一貫性のある境界情報(導関数など)を計算できない。
 
-The algorithm objects also introduce their own special
-complexity. Some algorithms may take multiple inputs and/or produce
-multiple outputs of different types. Some can operate locally on data
-(e.g., compute the center of a cell) while others require global
-information, for example to compute a histogram. In all cases, the
-algorithms treat their inputs as immutable, algorithms only read their
-input in order to produce their output. This is because data may be
-available as input to multiple algorithms, and it is not a good idea
-for one algorithm to trample on the input of another.
+%% The algorithm objects also introduce their own special
+%% complexity. Some algorithms may take multiple inputs and/or produce
+%% multiple outputs of different types. Some can operate locally on data
+%% (e.g., compute the center of a cell) while others require global
+%% information, for example to compute a histogram. In all cases, the
+%% algorithms treat their inputs as immutable, algorithms only read their
+%% input in order to produce their output. This is because data may be
+%% available as input to multiple algorithms, and it is not a good idea
+%% for one algorithm to trample on the input of another.
+アルゴリズムオブジェクトそれ自体も、独特の複雑さがある。
+アルゴリズムによっては、複数の入力を受け取ったり複数の出力を生成したりするものもあり、
+それらの型はすべて異なるかもしれない。ローカルのデータを処理するアルゴリズム(セルの中心を計算するなど)
+もあれば、グローバルな情報を必要とするアルゴリズム(ヒストグラムの計算など)もある。
+すべての場合において、アルゴリズムは自分への入力をイミュータブルなものとして扱わないといけない。
+つまり、アルゴリズムは、入力を読むだけで出力を生成しないといけない。
+ひとつのデータが複数のアルゴリズムへの入力になることもあり得るので、
+あるアルゴリズムが別のアルゴリズムへの入力をいじってしまうわけにはいかないからだ。
 
-Finally the executive can be complicated depending on the particulars
-of the execution strategy. In some cases we may wish to cache
-intermediate results between filters. This minimizes the amount of
-recomputation that must be performed if something in the pipeline
-changes. On the other hand, visualization data sets can be huge, in
-which case we may wish to release data when it is no longer needed for
-computation. Finally, there are complex execution strategies, such as
-multi-resolution processing of data, which require the pipeline to
-operate in iterative fashion.
+%% Finally the executive can be complicated depending on the particulars
+%% of the execution strategy. In some cases we may wish to cache
+%% intermediate results between filters. This minimizes the amount of
+%% recomputation that must be performed if something in the pipeline
+%% changes. On the other hand, visualization data sets can be huge, in
+%% which case we may wish to release data when it is no longer needed for
+%% computation. Finally, there are complex execution strategies, such as
+%% multi-resolution processing of data, which require the pipeline to
+%% operate in iterative fashion.
+パイプラインの実行も、実行戦略によっては複雑になり得る。
+場合によっては、フィルタとフィルタの間の中間結果をキャッシュしたくなることもあるかもしれない。
+そうすれば、パイプラインが変更されたときに必要となる再計算の量を減らせる。
+一方、ビジュアライゼーションデータセットは巨大なものになる可能性がある。
+そんな場合は、その後の計算に不要となったデータはその場で解放したくなることだろう。
+さらに、パイプラインの実行にはいろいろ複雑な方法がある。
+たとえばデータを多重分解処理する場合などは、パイプラインを繰り返し処理しないといけない。
 
-To demonstrate some of these concepts and further explain the pipeline
-architecture, consider the following C++ example:
+%% To demonstrate some of these concepts and further explain the pipeline
+%% architecture, consider the following C++ example:
+これらの考えかたのいくつかを示すため、そしてパイプラインのアーキテクチャについて
+さらに深く知るために、こんなC++の例を考えよう。
 
 \begin{verbatim}
 vtkPExodusIIReader *reader = vtkPExodusIIReader::New();
@@ -566,40 +598,70 @@ writer->SetFileName("outputFile.vtp");
 writer->Write();
 \end{verbatim}
 
-\noindent In this example, a reader object reads a large unstructured grid (or
-mesh) data file. The next filter generates an isosurface from the
-mesh. The \code{vtkQuadricDecimation} filter reduces the size of the
-isosurface, which is a polygonal dataset, by decimating it (i.e.,
-reducing the number of triangles representing the isocontour). Finally
-after decimation the new, reduced data file is written back to
-disk. The actual pipeline execution occurs when the \code{Write}
-method is invoked by the writer (i.e., upon demand for the data).
+%% \noindent In this example, a reader object reads a large unstructured grid (or
+%% mesh) data file. The next filter generates an isosurface from the
+%% mesh. The \code{vtkQuadricDecimation} filter reduces the size of the
+%% isosurface, which is a polygonal dataset, by decimating it (i.e.,
+%% reducing the number of triangles representing the isocontour). Finally
+%% after decimation the new, reduced data file is written back to
+%% disk. The actual pipeline execution occurs when the \code{Write}
+%% method is invoked by the writer (i.e., upon demand for the data).
+\noindent
+この例では、リーダーオブジェクトが巨大な非構造化グリッド(あるいはメッシュ)のデータファイルを読み込む。
+次のフィルタは、メッシュから等値面を生成する。
+\code{vtkQuadricDecimation}フィルタは等値面のサイズを削減する。
+等値面は多角形のデータセットなので、その数を減らしていく
+(つまり、同じ高さの三角形の数を減らす)。
+最終的に、削減後の新しいデータファイルをディスクに書き出す。
+実際にパイプラインが実行されるのは、ライターが\code{Write}
+メソッドを実行したとき(データを書き込もうとしたとき)だ。
 
-As this example demonstrates, VTK's pipeline execution mechanism is
-demand driven. When a sink such as a writer or a mapper (a data
-rendering object) needs data, it asks its input. If the input filter
-already has the appropriate data, it simply returns the execution
-control to the sink. However, if the input does not have the
-appropriate data, it needs to compute it. Consequently, it must first
-ask its input for data. This process will continue upstream along the
-pipeline until a filter or source that has "appropriate data" or the
-beginning of the pipeline is reached, at which point the filters will
-execute in correct order and the data will flow to the point in the
-pipeline at which it was requested.
+%% As this example demonstrates, VTK's pipeline execution mechanism is
+%% demand driven. When a sink such as a writer or a mapper (a data
+%% rendering object) needs data, it asks its input. If the input filter
+%% already has the appropriate data, it simply returns the execution
+%% control to the sink. However, if the input does not have the
+%% appropriate data, it needs to compute it. Consequently, it must first
+%% ask its input for data. This process will continue upstream along the
+%% pipeline until a filter or source that has "appropriate data" or the
+%% beginning of the pipeline is reached, at which point the filters will
+%% execute in correct order and the data will flow to the point in the
+%% pipeline at which it was requested.
+この例が示すように、VTKのパイプラインは要求駆動で実行される仕組みになっている。
+ライターやマッパー(データレンダリングオブジェクト)などの受信側でデータが必要になると、
+入力が欲しいというリクエストを出す。入力フィルタが既に適切なデータを持っている場合は、
+単に実行の制御を受信側に戻すだけだ。
+しかし、入力フィルタに適切なデータがない場合は、データを算出する必要がある。
+そのため、まずはデータがあるかどうかを入力フィルタにたずねることになる。
+このプロセスを上流に向けてさかのぼって、フィルタあるいはソースが「適切なデータ」
+を持っているところかあるいはパイプラインの開始地点に達するまで続ける。
+そこから適切な順番でのフィルタの実行が始まり、リクエストがあった時点までデータがパイプライン上を流れる。
 
-Here we should expand on what "appropriate data" means. By default,
-after a VTK source or filter executes, its output is cached by the
-pipeline in order to avoid unnecessary executions in the future. This
-is done to minimize computation and/or I/O at the cost of memory, and
-is configurable behavior. The pipeline caches not only the data
-objects but also the metadata about the conditions under which these
-data objects were generated. This metadata includes a time stamp
-(i.e., ComputeTime) that captures when the data object was
-computed. So in the simplest case, the "appropriate data" is one that
-was computed after all of the pipeline objects upstream from it were
-modified. It is easier to demonstrate this behavior by considering the
-following examples. Let's add the following to the end of the previous
-VTK program:
+%% Here we should expand on what "appropriate data" means. By default,
+%% after a VTK source or filter executes, its output is cached by the
+%% pipeline in order to avoid unnecessary executions in the future. This
+%% is done to minimize computation and/or I/O at the cost of memory, and
+%% is configurable behavior. The pipeline caches not only the data
+%% objects but also the metadata about the conditions under which these
+%% data objects were generated. This metadata includes a time stamp
+%% (i.e., ComputeTime) that captures when the data object was
+%% computed. So in the simplest case, the "appropriate data" is one that
+%% was computed after all of the pipeline objects upstream from it were
+%% modified. It is easier to demonstrate this behavior by considering the
+%% following examples. Let's add the following to the end of the previous
+%% VTK program:
+「適切なデータ」とは何か、はっきりさせておこう。
+デフォルトでは、VTKのソースあるいはフィルタを実行すると、
+その出力をパイプラインがキャッシュすることになっている。
+将来無駄な再計算をせずに済ませるようにするためだ。
+このおかげで、計算や入出力によるメモリのコストを抑えられる。また、キャッシュの挙動は設定で変更できる。
+パイプラインがキャッシュするのはデータオブジェクトだけではない。
+データオブジェクトを生成したときの条件に関するメタデータもキャッシュの対象になる。
+このメタデータにはタイムスタンプ(ComputeTime)が含まれており、これがデータオブジェクトを計算した時刻を表す。
+つまり、最も単純に考えた場合の「適切なデータ」とは、
+パイプラインの上流にあるすべてのオブジェクトの更新時刻よりもあとで計算されたデータだということになる。
+この振る舞いを示すには、こんな例を考えてみればいい。
+先ほどのVTKの例の最後に、こんなコードを追加してみよう。
 
 \begin{verbatim}
 vtkXMLPolyDataWriter *writer2 = vtkXMLPolyDataWriter::New();
@@ -608,14 +670,20 @@ writer2->SetFileName("outputFile2.vtp");
 writer2->Write();
 \end{verbatim}
 
-As explained previously, the first \code{writer-{\textgreater}Write}
-call causes the execution of the entire pipeline. When
-\code{writer2-{\textgreater}Write()} is called, the pipeline will
-realize that the cached output of the decimation filter is up to date
-when it compares the time stamp of the cache with the modification
-time of the decimation filter, the contour filter and the
-reader. Therefore, the data request does not have to propagate past
-\code{writer2}. Now, let's consider the following change.
+%% As explained previously, the first \code{writer-{\textgreater}Write}
+%% call causes the execution of the entire pipeline. When
+%% \code{writer2-{\textgreater}Write()} is called, the pipeline will
+%% realize that the cached output of the decimation filter is up to date
+%% when it compares the time stamp of the cache with the modification
+%% time of the decimation filter, the contour filter and the
+%% reader. Therefore, the data request does not have to propagate past
+%% \code{writer2}. Now, let's consider the following change.
+先述のとおり、最初の\code{writer-{\textgreater}Write}の呼び出しでパイプライン全体が実行される。
+\code{writer2-{\textgreater}Write()}が呼ばれたときには、decimationフィルタがキャッシュした出力が
+最新であることをパイプラインが把握している。キャッシュのタイムスタンプを、
+decimationフィルタやcontourフィルタそしてリーダーの最終更新時刻と比較すればわかることだ。
+したがって、このデータリクエストを過去の\code{writer2}に渡す必要はない。
+では、コードをこんなふうに変更したらどうなるだろう。
 
 \begin{verbatim}
 cont->SetValue(0, 400);
@@ -626,19 +694,30 @@ writer2->SetFileName("outputFile2.vtp");
 writer2->Write();
 \end{verbatim}
 
-Now the pipeline executive will realize that the contour filter was
-modified after the outputs of the contour and decimation filters were
-last executed. Thus, the cache for these two filters are stale and
-they have to be re-executed. However, since the reader was not
-modified prior to the contour filter its cache is valid and hence the
-reader does not have to re-execute.
+%% Now the pipeline executive will realize that the contour filter was
+%% modified after the outputs of the contour and decimation filters were
+%% last executed. Thus, the cache for these two filters are stale and
+%% they have to be re-executed. However, since the reader was not
+%% modified prior to the contour filter its cache is valid and hence the
+%% reader does not have to re-execute.
+この場合は、前回contorフィルタやdecimationフィルタを実行した後でcontourフィルタが変更されていることがわかる。
+したがって、これら二つのフィルタのキャッシュは無効となり、再実行しなければならなくなる。
+しかし、contourフィルタの前段階にあるリーダーには手が加えられていないので、このキャッシュは有効だ。
+リーダーは再実行する必要がない。
 
-The scenario described here is the simplest example of a demand-driven
-pipeline. VTK's pipeline is much more sophisticated. When a filter or
-a sink requires data, it can provide additional information to request
-specific data subsets. For example, a filter can perform out-of-core
-analysis by streaming pieces of data. Let's change our previous
-example to demonstrate.
+%% The scenario described here is the simplest example of a demand-driven
+%% pipeline. VTK's pipeline is much more sophisticated. When a filter or
+%% a sink requires data, it can provide additional information to request
+%% specific data subsets. For example, a filter can perform out-of-core
+%% analysis by streaming pieces of data. Let's change our previous
+%% example to demonstrate.
+ここで示したシナリオは、要求駆動のパイプラインの中でも最もシンプルな例だ。
+VTKのパイプラインは、もっと洗練されている。
+フィルタや受信者がデータを必要とするときには、追加情報を指定して、
+特定のデータのサブセットだけを要求することができる。
+たとえば、フィルタがデータ片をストリーミングするようにして、
+out-of-core分析を実行できる。
+先ほどの例をこのように変更してみよう。
 
 \begin{verbatim}
 vtkXMLPolyDataWriter *writer = vtkXMLPolyDataWriter::New();
@@ -654,34 +733,61 @@ writer->SetFileName("outputFile1.vtp");
 writer->Write();
 \end{verbatim}
 
-Here the writer asks the upstream pipeline to load and process data in
-two pieces each of which are streamed independently. You may have
-noticed that the simple execution logic described previously will not
-work here. By this logic when the \code{Write} function is called for
-the second time, the pipeline should not re-execute because nothing
-upstream changed. Thus to address this more complex case, the
-executives have additional logic to handle piece requests such as
-this. VTK's pipeline execution actually consists of multiple
-passes. The computation of the data objects is actually the last
-pass. The pass before then is a request pass. This is where sinks and
-filters can tell upstream what they want from the forthcoming
-computation. In the example above, the writer will notify its input
-that it wants piece 0 of 2. This request will actually propagate all
-the way to the reader. When the pipeline executes, the reader will
-then know that it needs to read a subset of the data. Furthermore,
-information about which piece the cached data corresponds to is stored
-in the metadata for the object. The next time a filter asks for data
-from its input, this metadata will be compared with the current
-request. Thus in this example the pipeline will re-execute in order to
-process a different piece request.
+%% Here the writer asks the upstream pipeline to load and process data in
+%% two pieces each of which are streamed independently. You may have
+%% noticed that the simple execution logic described previously will not
+%% work here. By this logic when the \code{Write} function is called for
+%% the second time, the pipeline should not re-execute because nothing
+%% upstream changed. Thus to address this more complex case, the
+%% executives have additional logic to handle piece requests such as
+%% this. VTK's pipeline execution actually consists of multiple
+%% passes. The computation of the data objects is actually the last
+%% pass. The pass before then is a request pass. This is where sinks and
+%% filters can tell upstream what they want from the forthcoming
+%% computation. In the example above, the writer will notify its input
+%% that it wants piece 0 of 2. This request will actually propagate all
+%% the way to the reader. When the pipeline executes, the reader will
+%% then know that it needs to read a subset of the data. Furthermore,
+%% information about which piece the cached data corresponds to is stored
+%% in the metadata for the object. The next time a filter asks for data
+%% from its input, this metadata will be compared with the current
+%% request. Thus in this example the pipeline will re-execute in order to
+%% process a different piece request.
+ここでは、ライターがパイプラインの上流に対してデータを要求するときに、
+二つに分割して受け取るようにしている。それぞれを個別に読み込んで処理し、
+別々にパイプラインを流す。先ほど説明したような単純なロジックが、
+ここではうまくいかないことに気付いた人もいるかもしれない。
+あの単純なロジックだと、\code{Write}関数が二度目に呼ばれたときに
+パイプラインを再実行しない。上流は何も変わっていないからだ。
+こんな複雑なケースに対応するには、リクエストを処理するロジックに
+もう少し手を加えないといけないことになる。
+VTKにおけるパイプラインの実行は、複数のパスで構成されている。
+データオブジェクトの算出は、その中でも最後のパスになる。
+その前段にあるのが、リクエストパスだ。
+リクエストパスでは、受信者やフィルタから上流に対して、
+その後の計算結果の中で自分が欲しいものを伝えることができる。
+先ほどの例の場合、ライター側では、入力が欲しがっているのは2つあるデータのうちの0番のほうであることがわかる。
+このリクエストは、実際にはリーダーまでたらいまわしされる。
+パイプラインを実行すると、リーダーは、実際に必要なのがデータの一部であるということを知る。
+さらに、キャッシュされているデータのどの部分が
+オブジェクトのメタデータに格納されているのかという情報も知る。
+次にフィルタが入力からデータを要求されたときは、
+このメタデータをリクエストと比較する。
+この例の場合は、パイプラインを再実行して、別の部分を受け取るリクエストを処理する。
 
-There are several more types of request that a filter can make. These
-include requests for a particular time step, a particular structured
-extent or the number of ghost layers (i.e., boundary layers for
-computing neighborhood information). Furthermore, during the request
-pass, each filter is allowed to modify requests from downstream. For
-example, a filter that is not able to stream (e.g., the streamline
-filter) can ignore the piece request and ask for the whole data.
+%% There are several more types of request that a filter can make. These
+%% include requests for a particular time step, a particular structured
+%% extent or the number of ghost layers (i.e., boundary layers for
+%% computing neighborhood information). Furthermore, during the request
+%% pass, each filter is allowed to modify requests from downstream. For
+%% example, a filter that is not able to stream (e.g., the streamline
+%% filter) can ignore the piece request and ask for the whole data.
+フィルタからできるリクエストには、それ以外にもいくつかの種類がある。
+時間ステップをリクエストしたり、構造化された範囲をリクエストしたり、
+ゴースト層(隣接情報を計算するときの、境界層)の数をリクエストしたりといったものだ。
+さらに、リクエストパスを処理する間に、各フィルタでリクエストに手を加えて下流に流すこともできる。
+たとえば、ストリームができないフィルタ(streamlineフィルタなど)
+は、部分的なリクエストを無視してデータ全体を要求したりできる。
 
 \end{aosasect2}
 
