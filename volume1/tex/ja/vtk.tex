@@ -794,20 +794,32 @@ VTKにおけるパイプラインの実行は、複数のパスで構成され�
 %% \begin{aosasect2}{Rendering Subsystem}
 \begin{aosasect2}{レンダリングサブシステム}
 
-At first glance VTK has a simple object-oriented rendering model with
-classes corresponding to the components that make up a 3D scene. For
-example, \code{vtkActor}s are objects that are rendered by a
-\code{vtkRenderer} in conjunction with a \code{vtkCamera}, with
-possibly multiple \code{vtkRenderer}s existing in a
-\code{vtkRenderWindow}. The scene is illuminated by one or more
-\code{vtkLight}s. The position of each \code{vtkActor} is controlled
-by a \code{vtkTransform}, and the appearance of an actor is specified
-through a \code{vtkProperty}. Finally, the geometric representation of
-an actor is defined by a \code{vtkMapper}. Mappers play an important
-role in VTK, they serve to terminate the data processing pipeline, as
-well as interface to the rendering system. Consider this example where
-we decimate data and write the result to a file, and then visualize
-and interact with the result by using a mapper:
+%% At first glance VTK has a simple object-oriented rendering model with
+%% classes corresponding to the components that make up a 3D scene. For
+%% example, \code{vtkActor}s are objects that are rendered by a
+%% \code{vtkRenderer} in conjunction with a \code{vtkCamera}, with
+%% possibly multiple \code{vtkRenderer}s existing in a
+%% \code{vtkRenderWindow}. The scene is illuminated by one or more
+%% \code{vtkLight}s. The position of each \code{vtkActor} is controlled
+%% by a \code{vtkTransform}, and the appearance of an actor is specified
+%% through a \code{vtkProperty}. Finally, the geometric representation of
+%% an actor is defined by a \code{vtkMapper}. Mappers play an important
+%% role in VTK, they serve to terminate the data processing pipeline, as
+%% well as interface to the rendering system. Consider this example where
+%% we decimate data and write the result to a file, and then visualize
+%% and interact with the result by using a mapper:
+ぱっと見た限り、VTKはシンプルなオブジェクト指向のレンダリングモデルを採用しており、
+3Dシーンを構成する各部品に対応するクラス群で構成されている。
+たとえば、{vtkActor}は\code{vtkRenderer}と\code{vtkCamera}でレンダリングするオブジェクトで、
+\code{vtkRenderWindow}の中には複数の\code{vtkRenderer}が存在することもある。
+シーンを彩るのは\code{vtkLight}だ。
+各\code{vtkActor}の位置を制御するのが\code{vtkTransform}で、
+アクターの見た目を指定するには\code{vtkProperty}を使う。
+最後に、アクターの幾何学的表現を定義するのが\code{vtkMapper}だ。
+マッパーはVTKの中でも重要な役割を果たすものだ。
+データ処理パイプラインの最後をまとめ、レンダリングシステムへのインターフェイスとなる。
+こんな例を考えてみよう。データを削減して結果をファイルに書き出し、
+マッパーを使って結果を可視化してやりとりするものだ。
 
 \begin{verbatim}
 vtkOBJReader *reader = vtkOBJReader::New();
@@ -838,55 +850,89 @@ interactor->SetRenderWindow(renWin);
 renWin->Render();
 \end{verbatim}
 
-Here a single actor, renderer and render window are created with the
-addition of a mapper that connects the pipeline to the rendering
-system. Also note the addition of a \code{vtkRenderWindowInteractor},
-instances of which capture mouse and keyboard events and translate
-them into camera manipulations or other actions. This translation
-process is defined via a \code{vtkInteractorStyle} (more on this
-below). By default many instances and data values are set behind the
-scenes. For example, an identity transform is constructed, as well as a
-single default (head) light and property.
+%% Here a single actor, renderer and render window are created with the
+%% addition of a mapper that connects the pipeline to the rendering
+%% system. Also note the addition of a \code{vtkRenderWindowInteractor},
+%% instances of which capture mouse and keyboard events and translate
+%% them into camera manipulations or other actions. This translation
+%% process is defined via a \code{vtkInteractorStyle} (more on this
+%% below). By default many instances and data values are set behind the
+%% scenes. For example, an identity transform is constructed, as well as a
+%% single default (head) light and property.
+この例では、アクターとレンダラーそしてレンダーウィンドウをひとつずつ作り、
+さらにマッパーを追加する。これは、パイプラインをレンダリングシステムにつなぐものだ。
+さらに、\code{vtkRenderWindowInteractor}を追加していることにも注目しよう。
+これはマウスとキーボードの入力をキャプチャするインスタンスで、
+それをカメラの操作などのアクションに変換する。
+この変換プロセスの定義は\code{vtkInteractorStyle}で行う(詳細は後述する)。
+デフォルトで、いろんなインスタンスやデータの値が裏側で設定される。
+たとえばIDの変換が行われるし、デフォルトのライト(ヘッドライト)がひとつ作られ、そのプロパティも設定される。
 
-Over time this object model has become more sophisticated. Much of the
-complexity has come from developing derived classes that specialize on
-an aspect of the rendering process. \code{vtkActor}s are now
-specializations of \code{vtkProp} (like a prop found on stage), and
-there are a whole slew of these props for rendering 2D overlay
-graphics and text, specialized 3D objects, and even for supporting
-advanced rendering techniques such as volume rendering or GPU
-implementations (see \aosafigref{fig.vtk.painter}).
+%% Over time this object model has become more sophisticated. Much of the
+%% complexity has come from developing derived classes that specialize on
+%% an aspect of the rendering process. \code{vtkActor}s are now
+%% specializations of \code{vtkProp} (like a prop found on stage), and
+%% there are a whole slew of these props for rendering 2D overlay
+%% graphics and text, specialized 3D objects, and even for supporting
+%% advanced rendering techniques such as volume rendering or GPU
+%% implementations (see \aosafigref{fig.vtk.painter}).
+時を経て、このオブジェクトモデルもだんだん洗練されてきた。
+派生クラスを作ってレンダリングプロセスの特別な処理を開発するときなどは、少し複雑になる。
+\code{vtkActor}は\code{vtkProp}を特化したもの(つまり、ステージ上にあるプロパティ)
+であり、こういったプロパティを大量に使って、2Dオーバーレイグラフィックスやテキスト、
+そして3Dオブジェクトのレンダリングを行う。
+さらには、ボリュームレンダリングやGPUの実装を使うなどの、
+より高度なレンダリングテクニックにも対応する(\aosafigref{fig.vtk.painter}を参照)。
 
-Similarly, as the data model supported by VTK has grown, so have the
-various mappers that interface the data to the rendering
-system. Another area of significant extension is the transformation
-hierarchy. What was originally a simple linear $4{\times}4$
-transformation matrix, has become a powerful hierarchy that supports
-non-linear transformations including thin-plate spline
-transformation. For example, the original \code{vtkPolyDataMapper} had
-device-specific subclasses (e.g., \code{vtkOpenGLPolyDataMapper}). In
-recent years it has been replaced with a sophisticated graphics
-pipeline referred to as the ``painter'' pipeline illustrated in
-\aosafigref{fig.vtk.painter}.
+%% Similarly, as the data model supported by VTK has grown, so have the
+%% various mappers that interface the data to the rendering
+%% system. Another area of significant extension is the transformation
+%% hierarchy. What was originally a simple linear $4{\times}4$
+%% transformation matrix, has become a powerful hierarchy that supports
+%% non-linear transformations including thin-plate spline
+%% transformation. For example, the original \code{vtkPolyDataMapper} had
+%% device-specific subclasses (e.g., \code{vtkOpenGLPolyDataMapper}). In
+%% recent years it has been replaced with a sophisticated graphics
+%% pipeline referred to as the ``painter'' pipeline illustrated in
+%% \aosafigref{fig.vtk.painter}.
+オブジェクトモデルと同様に、VTKがサポートするデータモデルも成長してきた。
+データとレンダリングシステムとの橋渡しをするマッパーにも、いろいろなものが出てきた。
+大きな拡張点は、変換の階層だ。当初は、単純にリニアな$4{\times}4$の変換行列を使っていた。
+これが強力な階層構造になり、非リニアな変換にも対応するようになった。シンプレートスプライン変換などだ。
+たとえば、最初の\code{vtkPolyDataMapper}にはデバイスごとのサブクラス(\code{vtkOpenGLPolyDataMapper}など)があった。
+最近は、より洗練されたグラフィックスパイプライン(「ペインター」パイプライン)で置き換えられた。
+その様子を\aosafigref{fig.vtk.painter}に示す。
 
 %% \aosafigure{../images/vtk/painter.eps}{Display Classes}{fig.vtk.painter}
 \aosafigure{../images/vtk/painter.eps}{ディスプレイクラス}{fig.vtk.painter}
 
-The painter design supports a variety of techniques for rendering data
-that can be combined to provide special rendering effects. This
-capability greatly surpasses the simple \code{vtkPolyDataMapper} that
-was initially implemented in 1994.
+%% The painter design supports a variety of techniques for rendering data
+%% that can be combined to provide special rendering effects. This
+%% capability greatly surpasses the simple \code{vtkPolyDataMapper} that
+%% was initially implemented in 1994.
+ペインター方式は、さまざまなデータレンダリングテクニックに対応しており、
+それらを組み合わせて特殊なエフェクトを提供できる。
+この機能のおかげで、1994年に実装されたシンプルな\code{vtkPolyDataMapper}
+をはるかにしのぐものになった。
 
-Another important aspect of a visualization system is the selection
-subsystem. In VTK there is a hierarchy of "pickers", roughly
-categorized into objects that select \code{vtkProp}s based on
-hardware-based methods versus software methods (e.g., ray-casting); as
-well as objects that provide different levels of information after a
-pick operations. For example, some pickers provide only a location in
-XYZ world space without indicating which \code{vtkProp} they have
-selected; others provide not only the selected \code{vtkProp} but a
-particular point or cell that make up the mesh defining the prop
-geometry.
+%% Another important aspect of a visualization system is the selection
+%% subsystem. In VTK there is a hierarchy of "pickers", roughly
+%% categorized into objects that select \code{vtkProp}s based on
+%% hardware-based methods versus software methods (e.g., ray-casting); as
+%% well as objects that provide different levels of information after a
+%% pick operations. For example, some pickers provide only a location in
+%% XYZ world space without indicating which \code{vtkProp} they have
+%% selected; others provide not only the selected \code{vtkProp} but a
+%% particular point or cell that make up the mesh defining the prop
+%% geometry.
+さらにもうひとつ、ビジュアライゼーションシステムの重要な側面がある。
+選択サブシステムだ。VTKには「ピッカー」の階層がある。
+これは、ハードウェアベースの方法あるいはソフトウェアの方法(レイキャスティングなど)にもとづいて
+\code{vtkProp}を選ぶオブジェクトをおおざっぱにまとめたり、
+ピック操作の後のさまざまなレベルの情報を提供するオブジェクトをまとめたりする。
+たとえば、ピッカーの中にはXYZ空間での位置しか提供しないものもある。これは、どの\code{vtkProp}を選んでいるかは示さない。
+また、別のピッカーは、単に選ばれている\code{vtkProp}だけでなくそのプロパティのジオメトリを定義する
+メッシュを作る点あるいはセルを提供するものもある。
 
 \end{aosasect2}
 
