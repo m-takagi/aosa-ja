@@ -939,22 +939,39 @@ renWin->Render();
 %% \begin{aosasect2}{Events and Interaction}
 \begin{aosasect2}{イベントとインタラクション}
 
-Interacting with data is an essential part of visualization. In VTK
-this occurs in a variety of ways. At its simplest level, users can
-observe events and respond appropriately through commands (the
-command/observer design pattern). All subclasses of \code{vtkObject}
-maintain a list of observers which register themselves with the
-object. During registration, the observers indicate which particular
-event(s) they are interested in, with the addition of an associated
-command that is invoked if and when the event occurs. To see how this
-works, consider the following example in which a filter (here a
-polygon decimation filter) has an observer which watches for the three
-events \code{StartEvent}, \code{ProgressEvent}, and
-\code{EndEvent}. These events are invoked when the filter begins to
-execute, periodically during execution, and then on completion of
-execution. In the following the \code{vtkCommand} class has an
-\code{Execute} method that prints out the appropriate information
-relative to the time it take to execute the algorithm:
+%% Interacting with data is an essential part of visualization. In VTK
+%% this occurs in a variety of ways. At its simplest level, users can
+%% observe events and respond appropriately through commands (the
+%% command/observer design pattern). All subclasses of \code{vtkObject}
+%% maintain a list of observers which register themselves with the
+%% object. During registration, the observers indicate which particular
+%% event(s) they are interested in, with the addition of an associated
+%% command that is invoked if and when the event occurs. To see how this
+%% works, consider the following example in which a filter (here a
+%% polygon decimation filter) has an observer which watches for the three
+%% events \code{StartEvent}, \code{ProgressEvent}, and
+%% \code{EndEvent}. These events are invoked when the filter begins to
+%% execute, periodically during execution, and then on completion of
+%% execution. In the following the \code{vtkCommand} class has an
+%% \code{Execute} method that prints out the appropriate information
+%% relative to the time it take to execute the algorithm:
+データを使ったインタラクションは、ビジュアライゼーションに不可欠なものだ。
+VTKでは、いろんな方法によるインタラクションが発生する。
+いちばん単純なレベルだと、何かのイベントが発生したことに気付いたユーザーが
+何らかのコマンドを実行することができる(command/observerパターン)。
+\code{vtkObject}のすべてのサブクラスは、
+自分自身を登録しているobserverとそのオブジェクトのリストを保持している。
+登録のときにobserverは、どのイベントを知りたいかを示す。
+さらに、そのイベントが発生したときに実行したい関連コマンドを指定することもある。
+その動きを見るために、こんな例を考えてみよう。あるフィルタ
+(ここではpolygon decimationフィルタ)がひとつのobserverを持っており、
+このobserverは\code{StartEvent}と\code{ProgressEvent}そして\code{EndEvent}
+の三つのイベントを監視している。これらのイベントが発生するのはそれぞれこんな場合だ。
+\code{StartEvent}はフィルタの実行が始まったとき、
+と\code{ProgressEvent}実行中に定期的に、
+そして\code{EndEvent}は実行完了時となる。
+次の例では\code{vtkCommand}クラスに\code{Execute}メソッドがあり、
+このアルゴリズムを実行するときに適切な関連情報を表示する。
 
 \begin{verbatim}
 class vtkProgressCommand : public vtkCommand
@@ -976,39 +993,69 @@ deci->SetTargetReduction( 0.75 );
 deci->AddObserver( vtkCommand::ProgressEvent, pobserver );
 \end{verbatim}
 
-While this is a primitive form of interaction, it is a foundational
-element to many applications that use VTK\@. For example, the simple
-code above can be easily converted to display and manage a GUI
-progress bar. This Command/Observer subsystem is also central to the
-3D widgets in VTK, which are sophisticated interaction objects for
-querying, manipulating and editing data and are described below.
+%% While this is a primitive form of interaction, it is a foundational
+%% element to many applications that use VTK\@. For example, the simple
+%% code above can be easily converted to display and manage a GUI
+%% progress bar. This Command/Observer subsystem is also central to the
+%% 3D widgets in VTK, which are sophisticated interaction objects for
+%% querying, manipulating and editing data and are described below.
+これは基本的なインタラクション形式だが、VTKを使う多くのアプリケーションで
+基本となるものだ。たとえば、先ほどのシンプルなコードに手を加えて、
+GUIのプログレスバーを表示させるのも簡単なことだ。
+このCommand/Observerサブシステムは、VTKの3Dウィジェットのでも重要な役割を果たしており、
+データの問い合わせや操作、編集などをよくできたインタラクションでできる。
+詳しくは後述する。
 
-Referring to the example above, it is important to note that events in
-VTK are predefined, but there is a back door for user-defined
-events. The class \code{vtkCommand} defines the set of enumerated
-events (e.g., \code{vtkCommand::ProgressEvent} in the above example)
-as well as a user event. The \code{UserEvent}, which is simply an integral
-value, is typically used as a starting offset value into a set of
-application user-defined events. So for example
-\code{vtkCommand::UserEvent+100} may refer to a specific event outside
-the set of VTK defined events.
+%% Referring to the example above, it is important to note that events in
+%% VTK are predefined, but there is a back door for user-defined
+%% events. The class \code{vtkCommand} defines the set of enumerated
+%% events (e.g., \code{vtkCommand::ProgressEvent} in the above example)
+%% as well as a user event. The \code{UserEvent}, which is simply an integral
+%% value, is typically used as a starting offset value into a set of
+%% application user-defined events. So for example
+%% \code{vtkCommand::UserEvent+100} may refer to a specific event outside
+%% the set of VTK defined events.
+この例で重要なのは、VTKのイベントが事前に定義されているけれどもユーザー定義イベント用の裏口も用意されているという点だ。
+\code{vtkCommand}クラスが、イベントの列挙(この例の場合は\code{vtkCommand::ProgressEvent}など)
+とユーザーイベントを定義している。
+\code{UserEvent}は単なる整数値で、一般的にはこれを開始オフセットとして
+アプリケーション内でのユーザー定義イベントを扱う。
+つまり、たとえば\code{vtkCommand::UserEvent+100}は、
+VTKで定義しているイベントとは別の何かのイベントを指すことになる。
 
-From the user's perspective, a VTK widget appears as an actor in a
-scene except that the user can interact with it by manipulating
-handles or other geometric features (the handle manipulation and
-geometric feature manipulation is based on the picking functionality
-described earlier.) The interaction with this widget is fairly
-intuitive: a user grabs the spherical handles and moves them, or grabs
-the line and moves it. Behind the scenes, however, events are emitted
-(e.g., \code{InteractionEvent}) and a properly programmed application
-can observe these events, and then take the appropriate action. For
-example they often trigger on the \code{vtkCommand::InteractionEvent}
-as follows:
+%% From the user's perspective, a VTK widget appears as an actor in a
+%% scene except that the user can interact with it by manipulating
+%% handles or other geometric features (the handle manipulation and
+%% geometric feature manipulation is based on the picking functionality
+%% described earlier.) The interaction with this widget is fairly
+%% intuitive: a user grabs the spherical handles and moves them, or grabs
+%% the line and moves it. Behind the scenes, however, events are emitted
+%% (e.g., \code{InteractionEvent}) and a properly programmed application
+%% can observe these events, and then take the appropriate action. For
+%% example they often trigger on the \code{vtkCommand::InteractionEvent}
+%% as follows:
+ユーザーからは、VTKのウィジェットはシーンの中のアクターとして見える。
+ただ、通常のアクターとは違って、ハンドルやその他の幾何学的な機能を操作したりしてユーザーが操作できる
+(ハンドルの操作や幾何学的機能の操作は、先ほど説明したピッキング機能に基づいたものだ)。
+ウィジェットの操作は極めて直感的にできる。球状のハンドルをつかんで移動したり、直線をつかんで移動したりといったものだ。
+しかし、その裏側では、いろんなイベント(\code{InteractionEvent}など)を発行している。
+適切に書かれたアプリケーションはそのイベントを捕捉できるし、それにあわせて適切なアクションをとれる。
+たとえば、こんな感じで\code{vtkCommand::InteractionEvent}を引き起こすことがよくある。
 
+%% \begin{verbatim}
+%% vtkLW2Callback *myCallback = vtkLW2Callback::New();
+%%   myCallback->PolyData = seeds;    // streamlines seed points, updated on interaction
+%%   myCallback->Actor = streamline;  // streamline actor, made visible on interaction
+
+%% vtkLineWidget2 *lineWidget = vtkLineWidget2::New();
+%%   lineWidget->SetInteractor(iren);
+%%   lineWidget->SetRepresentation(rep);
+%%   lineWidget->AddObserver(vtkCommand::InteractionEvent,myCallback);
+%% \end{verbatim}
 \begin{verbatim}
 vtkLW2Callback *myCallback = vtkLW2Callback::New();
-  myCallback->PolyData = seeds;    // streamlines seed points, updated on interaction
-  myCallback->Actor = streamline;  // streamline actor, made visible on interaction
+  myCallback->PolyData = seeds;    // ストリームラインのシードポイントで、対話的に更新される
+  myCallback->Actor = streamline;  // ストリームラインのアクターで、インタラクションで見えるようになる
 
 vtkLineWidget2 *lineWidget = vtkLineWidget2::New();
   lineWidget->SetInteractor(iren);
@@ -1016,17 +1063,27 @@ vtkLineWidget2 *lineWidget = vtkLineWidget2::New();
   lineWidget->AddObserver(vtkCommand::InteractionEvent,myCallback);
 \end{verbatim}
 
-VTK widgets are actually constructed using two objects: a subclass of
-\code{vtkInterac\-torObserver} and a subclass of \code{vtkProp}. The
-\code{vtkInteractorObserver} simply observes user interaction in the
-render window (i.e., mouse and keyboard events) and processes
-them. The subclasses of \code{vtkProp} (i.e., actors) are simply
-manipulated by the \code{vtkInteractorObserver}. Typically such
-manipulation consists of modifying the \code{vtkProp}'s geometry
-including highlighting handles, changing cursor appearance, and/or
-transforming data. Of course, the particulars of the widgets require
-that subclasses are written to control the nuances of widget behavior,
-and there are more than 50 different widgets currently in the system.
+%% VTK widgets are actually constructed using two objects: a subclass of
+%% \code{vtkInterac\-torObserver} and a subclass of \code{vtkProp}. The
+%% \code{vtkInteractorObserver} simply observes user interaction in the
+%% render window (i.e., mouse and keyboard events) and processes
+%% them. The subclasses of \code{vtkProp} (i.e., actors) are simply
+%% manipulated by the \code{vtkInteractorObserver}. Typically such
+%% manipulation consists of modifying the \code{vtkProp}'s geometry
+%% including highlighting handles, changing cursor appearance, and/or
+%% transforming data. Of course, the particulars of the widgets require
+%% that subclasses are written to control the nuances of widget behavior,
+%% and there are more than 50 different widgets currently in the system.
+VTKのウィジェットは、実際のところは二つのオブジェクトで構成されている。
+\code{vtkInteractorObserver}のサブクラスと\code{vtkProp}のサブクラスだ。
+\code{vtkInteractorObserver}は、単純にレンダーウィンドウ上でのユーザーのインタラクション
+(マウスやキーボードのイベントなど)を観察してそれを処理する。
+\code{vtkProp}のサブクラス(アクター)は、\code{vtkInteractorObserver}が操作する。
+一般に、この手の操作は、\code{vtkProp}のジオメトリを変更(ハンドルを強調させるなど)したり
+カーソルの見た目を変更したり、データを変換したりといったものになる。
+もちろん、ウィジェットを操作するには、これらのサブクラスが
+ウィジェットの振る舞いの細かい点を制御できるようにしておかないといけない。
+現時点で、システムには50以上のウィジェットが存在する。
 
 \end{aosasect2}
 
