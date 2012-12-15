@@ -1075,7 +1075,7 @@ vtkLineWidget2 *lineWidget = vtkLineWidget2::New();
 %% that subclasses are written to control the nuances of widget behavior,
 %% and there are more than 50 different widgets currently in the system.
 VTKのウィジェットは、実際のところは二つのオブジェクトで構成されている。
-\code{vtkInteractorObserver}のサブクラスと\code{vtkProp}のサブクラスだ。
+\code{vtkInterac\-torObserver}のサブクラスと\code{vtkProp}のサブクラスだ。
 \code{vtkInteractorObserver}は、単純にレンダーウィンドウ上でのユーザーのインタラクション
 (マウスやキーボードのイベントなど)を観察してそれを処理する。
 \code{vtkProp}のサブクラス(アクター)は、\code{vtkInteractorObserver}が操作する。
@@ -1090,35 +1090,58 @@ VTKのウィジェットは、実際のところは二つのオブジェクト�
 %% \begin{aosasect2}{Summary of Libraries}
 \begin{aosasect2}{ライブラリのまとめ}
 
-VTK is a large software toolkit. Currently the system consists of
-approximately 1.5 million lines of code (including comments but not
-including automatically generated wrapper software), and approximately
-1000 C++ classes. To manage the complexity of the system and reduce
-build and link times the system has been partitioned into dozens of
-subdirectories. \aosatblref{tbl.vtk.dirs} lists these subdirectories,
-with a brief summary describing what capabilities the library
-provides.
+%% VTK is a large software toolkit. Currently the system consists of
+%% approximately 1.5 million lines of code (including comments but not
+%% including automatically generated wrapper software), and approximately
+%% 1000 C++ classes. To manage the complexity of the system and reduce
+%% build and link times the system has been partitioned into dozens of
+%% subdirectories. \aosatblref{tbl.vtk.dirs} lists these subdirectories,
+%% with a brief summary describing what capabilities the library
+%% provides.
+VTKは大規模なソフトウェアツールキットだ。
+現時点でのシステム全体のコードは、約150万行(コメントを含む。
+ただし、ラッパーソフトウェアが自動生成したコードは含まない)
+であり、C++のクラス数は1000前後になる。
+こんな込み入ったシステムを管理するため、そしてビルドやリンクにかかる時間を減らすため、
+このシステムは多数のサブディレクトリで構成されている。
+\aosatblref{tbl.vtk.dirs}にサブディレクトリの一覧をまとめた。
+各サブディレクトリのライブラリがどんな機能を提供するのかも簡単に示している。
 
 \begin{table}\centering
   \begin{tabular}{ |ll| }
     \hline
-    \code{Common} & core VTK classes \\
-    \code{Filtering} & classes used to manage pipeline dataflow \\
-    \code{Rendering} & rendering, picking, image viewing, and interaction \\
-    \code{VolumeRendering} & volume rendering techniques \\
-    \code{Graphics} & 3D geometry processing \\
-    \code{GenericFiltering} &  non-linear 3D geometry processing \\
-    \code{Imaging} & imaging pipeline \\
-    \code{Hybrid} & classes requiring both graphics and imaging functionality \\
-    \code{Widgets} & sophisticated interaction \\
-    \code{IO} & VTK input and output \\
-    \code{Infovis} & information visualization \\
-    \code{Parallel} & parallel processing (controllers and communicators) \\
-    \code{Wrapping} & support for Tcl, Python, and Java wrapping \\
-    \code{Examples} & extensive, well-documented examples \\
+    %% \code{Common} & core VTK classes \\
+    %% \code{Filtering} & classes used to manage pipeline dataflow \\
+    %% \code{Rendering} & rendering, picking, image viewing, and interaction \\
+    %% \code{VolumeRendering} & volume rendering techniques \\
+    %% \code{Graphics} & 3D geometry processing \\
+    %% \code{GenericFiltering} &  non-linear 3D geometry processing \\
+    %% \code{Imaging} & imaging pipeline \\
+    %% \code{Hybrid} & classes requiring both graphics and imaging functionality \\
+    %% \code{Widgets} & sophisticated interaction \\
+    %% \code{IO} & VTK input and output \\
+    %% \code{Infovis} & information visualization \\
+    %% \code{Parallel} & parallel processing (controllers and communicators) \\
+    %% \code{Wrapping} & support for Tcl, Python, and Java wrapping \\
+    %% \code{Examples} & extensive, well-documented examples \\
+    \code{Common} & VTKコアクラス \\
+    \code{Filtering} & パイプラインデータフローの管理に使うクラス \\
+    \code{Rendering} & レンダリング、ピッキング、画像の表示、そしてインタラクション \\
+    \code{VolumeRendering} & ボリュームレンダリング \\
+    \code{Graphics} & 3Dジオメトリ処理 \\
+    \code{GenericFiltering} &  ノンリニア3Dジオメトリ処理 \\
+    \code{Imaging} & 画像パイプライン \\
+    \code{Hybrid} & グラフィック機能とイメージング機能の両方を必要とするクラス \\
+    \code{Widgets} & 洗練されたインタラクション \\
+    \code{IO} & VTKの入出力 \\
+    \code{Infovis} & 情報の可視化 \\
+    \code{Parallel} & 並列処理(コントローラとコミュニケータ) \\
+    \code{Wrapping} & TclやPythonそしてJava用のラッパー \\
+    \code{Examples} & ドキュメントつきの豊富なサンプル \\
     \hline
   \end{tabular}
-  \caption{VTK Subdirectories}
+  %% \caption{VTK Subdirectories}
+  \caption{VTKのサブディレクトリ}
   \label{tbl.vtk.dirs}
 \end{table}
 
