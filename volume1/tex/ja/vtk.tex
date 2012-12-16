@@ -1262,41 +1262,58 @@ VTKコミュニティはさらに、Topic Leadのチームも編成した。
 \end{aosasect2}
 
 %% \begin{aosasect2}{Technology Additions}
-\begin{aosasect2}{技術的な補足}
+\begin{aosasect2}{新技術}
 
-Besides the software process, there are many technological innovations
-in the development pipeline.
+%% Besides the software process, there are many technological innovations
+%% in the development pipeline.
+ソフトウェアの開発プロセスだけでなく、開発パイプラインの中ではいろんな技術的革新もあった。
 
 \begin{aosaitemize}
 
-  \item Co-processing is a capability where the visualization engine is
-  integrated into the simulation code, and periodically generates data
-  extracts for visualization. This technology greatly reduces the need
-  to output large amounts of complete solution data.
+  %% \item Co-processing is a capability where the visualization engine is
+  %% integrated into the simulation code, and periodically generates data
+  %% extracts for visualization. This technology greatly reduces the need
+  %% to output large amounts of complete solution data.
+  \item 共同処理機能は、ビジュアライゼーションエンジンをシミュレーションのコードに組み込み、
+  定期的にビジュアライゼーション用データを生成する機能だ。
+  この技術のおかげで、完全なソリューションデータを大量に出力しなくても済むようになった。
 
-  \item The data processing pipeline in VTK is still too
-  complex. Methods are under way to simplify and refactor this
-  subsystem.
+  %% \item The data processing pipeline in VTK is still too
+  %% complex. Methods are under way to simplify and refactor this
+  %% subsystem.
+  \item VTKのデータ処理パイプラインは、まだまだ複雑すぎる。
+  このサブシステムをリファクタリングでよりシンプルにする作業が進行中だ。
 
-  \item The ability to directly interact with data is increasingly
-  popular with users. While VTK has a large suite of widgets, many
-  more interaction techniques are emerging including
-  touch-screen-based and 3D methods. Interaction will continue its
-  development at a rapid pace.
+  %% \item The ability to directly interact with data is increasingly
+  %% popular with users. While VTK has a large suite of widgets, many
+  %% more interaction techniques are emerging including
+  %% touch-screen-based and 3D methods. Interaction will continue its
+  %% development at a rapid pace.
+  \item データとの直接のインタラクション機能は、ユーザーに広く使われるようになってきた。
+  VTKにはさまざまなウィジェット群が用意されているが、タッチスクリーンを使ったり3D方式を使ったりした
+  新たなインタラクション技法も開発中だ。インタラクションの開発は急ピッチで進められている。
 
-  \item Computational chemistry is increasing in importance to materials
-  designers and engineers. The ability to visualize and interact with
-  chemistry data is being added to VTK.
+  %% \item Computational chemistry is increasing in importance to materials
+  %% designers and engineers. The ability to visualize and interact with
+  %% chemistry data is being added to VTK.
+  \item 計算機化学は、材料デザイナーやエンジニアの間でその重要性を増している。
+  そこで、化学データを可視化したり操作したりするための機能がVTKに追加された。
 
-  \item The rendering system in VTK has been criticized for being too
-  complex, making it difficult to derive new classes or support new
-  rendering technology. In addition, VTK does not directly support the
-  notion of a scene graph, again something that many users have
-  requested.
+  %% \item The rendering system in VTK has been criticized for being too
+  %% complex, making it difficult to derive new classes or support new
+  %% rendering technology. In addition, VTK does not directly support the
+  %% notion of a scene graph, again something that many users have
+  %% requested.
+  \item VTKレンダリングシステムは、複雑すぎるとよく批判される。
+  新たな派生クラスを作ったり新たなレンダリング技術に対応させたりするのが難しいというわけだ。
+  さらに、VTKはシーングラフを直接サポートしていない。これもまた、多くのユーザーが望んでいるものだ。
 
-  \item Finally new forms of data are constantly emerging. For example,
-  in the medical field hierarchical volumetric datasets of varying
-  resolution (e.g., confocal microscopy with local magnification).
+  %% \item Finally new forms of data are constantly emerging. For example,
+  %% in the medical field hierarchical volumetric datasets of varying
+  %% resolution (e.g., confocal microscopy with local magnification).
+  \item 最後に、新たなデータ形式も常に追加されている。
+  たとえば医療の分野では、階層型の容積のデータセットをさまざまな解像度で対応している
+  (共焦点顕微鏡法にローカルの拡大機能をあわせたものなど)。
 
 \end{aosaitemize}
 
