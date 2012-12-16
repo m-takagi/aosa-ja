@@ -1,5 +1,5 @@
 \begin{aosachapter}{Battle for Wesnoth}{s:wesnoth}{Richard Shimooka and David White}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r272
 
 Programming tends to be considered a straightforward problem solving
 activity; a developer has a requirement and codes a solution. Beauty
@@ -55,7 +55,8 @@ implementation and external programs.  The chapter will end with some
 concluding observations on our structure and the challenges of
 broadening participation.
 
-\begin{aosasect1}{Project Overview}
+%% \begin{aosasect1}{Project Overview}
+\begin{aosasect1}{プロジェクトの概要}
 
 Wesnoth's core engine is written in C++, totalling around 200,000 lines
 at the time of this publication. This represents the core game engine,
@@ -70,7 +71,8 @@ rough picture of the program's architecture; green areas are
 maintained by Wesnoth developers, while white areas are external
 dependencies.
 
-\aosafigure{../images/wesnoth/architecture.eps}{Program Architecture}{fig.wes.arch}
+%% \aosafigure{../images/wesnoth/architecture.eps}{Program Architecture}{fig.wes.arch}
+\aosafigure{../images/wesnoth/architecture.eps}{プログラムのアーキテクチャ}{fig.wes.arch}
 
 Overall, the project attempts to minimize dependencies in most cases
 so as to maximize the portability of the application. This has the
@@ -184,6 +186,7 @@ common server and share it with others. Both are written in C++.
 
 \end{aosasect1}
 
+%% \begin{aosasect1}{Wesnoth Markup Language}
 \begin{aosasect1}{Wesnoth Markup Language}
 
 As an extensible game engine, Wesnoth uses a simple data language to
@@ -338,7 +341,8 @@ regenerated.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Units in Wesnoth}
+%% \begin{aosasect1}{Units in Wesnoth}
+\begin{aosasect1}{Wesnothのユニット}
 
 The protagonists of Wesnoth are its units. An Elvish Fighter and an
 Elvish Shaman might battle against a Troll Warrior and an Orcish
@@ -431,7 +435,8 @@ specific requirements.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Wesnoth's Multiplayer Implementation}
+%% \begin{aosasect1}{Wesnoth's Multiplayer Implementation}
+\begin{aosasect1}{Wesnothのマルチプレイヤー機能}
 
 The Wesnoth multiplayer implementation uses a simple-as-possible
 approach to implementing multiplayer in Wesnoth. It attempts to
@@ -510,7 +515,8 @@ immediately be identified to players where it can be dealt with.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Conclusion}
+%% \begin{aosasect1}{Conclusion}
+\begin{aosasect1}{結論}
 
 We believe that the beauty of the Battle for Wesnoth as a program is
 how it made coding accessible to a wide variety of individuals. To
