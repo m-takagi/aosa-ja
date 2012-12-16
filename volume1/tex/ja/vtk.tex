@@ -1152,70 +1152,112 @@ VTKは大規模なソフトウェアツールキットだ。
 %% \begin{aosasect1}{Looking Back/Looking Forward}
 \begin{aosasect1}{ふりかえり/今後の展望}
 
-VTK has been an enormously successful system. While the first line of code was written in
-1993, at the time of this writing VTK is still growing strong and if anything
-the pace of development is increasing.\footnote{See the latest VTK code
-analysis at \url{http://www.ohloh.net/p/vtk/analyses/latest}.} In this section
-we talk about some lessons learned and future challenges.
+%% VTK has been an enormously successful system. While the first line of code was written in
+%% 1993, at the time of this writing VTK is still growing strong and if anything
+%% the pace of development is increasing.\footnote{See the latest VTK code
+%% analysis at \url{http://www.ohloh.net/p/vtk/analyses/latest}.} In this section
+%% we talk about some lessons learned and future challenges.
+VTKは、これまでに大きな成功を収めてきた。最初の一行が書かれたのは1993年だが、
+この章の執筆時点でもまだVTKは着々と成長を続けており、
+むしろ、どちらかといえば開発の速度は上がっている。
+\footnote{VTKの最新のコード分析が\url{http://www.ohloh.net/p/vtk/analyses/latest}で見られる。}
+このセクションでは、これまでに学んだ教訓や今後の目標についてまとめよう。
 
 %% \begin{aosasect2}{Managing Growth}
 \begin{aosasect2}{プロジェクトの発展}
 
-One of the most surprising aspects to the VTK adventure has been the
-project's longevity. The pace of development is due to several major
-reasons:
+%% One of the most surprising aspects to the VTK adventure has been the
+%% project's longevity. The pace of development is due to several major
+%% reasons:
+VTKプロジェクトで最も驚くべきなのは、ここまで長い間生き延びてきたことだ。
+開発のペースは、これらの主要な要因に左右される。
 
 \begin{aosaitemize}
 
-  \item New algorithms and capabilities continue to be added. For
-  example, the informatics subsystem (Titan, primarily developed by
-  Sandia National Labs and Kitware) is a recent significant
-  addition. Additional charting and rendering classes are also being
-  added, as well as capabilities for new scientific dataset
-  types. Another important addition were the 3D interaction
-  widgets. Finally, the on-going evolution of GPU-based rendering and
-  data processing is driving new capabilities in VTK.
+  %% \item New algorithms and capabilities continue to be added. For
+  %% example, the informatics subsystem (Titan, primarily developed by
+  %% Sandia National Labs and Kitware) is a recent significant
+  %% addition. Additional charting and rendering classes are also being
+  %% added, as well as capabilities for new scientific dataset
+  %% types. Another important addition were the 3D interaction
+  %% widgets. Finally, the on-going evolution of GPU-based rendering and
+  %% data processing is driving new capabilities in VTK.
+  \item 日々追加され続ける、新たなアルゴリズムや新たな機能。
+  たとえば、最近追加された新たな機能として、インフォマティクスサブシステムがある
+  (Titan。主にSandia National LabsとKitwareが開発している)。
+  チャートやレンダリングのクラスも追加されたし、新たな科学データ型にも対応した。
+  もうひとつ重要な追加機能が、3Dインタラクションウィジェットだ。
+  さらに、現在進行中なのが、GPUベースのレンダリングやデータ処理機能で、
+  これらによってVTKに新たな機能をもたらそうとしている。
 
-  \item The growing exposure and use of VTK is a self-perpetuating
-  process that adds even more users and developers to the
-  community. For example, ParaView is the most popular scientific
-  visualization application built on VTK and is highly regarded in the
-  high-performance computing community. 3D Slicer is a major
-  biomedical computing platform that is largely built on VTK and
-  received millions of dollars per year in funding.
+  %% \item The growing exposure and use of VTK is a self-perpetuating
+  %% process that adds even more users and developers to the
+  %% community. For example, ParaView is the most popular scientific
+  %% visualization application built on VTK and is highly regarded in the
+  %% high-performance computing community. 3D Slicer is a major
+  %% biomedical computing platform that is largely built on VTK and
+  %% received millions of dollars per year in funding.
+  \item VTKの日々の露出や実際の利用例が増え続けるという自己永続的な流れによる、
+  ユーザーや開発者の増加。たとえば、ParaViewはサイエンティフィック・ビジュアライゼーション
+  アプリケーションの中でも最も人気のあるものだが、これはVTKを使って書かれており、
+  ハイパフォーマンスコンピューティングの世界で高い評価を得ている。
+  3D Slicerは有名な生物医学コンピューティングプラットフォームだが、
+  これも大半はVTKを使って書かれている。このプラットフォームは、年間何百万ドルもの資金援助を得ている。
 
-  \item VTK's development process continues to evolve. In recent years
-  the software process tools CMake, CDash, CTest, and CPack have been
-  integrated into the VTK build environment. More recently, the VTK
-  code repository has moved to Git and a more sophisticated work
-  flow. These improvements ensure that VTK remains on the leading edge
-  of software development in the scientific computing community.
+  %% \item VTK's development process continues to evolve. In recent years
+  %% the software process tools CMake, CDash, CTest, and CPack have been
+  %% integrated into the VTK build environment. More recently, the VTK
+  %% code repository has moved to Git and a more sophisticated work
+  %% flow. These improvements ensure that VTK remains on the leading edge
+  %% of software development in the scientific computing community.
+  \item 日々成長し続けるVTKの開発プロセス。
+  最近は、CMakeやCDash、CTest、そしてCPackなどのツールがVTKのビルド環境に組み込まれた。
+  さらにVTKのコードリポジトリはGitに移行し、より洗練されたワークフローが確立された。
+  これらの改善のおかげで、VTKは今も科学コンピューティングの世界での開発の最先端にあり続ける。
 
 \end{aosaitemize}
 
-While growth is exciting, validates the creation of the software
-system, and bodes well for the future of VTK, it can be extremely
-difficult to manage well. As a result, the near term future of VTK
-focuses more on managing the growth of the community as well as the
-software. Several steps have been taken in this regard.
+%% While growth is exciting, validates the creation of the software
+%% system, and bodes well for the future of VTK, it can be extremely
+%% difficult to manage well. As a result, the near term future of VTK
+%% focuses more on managing the growth of the community as well as the
+%% software. Several steps have been taken in this regard.
+これらの成長はすばらしいことで、このソフトウェアシステムを作ったのが間違いでなかったと感じるし、
+VTKの将来も有望だろう。でも、このながれをきちんと管理していくのはとても難しい。
+そこで、VTKの短期的な目標として、コミュニティの成長にもソフトウェアそのものの成長と同じように注力していくことにした。
+これは、次のような何段階かの手順で進めていった。
 
-First, formalized management structures are being created. An
-Architecture Review Board has been created to guide the development of
-the community and technology, focusing on high-level, strategic
-issues. The VTK community is also establishing a recognized team of
-Topic Leads to guide the technical development of particular VTK
-subsystems.
+%% First, formalized management structures are being created. An
+%% Architecture Review Board has been created to guide the development of
+%% the community and technology, focusing on high-level, strategic
+%% issues. The VTK community is also establishing a recognized team of
+%% Topic Leads to guide the technical development of particular VTK
+%% subsystems.
+まず、きちんとした管理体制の構築を考えた。
+Architecture Review Boardを作り、コミュニティや技術の発展を支援するようにした。
+ここでは、上位レベルの戦略的な課題に注力する。
+VTKコミュニティはさらに、Topic Leadのチームも編成した。
+このチームは、VTKの各サブシステムに関しての技術的な発展を支援する。
 
-Next, there are plans to modularize the toolkit further, partially in
-response to workflow capabilities introduced by git, but also to
-recognize that users and developers typically want to work with small
-subsystems of the toolkit, and do not want to build and link against
-the entire package. Further, to support the growing community, it's
-important that contributions of new functionality and subsystems are
-supported, even if they are not necessarily part of the core of the
-toolkit. By creating a loose, modularized collection of modules it is
-possible to accommodate the large number of contributions on the
-periphery while maintaining core stability.
+%% Next, there are plans to modularize the toolkit further, partially in
+%% response to workflow capabilities introduced by git, but also to
+%% recognize that users and developers typically want to work with small
+%% subsystems of the toolkit, and do not want to build and link against
+%% the entire package. Further, to support the growing community, it's
+%% important that contributions of new functionality and subsystems are
+%% supported, even if they are not necessarily part of the core of the
+%% toolkit. By creating a loose, modularized collection of modules it is
+%% possible to accommodate the large number of contributions on the
+%% periphery while maintaining core stability.
+次に、ツールキットをさらにモジュール化するという計画を立てた。
+これはgitのワークフロー機能を活用するものだが、ユーザーや開発者の要望に応えたものでもある。
+ユーザーや開発者はツールキット全体ではなく小さなサブシステムのほうが作業しやすいだろうし、
+パッケージ全体をビルドしたりリンクしたりするのも好まない。
+さらに、日々成長するコミュニティをサポートするために大切なのが、
+新機能やサブシステムへの貢献を受け入れることだ。
+たとえそれが必ずしもツールキットのコアには入らないものだとしても。
+疎結合なモジュール群による構成を作れば、
+周辺機能に関する大量の貢献を受け入れてもコアの安定性を保てる。
 
 \end{aosasect2}
 
