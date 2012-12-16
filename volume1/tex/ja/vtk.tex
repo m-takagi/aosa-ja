@@ -1355,49 +1355,78 @@ VTKは長年オープンソースかつオープンデータシステムとし�
 %% \begin{aosasect2}{Lessons Learned}
 \begin{aosasect2}{教訓}
 
-While VTK has been successful there are many things we didn't do
-right:
+%% While VTK has been successful there are many things we didn't do
+%% right:
+VTKはこれまで無事に続いてきたが、うまくできなかったことだっていろいろある。
 
 \begin{aosadescription}
 
-  \item{Design Modularity}: We did a good job choosing the
-  modularity of our classes. For example, we didn't do something as
-  silly as creating an object per pixel, rather we created the
-  higher-level \code{vtkImageClass} that under the hood treats data arrays of
-  pixel data. However in some cases we made our classes too high level
-  and too complex, in many instances we've had to refactor them into
-  smaller pieces, and are continuing this process. One prime example
-  is the data processing pipeline.  Initially, the pipeline was
-  implemented implicitly through interaction of the data and algorithm
-  objects. We eventually realized that we had to create an explicit
-  pipeline executive object to coordinate the interaction between data
-  and algorithms, and to implement different data processing
-  strategies.
+  %% \item{Design Modularity}: We did a good job choosing the
+  %% modularity of our classes. For example, we didn't do something as
+  %% silly as creating an object per pixel, rather we created the
+  %% higher-level \code{vtkImageClass} that under the hood treats data arrays of
+  %% pixel data. However in some cases we made our classes too high level
+  %% and too complex, in many instances we've had to refactor them into
+  %% smaller pieces, and are continuing this process. One prime example
+  %% is the data processing pipeline.  Initially, the pipeline was
+  %% implemented implicitly through interaction of the data and algorithm
+  %% objects. We eventually realized that we had to create an explicit
+  %% pipeline executive object to coordinate the interaction between data
+  %% and algorithms, and to implement different data processing
+  %% strategies.
+  \item{モジュラー設計}: クラスのモジュール化に関しては、うまい判断ができた。
+  たとえば、ピクセルごとにオブジェクトを作るなどというばかげたことはせず、
+  より上位レベルの\code{vtkImageClass}を作って、その裏側でピクセルデータの配列を扱うようにした。
+  しかし、中にはクラスを上位レベルでまとめすぎて複雑にしてしまったこともあった。
+  結局はリファクタリングでより小さく分割することになったし、今もその作業は進んでいる。
+  その最大の例が、データ処理パイプラインだ。
+  最初は、パイプラインの実装は暗黙的なものだった。データオブジェクトとアルゴリズムオブジェクトの
+  インタラクションとして実装されていたのだ。その後、パイプライン実行用のオブジェクトを
+  明示的に作らないといけないことがわかった。このオブジェクトに
+  データとアルゴリズムのインタラクションを調整させ、
+  いろんなデータ処理戦略を実装することになった。
 
-  \item{Missed Key Concepts}: Once of our biggest regrets is not
-  making widespread use of C++ iterators. In many cases the traversal
-  of data in VTK is akin to the scientific programming language
-  Fortran\@. The additional flexibility of iterators would have been a
-  significant benefit to the system. For example, it is very
-  advantageous to process a local region of data, or only data
-  satisfying some iteration criterion.
+  %% \item{Missed Key Concepts}: Once of our biggest regrets is not
+  %% making widespread use of C++ iterators. In many cases the traversal
+  %% of data in VTK is akin to the scientific programming language
+  %% Fortran\@. The additional flexibility of iterators would have been a
+  %% significant benefit to the system. For example, it is very
+  %% advantageous to process a local region of data, or only data
+  %% satisfying some iteration criterion.
+  \item{重要な概念を使いこなせなかった}: いちばん後悔していることのひとつが、
+  C++のイテレータをうまく使いこなせなかったことだ。VTKでは、データの走査の多くを
+  科学計算用のプログラミング言語であるFortran方式で行っている。
+  イテレータの柔軟性をうまく活用できていれば、システムに大きな利益をもたらしていたことだろう。
+  データの一部分だけを処理したり、条件を満たすデータだけを指定したりといったこともできたはずだ。
 
-  \item{Design Issues}: Of course there is a long list of design
-  decisions that are not optimal. We have struggled with the data
-  execution pipeline, having gone through multiple generations each
-  time making the design better. The rendering system too is complex
-  and hard to derive from. Another challenge resulted from the initial
-  conception of VTK: we saw it as a read-only visualization system for
-  viewing data. However, current customers often want it to be capable
-  of editing data, which requires significantly different data
-  structures.
+  %% \item{Design Issues}: Of course there is a long list of design
+  %% decisions that are not optimal. We have struggled with the data
+  %% execution pipeline, having gone through multiple generations each
+  %% time making the design better. The rendering system too is complex
+  %% and hard to derive from. Another challenge resulted from the initial
+  %% conception of VTK: we saw it as a read-only visualization system for
+  %% viewing data. However, current customers often want it to be capable
+  %% of editing data, which requires significantly different data
+  %% structures.
+  \item{設計の問題}: もちろん、設計上の判断の中にも、もっとうまくできただろうというものがたくさんある。
+  データ実行パイプラインには手を焼かされ、何回もの作り直しを経て改善してきた。
+  レンダリングシステムも複雑すぎて、それを派生した何かを作るのは難しい。
+  もうひとつ難しいことがあって、これはVTKの当初の概念に由来するものだ。
+  私たちはもともと、VTKを読み込み専用のビジュアライゼーションシステムと考えていた。
+  データを見るためだけのシステムというつもりだったのだ。
+  しかし、最近のユーザーはデータの編集もしたいと思うことが多い。
+  データの編集を考えるなら、必要なデータ構造も大きく変わってくる。
 
 \end{aosadescription}
 
-One of the great things about an open source system like VTK is that
-many of these mistakes can and will be rectified over time. We have an
-active, capable development community that is improving the system
-every day and we expect this to continue into the foreseeable future.
+%% One of the great things about an open source system like VTK is that
+%% many of these mistakes can and will be rectified over time. We have an
+%% active, capable development community that is improving the system
+%% every day and we expect this to continue into the foreseeable future.
+VTKのようなオープンソースシステムのすばらしいところは、
+こういった多くの間違いを修正していけるという点だ。
+私たちには活発で有能な開発者コミュニティがついており、日々ソフトウェアの改良を続けている。
+将来もきっとこれが続くだろう。
 
 \end{aosasect2}
 
