@@ -1,59 +1,97 @@
 \begin{aosachapter}{Battle for Wesnoth}{s:wesnoth}{Richard Shimooka and David White}
 %% Based on EN-Revision r272
 
-Programming tends to be considered a straightforward problem solving
-activity; a developer has a requirement and codes a solution. Beauty
-is often judged on the technical implementation's elegance or
-effectiveness; this book is replete with excellent examples. Yet
-beyond its immediate computing functions, code can have a profound
-effect on people's lives. It can inspire people to participate and
-create new content. Unfortunately, serious barriers exist that prevent
-individuals from participating in a project.
+%% Programming tends to be considered a straightforward problem solving
+%% activity; a developer has a requirement and codes a solution. Beauty
+%% is often judged on the technical implementation's elegance or
+%% effectiveness; this book is replete with excellent examples. Yet
+%% beyond its immediate computing functions, code can have a profound
+%% effect on people's lives. It can inspire people to participate and
+%% create new content. Unfortunately, serious barriers exist that prevent
+%% individuals from participating in a project.
+プログラミングって、単なる問題解決の方法だととらえられがちだ。
+要件を聞いた開発者が、それを解決すべくコードを書くっていう感じ。
+評価の基準は、技術的な実装の美しさとか効率とかそんなところになる。
+この本にも、そういった内容が満載だ。
+ただ、直接的な機能だけでなく、コードは人々の生活にも影響を及ぼすことがある。
+ここに参加して何か新しいものを作りたいという気持ちにさせることもできるんだ。
+残念ながら、プロジェクトに参加したいと考える人たちの前には、大きな壁が立ちはだかっている。
 
-Most programming languages require significant technical expertise to
-utilize, which is out of reach for many. In addition, enhancing the
-accessibility of code is technically difficult and is not necessary
-for many programs. It rarely translates into neat coding scripts or
-clever programming solutions. Achieving accessibility requires
-considerable forethought in project and program design, which often
-runs counter-intuitive to normal programming standards. Moreover most
-projects rely upon an established staff of skilled professionals that
-are expected to operate at a reasonably high level. They do not
-require additional programming resources. Thus, code accessibility
-becomes an afterthought, if considered at all.
+%% Most programming languages require significant technical expertise to
+%% utilize, which is out of reach for many. In addition, enhancing the
+%% accessibility of code is technically difficult and is not necessary
+%% for many programs. It rarely translates into neat coding scripts or
+%% clever programming solutions. Achieving accessibility requires
+%% considerable forethought in project and program design, which often
+%% runs counter-intuitive to normal programming standards. Moreover most
+%% projects rely upon an established staff of skilled professionals that
+%% are expected to operate at a reasonably high level. They do not
+%% require additional programming resources. Thus, code accessibility
+%% becomes an afterthought, if considered at all.
+たいていのプログラミング言語は、いろいろな知識がないと使いこなせない。そこまでたどり着けない人も多いだろう。
+さらに、誰でも手を加えやすいコードを書くのは技術的に難しいし、別に手を加えやすくしなくたって、たいていのプログラムは書ける。
+ちょっとした書き捨てのスクリプトがきちんとしたきれいなプログラムに成長することなんか、ほとんどない。
+手を加えやすいコードにするには、プロジェクトやプログラムの設計に関して事前にしっかり考えないといけない。
+これは、ふつうにプログラミングを進めるときの直感に反することが多い。
+さらに、たいていのプロジェクトはある程度の実力があるメンバーに依存しており、
+十分に高いスキルを持っている。彼らにすれば、別に新たなメンバーが増えなくてもぜんぜん困らないんだ。
+その結果、他の人から見たコードのわかりやすさは軽視されるようになる。
+考慮するにしても、後付けで対応することになる。
 
-Our project, the Battle for Wesnoth, attempted to address this issue
-from its origins. The program is a turn-based fantasy strategy game,
-produced in an open source model based on a GPL2 license. It has been
-a moderate success, with over four million downloads at the time of
-this writing. While this is an impressive metric, we believe the real
-beauty of our project is the development model that allowed a band of
-volunteers from widely different skill levels to interact in a
-productive way.
+%% Our project, the Battle for Wesnoth, attempted to address this issue
+%% from its origins. The program is a turn-based fantasy strategy game,
+%% produced in an open source model based on a GPL2 license. It has been
+%% a moderate success, with over four million downloads at the time of
+%% this writing. While this is an impressive metric, we believe the real
+%% beauty of our project is the development model that allowed a band of
+%% volunteers from widely different skill levels to interact in a
+%% productive way.
+Battle for Wesnothプロジェクトでは、最初からこの問題に取り組んできた。
+これはターン制のファンタジー戦略ゲームで、GPL2ライセンスのもとでオープンソースで公開されている。
+それなりに成功を収め、執筆時点では4百万ダウンロードをこえている。
+これはこれですごい数字だ。しかし、それよりも自慢したいことがある。
+いろんなスキルレベルの多数の人たちが、それぞれのやりかたで開発に参加するモデルだ。
 
-Enhancing accessibility was not a vague objective set by developers,
-it was viewed as essential for the project's survival. Wesnoth's open
-source approach meant that the project could not immediately expect
-large numbers of highly skilled developers.  Making the project
-accessible to a wide a number of contributors, with varying skill
-levels, would ensure its long-term viability.
+%% Enhancing accessibility was not a vague objective set by developers,
+%% it was viewed as essential for the project's survival. Wesnoth's open
+%% source approach meant that the project could not immediately expect
+%% large numbers of highly skilled developers.  Making the project
+%% accessible to a wide a number of contributors, with varying skill
+%% levels, would ensure its long-term viability.
+コードに手を加えやすくするのは、開発者たちにとっては単なるあいまいな目標ではない。
+このプロジェクトの存亡に関わる重大なことだと考えられている。
+Wesnothはオープンソースで開発されており、
+高いスキルを持つ開発者がたくさん集まってくれることはあまり期待できない。
+スキルレベルを問わずあらゆる人たちがプロジェクトにかかわれるようにしておくことを、
+長期的な生存戦略として考えた。
 
-Our developers attempted to lay the foundations for broadening
-accessibility right from its earliest iteration. This would have
-undeniable consequences for all aspect of the programming
-architecture. Major decisions were made largely with this objective in
-mind. This chapter will provide an in-depth examination of our program
-with a focus on the efforts to increase accessibility.
+%% Our developers attempted to lay the foundations for broadening
+%% accessibility right from its earliest iteration. This would have
+%% undeniable consequences for all aspect of the programming
+%% architecture. Major decisions were made largely with this objective in
+%% mind. This chapter will provide an in-depth examination of our program
+%% with a focus on the efforts to increase accessibility.
+このプロジェクトでは、開発者たちが最初から、幅広い人たちが開発にかかわれるようにすることを試みてきた。
+それがプログラムのアーキテクチャ全体にわたって何らかの影響を及ぼしたことは間違いない。
+何らかの決断をするときは、たいていこのことを重視した。
+この章では、プログラムの内部について深く掘り下げ、
+どうやって手の加えやすさを向上させてきたかに注目して紹介する。
 
-The first part of this chapter offers a general overview of the
-project's programming, covering its language, dependencies and
-architecture. The second part will focus on Wesnoth's unique data
-storage language, known as Wesnoth Markup Language (WML). It will
-explain the specific functions of WML, with a particular emphasis on
-its effects on in-game units. The next section covers multiplayer
-implementation and external programs.  The chapter will end with some
-concluding observations on our structure and the challenges of
-broadening participation.
+%% The first part of this chapter offers a general overview of the
+%% project's programming, covering its language, dependencies and
+%% architecture. The second part will focus on Wesnoth's unique data
+%% storage language, known as Wesnoth Markup Language (WML). It will
+%% explain the specific functions of WML, with a particular emphasis on
+%% its effects on in-game units. The next section covers multiplayer
+%% implementation and external programs.  The chapter will end with some
+%% concluding observations on our structure and the challenges of
+%% broadening participation.
+まずは、このプロジェクトでのプログラミングの概要を紹介する。
+使っている言語や依存関係、そしてアーキテクチャなどに関して扱う。
+次に、Wesnothで使っている独自のデータストレージ言語であるWesnoth Markup Language (WML)について紹介する。
+WMLの個別の機能について、特にゲーム内でのユニットへの効果を中心に説明する。
+それから、マルチプレイヤー機能の実装や外部プログラムについてとりあげる。
+最後に、プロジェクトの構造や参加者を増やすための取り組みについてまとめる。
 
 %% \begin{aosasect1}{Project Overview}
 \begin{aosasect1}{プロジェクトの概要}
