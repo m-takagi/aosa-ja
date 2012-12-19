@@ -96,131 +96,195 @@ WMLの個別の機能について、特にゲーム内でのユニットへの�
 %% \begin{aosasect1}{Project Overview}
 \begin{aosasect1}{プロジェクトの概要}
 
-Wesnoth's core engine is written in C++, totalling around 200,000 lines
-at the time of this publication. This represents the core game engine,
-approximately half of the code base without any content.  The program
-also allows in game content to be defined in a unique data language
-known as Wesnoth Markup Language (WML). The game ships with another
-250,000 lines of WML code. The proportion has shifted over the
-project's existence. As the program matured, game content that was
-hardcoded in C++ has increasingly been rewritten so that WML can
-be used to define its operation. \aosafigref{fig.wes.arch} gives a
-rough picture of the program's architecture; green areas are
-maintained by Wesnoth developers, while white areas are external
-dependencies.
+%% Wesnoth's core engine is written in C++, totalling around 200,000 lines
+%% at the time of this publication. This represents the core game engine,
+%% approximately half of the code base without any content.  The program
+%% also allows in game content to be defined in a unique data language
+%% known as Wesnoth Markup Language (WML). The game ships with another
+%% 250,000 lines of WML code. The proportion has shifted over the
+%% project's existence. As the program matured, game content that was
+%% hardcoded in C++ has increasingly been rewritten so that WML can
+%% be used to define its operation. \aosafigref{fig.wes.arch} gives a
+%% rough picture of the program's architecture; green areas are
+%% maintained by Wesnoth developers, while white areas are external
+%% dependencies.
+WesnothのコアエンジンはC++で書かれている。執筆時点での行数は、ぜんぶで200,000行程度だ。
+これはゲームエンジンの中核となる部分で、コードベース全体からコンテンツを除いた半分程度になる。
+This represents the core game engine, approximately half of the code base without any content.
+このプログラムでは、ゲームのコンテンツを独自のデータ言語で定義できるようになっている。
+その名はWesnoth Markup Language (WML)だ。
+このゲームに同梱されているWMLのコードは250,000行程度になる。
+プロジェクトの存在感が増すにつれて、コンテンツの割合が増えてきた。
+プログラムが成熟するにつれて、C++でハードコードされたゲームコンテンツも新たに書き直され、
+WMLを使ってその動きを定義できるようになった。
+\aosafigref{fig.wes.arch}はプログラムのアーキテクチャの概要を示したもので、
+色が付いている部分はWesnothの開発者が保守するところ、そして白い部分は外部の依存関係を表す。
 
 %% \aosafigure{../images/wesnoth/architecture.eps}{Program Architecture}{fig.wes.arch}
 \aosafigure{../images/wesnoth/architecture.eps}{プログラムのアーキテクチャ}{fig.wes.arch}
 
-Overall, the project attempts to minimize dependencies in most cases
-so as to maximize the portability of the application. This has the
-added benefit of reducing the program's complexity, and decreases the
-need for developers to learn the nuances of a large number of third
-party APIs.  At the same time, the prudent use of some dependencies
-can actually achieve the same effect. For example, Wesnoth uses the
-Simple Directmedia Layer (SDL) for video, I/O and event handling. It
-was chosen because it is easy to use and provides a common I/O
-interface across many platforms.  This allows it to be portable to a
-wide array of platforms, rather than the alternative of coding to
-specific APIs on different platforms. This comes at a price however;
-it is harder to take advantage of some platform specific features. SDL
-also has an accompanying family of libraries that are used by Wesnoth
-for various purposes:
+%% Overall, the project attempts to minimize dependencies in most cases
+%% so as to maximize the portability of the application. This has the
+%% added benefit of reducing the program's complexity, and decreases the
+%% need for developers to learn the nuances of a large number of third
+%% party APIs.  At the same time, the prudent use of some dependencies
+%% can actually achieve the same effect. For example, Wesnoth uses the
+%% Simple Directmedia Layer (SDL) for video, I/O and event handling. It
+%% was chosen because it is easy to use and provides a common I/O
+%% interface across many platforms.  This allows it to be portable to a
+%% wide array of platforms, rather than the alternative of coding to
+%% specific APIs on different platforms. This comes at a price however;
+%% it is harder to take advantage of some platform specific features. SDL
+%% also has an accompanying family of libraries that are used by Wesnoth
+%% for various purposes:
+総合的には、このプロジェクトではできるだけ依存関係を減らすよう心がけている。
+アプリケーションのポータビリティを高めるためだ。
+こうしておけば、プログラムの複雑度がさがるという効果もある。
+さらに、開発者がいろんなサードパーティのAPIを学ぶ手間も省ける。
+もちろん、使うべきところでは適切な依存関係を利用する。それもまた同じ効果を与えてくれる。
+Wesnothでは、Simple Directmedia Layer (SDL)を使って画像処理やI/Oそしてイベント処理を書いている。
+これを選んだ理由は、使いやすいことと多数のプラットフォームで共通のI/Oインターフェイスが使えることだ。
+そのおかげで、プラットフォームごとに独自のAPIを書いていくのに比べてより幅広いプラットフォームへのポータビリティを確保できた。
+しかし、見返りとして失ったものもある。プラットフォームごとの独自機能を使うのが難しくなったのだ。
+SDLにはいろんなライブラリが添付されており、Wesnothでもいろんなところでそれを使っている。
 
 \begin{aosaitemize}
 
-  \item SDL\_Mixer for audio and sound
+  %% \item SDL\_Mixer for audio and sound
+  \item SDL\_Mixer(音楽や音声)
 
-  \item SDL\_Image for loading PNG and other image formats
+  %% \item SDL\_Image for loading PNG and other image formats
+  \item SDL\_Image(PNGなどの画像フォーマットの読み込み)
 
-  \item SDL\_Net for network I/O
+  %% \item SDL\_Net for network I/O
+  \item SDL\_Net(ネットワークI/O)
 
 \end{aosaitemize}
 
-Additionally, Wesnoth uses several other libraries:
+%% Additionally, Wesnoth uses several other libraries:
+さらに、Wesnothではその他のライブラリも使っている。
 
 \begin{aosaitemize}
 
-  \item Boost for a variety of advanced C++ features
+  %% \item Boost for a variety of advanced C++ features
+  \item Boost(C++の高度な機能)
 
-  \item Pango with Cairo for internationalized fonts
+  %% \item Pango with Cairo for internationalized fonts
+  \item PangoとCairo(国際化フォント)
 
-  \item zlib for compression
+  %% \item zlib for compression
+  \item zlib(圧縮)
 
-  \item Python and Lua for scripting support
+  %% \item Python and Lua for scripting support
+  \item PythonとLua(スクリプトによる拡張への対応)
 
-  \item GNU gettext for internationalization
+  %% \item GNU gettext for internationalization
+  \item GNU gettext(国際化)
 
 \end{aosaitemize}
 
-Throughout Wesnoth's engine, the use of WML objects---that is, string
-dictionaries with child nodes---is fairly ubiquitous.  Many objects
-can be constructed from a WML node, and also serialize themselves to a
-WML node. Some parts of the engine keep data in this WML dictionary
-based format, interpreting it directly rather than parsing it into a
-C++ data structure.
+%% Throughout Wesnoth's engine, the use of WML objects---that is, string
+%% dictionaries with child nodes---is fairly ubiquitous.  Many objects
+%% can be constructed from a WML node, and also serialize themselves to a
+%% WML node. Some parts of the engine keep data in this WML dictionary
+%% based format, interpreting it directly rather than parsing it into a
+%% C++ data structure.
+Wesnothエンジンでは、WMLオブジェクト(文字列のディレクトリと子ノード群)をあらゆるところで使っている。
+WMLノードからさまざまなオブジェクトを構築したり、
+逆にオブジェクトをWMLノードにシリアライズしたりできる。
+エンジン内部ではこのWMLディレクトリベースの形式でデータを保持しているところもあり、
+C++のデータ構造を介さずに直接それをパースしている。
 
-Wesnoth utilizes several important subsystems, most of which are as
-self-contained as possible. This segmented structure has advantages
-for accessibility. An interested party can easily work a code in a
-specific area and introduce changes without damaging the rest of the
-program. The major subdivisions include:
+%% Wesnoth utilizes several important subsystems, most of which are as
+%% self-contained as possible. This segmented structure has advantages
+%% for accessibility. An interested party can easily work a code in a
+%% specific area and introduce changes without damaging the rest of the
+%% program. The major subdivisions include:
+Wesnothではいくつかの重要なサブシステムを使っているが、
+その多くはできるだけ自己完結型になるようにしている。
+このように分割された作りにしておくことで、可読性をあげている。
+何か特定の部分に興味を持った人はすぐにその部分の作業にとりかかれるし、
+手を加えるときにも、それがプログラムの他の部分に悪影響を及ぼすことを心配せずに済む。
+主なサブシステムを次にまとめる。
 
 \begin{aosaitemize}
 
-  \item A WML parser with preprocessor
+  %% \item A WML parser with preprocessor
+  \item WMLパーサーとプリプロセッサ
 
-  \item Basic I/O modules that abstract underlying libraries and
-  system calls---a video module, a sound module, a network module
+  %% \item Basic I/O modules that abstract underlying libraries and
+  %% system calls---a video module, a sound module, a network module
+  \item 基本I/Oモジュール(ベースになる映像モジュールや音声モジュール、ネットワークモジュールのライブラリやシステムコールの抽象化)
 
-  \item A GUI module containing widget implementations for buttons,
-  lists, menus, etc.
+  %% \item A GUI module containing widget implementations for buttons,
+  %% lists, menus, etc.
+  \item GUIモジュール(ボタンやリスト、メニューなどのウィジェットの実装を含む)
 
-  \item A display module for rendering the game board, units,
-  animations, and so forth
+  %% \item A display module for rendering the game board, units,
+  %% animations, and so forth
+  \item ディスプレイモジュール(ゲーム盤やユニット、アニメーションなどのレンダリング)
 
-  \item An AI module
+  %% \item An AI module
+  \item AIモジュール
 
-  \item A pathfinding module that includes many utility functions for
-  dealing with a hexagonal gaming board
+  %% \item A pathfinding module that includes many utility functions for
+  %% dealing with a hexagonal gaming board
+  \item パスファインディングモジュール(六角形のゲーム盤を扱うさまざまなユーティリティ関数を含む)
 
-  \item A map generation module for generating different kinds of
-  random maps
+  %% \item A map generation module for generating different kinds of
+  %% random maps
+  \item マップ生成モジュール(さまざまな形式のマップをランダムに生成する)
 
 \end{aosaitemize}
 
-There are also different modules for controlling different parts of
-the game flow:
+%% There are also different modules for controlling different parts of
+%% the game flow:
+ゲームの流れを制御するモジュールも用意されている。
 
 \begin{aosaitemize}
 
-  \item The titlescreen module, for controlling display of the
-  title screen.
+  %% \item The titlescreen module, for controlling display of the
+  %% title screen.
+  \item タイトルスクリーンモジュール(タイトル画面の表示を制御する)
 
-  \item The storyline module, for showing cut-scene sequences.
+  %% \item The storyline module, for showing cut-scene sequences.
+  \item ストーリーラインモジュール(一連のカットシーンを表示する)
 
-  \item The lobby module, for displaying and allowing setup of games
-  on the multiplayer server.
+  %% \item The lobby module, for displaying and allowing setup of games
+  %% on the multiplayer server.
+  \item ロビーモジュール(マルチプレイヤーサーバー上でのゲームの設定画面を表示する)
 
-  \item The ``play game'' module that controls the main gameplay.
+  %% \item The ``play game'' module that controls the main gameplay.
+  \item ``play game''モジュール(ゲーム全体を制御するモジュール)
 
 \end{aosaitemize}
 
-The ``play game'' module and the main display module are the largest
-within Wesnoth.  Their purpose is the least well defined, as their
-function is ever-changing and thus difficult to have a clear
-specification for. Consequently, the modules has often been in danger
-of suffering from the Blob anti-pattern over the program's
-history---i.e., becoming huge dominant segments without well-defined
-behaviors.  The code in the display and play game modules are
-regularly reviewed to see if any of it can be separated into a module
-of its own.
+%% The ``play game'' module and the main display module are the largest
+%% within Wesnoth.  Their purpose is the least well defined, as their
+%% function is ever-changing and thus difficult to have a clear
+%% specification for. Consequently, the modules has often been in danger
+%% of suffering from the Blob anti-pattern over the program's
+%% history---i.e., becoming huge dominant segments without well-defined
+%% behaviors.  The code in the display and play game modules are
+%% regularly reviewed to see if any of it can be separated into a module
+%% of its own.
+``play game''モジュールとディスプレイモジュールが、Wesnothの中でも最大のものだ。
+その役割をはっきり定義することはできない。
+というのも、このモジュールの機能は常に変わり続けるものだし、明確な仕様を定めることなどできないからだ。
+そのため、このモジュールは常に、Blobアンチパターンに陥る危険にさらされている。
+いったい何をするものなのかわからない巨大な塊として君臨してしまう、というパターンだ。
+ディスプレイモジュールとこのモジュールのコードについては常にレビューされており、
+何か別のモジュールに切り出せるコードがないかどうかを調べている。
 
-There are also ancillary features that are part of the overall
-project, but are separate from the main program. This includes a
-multiplayer server that facilitates multiplayer network games, as well
-as a content server that allows users to upload their content to a
-common server and share it with others. Both are written in C++.
+%% There are also ancillary features that are part of the overall
+%% project, but are separate from the main program. This includes a
+%% multiplayer server that facilitates multiplayer network games, as well
+%% as a content server that allows users to upload their content to a
+%% common server and share it with others. Both are written in C++.
+さらに、プロジェクト全体にかかわる補助機能もあって、これはメインプログラムとは切り離されている。
+マルチプレイヤーでのネットワークゲームを進行するマルチプレイヤーサーバー、
+そしてユーザーがコンテンツをアップロードして他のユーザーと共有できるようにするコンテンツサーバーなどがこれにあたる。
+どちらもC++で書かれている。
 
 \end{aosasect1}
 
