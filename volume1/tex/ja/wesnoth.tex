@@ -678,13 +678,18 @@ WMLはもっと柔軟にする必要があるだろう。
 %% \begin{aosasect1}{Wesnoth's Multiplayer Implementation}
 \begin{aosasect1}{Wesnothのマルチプレイヤー機能}
 
-The Wesnoth multiplayer implementation uses a simple-as-possible
-approach to implementing multiplayer in Wesnoth. It attempts to
-mitigate the possibility of malicious attacks on the server, but
-doesn't make a serious attempt to prevent cheating.  Any movement that
-is made in a Wesnoth game---moving of a unit, attacking an enemy,
-recruiting a unit, and so forth---can be saved as a WML node. For
-instance, a command to move a unit might be saved into WML like this:
+%% The Wesnoth multiplayer implementation uses a simple-as-possible
+%% approach to implementing multiplayer in Wesnoth. It attempts to
+%% mitigate the possibility of malicious attacks on the server, but
+%% doesn't make a serious attempt to prevent cheating.  Any movement that
+%% is made in a Wesnoth game---moving of a unit, attacking an enemy,
+%% recruiting a unit, and so forth---can be saved as a WML node. For
+%% instance, a command to move a unit might be saved into WML like this:
+Wesnothのマルチプレイヤー機能の実装は、できるだけシンプルな手法を使うようにした。
+サーバーへの悪意のある攻撃の可能性をできるだけ減らすことには注意したが、
+チート対策にはそんなに力を入れていない。Wesnothのゲーム中のあらゆる操作
+(ユニットの移動、敵への攻撃、ユニットの追加など)はすべて、WMLのノードとして保存される。
+たとえば、ユニットを移動させるコマンドはこんなWMLファイルになるだろう。
 
 \begin{verbatim}
 [move]
@@ -693,65 +698,110 @@ instance, a command to move a unit might be saved into WML like this:
 [/move]
 \end{verbatim}
 
-\noindent This shows the path that a unit follows as a result of a player's
-commands. The game then has a facility to execute any such WML command
-given to it. This is very useful because it means that a complete
-replay can be saved, by storing the initial state of the game and then
-all subsequent commands. Being able to replay games is useful both for
-players to observe each other playing, as well as to help in certain
-kinds of bug reports.
+%% \noindent This shows the path that a unit follows as a result of a player's
+%% commands. The game then has a facility to execute any such WML command
+%% given to it. This is very useful because it means that a complete
+%% replay can be saved, by storing the initial state of the game and then
+%% all subsequent commands. Being able to replay games is useful both for
+%% players to observe each other playing, as well as to help in certain
+%% kinds of bug reports.
+\noindent
+これは、プレイヤーのコマンドに従ってユニットがたどる道を示している。
+このゲームには、このようなWMLのコマンドを受け取って実行する仕組みがある。
+これはとても有用だ。つまり、ゲームの初期状態とその後のすべてのコマンドを保存しておけば、
+そのゲームを完全に再現できるということだからだ。
+ゲームを再現できるようにしておけば、プレイヤーどうしがお互いのプレイを見るのにも便利だし、
+バグレポートのときにも便利に使える。
 
-We decided that the community would try to focus on friendly, casual
-games for the network multiplayer implementation of Wesnoth.  Rather
-than fight a technical battle against anti-social crackers trying to
-compromise cheat prevention systems, the project would simply not try
-hard to prevent cheating. An analysis of other multiplayer games
-indicated that competitive ranking systems were a key source of
-anti-social behavior. Deliberately preventing such functions on the
-server greatly reduced the motivation for individuals to cheat.
-Moreover the moderators try to encourage a positive gaming community
-where individuals develop personal rapport with other players and play
-with them. This placed a greater emphasis on relationships rather than
-competition. The outcome of these efforts has been deemed successful,
-as thus far efforts to maliciously hack the game have been largely
-isolated.
+%% We decided that the community would try to focus on friendly, casual
+%% games for the network multiplayer implementation of Wesnoth.  Rather
+%% than fight a technical battle against anti-social crackers trying to
+%% compromise cheat prevention systems, the project would simply not try
+%% hard to prevent cheating. An analysis of other multiplayer games
+%% indicated that competitive ranking systems were a key source of
+%% anti-social behavior. Deliberately preventing such functions on the
+%% server greatly reduced the motivation for individuals to cheat.
+%% Moreover the moderators try to encourage a positive gaming community
+%% where individuals develop personal rapport with other players and play
+%% with them. This placed a greater emphasis on relationships rather than
+%% competition. The outcome of these efforts has been deemed successful,
+%% as thus far efforts to maliciously hack the game have been largely
+%% isolated.
+私たちコミュニティは、フレンドリーでカジュアルなゲームであることを心がけながら
+Wesnothのネットワークマルチプレイヤー環境を作った。
+チート防止システムを組み込んで悪意のあるクラッカーと技術的に争うのではやめて、
+チート防止に無駄に力を入れすぎないようにした。
+私たちの競合だとみられている他のマルチプレイヤーゲーム(ランキングシステムで競争しあうもの)
+を分析して、クラッカー対策をどうするのかの参考にした。
+サーバー上のチート防止機能を意図的に外していると、チートしようとする人のやる気を大きくそぐようだった。
+さらに、モデレーターが前向きなコミュニティを作るようにし、
+個々の開発者とプレイヤーの信頼関係を築いて遊んでもらえるようにした。
+争うことよりもいい関係を保つことに注力したんだ。
+その努力の結果はうまくいっているものと見られる。
+悪意を持ってゲームをクラックしようという動きはほぼなくなったからだ。
 
-Wesnoth's multiplayer implementation consists of a typical
-client-server infrastructure. A server, known as wesnothd, accepts
-connections from the Wesnoth client, and sends the client a summary of
-available games.  Wesnoth will display a 'lobby' to the player who can
-choose to join a game or create a new game for others to join. Once
-players are in a game and the game starts, each instance of Wesnoth
-will generate WML commands describing the actions the player
-makes. These commands are sent to the server, and then the server
-relays them on to all the other clients in the game. The server will
-thus act as a very thin, simple relay. The replay system is used on
-the other clients to execute the WML commands.  Since Wesnoth is a
-turn-based game, TCP/IP is used for all network communication.
+%% Wesnoth's multiplayer implementation consists of a typical
+%% client-server infrastructure. A server, known as wesnothd, accepts
+%% connections from the Wesnoth client, and sends the client a summary of
+%% available games.  Wesnoth will display a 'lobby' to the player who can
+%% choose to join a game or create a new game for others to join. Once
+%% players are in a game and the game starts, each instance of Wesnoth
+%% will generate WML commands describing the actions the player
+%% makes. These commands are sent to the server, and then the server
+%% relays them on to all the other clients in the game. The server will
+%% thus act as a very thin, simple relay. The replay system is used on
+%% the other clients to execute the WML commands.  Since Wesnoth is a
+%% turn-based game, TCP/IP is used for all network communication.
+Wesnothのマルチプレイヤー実装は、ありがちなクライアント・サーバー型のインフラで構成されている。
+サーバー(wesnothd)はWesnothクライアントからの接続を受け付け、遊べるゲームの概要をクライアントに送信する。
+Wesnothはプレイヤーに「ロビー」を表示し、どのゲームに参加するか、
+あるいは新たなゲームを作って他のユーザーを呼ぶのかを選べるようにする。
+プレイヤーが何かのゲームを選んでゲームが始まると、
+Wesnothの各インスタンスはプレイヤーのアクションにしたがってWMLコマンドを生成する。
+このコマンドはサーバーに送られ、サーバーは参加しているすべてのクライアントにそのコマンドを中継する。
+つまり、サーバーは、薄くシンプルな中継役として働くことになる。
+リプレイシステムを他のクライアントで使って、WMLコマンドを実行する。
+Wesnothはターン制のゲームなので、すべてのネットワーク通信にはTCP/IPを使う。
 
-This system also allows observers to easily watch a game. An observer
-can join a game in-progress, in which case the server will send the
-WML representing the initial state of the game, followed by a history
-of all commands that have been carried out since the start of the
-game. This allows new observers to get up to speed on the state of
-the game. They can see a history of the game, although it does take
-time for the observer to get to the game's current position---the
-history of commands can be fast forwarded but it still takes
-time. The alternative would be to have one of the clients generate a
-snapshot of the game's current state as WML and send it to the new
-observer; however this approach would burden clients with overhead
-based on observers, and could facilitate denial-of-service attacks by
-having many observers join a game.
+%% This system also allows observers to easily watch a game. An observer
+%% can join a game in-progress, in which case the server will send the
+%% WML representing the initial state of the game, followed by a history
+%% of all commands that have been carried out since the start of the
+%% game. This allows new observers to get up to speed on the state of
+%% the game. They can see a history of the game, although it does take
+%% time for the observer to get to the game's current position---the
+%% history of commands can be fast forwarded but it still takes
+%% time. The alternative would be to have one of the clients generate a
+%% snapshot of the game's current state as WML and send it to the new
+%% observer; however this approach would burden clients with overhead
+%% based on observers, and could facilitate denial-of-service attacks by
+%% having many observers join a game.
+このシステムでは、プレイヤー以外もオブザーバーとしてゲームを観戦できるようになっている。
+オブザーバーは進行中のゲームに途中参加できる。このとき、サーバーはゲームの初期状態を表す
+WMLを送信してから、それ以降に実行されたすべてのコマンドの履歴を送信する。
+これで、途中から参加したオブザーバーもゲームの状態についていけるようになる。
+この時点でゲームの履歴を見られるようになるが、オブザーバーがゲームの現在の状態に追いつくには
+多少時間がかかる。コマンドの履歴は高速に転送されるとはいえ、それでも少し時間がかかるからだ。
+もうひとつの方法としては、クライアントのひとつがゲームの現状のスナップショットをWMLとして生成して、
+それを新しいオブザーバーに送るというやりかたもある。
+しかし、この手法だとクライアント側にオブザーバーのオーバーヘッドを押しつけることになり、
+大量のオブザーバーを同時にゲームに参加させるDoS攻撃もできるようになってしまう。
 
-Of course, since Wesnoth clients do not share any kind of game state
-with each other, only sending commands, it is important that they
-agree on the rules of the game. The server is segmented by version,
-with only players using the same version of the game able to
-interact. Players are immediately alerted if their client's game
-becomes out of sync with others. This also is a useful system to
-prevent cheating. Although it is rather easy for a player to cheat by
-modifying their client, any difference between versions will
-immediately be identified to players where it can be dealt with.
+%% Of course, since Wesnoth clients do not share any kind of game state
+%% with each other, only sending commands, it is important that they
+%% agree on the rules of the game. The server is segmented by version,
+%% with only players using the same version of the game able to
+%% interact. Players are immediately alerted if their client's game
+%% becomes out of sync with others. This also is a useful system to
+%% prevent cheating. Although it is rather easy for a player to cheat by
+%% modifying their client, any difference between versions will
+%% immediately be identified to players where it can be dealt with.
+もちろん、Wesnothクライアントはゲームの状態を何も共有せずただコマンドを送信するだけなので、
+クライアントがゲームのルールに合意することが重要になる。
+サーバーはバージョンによって分けられており、同じバージョンのゲームを使っているプレイヤーとしかやりとりできない。
+もし自分のクライアントのゲームのバージョンが他のクライアントとずれてしまったら、そのときにはプレイヤーにすぐ警告が出る。
+これは、チートを防ぐにも便利な仕組みだ。たとえクライアントをいじれば簡単にチートできるとしても、
+バージョンが変わればすぐに気づかれてしまうってことだ。
 
 \end{aosasect1}
 

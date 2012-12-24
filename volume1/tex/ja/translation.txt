@@ -31,4 +31,4 @@ thousandparsec.tex  TAKAGI Masahiro <matakagi@gmail.com>      100
 violet.tex          TAKAGI Masahiro <matakagi@gmail.com>      100
 vistrails.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
 vtk.tex             TAKAGI Masahiro <matakagi@gmail.com>      100
-wesnoth.tex         TAKAGI Masahiro <matakagi@gmail.com>       70
+wesnoth.tex         TAKAGI Masahiro <matakagi@gmail.com>       85
