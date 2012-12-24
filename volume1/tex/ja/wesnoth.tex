@@ -321,7 +321,7 @@ WMLの基本構造はXMLと同じで、要素と属性で構成されている�
 しかし、要素の中にテキストを置くことはできない。
 WMLの属性は、単に文字列と文字列をマップする辞書形式だ。
 そこに、属性を解釈するプログラムロジックを組み合わせたものになる。
-シンプルなWMLの例を示す。これは、ゲームの中で使うElvish Fighter
+シンプルなWMLの例を示す。これは、ゲームの中で使うエルフの戦士
 ユニットの定義を整えたものだ。
 
 \begin{verbatim}
@@ -404,7 +404,7 @@ Wesnothでは、大量のWMLドキュメントを用意する方法ではなく�
 %% nimble under certain conditions, such as when they are stationed in a
 %% forest:
 WMLはとても冗長になることがあるので、プリプロセッサではマクロも定義できるようにしている。
-マクロを使えば、冗長な部分を簡略化できる。たとえばElvish Fighterの定義の中で
+マクロを使えば、冗長な部分を簡略化できる。たとえばエルフの戦士の定義の中で
 \code{\{LESS\_NIMBLE\_ELF\}}を起動しているところは、マクロの呼び出しになっている。
 このマクロは、森の中にいるなどの特定の条件のもとで、敏捷性に劣るエルフの宇ニットを作る。
 
@@ -517,94 +517,161 @@ WMLドキュメントのサイズがメガバイト単位にふくれあがっ�
 %% \begin{aosasect1}{Units in Wesnoth}
 \begin{aosasect1}{Wesnothのユニット}
 
-The protagonists of Wesnoth are its units. An Elvish Fighter and an
-Elvish Shaman might battle against a Troll Warrior and an Orcish
-Grunt.  All units share the same basic behavior, but many have special
-abilities that alter the normal flow of gameplay. For example, a troll
-regenerates some of its health every turn, an Elvish shaman slows its
-opponents with an entangling root, and a Wose is invisible in a
-forest. 
+%% The protagonists of Wesnoth are its units. An Elvish Fighter and an
+%% Elvish Shaman might battle against a Troll Warrior and an Orcish
+%% Grunt.  All units share the same basic behavior, but many have special
+%% abilities that alter the normal flow of gameplay. For example, a troll
+%% regenerates some of its health every turn, an Elvish shaman slows its
+%% opponents with an entangling root, and a Wose is invisible in a
+%% forest. 
+Wesnothの主役はユニットだ。
+エルフの戦士やエルフの女呪術師が、トロルの戦士やオークの兵卒と戦うことになる。
+基本的な挙動はすべてのユニットで共通だが、通常のゲームの流れを変えるような特別な能力もいろいろある。
+たとえばトロルはターンごとに自分の体を部分的に再生するし、
+エルフの女呪術師はエンタングリング・ルーツで敵を遅くさせることができ、
+ウーズは森の中では目に見えない。
 
-What is the best way to represent this in an engine? It is
-tempting to make a base \code{unit} class in C++, with different types
-of units derived from it. For instance, a \code{wose\_unit} class could
-derive from \code{unit}, and \code{unit} could have a virtual
-function, \code{bool is\_invisible() const}, which returns false, which
-the \code{wose\_unit} overrides, returning true if the unit happens to
-be in forest.
+%% What is the best way to represent this in an engine? It is
+%% tempting to make a base \code{unit} class in C++, with different types
+%% of units derived from it. For instance, a \code{wose\_unit} class could
+%% derive from \code{unit}, and \code{unit} could have a virtual
+%% function, \code{bool is\_invisible() const}, which returns false, which
+%% the \code{wose\_unit} overrides, returning true if the unit happens to
+%% be in forest.
+これらをエンジンの中で表す、最適な方法は何だろうか。
+C++で基底クラス\code{unit}を作って、その派生クラスとしていろんなタイプのユニットを用意したくなるところだ。
+たとえば\code{unit}の派生クラスとして\code{wose\_unit}クラスを作り、
+\code{unit}のほうでは仮想関数\code{bool is\_invisible() const}を用意してfalseを返すようにしておく。
+\code{wose\_unit}ではそれをオーバーライドして、森の中にいるときはtrueを返すようにすればいい。
 
-Such an approach would work reasonably well for a game with a limited
-set of rules. Unfortunately Wesnoth is quite a large game and such an
-approach is not easily extendable. If a person wanted to add a new
-type of unit under this approach, it would require the addition of a
-new C++ class to the game. Additionally, it does not allow different
-characteristics to be combined well: what if you had a unit that
-regenerated, could slow enemies with a net, and was invisible in a
-forest? You would have to write an entirely new class that duplicates
-code in the other classes.
+%% Such an approach would work reasonably well for a game with a limited
+%% set of rules. Unfortunately Wesnoth is quite a large game and such an
+%% approach is not easily extendable. If a person wanted to add a new
+%% type of unit under this approach, it would require the addition of a
+%% new C++ class to the game. Additionally, it does not allow different
+%% characteristics to be combined well: what if you had a unit that
+%% regenerated, could slow enemies with a net, and was invisible in a
+%% forest? You would have to write an entirely new class that duplicates
+%% code in the other classes.
+ルールが限られているときは、こんな手法でもうまくいくことだろう。
+ただ、残念ながらWesnothはとても大規模なゲームなので、
+そんなやりかたをしていれば拡張性を損ねてしまう。
+この方式の場合、もし新たなタイプのユニットを追加したくなったら
+新しくC++のクラスを作らないといけなくなる。
+さらに、別々の特性を組み合わせて使うことができない。
+再生能力があって、網で的のスピードを抑えられ、かつ森の中では見えなくなるというユニットがでてきたらどうする？
+それ用に新しくクラスを書かないといけなくなって、コードが重複してしまうことになる。
 
-Wesnoth's unit system doesn't use inheritance at all to accomplish
-this task. Instead, it uses a \code{unit} class to represent instances
-of units, and a \code{unit\_type} class, which represents the
-immutable characteristics that all units of a certain type share. The
-\code{unit} class has a reference to the type of object that it is.
-All the possible \code{unit\_type} objects are stored in a globally
-held dictionary that is loaded when the main WML document is loaded.
+%% Wesnoth's unit system doesn't use inheritance at all to accomplish
+%% this task. Instead, it uses a \code{unit} class to represent instances
+%% of units, and a \code{unit\_type} class, which represents the
+%% immutable characteristics that all units of a certain type share. The
+%% \code{unit} class has a reference to the type of object that it is.
+%% All the possible \code{unit\_type} objects are stored in a globally
+%% held dictionary that is loaded when the main WML document is loaded.
+Wesnothのユニットシステムは、継承を一切使わずにこの仕組みを実現した。
+\code{unit}クラスはユニットのインスタンスを表すものとして使い、
+それとは別に\code{unit\_type}クラスを用意して、
+その型の全ユニットが共有する不変な性質を表した。
+\code{unit}クラスは、自分自身のオブジェクトの型への参照を持っている。
+考え得るすべての\code{unit\_type}オブジェクトはグローバルな辞書で保持されており、
+メインWMLドキュメントを読み込むときにこの辞書も読み込まれる。
 
-A unit type has a list of all the abilities that that unit has. For
-instance, a Troll has the ``regeneration'' ability that makes it heal
-life every turn. A Saurian Skirmisher has the ``skirmisher'' ability
-that allows it to move through enemy lines. Recognition of these
-abilities is built into the engine---for instance, the pathfinding
-algorithms will check if a unit has the ``skirmisher'' flag set to see
-if it can move freely past enemy lines. This approach allows an
-individual to add new units, which have any combination of abilities
-made by the engine, by only editing WML\@. Of course, it doesn't allow
-adding completely new abilities and unit behavior without modifying
-the engine.
+%% A unit type has a list of all the abilities that that unit has. For
+%% instance, a Troll has the ``regeneration'' ability that makes it heal
+%% life every turn. A Saurian Skirmisher has the ``skirmisher'' ability
+%% that allows it to move through enemy lines. Recognition of these
+%% abilities is built into the engine---for instance, the pathfinding
+%% algorithms will check if a unit has the ``skirmisher'' flag set to see
+%% if it can move freely past enemy lines. This approach allows an
+%% individual to add new units, which have any combination of abilities
+%% made by the engine, by only editing WML\@. Of course, it doesn't allow
+%% adding completely new abilities and unit behavior without modifying
+%% the engine.
+ユニットタイプは、そのユニットが持つすべての能力のリストになる。
+たとえばトロルは``regeneration(再生)''能力を持っていて、ターンごとに生命力を回復できる。
+トカゲの散兵には``skirmisher(散兵)''能力があって、敵地を移動できる。
+これらの能力を認識する仕組みがエンジンに組み込まれている。
+たとえば開拓のアルゴリズムは、そのユニットに``skirmisher''
+フラグが設定されているかどうかを調べ、敵陣を自由に動けるかどうかを判断する。
+この手法だと、誰でも新しいユニットを追加できるようになる。
+エンジンが作った能力を自由に組み合わせるには、単にWMLを編集するだけでいい。
+もちろん、まったく新しい能力やユニットの挙動を追加したりするには
+エンジン自体を編集する必要がある。
 
-Additionally, each unit in Wesnoth may have any number of ways to
-attack.  For instance, an Elvish Archer has a long-range bow attack
-and also a short-range sword attack. Each deals different damage
-amounts and characteristics. To represent an attack, there is an
-\code{attack\_type} class, with every \code{unit\_type} instance
-having a list of possible \code{attack\_types}.
+%% Additionally, each unit in Wesnoth may have any number of ways to
+%% attack.  For instance, an Elvish Archer has a long-range bow attack
+%% and also a short-range sword attack. Each deals different damage
+%% amounts and characteristics. To represent an attack, there is an
+%% \code{attack\_type} class, with every \code{unit\_type} instance
+%% having a list of possible \code{attack\_types}.
+さらに、Wesnothの各ユニットには任意の数の攻撃方法を持たせることができる。
+たとえばエルフの射手は、長距離用の弓による攻撃と短距離用の剣による攻撃ができる。
+それぞれ、ダメージの量も違うし特徴も違う。
+こんな攻撃方法を表すために用意したのが\code{attack\_type}クラスで、
+すべての\code{unit\_type}のインスタンスは自分が使える\code{attack\_types}のリストを持っている。
 
-To give each unit more character, Wesnoth has a feature known as
-traits. Upon recruitment, most units are assigned two traits at random
-from a predefined list. For instance, a strong unit does more damage
-with its melee attacks, while an intelligent unit needs less
-experience before it ``levels up.'' Also, it is possible for units to
-acquire equipment during the game that make them more powerful. For
-instance, there might be a sword a unit can pick up that makes their
-attacks do more damage. To implement traits and equipment Wesnoth
-allows modifications on units, which are WML-defined alterations to a
-unit's statistics. The modification can even be applied to certain
-types of attacks. For instance, the strong trait gives strong units
-more damage when attacking in melee, but not when using a ranged
-strike.
+%% To give each unit more character, Wesnoth has a feature known as
+%% traits. Upon recruitment, most units are assigned two traits at random
+%% from a predefined list. For instance, a strong unit does more damage
+%% with its melee attacks, while an intelligent unit needs less
+%% experience before it ``levels up.'' Also, it is possible for units to
+%% acquire equipment during the game that make them more powerful. For
+%% instance, there might be a sword a unit can pick up that makes their
+%% attacks do more damage. To implement traits and equipment Wesnoth
+%% allows modifications on units, which are WML-defined alterations to a
+%% unit's statistics. The modification can even be applied to certain
+%% types of attacks. For instance, the strong trait gives strong units
+%% more damage when attacking in melee, but not when using a ranged
+%% strike.
+各ユニットにさらに個性を持たせるために、Wesnothにはトレイトという機能もある。
+ユニットを補充するときに、ほとんどのユニットには定義済みトレイトからランダムに選ばれた
+二種類のトレイトが設定される。たとえばstrongユニットは格闘でより多くのダメージを与え、
+intelligentユニットはレベルアップに要する経験値が減らせる。
+また、ゲームの中でユニットの装備を増やし、さらに強力にできる。
+たとえば、剣を手に取ったユニットは、攻撃時によりダメージを与えられるようになる。
+トレイトや装備の仕組みを実装するために、Wesnothはユニットに手を加えられるようにした。
+WMLで定義した変更を、ユニットのデータに適用する。
+この変更は、ある種の攻撃にも適用できる。
+たとえばstrongトレイトは、格闘の際の攻撃のダメージは増やすが
+投射のときに使っても効果はない。
 
-Allowing completely configurable unit behavior with WML would be an
-admirable goal, so it is instructional to consider why Wesnoth has
-never achieved such a goal.  WML would need to be much more flexible
-than it is if it were to allow arbitrary unit behavior. Rather than
-being a data-oriented language, WML would have to be extended into a
-full-fledged programming language and that would be intimidating for
-many aspiring contributors.
+%% Allowing completely configurable unit behavior with WML would be an
+%% admirable goal, so it is instructional to consider why Wesnoth has
+%% never achieved such a goal.  WML would need to be much more flexible
+%% than it is if it were to allow arbitrary unit behavior. Rather than
+%% being a data-oriented language, WML would have to be extended into a
+%% full-fledged programming language and that would be intimidating for
+%% many aspiring contributors.
+ユニットの挙動をWMLだけで完全に設定可能にできればお見事というところだろう。
+じゃあ、いったいなぜWesnothはそこにたどり着けていないのかを考えよう。
+もしユニットの挙動を好きにいじれるようにしようと思えば、
+WMLはもっと柔軟にする必要があるだろう。
+データ指向の言語にするのではなく、もっと高機能なプログラミング言語にしてしまう必要がある。
+でも、そんなことをしたら、何か貢献しようと思っている多くの人たちが敷居を高く感じてしまうようになる。
 
-Additionally, the Wesnoth AI, which is developed in C++, recognizes
-the abilities present in the game. It takes into account regeneration,
-invisibility, and so forth, and attempts to maneuver its units to take
-best advantage of these different abilities. Even if a unit ability
-could be created using WML, it would be difficult to make the AI
-sophisticated enough to recognize this ability to take advantage of
-it.  Implementing an ability but not having it accounted for by the AI
-would not be a very satisfying implementation.  Similarly,
-implementing an ability in WML and then having to modify the AI in C++
-to account for the ability would be awkward. Thus, having units
-definable in WML, but having abilities hard-wired into the engine is
-considered a reasonable compromise that works best for Wesnoth's
-specific requirements.
+%% Additionally, the Wesnoth AI, which is developed in C++, recognizes
+%% the abilities present in the game. It takes into account regeneration,
+%% invisibility, and so forth, and attempts to maneuver its units to take
+%% best advantage of these different abilities. Even if a unit ability
+%% could be created using WML, it would be difficult to make the AI
+%% sophisticated enough to recognize this ability to take advantage of
+%% it.  Implementing an ability but not having it accounted for by the AI
+%% would not be a very satisfying implementation.  Similarly,
+%% implementing an ability in WML and then having to modify the AI in C++
+%% to account for the ability would be awkward. Thus, having units
+%% definable in WML, but having abilities hard-wired into the engine is
+%% considered a reasonable compromise that works best for Wesnoth's
+%% specific requirements.
+さらに、WesnothのAIはC++で開発されており、ゲーム内のさまざまな能力を認識する。
+再生能力や見えなくなる力なども考慮してユニットの動きを決め、
+さまざまな能力を最大限に活用する。ユニットの能力をWMLで定義することもできたが、
+今のように洗練されたAIで能力を活用できるようにするのは難しくなっただろう。
+能力を使えるようにするけれどもAIはそれを活用しないというのは、
+あまりうまい実装ではない。同様に、能力をWMLで実装して、
+それを使うにはAIのC++コードも修正しないといけないっていうのもうまくない。
+そこで、ユニットの定義はWMLで行うけれども能力に関してはエンジンに組み込むという
+妥協案を採用した。これはWesnothの仕様の要件を十分満たす。
 
 \end{aosasect1}
 
