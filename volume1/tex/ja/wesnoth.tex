@@ -808,50 +808,88 @@ WMLを送信してから、それ以降に実行されたすべてのコマン�
 %% \begin{aosasect1}{Conclusion}
 \begin{aosasect1}{結論}
 
-We believe that the beauty of the Battle for Wesnoth as a program is
-how it made coding accessible to a wide variety of individuals. To
-achieve this aim, the project often made compromises that do not look
-elegant whatsoever in the code. It should be noted that many of the
-project's more talented programmers frown upon WML for its inefficient
-syntax. Yet this compromise enabled one of the project's greatest
-successes. Today Wesnoth can boast of hundreds of user-made campaigns
-and eras, created mostly by users with little or no programming
-experience. Furthermore it has inspired a number of people to take up
-programming as a profession, using the project as a learning
-tool. Those are tangible accomplishments that few programs can equal.
+%% We believe that the beauty of the Battle for Wesnoth as a program is
+%% how it made coding accessible to a wide variety of individuals. To
+%% achieve this aim, the project often made compromises that do not look
+%% elegant whatsoever in the code. It should be noted that many of the
+%% project's more talented programmers frown upon WML for its inefficient
+%% syntax. Yet this compromise enabled one of the project's greatest
+%% successes. Today Wesnoth can boast of hundreds of user-made campaigns
+%% and eras, created mostly by users with little or no programming
+%% experience. Furthermore it has inspired a number of people to take up
+%% programming as a profession, using the project as a learning
+%% tool. Those are tangible accomplishments that few programs can equal.
+Battle for Wesnothのプログラムとしての長所は、
+幅広い人たちがコーディングに参加できるようになっているところだと思っている。
+この狙いを達成するため、あまりエレガントではないコードで妥協することも少なくない。
+ただ、プロジェクトに参加しているプログラマーの中でもデキる人たちはいて、
+そんな人たちはWMLの構文が非効率的であることに不満を持っている。
+でも、ここでの妥協は、このプロジェクトの大成功の一因になった。
+今やWesnothは、ユーザーが作った何百ものキャンペーンや時代を誇る。
+これらの大半は、プログラミングの経験がほとんどない(あるいはまったくない)人が作ったものだ。
+さらに、このプロジェクトがきっかけとなってプログラミングの仕事をするようになったという人も多い。
+彼らはこのプロジェクトでプログラミングを学んだんだ。
+これらが私たちのプロジェクトの目に見える成果で、ちょっと他のプログラムには類を見ないものだろう。
 
-One of the key lessons a reader should take away from Wesnoth's
-efforts is to consider the challenges faced by lesser skilled
-programmers. It requires an awareness of what blocks contributors from
-actually performing coding and developing their skills. For example an
-individual might want to contribute to the program but does not
-possess any programming skills. Dedicated technological editors like
-\code{emacs} or \code{vim} possess a significant learning curve that
-might prove daunting for such an individual. Thus WML was designed to
-allow a simple text editor to open up its files, giving anybody the
-tools to contribute.
+%% One of the key lessons a reader should take away from Wesnoth's
+%% efforts is to consider the challenges faced by lesser skilled
+%% programmers. It requires an awareness of what blocks contributors from
+%% actually performing coding and developing their skills. For example an
+%% individual might want to contribute to the program but does not
+%% possess any programming skills. Dedicated technological editors like
+%% \code{emacs} or \code{vim} possess a significant learning curve that
+%% might prove daunting for such an individual. Thus WML was designed to
+%% allow a simple text editor to open up its files, giving anybody the
+%% tools to contribute.
+Wesnothの歴史から学んで欲しい大切なことがひとつある。
+それは、経験の浅いプログラマーがどんな苦労をすることになるか、気をつけるということだ。
+実際にコードを書いて自分の力を伸ばしたいと思っている貢献者たちに立ちはだかる壁は何なのか、
+そこを気にしないといけない。たとえば、プログラムに対して何らかの貢献をしたいけれども
+プログラミングに関する知識はまったくないという人もいるかもしれない。
+技術者向けのエディタ、たとえば\code{emacs}や\code{vim}
+の学習曲線は急勾配で、そんな人たちにとっては恐れ多いものだろう。
+そこで、WMLはシンプルなテキストエディタでも扱えるような形式にした。
+誰でも貢献できるようなツールを用意したというわけだ。
 
-However, increasing a code base's accessibility is not a simple
-objective to achieve. There are no hard and fast rules for increasing
-code's accessibility. Rather it requires a balance between different
-considerations, which can have negative consequences that the
-community must be aware of. This is apparent in how the program dealt
-with dependencies. In some cases, dependencies can actually increase
-barriers to participation, while in others they can allow people to
-contribute more easily. Every issue must be considered on a
-case-by-case basis.
+%% However, increasing a code base's accessibility is not a simple
+%% objective to achieve. There are no hard and fast rules for increasing
+%% code's accessibility. Rather it requires a balance between different
+%% considerations, which can have negative consequences that the
+%% community must be aware of. This is apparent in how the program dealt
+%% with dependencies. In some cases, dependencies can actually increase
+%% barriers to participation, while in others they can allow people to
+%% contribute more easily. Every issue must be considered on a
+%% case-by-case basis.
+しかし、コードを誰でも扱いやすくするというのは決して容易なことではない。
+「こうすればOK」というような明確なルールがないからだ。
+いろんな要素を比較した上でうまくバランスを取る必要がある。
+下手をすると、まったく逆効果になってしまうかもしれない。
+これがはっきりするのが、依存関係の扱いかた。
+依存関係が増えると参入障壁が高くなってしまうこともあるが、
+場合によっては依存関係のおかげで参入しやすくなることもある。
+あらゆる問題を、ケースバイケースで考えないといけないということだ。
 
-We should also be careful not to overstate some of Wesnoth's
-successes.  The project enjoyed some advantages that are not easily
-replicated by other programs. Making code accessible to a wider public
-is partly a result of the program's setting. As an open source
-program, Wesnoth had several advantages in this regard. Legally the
-GNU license allows someone to open up an existing file, understand how
-it works and makes changes.  Individuals are encouraged to experiment,
-learn and share within this culture, which might not be appropriate
-for other programs. Nevertheless we hope that there are certain
-elements that might prove useful for all developers and help them in
-their effort to find beauty in coding.
+%% We should also be careful not to overstate some of Wesnoth's
+%% successes.  The project enjoyed some advantages that are not easily
+%% replicated by other programs. Making code accessible to a wider public
+%% is partly a result of the program's setting. As an open source
+%% program, Wesnoth had several advantages in this regard. Legally the
+%% GNU license allows someone to open up an existing file, understand how
+%% it works and makes changes.  Individuals are encouraged to experiment,
+%% learn and share within this culture, which might not be appropriate
+%% for other programs. Nevertheless we hope that there are certain
+%% elements that might prove useful for all developers and help them in
+%% their effort to find beauty in coding.
+Wesnothの成功の一部については、誇張しすぎないように注意が必要だ。
+このプロジェクトはかなり恵まれていたところもあって、そのあたりは他のプログラムではまねできないだろうからだ。
+コードを幅広い層に扱ってもらえるようにするためのひとつの要素は、そのプログラムの背景だ。
+Wesnothはオープンソースのプログラムだったので、この点ではいろいろ恵まれていた。
+より厳密に言うと、GNUライセンスのおかげで誰でも既存のファイルを見ることができたし、
+その動きを理解したり手を加えたりも自由にできたんだ。
+いろいろ試してみながら学んで、それを他の人たちと共有することが推奨される文化だが、
+これが他のプログラムにもうまくあてはまるとは限らない。
+とは言え、本章の中にはあらゆる開発者にとって有用な内容も含まれていると思う。
+自分たちが美しいコードを書いていく上での参考になれば幸いだ。
 
 \end{aosasect1}
 
