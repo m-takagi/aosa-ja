@@ -1,5 +1,5 @@
 \begin{aosachapter}{LLVM}{s:llvm}{Chris Lattner}
-%% Based on EN-Revision r229
+%% Based on EN-Revision r272
 
 This chapter discusses some of the design decisions that shaped
 LLVM\footnote{\url{http://llvm.org}}, an umbrella project that hosts
@@ -47,7 +47,8 @@ LLVM has also been used to create a broad variety of new products,
 perhaps the best known of which is the OpenCL GPU programming language
 and runtime.
 
-\begin{aosasect1}{A Quick Introduction to Classical Compiler Design}
+%% \begin{aosasect1}{A Quick Introduction to Classical Compiler Design}
+\begin{aosasect1}{古典的なコンパイラの設計}
 
 The most popular design for a traditional static compiler (like most C
 compilers) is the three phase design whose major components are the
@@ -58,7 +59,8 @@ it for errors, and builds a language-specific Abstract Syntax Tree
 a new representation for optimization, and the optimizer and back end
 are run on the code.
 
-\aosafigure{../images/llvm/SimpleCompiler.eps}{Three Major Components of a Three-Phase Compiler}{fig.llvm.com}
+%% \aosafigure{../images/llvm/SimpleCompiler.eps}{Three Major Components of a Three-Phase Compiler}{fig.llvm.com}
+\aosafigure{../images/llvm/SimpleCompiler.eps}{3フェーズコンパイラの主要なコンポーネント}{fig.llvm.com}
 
 The optimizer is responsible for doing a broad variety of
 transformations to try to improve the code's running time, such as
@@ -76,7 +78,8 @@ The Java Virtual Machine (JVM) is also an implementation of this
 model, which uses Java bytecode as the interface between the front end
 and optimizer.
 
-\begin{aosasect2}{Implications of this Design}
+%% \begin{aosasect2}{Implications of this Design}
+\begin{aosasect2}{この設計の実装}
 
 The most important win of this classical design comes when a compiler
 decides to support multiple source languages or target
@@ -85,7 +88,8 @@ its optimizer, then a front end can be written for any language that
 can compile to it, and a back end can be written for any target that
 can compile from it, as shown in \aosafigref{fig.llvm.rtc}.
 
-\aosafigure{../images/llvm/RetargetableCompiler.eps}{Retargetablity}{fig.llvm.rtc}
+%% \aosafigure{../images/llvm/RetargetableCompiler.eps}{Retargetablity}{fig.llvm.rtc}
+\aosafigure{../images/llvm/RetargetableCompiler.eps}{再利用性}{fig.llvm.rtc}
 
 With this design, porting the compiler to support a new source
 language (e.g.,  Algol or BASIC) requires implementing a new front end,
@@ -120,7 +124,8 @@ that want to reduce the barrier to contributing as much as possible.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Existing Language Implementations}
+%% \begin{aosasect1}{Existing Language Implementations}
+\begin{aosasect1}{既存の言語の実装}
 
 While the benefits of a three-phase design are compelling and
 well-documented in compiler textbooks, in practice it is almost never
@@ -195,7 +200,8 @@ set up by the command line interface.
 
 \end{aosasect1}
 
-\begin{aosasect1}{LLVM's Code Representation: LLVM IR}
+%% \begin{aosasect1}{LLVM's Code Representation: LLVM IR}
+\begin{aosasect1}{LLVMのコード表現: LLVM IR}
 
 With the historical background and context out of the way, let's dive
 into LLVM: The most important aspect of its design is the LLVM
@@ -286,7 +292,8 @@ the other hand, it has to serve both well: it has to be designed to be
 easy for a front end to generate and be expressive enough to allow
 important optimizations to be performed for real targets.
 
-\begin{aosasect2}{Writing an LLVM IR Optimization}
+%% \begin{aosasect2}{Writing an LLVM IR Optimization}
+\begin{aosasect2}{LLVM IRの最適化}
 
 To give some intuition for how optimizations work, it is useful to
 walk through some examples.  There are lots of different kinds of
@@ -379,7 +386,8 @@ the simplifiable operation with the simpler form.
 
 \end{aosasect1}
 
-\begin{aosasect1}{LLVM's Implementation of Three-Phase Design}
+%% \begin{aosasect1}{LLVM's Implementation of Three-Phase Design}
+\begin{aosasect1}{LLVMでの3フェーズ設計の実装}
 
 In an LLVM-based compiler, a front end is responsible for parsing,
 validating and diagnosing errors in the input code, then translating
@@ -392,9 +400,11 @@ straightforward implementation of the three-phase design, but this
 simple description glosses over some of the power and flexibility
 that the LLVM architecture derives from LLVM IR.
 
-\aosafigure{../images/llvm/LLVMCompiler1.eps}{LLVM's Implementation of the Three-Phase Design}{fig.llvm.lcom}
+%% \aosafigure{../images/llvm/LLVMCompiler1.eps}{LLVM's Implementation of the Three-Phase Design}{fig.llvm.lcom}
+\aosafigure{../images/llvm/LLVMCompiler1.eps}{LLVMでの3フェーズ設計の実装}{fig.llvm.lcom}
 
-\begin{aosasect2}{LLVM IR is a Complete Code Representation}
+%% \begin{aosasect2}{LLVM IR is a Complete Code Representation}
+\begin{aosasect2}{LLVM IRは完全なコード表現である}
 
 In particular, LLVM IR is both well specified and the \emph{only}
 interface to the optimizer.  This property means that all you need to
@@ -427,7 +437,8 @@ therefore it has relatively few front ends.
 
 \end{aosasect2}
 
-\begin{aosasect2}{LLVM is a Collection of Libraries}
+%% \begin{aosasect2}{LLVM is a Collection of Libraries}
+\begin{aosasect2}{LLVMはライブラリ群である}
 
 After the design of LLVM IR, the next most important
 aspect of LLVM is that it is designed as a set of libraries, rather than as a
@@ -513,7 +524,8 @@ language-specific optimization opportunities.
 \aosafigref{fig.llvn.pass} shows a simple example for our hypothetical
 XYZ image processing system:
 
-\aosafigure[300pt]{../images/llvm/PassLinkage.eps}{Hypothetical XYZ System using LLVM}{fig.llvn.pass}
+%% \aosafigure[300pt]{../images/llvm/PassLinkage.eps}{Hypothetical XYZ System using LLVM}{fig.llvn.pass}
+\aosafigure[300pt]{../images/llvm/PassLinkage.eps}{LLVMを使った想像上のXYZシステム}{fig.llvn.pass}
 
 Once the set of optimizations is chosen (and similar decisions are
 made for the code generator) the image processing compiler is built
@@ -553,7 +565,8 @@ it.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Design of the Retargetable LLVM Code Generator}
+%% \begin{aosasect1}{Design of the Retargetable LLVM Code Generator}
+\begin{aosasect1}{再利用性を考慮したLLVMコードジェネレータの設計}
 
 The LLVM code generator is responsible for transforming LLVM IR into
 target specific machine code.  On the one hand, it is the code
@@ -581,7 +594,8 @@ functions where needed.  This flexibility allows target authors to
 produce great code without having to write an entire code generator
 from scratch for their target.
 
-\begin{aosasect2}{LLVM Target Description Files}
+%% \begin{aosasect2}{LLVM Target Description Files}
+\begin{aosasect2}{LLVMターゲット記述ファイル}
 
 The ``mix and match'' approach allows target authors to choose what
 makes sense for their architecture and permits a large amount of code
@@ -595,7 +609,8 @@ a declarative domain-specific language (a set of \code{.td} files)
 processed by the tblgen tool.  The (simplified) build process for the
 x86 target is shown in \aosafigref{fig.llvm.x86}.
 
-\aosafigure{../images/llvm/X86Target.eps}{Simplified x86 Target Definition}{fig.llvm.x86}
+%% \aosafigure{../images/llvm/X86Target.eps}{Simplified x86 Target Definition}{fig.llvm.x86}
+\aosafigure{../images/llvm/X86Target.eps}{単純化したx86ターゲット定義}{fig.llvm.x86}
 
 The different subsystems supported by the \code{.td} files allow
 target authors to build up the different pieces of their target. For
@@ -674,14 +689,16 @@ targets in LLVM as time goes on.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Interesting Capabilities Provided by a Modular Design}
+%% \begin{aosasect1}{Interesting Capabilities Provided by a Modular Design}
+\begin{aosasect1}{モジュラー設計がもたらす興味深い可能性}
 
 Besides being a generally elegant design, modularity provides clients
 of the LLVM libraries with several interesting capabilities. These
 capabilities stem from the fact that LLVM provides functionality, but
 lets the client decide most of the \emph{policies} on how to use it.
 
-\begin{aosasect2}{Choosing When and Where Each Phase Runs}
+%% \begin{aosasect2}{Choosing When and Where Each Phase Runs}
+\begin{aosasect2}{各フェーズがいつどこで走るかを選ぶ}
 
 As mentioned earlier, LLVM IR can be efficiently (de)serialized
 to/from a binary format known as LLVM bitcode.  Since LLVM IR is
@@ -701,7 +718,8 @@ This option instructs the compiler to emit LLVM bitcode to the
 \code{.o}file instead of writing out a native object file, and delays
 code generation to link time, shown in \aosafigref{fig.llvm.lto}.
 
-\aosafigure{../images/llvm/LTO.eps}{Link-Time Optimization}{fig.llvm.lto}
+%% \aosafigure{../images/llvm/LTO.eps}{Link-Time Optimization}{fig.llvm.lto}
+\aosafigure{../images/llvm/LTO.eps}{リンク時の最適化}{fig.llvm.lto}
 
 Details differ depending on which operating system you're on, but the
 important bit is that the linker detects that it has LLVM bitcode in
@@ -728,12 +746,14 @@ instruction choice, scheduling, and other aspects of code generation,
 you can pick the best answers for the specific hardware an application
 ends up running on.
 
-\aosafigure{../images/llvm/InstallTime.eps}{Install-Time Optimization}{fig.llvm.ito}
+%% \aosafigure{../images/llvm/InstallTime.eps}{Install-Time Optimization}{fig.llvm.ito}
+\aosafigure{../images/llvm/InstallTime.eps}{インストール時の最適化}{fig.llvm.ito}
 
 \end{aosasect2}
 
 \vspace{-.5cm}
-\begin{aosasect2}{Unit Testing the Optimizer}
+%% \begin{aosasect2}{Unit Testing the Optimizer}
+\begin{aosasect2}{オプティマイザのユニットテスト}
 
 Compilers are very complicated, and quality is important, therefore
 testing is critical.  For example, after fixing a bug that caused a
@@ -790,7 +810,8 @@ exactly what we want, both for regression and feature tests.
 
 \end{aosasect2}
 
-\begin{aosasect2}{Automatic Test Case Reduction with BugPoint}
+%% \begin{aosasect2}{Automatic Test Case Reduction with BugPoint}
+\begin{aosasect2}{BugPointによる、自動的なテストケースの削減}
 
 When a bug is found in a compiler or other client of the LLVM
 libraries, the first step to fixing it is to get a test case that
@@ -839,7 +860,8 @@ consistent design or owner.
 
 \end{aosasect1}
 
-\begin{aosasect1}{Retrospective and Future Directions}
+%% \begin{aosasect1}{Retrospective and Future Directions}
+\begin{aosasect1}{ふりかえりと今後の方針}
 
 LLVM's modularity wasn't originally designed to directly achieve any
 of the goals described here. It was a self-defense mechanism: it was
