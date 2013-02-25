@@ -1,51 +1,86 @@
 \begin{aosachapter}{LLVM}{s:llvm}{Chris Lattner}
 %% Based on EN-Revision r272
 
-This chapter discusses some of the design decisions that shaped
-LLVM\footnote{\url{http://llvm.org}}, an umbrella project that hosts
-and develops a set of close-knit low-level toolchain components (e.g.,
-assemblers, compilers, debuggers, etc.), which are designed to be
-compatible with existing tools typically used on Unix systems.  The
-name ``LLVM'' was once an acronym, but is now just a brand for the
-umbrella project.  While LLVM provides some unique capabilities, and
-is known for some of its great tools (e.g., the Clang
-compiler\footnote{\url{http://clang.llvm.org}}, a C/C++/Objective-C
-compiler which provides a number of benefits over the GCC compiler),
-the main thing that sets LLVM apart from other compilers is its
-internal architecture.
+%% This chapter discusses some of the design decisions that shaped
+%% LLVM\footnote{\url{http://llvm.org}}, an umbrella project that hosts
+%% and develops a set of close-knit low-level toolchain components (e.g.,
+%% assemblers, compilers, debuggers, etc.), which are designed to be
+%% compatible with existing tools typically used on Unix systems.  The
+%% name ``LLVM'' was once an acronym, but is now just a brand for the
+%% umbrella project.  While LLVM provides some unique capabilities, and
+%% is known for some of its great tools (e.g., the Clang
+%% compiler\footnote{\url{http://clang.llvm.org}}, a C/C++/Objective-C
+%% compiler which provides a number of benefits over the GCC compiler),
+%% the main thing that sets LLVM apart from other compilers is its
+%% internal architecture.
+本章では、LLVM
+\footnote{\url{http://llvm.org}}を形づくるもとになった設計上の判断について議論する。
+LLVMは包括的なプロジェクトで、各種の低レベルツールコンポーネント(アセンブラやコンパイラ、デバッガなど)
+が密接に結びついている。また、主にUnixシステム上で使われている既存のツール群との互換性を考慮している。
+``LLVM''という名前は元々は略語だったが、今ではこのプロジェクトのブランドになっている。
+LLVMは独特の機能を提供するし、すばらしいツール
+(たとえばClangコンパイラ\footnote{\url{http://clang.llvm.org}}。これはC/C++/Objective-Cのコンパイラで、
+GCCに比べていろんな利点がある)
+が含まれていることでも有名だが、LLVMがその他のコンパイラと一線を画す最大の要因は、その内部アーキテクチャだ。
 
-From its beginning in December 2000, LLVM was designed as a set of
-reusable libraries with well-defined
-interfaces~\cite{bib:lattner:cgo}.  At the time, open source
-programming language implementations were designed as special-purpose
-tools which usually had monolithic executables. For example, it was
-very difficult to reuse the parser from a static compiler (e.g., GCC)
-for doing static analysis or refactoring.  While scripting languages
-often provided a way to embed their runtime and interpreter into
-larger applications, this runtime was a single monolithic lump of code
-that was included or excluded.  There was no way to reuse pieces, and
-very little sharing across language implementation projects.
+%% From its beginning in December 2000, LLVM was designed as a set of
+%% reusable libraries with well-defined
+%% interfaces~\cite{bib:lattner:cgo}.  At the time, open source
+%% programming language implementations were designed as special-purpose
+%% tools which usually had monolithic executables. For example, it was
+%% very difficult to reuse the parser from a static compiler (e.g., GCC)
+%% for doing static analysis or refactoring.  While scripting languages
+%% often provided a way to embed their runtime and interpreter into
+%% larger applications, this runtime was a single monolithic lump of code
+%% that was included or excluded.  There was no way to reuse pieces, and
+%% very little sharing across language implementation projects.
+LLVMが生まれたのは2000年12月のこと。
+再利用可能なライブラリとよくできたインターフェイスをまとめたものとして設計された~\cite{bib:lattner:cgo}。
+その頃のオープンソースなプログラミング言語の実装は、
+特化型のツールとして設計されていることが多く、
+たいていは一枚岩の大きな実行ファイルだった。
+たとえば、GCCなどの静的なコンパイラの中からパーサーだけを再利用して
+静的解析やリファクタリングを施そうとしても、それはとても難しかったのだ。
+スクリプト言語の中にはそのランタイムを別のアプリケーションに組み込めるようになっているものも多かったが、
+そのランタイムだって一枚岩なひと固まりのコードで、それをインクルードするかしないかというだけのことだった。
+一部だけを再利用する手段はなくて、言語をまたがって実装を共有するプロジェクトなどほとんどなかった。
 
-Beyond the composition of the compiler itself, the communities
-surrounding popular language implementations were usually strongly
-polarized: an implementation usually provided \emph{either} a
-traditional static compiler like GCC, Free Pascal, and FreeBASIC,
-\emph{or} it provided a runtime compiler in the form of an
-interpreter or Just-In-Time (JIT) compiler.  It was very uncommon to
-see language implementation that supported both, and if they did,
-there was usually very little sharing of code.
+%% Beyond the composition of the compiler itself, the communities
+%% surrounding popular language implementations were usually strongly
+%% polarized: an implementation usually provided \emph{either} a
+%% traditional static compiler like GCC, Free Pascal, and FreeBASIC,
+%% \emph{or} it provided a runtime compiler in the form of an
+%% interpreter or Just-In-Time (JIT) compiler.  It was very uncommon to
+%% see language implementation that supported both, and if they did,
+%% there was usually very little sharing of code.
+コンパイラ自体の構成以上に、主要な言語実装を取り巻くコミュニティもまた偏向していた。
+GCCやFree PascalそしてFree BASICのような昔ながらの静的コンパイラか、
+またはインタプリタやJust-In-Time (JIT)コンパイラのような実行時コンパイラ。
+その\emph{どちらかだけ}を提供するというところが多かった。
+両方に対応した言語実装はほとんどなかったし、
+仮にあったとしても、両方で共有しているコードはごく一部だけだった。
 
-Over the last ten years, LLVM has substantially altered this
-landscape.  LLVM is now used as a common infrastructure to implement a
-broad variety of statically and runtime compiled languages (e.g., the
-family of languages supported by GCC, Java, .NET, Python, Ruby,
-Scheme, Haskell, D, as well as countless lesser known languages).  It
-has also replaced a broad variety of special purpose compilers, such
-as the runtime specialization engine in Apple's OpenGL stack and the
-image processing library in Adobe's After Effects product.  Finally
-LLVM has also been used to create a broad variety of new products,
-perhaps the best known of which is the OpenCL GPU programming language
-and runtime.
+%% Over the last ten years, LLVM has substantially altered this
+%% landscape.  LLVM is now used as a common infrastructure to implement a
+%% broad variety of statically and runtime compiled languages (e.g., the
+%% family of languages supported by GCC, Java, .NET, Python, Ruby,
+%% Scheme, Haskell, D, as well as countless lesser known languages).  It
+%% has also replaced a broad variety of special purpose compilers, such
+%% as the runtime specialization engine in Apple's OpenGL stack and the
+%% image processing library in Adobe's After Effects product.  Finally
+%% LLVM has also been used to create a broad variety of new products,
+%% perhaps the best known of which is the OpenCL GPU programming language
+%% and runtime.
+この10年で、LLVMがその状況を大きく変えた。
+LLVMは今や共通の基盤として使われるようになり、
+静的コンパイル型から実行時コンパイル型まで幅広い言語の実装に使われている
+(GCCがサポートする言語群の他にも、Javaや.NET、Python、Ruby、Scheme、Haskell、Dなど。
+あまり知られていないものも含めると、さらに多くの言語に対応する)。
+また、さまざまな特化型コンパイラにとって代わるようになってきた。
+AppleのOpenGLスタック内の実行時特殊化エンジンや、
+Adobe After Effectsの画像処理ライブラリなどだ。
+LLVMはさまざまな分野の新製品開発にも使われるようになっている。
+中でも一番有名なのは、GPUプログラミング言語OpenCLとそのランタイムだろう。
 
 %% \begin{aosasect1}{A Quick Introduction to Classical Compiler Design}
 \begin{aosasect1}{古典的なコンパイラの設計}
