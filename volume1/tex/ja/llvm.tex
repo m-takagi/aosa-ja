@@ -85,75 +85,122 @@ LLVMはさまざまな分野の新製品開発にも使われるようになっ�
 %% \begin{aosasect1}{A Quick Introduction to Classical Compiler Design}
 \begin{aosasect1}{古典的なコンパイラの設計}
 
-The most popular design for a traditional static compiler (like most C
-compilers) is the three phase design whose major components are the
-front end, the optimizer and the back end
-(\aosafigref{fig.llvm.com}). The front end parses source code, checking
-it for errors, and builds a language-specific Abstract Syntax Tree
-(AST) to represent the input code.  The AST is optionally converted to
-a new representation for optimization, and the optimizer and back end
-are run on the code.
+%% The most popular design for a traditional static compiler (like most C
+%% compilers) is the three phase design whose major components are the
+%% front end, the optimizer and the back end
+%% (\aosafigref{fig.llvm.com}). The front end parses source code, checking
+%% it for errors, and builds a language-specific Abstract Syntax Tree
+%% (AST) to represent the input code.  The AST is optionally converted to
+%% a new representation for optimization, and the optimizer and back end
+%% are run on the code.
+昔ながらの静的コンパイラ(たいていのCコンパイラ)でよくある設計は、
+フロントエンド・オプティマイザ・バックエンドの3フェーズにわけるものだ
+(\aosafigref{fig.llvm.com})。
+フロントエンドは、ソースコードを解析してエラーをチェックし、言語固有の抽象構文木
+(AST)を作ってコードを表現する。ASTは最適化に備えて別の表現に変換されることもある。
+オプティマイザやバックエンドは、この表現上で動く。
 
 %% \aosafigure{../images/llvm/SimpleCompiler.eps}{Three Major Components of a Three-Phase Compiler}{fig.llvm.com}
 \aosafigure{../images/llvm/SimpleCompiler.eps}{3フェーズコンパイラの主要なコンポーネント}{fig.llvm.com}
 
-The optimizer is responsible for doing a broad variety of
-transformations to try to improve the code's running time, such as
-eliminating redundant computations, and is usually more or less
-independent of language and target.  The back end (also known as the
-code generator) then maps the code onto the target instruction set.
-In addition to making \emph{correct} code, it is responsible for
-generating \emph{good} code that takes advantage of unusual features
-of the supported architecture.  Common parts of a compiler back end
-include instruction selection, register allocation, and instruction
-scheduling.
+%% The optimizer is responsible for doing a broad variety of
+%% transformations to try to improve the code's running time, such as
+%% eliminating redundant computations, and is usually more or less
+%% independent of language and target.  The back end (also known as the
+%% code generator) then maps the code onto the target instruction set.
+%% In addition to making \emph{correct} code, it is responsible for
+%% generating \emph{good} code that takes advantage of unusual features
+%% of the supported architecture.  Common parts of a compiler back end
+%% include instruction selection, register allocation, and instruction
+%% scheduling.
+オプティマイザの役割は、さまざまな変換(冗長な計算の除去など)を行ってコードの実行時間を短縮することだ。
+通常は、言語やターゲットとは独立している。バックエンド(コードジェネレータとも呼ばれる)は、
+そのコードをターゲット上の命令セットにマップする。
+単に\emph{正しい}コードを作るだけではなく、より\emph{よい}
+コードを作ってそのアーキテクチャ独自の機能を活用できるようにするのもバックエンドの役割だ。
+コンパイラのバックエンドでの一般的な処理は、
+命令の選択やレジスタの確保、命令のスケジューリングなどだ。
 
-This model applies equally well to interpreters and JIT compilers.
-The Java Virtual Machine (JVM) is also an implementation of this
-model, which uses Java bytecode as the interface between the front end
-and optimizer.
+%% This model applies equally well to interpreters and JIT compilers.
+%% The Java Virtual Machine (JVM) is also an implementation of this
+%% model, which uses Java bytecode as the interface between the front end
+%% and optimizer.
+このモデルは、インタプリタやJITコンパイラにも同様にあてはまる。
+Java仮想マシン(JVM)もこのモデルの実装で、
+フロントエンドとオプティマイザの間のインターフェイスとしてJavaバイトコードを使っている。
 
 %% \begin{aosasect2}{Implications of this Design}
 \begin{aosasect2}{この設計の実装}
 
-The most important win of this classical design comes when a compiler
-decides to support multiple source languages or target
-architectures. If the compiler uses a common code representation in
-its optimizer, then a front end can be written for any language that
-can compile to it, and a back end can be written for any target that
-can compile from it, as shown in \aosafigref{fig.llvm.rtc}.
+%% The most important win of this classical design comes when a compiler
+%% decides to support multiple source languages or target
+%% architectures. If the compiler uses a common code representation in
+%% its optimizer, then a front end can be written for any language that
+%% can compile to it, and a back end can be written for any target that
+%% can compile from it, as shown in \aosafigref{fig.llvm.rtc}.
+この古典的な設計の重要な利点は、コンパイラで複数のソース言語や
+ターゲットアーキテクチャをサポートするようになったときに効いてくる。
+オプティマイザ内で共通のコード表現を使うようにしてすれば、
+どんな言語のフロントエンドだってその形式に変換するように書いておける。
+一方バックエンド側も、共通の表現から任意のターゲットへのコンパイルを書けるようになる。
+その様子を\aosafigref{fig.llvm.rtc}に示した。
 
 %% \aosafigure{../images/llvm/RetargetableCompiler.eps}{Retargetablity}{fig.llvm.rtc}
 \aosafigure{../images/llvm/RetargetableCompiler.eps}{再利用性}{fig.llvm.rtc}
 
-With this design, porting the compiler to support a new source
-language (e.g.,  Algol or BASIC) requires implementing a new front end,
-but the existing optimizer and back end can be reused.  If these parts
-weren't separated, implementing a new source language would require
-starting over from scratch, so supporting \code{N} targets and
-\code{M} source languages would need N*M compilers.
+%% With this design, porting the compiler to support a new source
+%% language (e.g.,  Algol or BASIC) requires implementing a new front end,
+%% but the existing optimizer and back end can be reused.  If these parts
+%% weren't separated, implementing a new source language would require
+%% starting over from scratch, so supporting \code{N} targets and
+%% \code{M} source languages would need N*M compilers.
+この設計のコンパイラで新たなソース言語(AlgolやBASICなど)に対応するために必要なのは、
+それ用のフロントエンドを実装することだ。オプティマイザやバックエンドは、
+既存のものを流用できる。もしこれらのフェーズを分割していなければ、
+新たな言語をサポートしようとするたびにスクラッチですべて書かないといけないことになってしまう。
+\code{N}種類のターゲットと\code{M}種類のソース言語をサポートするには、
+N*M種類のコンパイラが必要になるということだ。
 
-Another advantage of the three-phase design (which follows directly
-from retargetability) is that the compiler serves a broader set of
-programmers than it would if it only supported one source language and
-one target. For an open source project, this means that there is a
-larger community of potential contributors to draw from, which
-naturally leads to more enhancements and improvements to the compiler.
-This is the reason why open source compilers that serve many
-communities (like GCC) tend to generate better optimized machine code
-than narrower compilers like FreePASCAL\@.  This isn't the case for
-proprietary compilers, whose quality is directly related to the
-project's budget.  For example, the Intel ICC Compiler is widely known
-for the quality of code it generates, even though it serves a narrow
-audience.
+%% Another advantage of the three-phase design (which follows directly
+%% from retargetability) is that the compiler serves a broader set of
+%% programmers than it would if it only supported one source language and
+%% one target. For an open source project, this means that there is a
+%% larger community of potential contributors to draw from, which
+%% naturally leads to more enhancements and improvements to the compiler.
+%% This is the reason why open source compilers that serve many
+%% communities (like GCC) tend to generate better optimized machine code
+%% than narrower compilers like FreePASCAL\@.  This isn't the case for
+%% proprietary compilers, whose quality is directly related to the
+%% project's budget.  For example, the Intel ICC Compiler is widely known
+%% for the quality of code it generates, even though it serves a narrow
+%% audience.
+3フェーズ設計には別の利点もある(再利用性から直接導けるものだ)。
+それは、単一のソース言語と単一のターゲットしかサポートしていないとしても、
+そのコンパイラがより幅広いプログラマーの役に立てるということだ。
+オープンソースプロジェクトにとっては、
+これはつまり、より多くの貢献者を巻き込めるようになるということだ。
+当然、そのほうがコンパイラの機能追加や改良も進めやすくなる。
+これこそが、多くのコミュニティで使われるオープンソースのコンパイラ(GCCなど)
+のほうがFreePASCALのような限定的なコンパイラよりも高性能のオプティマイザを作れる理由でもある。
+プロプライエタリなコンパイラの場合はその限りではない。
+コンパイラの品質は、純粋にそのプロジェクトの予算に絡んでくる。
+たとえばIntel ICC Compilerが生成するコードが高品質であることは広く知られているが、
+このコンパイラの利用者はそんなに多くない。
 
-A final major win of the three-phase design is that the skills
-required to implement a front end are different than those required for
-the optimizer and back end.  Separating these makes it easier for a
-``front-end person'' to enhance and maintain their part of the
-compiler.  While this is a social issue, not a technical one, it
-matters a lot in practice, particularly for open source projects
-that want to reduce the barrier to contributing as much as possible.
+%% A final major win of the three-phase design is that the skills
+%% required to implement a front end are different than those required for
+%% the optimizer and back end.  Separating these makes it easier for a
+%% ``front-end person'' to enhance and maintain their part of the
+%% compiler.  While this is a social issue, not a technical one, it
+%% matters a lot in practice, particularly for open source projects
+%% that want to reduce the barrier to contributing as much as possible.
+3フェーズ設計の主要な利点として最後にもう一つあげられるのが、
+各フェーズの実装に求められるスキルがそれぞれ異なるという点だ。
+これらを分割しておくことで、「他はともかくフロントエンドならわかるよ」
+といおう人でもコンパイラに手を加えたり保守したりできるようになる。
+技術的な問題というよりはソーシャルな問題ではあるが、
+現実的にはこのあたりが大きく影響してくる。
+特にオープンソースプロジェクトの場合、参入障壁はできるだけ低くしておきたいものだ。
 
 \end{aosasect2}
 
