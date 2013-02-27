@@ -209,76 +209,126 @@ N*M種類のコンパイラが必要になるということだ。
 %% \begin{aosasect1}{Existing Language Implementations}
 \begin{aosasect1}{既存の言語の実装}
 
-While the benefits of a three-phase design are compelling and
-well-documented in compiler textbooks, in practice it is almost never
-fully realized. Looking across open source language implementations
-(back when LLVM was started), you'd find that the implementations of
-Perl, Python, Ruby and Java share no code.  Further, projects like the
-Glasgow Haskell Compiler (GHC) and FreeBASIC are retargetable to
-multiple different CPUs, but their implementations are very specific
-to the one source language they support.  There is also a broad
-variety of special purpose compiler technology deployed to implement
-JIT compilers for image processing, regular expressions, graphics card
-drivers, and other subdomains that require CPU intensive work.
+%% While the benefits of a three-phase design are compelling and
+%% well-documented in compiler textbooks, in practice it is almost never
+%% fully realized. Looking across open source language implementations
+%% (back when LLVM was started), you'd find that the implementations of
+%% Perl, Python, Ruby and Java share no code.  Further, projects like the
+%% Glasgow Haskell Compiler (GHC) and FreeBASIC are retargetable to
+%% multiple different CPUs, but their implementations are very specific
+%% to the one source language they support.  There is also a broad
+%% variety of special purpose compiler technology deployed to implement
+%% JIT compilers for image processing, regular expressions, graphics card
+%% drivers, and other subdomains that require CPU intensive work.
+3フェーズコンパイラには利点があることは認めざるを得ないし、実際コンパイラの教科書にもそう書かれている。
+でも実際のところ、そのメリットを完全に理解している人は少ない。オープンソースの言語の実装を
+(LLVM以前にさかのぼって)見てみると、わかるはずだ。
+PerlやPython、Ruby、そしてJava。これらの言語間では一切コードを共有していない。
+さらに、Glasgow Haskell Compiler (GHC)やFreeBASICといったプロジェクトは
+さまざまなCPUに対応した再利用性を持っているが、その実装はたった一つのソース言語しかサポートしていない。
+特化型のコンパイラ技術はいろいろ公開されており、画像処理や正規表現、グラフィックカードのドライバ用などの
+CPU固有の作業用にJITコンパイラが実装されている。
 
-That said, there are three major success stories for this model, the
-first of which are the Java and .NET virtual machines.  These systems
-provide a JIT compiler, runtime support, and a very well defined
-bytecode format.  This means that any language that can compile to the
-bytecode format (and there are dozens of
-them\footnote{\url{http://en.wikipedia.org/wiki/List_of_JVM_languages}})
-can take advantage of the effort put into the optimizer and JIT as
-well as the runtime.  The tradeoff is that these implementations
-provide little flexibility in the choice of runtime: they both
-effectively force JIT compilation, garbage collection, and the use of
-a very particular object model.  This leads to suboptimal performance
-when compiling languages that don't match this model closely, such as
-C (e.g., with the LLJVM project).
+%% That said, there are three major success stories for this model, the
+%% first of which are the Java and .NET virtual machines.  These systems
+%% provide a JIT compiler, runtime support, and a very well defined
+%% bytecode format.  This means that any language that can compile to the
+%% bytecode format (and there are dozens of
+%% them\footnote{\url{http://en.wikipedia.org/wiki/List_of_JVM_languages}})
+%% can take advantage of the effort put into the optimizer and JIT as
+%% well as the runtime.  The tradeoff is that these implementations
+%% provide little flexibility in the choice of runtime: they both
+%% effectively force JIT compilation, garbage collection, and the use of
+%% a very particular object model.  This leads to suboptimal performance
+%% when compiling languages that don't match this model closely, such as
+%% C (e.g., with the LLJVM project).
+とはいえ、このモデルを採用してコードの共有に成功した例もある。ここでは三つの有名な例を取り上げよう。
+まずはJavaや.NETの仮想マシンだ。これらのシステムでは、JITコンパイラやランタイムサポート、
+そしてうまく考えられたバイトコードフォーマットを提供する。
+つまり、どんな言語であっても、このバイトコードフォーマットへの変換さえできれば
+(実際、できている言語がいろいろある\footnote{\url{http://en.wikipedia.org/wiki/List_of_JVM_languages}})
+、オプティマイザだけでなくJITやランタイムも活用できるということだ。
+その代償として、ランタイムの選択によって実装の柔軟性が縛られるという点がある。
+JITコンパイルやガベージコレクション、そして採用するオブジェクトモデルなどの制約を受けるということだ。
+その結果、このオブジェクトモデルにマッチしない言語、たとえばCなどを(LLVMプロジェクトで)コンパイルするときには、
+パフォーマンスが二の次になってしまう。
 
-A second success story is perhaps the most unfortunate, but
-also most popular way to reuse compiler technology: translate the input
-source to C code (or some other language) and send it through existing
-C compilers.  This allows reuse of the optimizer and code generator,
-gives good flexibility, control over the runtime, and is really easy
-for front-end implementers to understand, implement, and maintain.
-Unfortunately, doing this prevents efficient implementation of
-exception handling, provides a poor debugging experience, slows down
-compilation, and can be problematic for languages that require guaranteed
-tail calls (or other features not supported by C).
+%% A second success story is perhaps the most unfortunate, but
+%% also most popular way to reuse compiler technology: translate the input
+%% source to C code (or some other language) and send it through existing
+%% C compilers.  This allows reuse of the optimizer and code generator,
+%% gives good flexibility, control over the runtime, and is really easy
+%% for front-end implementers to understand, implement, and maintain.
+%% Unfortunately, doing this prevents efficient implementation of
+%% exception handling, provides a poor debugging experience, slows down
+%% compilation, and can be problematic for languages that require guaranteed
+%% tail calls (or other features not supported by C).
+二番目の例は、おそらく最も不運なものだ。しかし、
+コンパイラの技術の再利用という点では最も有名な例でもある。
+入力のソースをCのコード(あるいは別の言語のコード)に変換して、既存のCコンパイラに渡すというものだ。
+これによって、オプティマイザやコードジェネレータの再利用ができるようになり、
+柔軟性も上がり、ランタイムも制御できるようになる。
+実装する側にとっては、フロントエンドの実装がいちばんわかりやすいし、実装や保守も楽だ。
+残念ながら、この方式だと例外処理の実装が非効率的になるし、デバッグ機能も貧弱になる。
+コンパイル速度も遅くなるし、末尾再帰の保証(などのCでサポートしていない機能)を要求する言語で問題になる。
 
-A final successful implementation of this model is GCC\footnote{A
-backronym that now stands for ``GNU Compiler Collection''.}.  GCC
-supports many front ends and back ends, and has an active and broad
-community of contributors.  GCC has a long history of being a C
-compiler that supports multiple targets with hacky support for a few
-other languages bolted onto it.  As the years go by, the GCC community
-is slowly evolving a cleaner design.  As of GCC~4.4, it has a new
-representation for the optimizer (known as ``GIMPLE Tuples'') which is
-closer to being separate from the front-end representation than
-before.  Also, its Fortran and Ada front ends use a clean AST.
+%% A final successful implementation of this model is GCC\footnote{A
+%% backronym that now stands for ``GNU Compiler Collection''.}.  GCC
+%% supports many front ends and back ends, and has an active and broad
+%% community of contributors.  GCC has a long history of being a C
+%% compiler that supports multiple targets with hacky support for a few
+%% other languages bolted onto it.  As the years go by, the GCC community
+%% is slowly evolving a cleaner design.  As of GCC~4.4, it has a new
+%% representation for the optimizer (known as ``GIMPLE Tuples'') which is
+%% closer to being separate from the front-end representation than
+%% before.  Also, its Fortran and Ada front ends use a clean AST.
+このモデルの実装での成功例として最後に取り上げるのが、GCC\footnote{後付けで、今は``GNU Compiler Collection''の略だということになっている}だ。
+GCCはさまざまなフロントエンドとバックエンドに対応しており、幅広いコミュニティが活発に活動している。
+GCCは、Cコンパイラとしての長い歴史があり、複数のターゲットに対応している。
+そこにちょっとした手を加えて、いくつかの他の言語も組み込まれていた。
+時を経て、GCCコミュニティは徐々に設計を改良しはじめた。
+GCC~4.4の時点ではオプティマイザの内部表現が新しい形式(``GIMPLE Tuples'')になって、
+以前よりもフロントエンドの表現と切り離されたものになった。
+また、FortranやAda用のフロントエンドでは、クリーンなASTを使っている。
 
-While very successful, these three approaches have strong limitations
-to what they can be used for, because they are designed as monolithic
-applications.  As one example, it is not realistically possible to
-embed GCC into other applications, to use GCC as a runtime/JIT
-compiler, or extract and reuse pieces of GCC without pulling in most
-of the compiler.  People who have wanted to use GCC's C++ front end for
-documentation generation, code indexing, refactoring, and static
-analysis tools have had to use GCC as a monolithic application that
-emits interesting information as XML, or write plugins to inject
-foreign code into the GCC process.
+%% While very successful, these three approaches have strong limitations
+%% to what they can be used for, because they are designed as monolithic
+%% applications.  As one example, it is not realistically possible to
+%% embed GCC into other applications, to use GCC as a runtime/JIT
+%% compiler, or extract and reuse pieces of GCC without pulling in most
+%% of the compiler.  People who have wanted to use GCC's C++ front end for
+%% documentation generation, code indexing, refactoring, and static
+%% analysis tools have had to use GCC as a monolithic application that
+%% emits interesting information as XML, or write plugins to inject
+%% foreign code into the GCC process.
+これら三つの例は大成功をしたものだが、
+どのアプローチにも使い方に大きな制限がある。もともとモノリシックなアプリケーション用に作られているからだ。
+たとえば、GCCを他のアプリケーションに組み込んだりするのは現実的に不可能だろう。
+同じく、GCCをJITコンパイラとして使ったりGCCの一部分だけを取り出して再利用したりといったことも不可能だ。
+GCCのC++フロントエンドだけを使ってドキュメントの生成やコードのインデキシング、リファクタリング、静的解析などが
+したいという人がいたとしても、GCC全体をモノリシックなアプリケーションとして使うしかない。
+あるいはプラグインを書いて、外部のコードをGCCのプロセスに注入するということになるだろう。
 
-There are multiple reasons why pieces of GCC cannot be reused as
-libraries, including rampant use of global variables, weakly enforced
-invariants, poorly-designed data structures, sprawling code base, and
-the use of macros that prevent the codebase from being compiled to
-support more than one front-end/target pair at a time.  The hardest
-problems to fix, though, are the inherent architectural problems that
-stem from its early design and age.  Specifically, GCC suffers from
-layering problems and leaky abstractions: the back end walks front-end
-ASTs to generate debug info, the front ends generate back-end data
-structures, and the entire compiler depends on global data structures
-set up by the command line interface.
+%% There are multiple reasons why pieces of GCC cannot be reused as
+%% libraries, including rampant use of global variables, weakly enforced
+%% invariants, poorly-designed data structures, sprawling code base, and
+%% the use of macros that prevent the codebase from being compiled to
+%% support more than one front-end/target pair at a time.  The hardest
+%% problems to fix, though, are the inherent architectural problems that
+%% stem from its early design and age.  Specifically, GCC suffers from
+%% layering problems and leaky abstractions: the back end walks front-end
+%% ASTs to generate debug info, the front ends generate back-end data
+%% structures, and the entire compiler depends on global data structures
+%% set up by the command line interface.
+GCCの一部だけを切り出してライブラリとして再利用できないのには、複数の理由がある。
+グローバル変数を使いまくっていること、不変条件の強要が弱いこと、データ構造の設計がまずいこと、
+コードが乱雑なこと。
+さらに、マクロを使っているせいで、複数のフロントエンドとバックエンドのペアを同時にサポートするようにコンパイルすることができない。
+中でも一番修正しにくいのは、初期の設計や当時の時代背景に由来する先天的なアーキテクチャの問題だ。
+特に、GCCはレイヤー化の問題と抽象化の漏れに苦しんでいる。
+バックエンドはフロントエンドのASTを使ってデバッグ情報を生成するし、
+フロントエンドはバックエンドのデータ構造を生成する。
+そしてコンパイラ全体がグローバルなデータ構造に依存しており、これはコマンドラインインターフェイスで準備するものだ。
 
 \end{aosasect1}
 
