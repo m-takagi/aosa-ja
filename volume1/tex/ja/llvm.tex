@@ -335,18 +335,28 @@ GCCの一部だけを切り出してライブラリとして再利用できな�
 %% \begin{aosasect1}{LLVM's Code Representation: LLVM IR}
 \begin{aosasect1}{LLVMのコード表現: LLVM IR}
 
-With the historical background and context out of the way, let's dive
-into LLVM: The most important aspect of its design is the LLVM
-Intermediate Representation (IR), which is the form it uses to
-represent code in the compiler.  LLVM IR is designed to host mid-level
-analyses and transformations that you find in the optimizer section of
-a compiler.  It was designed with many specific goals in mind,
-including supporting lightweight runtime optimizations,
-cross-function/interprocedural optimizations, whole program analysis,
-and aggressive restructuring transformations, etc.  The most important
-aspect of it, though, is that it is itself defined as a first class
-language with well-defined semantics. To make this concrete, here is a
-simple example of a \code{.ll} file:
+%% With the historical background and context out of the way, let's dive
+%% into LLVM: The most important aspect of its design is the LLVM
+%% Intermediate Representation (IR), which is the form it uses to
+%% represent code in the compiler.  LLVM IR is designed to host mid-level
+%% analyses and transformations that you find in the optimizer section of
+%% a compiler.  It was designed with many specific goals in mind,
+%% including supporting lightweight runtime optimizations,
+%% cross-function/interprocedural optimizations, whole program analysis,
+%% and aggressive restructuring transformations, etc.  The most important
+%% aspect of it, though, is that it is itself defined as a first class
+%% language with well-defined semantics. To make this concrete, here is a
+%% simple example of a \code{.ll} file:
+歴史的な経緯やコンテキストはさておいて、LLVMの内部に飛び込んでみよう。
+LLVMの設計でいちばん重要な部分が
+LLVM Intermediate Representation (IR)だ。これは、コンパイラ内でのコードの表現形式である。
+LLVM IRは中間レベルの解析や変換のために作られたもので、コンパイラの中の
+オプティマイザの部分で使う。
+いろんな目標があった。軽量な実行時最適化、関数や手続きをまたがった最適化、
+プログラム全体の解析、積極的な構造変換などだ。
+しかし、中でも一番重要だったのは、それ自体をファーストクラスの言語として定義し、
+きちんと考えた文法にすることだった。
+具体例として、シンプルな\code{.ll}ファイルを示す。
 
 \begin{verbatim}
 define i32 @add1(i32 %a, i32 %b) {
@@ -371,58 +381,99 @@ done:
 }
 \end{verbatim}
 
-\noindent This LLVM IR corresponds to this C code, which provides two different
-ways to add integers:
+%% \noindent This LLVM IR corresponds to this C code, which provides two different
+%% ways to add integers:
+\noindent
+このLLVM IRは、次のCのコードに対応するものだ。このコードでは、二通りの方法で整数の足し算をしている。
 
+%% \begin{verbatim}
+%% unsigned add1(unsigned a, unsigned b) {
+%%   return a+b;
+%% }
+
+%% // Perhaps not the most efficient way to add two numbers.
+%% unsigned add2(unsigned a, unsigned b) {
+%%   if (a == 0) return b;
+%%   return add2(a-1, b+1);
+%% }
+%% \end{verbatim}
 \begin{verbatim}
 unsigned add1(unsigned a, unsigned b) {
   return a+b;
 }
 
-// Perhaps not the most efficient way to add two numbers.
+// 非効率的な方法での足し算
 unsigned add2(unsigned a, unsigned b) {
   if (a == 0) return b;
   return add2(a-1, b+1);
 }
 \end{verbatim}
 
-\noindent As you can see from this example, LLVM IR is a low-level RISC-like
-virtual instruction set.  Like a real RISC instruction set, it
-supports linear sequences of simple instructions like add, subtract,
-compare, and branch.  These instructions are in three address form,
-which means that they take some number of inputs and produce a result
-in a different register.\footnote{This is in contrast to a two-address
-instruction set, like X86, which destructively updates an input
-register, or one-address machines which take one explicit operand
-and operate on an accumulator or the top of the stack on a stack
-machine.} LLVM IR supports labels and generally looks like a weird
-form of assembly language.
+%% \noindent As you can see from this example, LLVM IR is a low-level RISC-like
+%% virtual instruction set.  Like a real RISC instruction set, it
+%% supports linear sequences of simple instructions like add, subtract,
+%% compare, and branch.  These instructions are in three address form,
+%% which means that they take some number of inputs and produce a result
+%% in a different register.\footnote{This is in contrast to a two-address
+%% instruction set, like X86, which destructively updates an input
+%% register, or one-address machines which take one explicit operand
+%% and operate on an accumulator or the top of the stack on a stack
+%% machine.} LLVM IR supports labels and generally looks like a weird
+%% form of assembly language.
+\noindent
+この例からわかるとおり、LLVM IRはローレベルなRISC風の仮想命令セットである。
+実際のRISC命令セットと同様に、addやsubtract、compare、branchといったシンプルな命令のリニアなシーケンスに対応している。
+これらの命令は3アドレス形式で、いくつかの入力を受け取って、
+結果を別のレジスタに生成するというものだ。
+\footnote{これは、2アドレス形式(X86など、入力レジスタを破壊してしまう方式)
+や1アドレスマシン(オペランドだけを指定してアキュムレータを操作したり、
+スタックマシン上でスタックの先頭を操作したりするもの)とは対象的だ。}
+LLVM IRはラベルをサポートしており、ちょっと見た限りでは風変わりなアセンブリ言語にも見える。
 
-Unlike most RISC instruction sets, LLVM is strongly typed with a
-simple type system (e.g., \code{i32} is a 32-bit integer, \code{i32**}
-is a pointer to pointer to 32-bit integer) and some details of the
-machine are abstracted away.  For example, the calling convention is
-abstracted through \code{call} and \code{ret} instructions and
-explicit arguments.  Another significant difference from machine code
-is that the LLVM IR doesn't use a fixed set of named registers, it
-uses an infinite set of temporaries named with a \% character.
+%% Unlike most RISC instruction sets, LLVM is strongly typed with a
+%% simple type system (e.g., \code{i32} is a 32-bit integer, \code{i32**}
+%% is a pointer to pointer to 32-bit integer) and some details of the
+%% machine are abstracted away.  For example, the calling convention is
+%% abstracted through \code{call} and \code{ret} instructions and
+%% explicit arguments.  Another significant difference from machine code
+%% is that the LLVM IR doesn't use a fixed set of named registers, it
+%% uses an infinite set of temporaries named with a \% character.
+多くのRISC命令セットとは異なり、LLVMはシンプルな型システムによる強い型付け
+(たとえば\code{i32}は32ビット整数、\code{i32**}は32ビット整数へのポインタのポインタ)
+があり、マシンの詳細は抽象化されている。
+たとえば、呼び出し規約の抽象化をしているのが\code{call}命令と\code{ret}命令で、
+これらに明示的に引数を指定する。
+マシンコードとの大きな違いがもうひとつあって、それはLLVM IRが名前付きレジスタの固定セットを使わないということだ。
+代わりに使うのは無限のテンポラリレジスタで、名前には\%文字を使う。
 
-Beyond being implemented as a language, LLVM IR is actually defined in
-three isomorphic forms: the textual format above, an in-memory data
-structure inspected and modified by optimizations themselves, and an
-efficient and dense on-disk binary ``bitcode'' format.  The LLVM
-Project also provides tools to convert the on-disk format from text to
-binary: \code{llvm-as} assembles the textual \code{.ll} file into a
-\code{.bc} file containing the bitcode goop and \code{llvm-dis} turns a
-\code{.bc} file into a \code{.ll} file.
+%% Beyond being implemented as a language, LLVM IR is actually defined in
+%% three isomorphic forms: the textual format above, an in-memory data
+%% structure inspected and modified by optimizations themselves, and an
+%% efficient and dense on-disk binary ``bitcode'' format.  The LLVM
+%% Project also provides tools to convert the on-disk format from text to
+%% binary: \code{llvm-as} assembles the textual \code{.ll} file into a
+%% \code{.bc} file containing the bitcode goop and \code{llvm-dis} turns a
+%% \code{.bc} file into a \code{.ll} file.
+言語としての実装にとどまらず、LLVM IRは実際には三通りの形式で定義されている。
+先に示したテキスト形式、オプティマイザがインメモリで扱うときのデータ構造、そして
+効率的かつ濃縮した形式でディスク上に格納するバイナリ形式の``bitcode''フォーマットだ。
+LLVMプロジェクトでは、ディスク上のフォーマットをテキストからバイナリに変換するツールも用意している。
+\code{llvm-as}はテキスト形式の\code{.ll}ファイルをbitcode形式の\code{.bc}ファイルに変換し、
+\code{llvm-dis}はその逆で\code{.bc}ファイルから\code{.ll}ファイルに変換する。
 
-The intermediate representation of a compiler is interesting because
-it can be a ``perfect world'' for the compiler optimizer: unlike the
-front end and back end of the compiler, the optimizer isn't constrained
-by either a specific source language or a specific target machine.  On
-the other hand, it has to serve both well: it has to be designed to be
-easy for a front end to generate and be expressive enough to allow
-important optimizations to be performed for real targets.
+%% The intermediate representation of a compiler is interesting because
+%% it can be a ``perfect world'' for the compiler optimizer: unlike the
+%% front end and back end of the compiler, the optimizer isn't constrained
+%% by either a specific source language or a specific target machine.  On
+%% the other hand, it has to serve both well: it has to be designed to be
+%% easy for a front end to generate and be expressive enough to allow
+%% important optimizations to be performed for real targets.
+コンパイラの中間表現は興味深いものだ。なぜならそれは、コンパイラのオプティマイザにとって
+``理想の世界''だからである。コンパイラのフロントエンドやバックエンドとは違い、
+オプティマイザは特定のソース言語やターゲットマシンの制約を受けない。
+一方、オプティマイザはその両方を適切に扱えないといけない。
+フロントエンドが生成しやすいような設計にしないといけないし、
+実際のターゲット上での最適化が十分できるほどの表現力も必要だ。
 
 %% \begin{aosasect2}{Writing an LLVM IR Optimization}
 \begin{aosasect2}{LLVM IRの最適化}
