@@ -478,27 +478,37 @@ LLVMプロジェクトでは、ディスク上のフォーマットをテキス�
 %% \begin{aosasect2}{Writing an LLVM IR Optimization}
 \begin{aosasect2}{LLVM IRの最適化}
 
-To give some intuition for how optimizations work, it is useful to
-walk through some examples.  There are lots of different kinds of
-compiler optimizations, so it is hard to provide a recipe for how to
-solve an arbitrary problem.  That said, most optimizations follow a
-simple three-part structure:
+%% To give some intuition for how optimizations work, it is useful to
+%% walk through some examples.  There are lots of different kinds of
+%% compiler optimizations, so it is hard to provide a recipe for how to
+%% solve an arbitrary problem.  That said, most optimizations follow a
+%% simple three-part structure:
+最適化の様子を直感的につかむには、例を使って実際に動きを見るのがいいだろう。
+コンパイラの最適化にはいろんなやりかたがあるので、あらゆる問題に対応できるレシピを用意するのは難しい。
+とはいえ、ほとんどの最適化はこの三段階の構造になっている。
 
 \begin{aosaitemize}
 
-  \item Look for a pattern to be transformed.
+  %% \item Look for a pattern to be transformed.
+  \item 変換できそうなパターンを探す。
 
-  \item Verify that the transformation is safe/correct for the matched
-  instance.
+  %% \item Verify that the transformation is safe/correct for the matched
+  %% instance.
+  \item その変換をしても安全か、そして動きが変わらないかを確かめる。
 
-  \item Do the transformation, updating the code.
+  %% \item Do the transformation, updating the code.
+  \item 変換を施し、コードを更新する。
 
 \end{aosaitemize}
 
-The most trivial optimization is pattern matching on arithmetic
-identities, such as: for any integer \code{X}, \code{X-X} is 0,
-\code{X-0} is \code{X}, \code{(X*2)-X} is \code{X}.  The first
-question is what these look like in LLVM IR\@.  Some examples are:
+%% The most trivial optimization is pattern matching on arithmetic
+%% identities, such as: for any integer \code{X}, \code{X-X} is 0,
+%% \code{X-0} is \code{X}, \code{(X*2)-X} is \code{X}.  The first
+%% question is what these look like in LLVM IR\@.  Some examples are:
+いちばんわかりやすい最適化は、数式上のパターンマッチングだ。
+たとえば、任意の整数\code{X}について\code{X-X}は0になるし、\code{X-0}は\code{X}、\code{(X*2)-X}は\code{X}になる。
+これを実現するための最初の課題は、これらの式がLLVM IR上でどのような表現になるのかを知ることだ。
+たとえば、こんなふうになる。
 
 \begin{verbatim}
 ...
@@ -511,12 +521,32 @@ question is what these look like in LLVM IR\@.  Some examples are:
 ...
 \end{verbatim}
 
-For these sorts of ``peephole'' transformations, LLVM provides an
-instruction simplification interface that is used as utilities by
-various other higher level transformations.  These particular
-transformations are in the \code{SimplifySubInst} function and look
-like this:
+%% For these sorts of ``peephole'' transformations, LLVM provides an
+%% instruction simplification interface that is used as utilities by
+%% various other higher level transformations.  These particular
+%% transformations are in the \code{SimplifySubInst} function and look
+%% like this:
+この種の「節穴」的な変換用に、LLVMでは命令を単純化するインターフェイスを用意している。
+これをユーティリティとして使い、より上位レベルのさまざまな変換を行う。
+今回の例の変換は、\code{SimplifySubInst}関数を使って次のようにできる。
 
+%% \begin{verbatim}
+%% // X - 0 -> X
+%% if (match(Op1, m_Zero()))
+%%   return Op0;
+
+%% // X - X -> 0
+%% if (Op0 == Op1)
+%%   return Constant::getNullValue(Op0->getType());
+
+%% // (X*2) - X -> X
+%% if (match(Op0, m_Mul(m_Specific(Op1), m_ConstantInt<2>())))
+%%   return Op1;
+
+%% ...
+
+%% return 0;  // Nothing matched, return null to indicate no transformation.
+%% \end{verbatim}
 \begin{verbatim}
 // X - 0 -> X
 if (match(Op1, m_Zero()))
@@ -532,26 +562,43 @@ if (match(Op0, m_Mul(m_Specific(Op1), m_ConstantInt<2>())))
 
 ...
 
-return 0;  // Nothing matched, return null to indicate no transformation.
+return 0;  // どれにもマッチしなかったときは、nullを返して何も変換しないことを示す
 \end{verbatim}
 
-\noindent In this code, Op0 and Op1 are bound to the left and right operands of
-an integer subtract instruction (importantly, these identities don't
-necessarily hold for IEEE floating point!).  LLVM is implemented in
-C++, which isn't well known for its pattern matching capabilities
-(compared to functional languages like Objective Caml), but it does
-offer a very general template system that allows us to implement
-something similar.  The \code{match} function and the \code{m\_}
-functions allow us to perform declarative pattern matching operations
-on LLVM IR code.  For example, the \code{m\_Specific} predicate only
-matches if the left hand side of the multiplication is the same as Op1.
+%% \noindent In this code, Op0 and Op1 are bound to the left and right operands of
+%% an integer subtract instruction (importantly, these identities don't
+%% necessarily hold for IEEE floating point!).  LLVM is implemented in
+%% C++, which isn't well known for its pattern matching capabilities
+%% (compared to functional languages like Objective Caml), but it does
+%% offer a very general template system that allows us to implement
+%% something similar.  The \code{match} function and the \code{m\_}
+%% functions allow us to perform declarative pattern matching operations
+%% on LLVM IR code.  For example, the \code{m\_Specific} predicate only
+%% matches if the left hand side of the multiplication is the same as Op1.
+\noindent
+このコードでは、Op0とOp1がそれぞれ整数減算命令の左右のオペランドに束縛される
+(これらはIEEE浮動小数点にも適用できるとは限らないことに注意!)。
+LLVMはC++で実装されているが、C++のパターンマッチは
+(Objective Camlなどの関数型言語と比べて)そんなに高機能ではない。
+しかしC++には非常に汎用的なテンプレートシステムがあり、
+それと同等の仕組みを実装できる。
+\code{match}関数と\code{m\_}関数は、
+宣言型のパターンマッチ操作をLLVM IRコードに対して行う。
+たとえば\code{m\_Specific}述語は、
+乗算の左辺がOp1と等しい場合にだけマッチする。
 
-Together, these three cases are all pattern matched and the function
-returns the replacement if it can, or a null pointer if no replacement
-is possible.  The caller of this function (\code{SimplifyInstruction})
-is a dispatcher that does a switch on the instruction opcode,
-dispatching to the per-opcode helper functions.  It is called from
-various optimizations. A simple driver looks like this:
+%% Together, these three cases are all pattern matched and the function
+%% returns the replacement if it can, or a null pointer if no replacement
+%% is possible.  The caller of this function (\code{SimplifyInstruction})
+%% is a dispatcher that does a switch on the instruction opcode,
+%% dispatching to the per-opcode helper functions.  It is called from
+%% various optimizations. A simple driver looks like this:
+これら三つのケースがどれもパターンマッチの対象となり、
+もし変換可能なら変換結果が返される。変換できなかった場合はnullポインタが返される。
+この関数(\code{SimplifyInstruction})の呼び出し元はディスパッチャで、
+命令のオペコードに応じてそれぞれのオペコード用のヘルパー関数に振り分ける。
+これが、各種最適化の場面で呼ばれる。
+シンプルなドライバの例を、次に示す。
 
 \begin{verbatim}
 for (BasicBlock::iterator I = BB->begin(), E = BB->end(); I != E; ++I)
@@ -559,11 +606,15 @@ for (BasicBlock::iterator I = BB->begin(), E = BB->end(); I != E; ++I)
     I->replaceAllUsesWith(V);
 \end{verbatim}
 
-\noindent This code simply loops over each instruction in a block, checking to
-see if any of them simplify.  If so (because
-\code{SimplifyInstruction} returns non-null), it uses the
-\code{replaceAllUsesWith} method to update anything in the code using
-the simplifiable operation with the simpler form.
+%% \noindent This code simply loops over each instruction in a block, checking to
+%% see if any of them simplify.  If so (because
+%% \code{SimplifyInstruction} returns non-null), it uses the
+%% \code{replaceAllUsesWith} method to update anything in the code using
+%% the simplifiable operation with the simpler form.
+\noindent
+このコードは単にブロック内の各命令をループして、単純化できるものがあるかどうかを調べる。
+もしできるなら(つまり\code{SimplifyInstruction}が非nullを返したら)、
+\code{replaceAllUsesWith}メソッドを使ってよりシンプルな形式の操作に置き換える。
 
 \end{aosasect2}
 
