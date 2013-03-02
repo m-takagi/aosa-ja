@@ -16,7 +16,7 @@ hdfs.tex            TAKAGI Masahiro <matakagi@gmail.com>      100
 integration.tex     TAKAGI Masahiro <matakagi@gmail.com>      100
 intro.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
 jitsi.tex           Arai Kunimitsu                            100
-llvm.tex            TAKAGI Masahiro <matakagi@gmail.com>       35
+llvm.tex            TAKAGI Masahiro <matakagi@gmail.com>       40
 makingsoftware.tex  TAKAGI Masahiro <matakagi@gmail.com>      100
 mercurial.tex       TAKAGI Masahiro <matakagi@gmail.com>      100
 nosql.tex           TAKAGI Masahiro <matakagi@gmail.com>      100

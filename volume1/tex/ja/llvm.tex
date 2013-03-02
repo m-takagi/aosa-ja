@@ -623,16 +623,24 @@ for (BasicBlock::iterator I = BB->begin(), E = BB->end(); I != E; ++I)
 %% \begin{aosasect1}{LLVM's Implementation of Three-Phase Design}
 \begin{aosasect1}{LLVMでの3フェーズ設計の実装}
 
-In an LLVM-based compiler, a front end is responsible for parsing,
-validating and diagnosing errors in the input code, then translating
-the parsed code into LLVM IR (usually, but not always, by building an
-AST and then converting the AST to LLVM IR).  This IR is optionally
-fed through a series of analysis and optimization passes which improve
-the code, then is sent into a code generator to produce native machine
-code, as shown in \aosafigref{fig.llvm.lcom}. This is a very
-straightforward implementation of the three-phase design, but this
-simple description glosses over some of the power and flexibility
-that the LLVM architecture derives from LLVM IR.
+%% In an LLVM-based compiler, a front end is responsible for parsing,
+%% validating and diagnosing errors in the input code, then translating
+%% the parsed code into LLVM IR (usually, but not always, by building an
+%% AST and then converting the AST to LLVM IR).  This IR is optionally
+%% fed through a series of analysis and optimization passes which improve
+%% the code, then is sent into a code generator to produce native machine
+%% code, as shown in \aosafigref{fig.llvm.lcom}. This is a very
+%% straightforward implementation of the three-phase design, but this
+%% simple description glosses over some of the power and flexibility
+%% that the LLVM architecture derives from LLVM IR.
+LLVMベースのコンパイラにおけるフロントエンドの役割は、
+入力されたコードのパースと検証そしてエラー診断で、
+パース済みのコードをLLVM IRに変換する
+(場合によっては、ASTを構築してからそれをLLVM IRに変換することもある)。
+このIRを、(オプションで)解析や最適化に回してコードを改善させ、
+それからコードジェネレータに送ってネイティブのマシン語を生成する。その様子を\aosafigref{fig.llvm.lcom}に示す。
+3フェーズ設計をそのままストレートに実装したものだが、
+この単純な説明の中に、LLVMのアーキテクチャがLLVM IRから受け継いだ威力や柔軟性が隠されている。
 
 %% \aosafigure{../images/llvm/LLVMCompiler1.eps}{LLVM's Implementation of the Three-Phase Design}{fig.llvm.lcom}
 \aosafigure{../images/llvm/LLVMCompiler1.eps}{LLVMでの3フェーズ設計の実装}{fig.llvm.lcom}
@@ -640,34 +648,56 @@ that the LLVM architecture derives from LLVM IR.
 %% \begin{aosasect2}{LLVM IR is a Complete Code Representation}
 \begin{aosasect2}{LLVM IRは完全なコード表現である}
 
-In particular, LLVM IR is both well specified and the \emph{only}
-interface to the optimizer.  This property means that all you need to
-know to write a front end for LLVM is what LLVM IR is, how it works,
-and the invariants it expects.  Since LLVM IR has a first-class
-textual form, it is both possible and reasonable to build a front end
-that outputs LLVM IR as text, then uses Unix pipes to send it through
-the optimizer sequence and code generator of your choice.
+%% In particular, LLVM IR is both well specified and the \emph{only}
+%% interface to the optimizer.  This property means that all you need to
+%% know to write a front end for LLVM is what LLVM IR is, how it works,
+%% and the invariants it expects.  Since LLVM IR has a first-class
+%% textual form, it is both possible and reasonable to build a front end
+%% that outputs LLVM IR as text, then uses Unix pipes to send it through
+%% the optimizer sequence and code generator of your choice.
+より具体的に言うと、LLVM IRはきちんと規定されていて、かつオプティマイザへの\emph{唯一の}
+インターフェイスであるということだ。つまり、LLVMのフロントエンドを書くのに必要となる知識は、
+LLVM IRが何者かということとその動作原理そして期待する不変条件だけとなる。
+LLVM IRにはファーストクラスのテキスト表現形式があるので、
+LLVM IRをテキスト形式で出力するフロントエンドを作ってもかまわないし、それも十分理にかなっている。
+それをUnixのパイプに通してオプティマイザやコードジェネレータに渡せばいい。
 
-It might be surprising, but this is actually a pretty novel property
-to LLVM and one of the major reasons for its success in a broad range
-of different applications.  Even the widely successful and relatively
-well-architected GCC compiler does not have this property: its GIMPLE
-mid-level representation is not a self-contained representation.  As a
-simple example, when the GCC code generator goes to emit DWARF debug
-information, it reaches back and walks the source level ``tree'' form.
-GIMPLE itself uses a ``tuple'' representation for the operations in
-the code, but (at least as of GCC 4.5) still represents operands as
-references back to the source level tree form.
+%% It might be surprising, but this is actually a pretty novel property
+%% to LLVM and one of the major reasons for its success in a broad range
+%% of different applications.  Even the widely successful and relatively
+%% well-architected GCC compiler does not have this property: its GIMPLE
+%% mid-level representation is not a self-contained representation.  As a
+%% simple example, when the GCC code generator goes to emit DWARF debug
+%% information, it reaches back and walks the source level ``tree'' form.
+%% GIMPLE itself uses a ``tuple'' representation for the operations in
+%% the code, but (at least as of GCC 4.5) still represents operands as
+%% references back to the source level tree form.
+驚くかもしれない。でもこれこそがLLVMの今までにない特徴となって、
+いろんなアプリケーションで幅広く使われるようになった理由にもなったのだ。
+大いに成功を収めて比較的きれいなアーキテクチャになっているGCCコンパイラでさえも、
+これは実現できなかった。GCCの中間表現であるGIMPLEは、自己完結していなかったのだ。
+単純な例をあげると、GCCのコードジェネレータはDWARF形式のデバッグ情報を発行するが、
+これはソースレベルの「ツリー」形式にまで達するものだ。
+GIMPLE自身は「タプル」表現を使ってコード内の操作を表しているが、
+(少なくともGCC 4.5の時点では)オペランドの表現はソースレベルのツリー形式にさかのぼっている。
 
-The implications of this are that front-end authors need to know and
-produce GCC's tree data structures as well as GIMPLE to write a GCC
-front end.  The GCC back end has similar problems, so they also need to
-know bits and pieces of how the RTL back end works as well.  Finally,
-GCC doesn't have a way to dump out ``everything representing my
-code'', or a way to read and write GIMPLE (and the related data
-structures that form the representation of the code) in text form.
-The result is that it is relatively hard to experiment with GCC, and
-therefore it has relatively few front ends.
+%% The implications of this are that front-end authors need to know and
+%% produce GCC's tree data structures as well as GIMPLE to write a GCC
+%% front end.  The GCC back end has similar problems, so they also need to
+%% know bits and pieces of how the RTL back end works as well.  Finally,
+%% GCC doesn't have a way to dump out ``everything representing my
+%% code'', or a way to read and write GIMPLE (and the related data
+%% structures that form the representation of the code) in text form.
+%% The result is that it is relatively hard to experiment with GCC, and
+%% therefore it has relatively few front ends.
+これが何を意味するかというと、GCCのフロントエンドを書きたければ、
+GIMPLEだけではなくGCCのツリーデータ構造も知らないといけないし、
+それを生成しないといけないということだ。
+GCCは、バックエンド側でも同様の問題を抱えている。
+つまり、バックエンドを書くためにはRTLバックエンドについても多少は知る必要があるということだ。
+GCCには「自分のコードを表すすべて」を出力する方法がない。
+そして、GIMPLE(および、コードを表すためのそれに関連するデータ構造)をテキスト形式で読み書きする方法もない。
+その結果、GCCは比較的扱いにくくなり、フロントエンドの数も多くないということだ。
 
 \end{aosasect2}
 
