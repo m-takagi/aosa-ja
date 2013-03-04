@@ -704,44 +704,86 @@ GCCには「自分のコードを表すすべて」を出力する方法がな�
 %% \begin{aosasect2}{LLVM is a Collection of Libraries}
 \begin{aosasect2}{LLVMはライブラリ群である}
 
-After the design of LLVM IR, the next most important
-aspect of LLVM is that it is designed as a set of libraries, rather than as a
-monolithic command line compiler like GCC or an opaque virtual machine
-like the JVM or .NET virtual machines.  LLVM is an
-infrastructure, a collection of useful compiler technology that can be
-brought to bear on specific problems (like building a C compiler, or
-an optimizer in a special effects pipeline).  While one of its most
-powerful features, it is also one of its least understood design
-points.
+%% After the design of LLVM IR, the next most important
+%% aspect of LLVM is that it is designed as a set of libraries, rather than as a
+%% monolithic command line compiler like GCC or an opaque virtual machine
+%% like the JVM or .NET virtual machines.  LLVM is an
+%% infrastructure, a collection of useful compiler technology that can be
+%% brought to bear on specific problems (like building a C compiler, or
+%% an optimizer in a special effects pipeline).  While one of its most
+%% powerful features, it is also one of its least understood design
+%% points.
+LLVM IRそのものの設計は別として、
+それ以外でもっとも重要なLLVMの性質は、ライブラリ群として作られているという点だ。
+GCCみたいなモノリシックなコマンドラインのコンパイラ、
+そしてJVMあるいは.NET仮想マシンのような不透明な仮想マシンとはこの点が異なる。
+LLVMは基盤であり、有用なコンパイラ技術を集めたものだ。
+これらを使って、さまざまな固有の問題
+(Cコンパイラを作ったり、特殊効果パイプライン内でのオプティマイザを作ったりなど)
+に対応できる。これは最も強力な機能の一つであるにも関わらず、
+最も過小評価されている点でもある。
 
-Let's look at the design of the optimizer as an example: it reads LLVM
-IR in, chews on it a bit, then emits LLVM IR which hopefully will
-execute faster.  In LLVM (as in many other compilers) the optimizer is
-organized as a pipeline of distinct optimization passes each of which
-is run on the input and has a chance to do something.  Common examples
-of passes are the inliner (which substitutes the body of a function
-into call sites), expression reassociation, loop invariant code
-motion, etc.  Depending on the optimization level, different passes
-are run: for example at -O0 (no optimization) the Clang compiler runs
-no passes, at -O3 it runs a series of 67 passes in its optimizer (as
-of LLVM 2.8).
+%% Let's look at the design of the optimizer as an example: it reads LLVM
+%% IR in, chews on it a bit, then emits LLVM IR which hopefully will
+%% execute faster.  In LLVM (as in many other compilers) the optimizer is
+%% organized as a pipeline of distinct optimization passes each of which
+%% is run on the input and has a chance to do something.  Common examples
+%% of passes are the inliner (which substitutes the body of a function
+%% into call sites), expression reassociation, loop invariant code
+%% motion, etc.  Depending on the optimization level, different passes
+%% are run: for example at -O0 (no optimization) the Clang compiler runs
+%% no passes, at -O3 it runs a series of 67 passes in its optimizer (as
+%% of LLVM 2.8).
+オプティマイザの設計を例にとって考えてみよう。
+オプティマイザはLLVM IR形式の入力を読んでいろいろかみ砕き、
+同じくLLVM IR形式を出力する。出力のほうが実行速度が速くなっていることだろう。
+LLVMのオプティマイザは、その他多くのコンパイラの場合と同じく、
+いくつかの最適化パスのパイプラインで構成されている。
+各パスが、入力を受け取って何らかの操作をする。
+よくあるパスの例は、インライナー(関数の本体を呼び出し側に移動させる)
+や式の再構成、ループ内で不変なコードの移動などだ。
+最適化のレベルに応じて、実行するパスが変わる。
+-O0 (最適化しない)の場合はClangコンパイラはどのパスも実行しないが、
+-O3の場合はコンパイラ内で67のパスを実行する(LLVM 2.8時点での値)。
 
-Each LLVM pass is written as a C++ class that derives (indirectly)
-from the \code{Pass} class.  Most passes are written in a single
-\code{.cpp} file, and their subclass of the \code{Pass} class is
-defined in an anonymous namespace (which makes it completely private
-to the defining file).  In order for the pass to be useful, code
-outside the file has to be able to get it, so a single function (to
-create the pass) is exported from the file.  Here is a slightly
-simplified example of a pass to make things concrete.\footnote{ For
-all the details, please see \emph{Writing an LLVM Pass manual} at
-\url{http://llvm.org/docs/WritingAnLLVMPass.html}.  }
+%% Each LLVM pass is written as a C++ class that derives (indirectly)
+%% from the \code{Pass} class.  Most passes are written in a single
+%% \code{.cpp} file, and their subclass of the \code{Pass} class is
+%% defined in an anonymous namespace (which makes it completely private
+%% to the defining file).  In order for the pass to be useful, code
+%% outside the file has to be able to get it, so a single function (to
+%% create the pass) is exported from the file.  Here is a slightly
+%% simplified example of a pass to make things concrete.\footnote{ For
+%% all the details, please see \emph{Writing an LLVM Pass manual} at
+%% \url{http://llvm.org/docs/WritingAnLLVMPass.html}.  }
+LLVMのパスはC++のクラスとして書かれており、(間接的に)\code{Pass}クラスを継承している。
+ほとんどのパスは単一の\code{.cpp}ファイルにまとめられており、
+\code{Pass}クラスのサブクラスは無名名前空間で定義されている
+(つまり、定義しているファイル内で完全に閉じたものになる)。
+パスを使いやすくするためには、そのファイルの外部のコードからも取得できなければいけない。
+そこで、パスを作るための関数をファイルから公開する。
+若干単純にした具体例を示す。
+\footnote{詳細は、マニュアルの\emph{Writing an LLVM Pass} (\url{http://llvm.org/docs/WritingAnLLVMPass.html})を参照のこと。}
 
+%% \begin{verbatim}
+%% namespace {
+%%   class Hello : public FunctionPass {
+%%   public:
+%%     // Print out the names of functions in the LLVM IR being optimized.
+%%     virtual bool runOnFunction(Function &F) {
+%%       cerr << "Hello: " << F.getName() << "\n";
+%%       return false;
+%%     }
+%%   };
+%% }
+
+%% FunctionPass *createHelloPass() { return new Hello(); }
+%% \end{verbatim}
 \begin{verbatim}
 namespace {
   class Hello : public FunctionPass {
   public:
-    // Print out the names of functions in the LLVM IR being optimized.
+    // 最適化対象の LLVM IR 内にある関数の名前を表示する
     virtual bool runOnFunction(Function &F) {
       cerr << "Hello: " << F.getName() << "\n";
       return false;
@@ -752,78 +794,128 @@ namespace {
 FunctionPass *createHelloPass() { return new Hello(); }
 \end{verbatim}
 
-As mentioned, the LLVM optimizer provides dozens of different passes,
-each of which are written in a similar style.  These passes are
-compiled into one or more \code{.o} files, which are then built into a
-series of archive libraries (\code{.a} files on Unix systems). These
-libraries provide all sorts of analysis and transformation
-capabilities, and the passes are as loosely coupled as possible: they
-are expected to stand on their own, or explicitly declare their
-dependencies among other passes if they depend on some other analysis
-to do their job.  When given a series of passes to run, the LLVM
-PassManager uses the explicit dependency information to satisfy these
-dependencies and optimize the execution of passes.
+%% As mentioned, the LLVM optimizer provides dozens of different passes,
+%% each of which are written in a similar style.  These passes are
+%% compiled into one or more \code{.o} files, which are then built into a
+%% series of archive libraries (\code{.a} files on Unix systems). These
+%% libraries provide all sorts of analysis and transformation
+%% capabilities, and the passes are as loosely coupled as possible: they
+%% are expected to stand on their own, or explicitly declare their
+%% dependencies among other passes if they depend on some other analysis
+%% to do their job.  When given a series of passes to run, the LLVM
+%% PassManager uses the explicit dependency information to satisfy these
+%% dependencies and optimize the execution of passes.
+既に説明したとおり、LLVMのオプティマイザは何十ものパスを提供しており、
+それぞれ似たスタイルで書かれている。これらのパスがコンパイルされてひとつあるいは複数の\code{.o}
+ファイルになり、それをアーカイブライブラリ(Unixシステムの場合は\code{.a}ファイル)に組み込む。
+これらのライブラリが解析や変換などのあらゆる機能を提供し、パスを可能な限り疎結合にする。
+つまり、各パスは基本的にそれ単体で動くものとされており、もし他の解析などに依存している場合は他のパスとの依存関係を明示する。
+実行する一連のパスを指定すると、LLVMのPassManagerはその依存情報を使って依存関係を見たし、
+パスの実行を最適化する。
 
-Libraries and abstract capabilities are great, but they don't actually
-solve problems.  The interesting bit comes when someone wants to build
-a new tool that can benefit from compiler technology, perhaps a JIT
-compiler for an image processing language.  The implementer of this
-JIT compiler has a set of constraints in mind: for example, perhaps
-the image processing language is highly sensitive to compile-time
-latency and has some idiomatic language properties that are important
-to optimize away for performance reasons.
+%% Libraries and abstract capabilities are great, but they don't actually
+%% solve problems.  The interesting bit comes when someone wants to build
+%% a new tool that can benefit from compiler technology, perhaps a JIT
+%% compiler for an image processing language.  The implementer of this
+%% JIT compiler has a set of constraints in mind: for example, perhaps
+%% the image processing language is highly sensitive to compile-time
+%% latency and has some idiomatic language properties that are important
+%% to optimize away for performance reasons.
+ライブラリや機能の抽象化はすばらしいが、それだけで万事解決というわけではない。
+興味深い例を考えてみよう。
+誰かがコンパイラの技術を活用する新しいツールを作ろうとしたとする。
+たとえば画像処理言語用のJITコンパイラなどだ。
+このJITコンパイラを実装する人は、いろんな制約を考慮しないといけない。
+たとえば、その画像処理言語がコンパイル時のレイテンシーにとても厳しいものかもしれない。
+そして、その言語に独特の特徴があって、パフォーマンス上の理由で最適化できなかったりするかもしれない。
 
-The library-based design of the LLVM optimizer allows our implementer
-to pick and choose both the order in which passes execute, and which
-ones make sense for the image processing domain: if everything is
-defined as a single big function, it doesn't make sense to waste time
-on inlining.  If there are few pointers, alias analysis and memory
-optimization aren't worth bothering about.  However, despite our best
-efforts, LLVM doesn't magically solve all optimization problems!
-Since the pass subsystem is modularized and the PassManager itself
-doesn't know anything about the internals of the passes, the
-implementer is free to implement their own language-specific passes to
-cover for deficiencies in the LLVM optimizer or to explicit
-language-specific optimization opportunities.
-\aosafigref{fig.llvn.pass} shows a simple example for our hypothetical
-XYZ image processing system:
+%% The library-based design of the LLVM optimizer allows our implementer
+%% to pick and choose both the order in which passes execute, and which
+%% ones make sense for the image processing domain: if everything is
+%% defined as a single big function, it doesn't make sense to waste time
+%% on inlining.  If there are few pointers, alias analysis and memory
+%% optimization aren't worth bothering about.  However, despite our best
+%% efforts, LLVM doesn't magically solve all optimization problems!
+%% Since the pass subsystem is modularized and the PassManager itself
+%% doesn't know anything about the internals of the passes, the
+%% implementer is free to implement their own language-specific passes to
+%% cover for deficiencies in the LLVM optimizer or to explicit
+%% language-specific optimization opportunities.
+%% \aosafigref{fig.llvn.pass} shows a simple example for our hypothetical
+%% XYZ image processing system:
+LLVMのオプティマイザはライブラリベースの設計になっているので、
+実装する人がどのパスをどの順番で実行するか取捨選択できる。
+それは、画像処理のドメインでも理にかなっているだろう。
+もしたった一つの大きな関数にすべてまとまっていたら、
+その中から必要な部分だけをインラインで切り出すという作業に無駄な時間を費やすことになる。
+もしポインタがほとんどなければ、エイリアスの解析やメモリの最適化はそれほど面倒ではない。
+でも、いくら最善を尽くしたところで、
+LLVMが最適化の問題を魔法のように解決してくれるわけじゃない！
+パスのシステムはモジュール化されており、PassManager自身はパスの内部について関知しないので、
+実装者はその言語専用のパスでLLVMオプティマイザの不備をカバーする必要はない。
+また、明示的にその言語専用の最適化をする必要もない。
+\aosafigref{fig.llvn.pass}は、その一例として、架空の画像処理システムXYZを示したものだ。
 
 %% \aosafigure[300pt]{../images/llvm/PassLinkage.eps}{Hypothetical XYZ System using LLVM}{fig.llvn.pass}
-\aosafigure[300pt]{../images/llvm/PassLinkage.eps}{LLVMを使った想像上のXYZシステム}{fig.llvn.pass}
+\aosafigure[300pt]{../images/llvm/PassLinkage.eps}{LLVMを使った架空のXYZシステム}{fig.llvn.pass}
 
-Once the set of optimizations is chosen (and similar decisions are
-made for the code generator) the image processing compiler is built
-into an executable or dynamic library.  Since the only reference to
-the LLVM optimization passes is the simple \code{create} function
-defined in each \code{.o} file, and since the optimizers live in
-\code{.a} archive libraries, only the optimization passes \emph{that
-are actually used} are linked into the end application, not the
-entire LLVM optimizer.  In our example above, since there is a
-reference to PassA and PassB, they will get linked in.  Since PassB
-uses PassD to do some analysis, PassD gets linked in.  However, since
-PassC (and dozens of other optimizations) aren't used, its code isn't
-linked into the image processing application.
+%% Once the set of optimizations is chosen (and similar decisions are
+%% made for the code generator) the image processing compiler is built
+%% into an executable or dynamic library.  Since the only reference to
+%% the LLVM optimization passes is the simple \code{create} function
+%% defined in each \code{.o} file, and since the optimizers live in
+%% \code{.a} archive libraries, only the optimization passes \emph{that
+%% are actually used} are linked into the end application, not the
+%% entire LLVM optimizer.  In our example above, since there is a
+%% reference to PassA and PassB, they will get linked in.  Since PassB
+%% uses PassD to do some analysis, PassD gets linked in.  However, since
+%% PassC (and dozens of other optimizations) aren't used, its code isn't
+%% linked into the image processing application.
+利用する最適化のセットの選択(と、コードジェネレータについてのそれと同様の選択)
+が終わったら、画像処理コンパイラを実行形式にするか動的ライブラリとして組み込む。
+LLVMの最適化パスへの唯一の参照は\code{.o}ファイルで定義されたシンプルな\code{create}
+関数であり、オプティマイザ自体はアーカイブライブラリ\code{.a}に存在するので、
+\emph{実際に利用する}最適化パスだけがアプリケーションにリンクされる。
+LLVMオプティマイザ全体がリンクされるわけではない。
+先ほどの例ではPassAとPassBへの参照があるので、これらがリンクされる。
+また、PassBがPassDを使って何らかの解析をしているので、PassDも組み込まれる。
+しかし、PassC (そしてその他の最適化パス)は使われていないので、
+これらは画像処理アプリケーションにはリンクされない。
 
-This is where the power of the library-based design of LLVM comes into
-play. This straightforward design approach allows LLVM to provide a
-vast amount of capability, some of which may only be useful to
-specific audiences, without punishing clients of the libraries that
-just want to do simple things. In contrast, traditional compiler
-optimizers are built as a tightly interconnected mass of code, which
-is much more difficult to subset, reason about, and come up to speed
-on. With LLVM you can understand individual optimizers without knowing
-how the whole system fits together.
+%% This is where the power of the library-based design of LLVM comes into
+%% play. This straightforward design approach allows LLVM to provide a
+%% vast amount of capability, some of which may only be useful to
+%% specific audiences, without punishing clients of the libraries that
+%% just want to do simple things. In contrast, traditional compiler
+%% optimizers are built as a tightly interconnected mass of code, which
+%% is much more difficult to subset, reason about, and come up to speed
+%% on. With LLVM you can understand individual optimizers without knowing
+%% how the whole system fits together.
+ここで、LLVMがライブラリベースであるという特徴が威力を発揮する。
+このアプローチで設計していたおかげで、LLVMはいろんな可能性を手に入れた。
+ごく一部の人たちだけにしか役立たないようなものもあるが、
+それがその他大勢の人(ただ単にシンプルに使いたいだけの人)たちに害を及ぼすことはない。
+それとは対照的に、昔ながらのコンパイラのオプティマイザは
+大部分のコードが密結合しており、その一部だけを取り出して高速化するのはかなり難しい。
+LLVMなら、ある特定のオプティマイザを理解するのにシステム全体に関する知識は不要だ。
 
-This library-based design is also the reason why so many people
-misunderstand what LLVM is all about: the LLVM libraries have many
-capabilities, but they don't actually \emph{do} anything by themselves.
-It is up to the designer of the client of the libraries (e.g., the
-Clang C compiler) to decide how to put the pieces to best use.  This
-careful layering, factoring, and focus on subset-ability is also why
-the LLVM optimizer can be used for such a broad range of different
-applications in different contexts.  Also, just because LLVM provides
-JIT compilation capabilities, it doesn't mean that every client uses
-it.
+%% This library-based design is also the reason why so many people
+%% misunderstand what LLVM is all about: the LLVM libraries have many
+%% capabilities, but they don't actually \emph{do} anything by themselves.
+%% It is up to the designer of the client of the libraries (e.g., the
+%% Clang C compiler) to decide how to put the pieces to best use.  This
+%% careful layering, factoring, and focus on subset-ability is also why
+%% the LLVM optimizer can be used for such a broad range of different
+%% applications in different contexts.  Also, just because LLVM provides
+%% JIT compilation capabilities, it doesn't mean that every client uses
+%% it.
+このライブラリベースの設計のせいで、多くの人がLLVMについて誤解しているところもある。
+LLVMのライブラリにはいろんな機能があるが、それ単体では実際には\emph{何もしない}。
+ライブラリをいかに組み合わせて機能を実現するかは、
+ライブラリを使うクライアント(Clang Cコンパイラなど)の設計に依存するということだ。
+注意深くレイヤー化され、分割され、それぞれの機能に焦点を合わせていることで、
+LLVMのオプティマイザはいろんな場面でいろんなアプリケーションから使えるようになった。
+また、LLVMがJITコンパイル機能を提供しているからといって、すべてのクライアントがその機能を使っているというわけでもない。
 
 \end{aosasect2}
 
