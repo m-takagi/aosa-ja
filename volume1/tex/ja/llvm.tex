@@ -924,31 +924,51 @@ LLVMのオプティマイザはいろんな場面でいろんなアプリケー�
 %% \begin{aosasect1}{Design of the Retargetable LLVM Code Generator}
 \begin{aosasect1}{再利用性を考慮したLLVMコードジェネレータの設計}
 
-The LLVM code generator is responsible for transforming LLVM IR into
-target specific machine code.  On the one hand, it is the code
-generator's job to produce the best possible machine code for any
-given target.  Ideally, each code generator should be completely
-custom code for the target, but on the other hand, the code generators
-for each target need to solve very similar problems.  For example,
-each target needs to assign values to registers, and though each
-target has different register files, the algorithms used should be
-shared wherever possible.
+%% The LLVM code generator is responsible for transforming LLVM IR into
+%% target specific machine code.  On the one hand, it is the code
+%% generator's job to produce the best possible machine code for any
+%% given target.  Ideally, each code generator should be completely
+%% custom code for the target, but on the other hand, the code generators
+%% for each target need to solve very similar problems.  For example,
+%% each target needs to assign values to registers, and though each
+%% target has different register files, the algorithms used should be
+%% shared wherever possible.
+LLVMのコードジェネレータの役割は、LLVM IRを各ターゲット向けのマシンコードに変換することだ。
+指定されたターゲット向けに向けて、いちばんいいコードを作るというのもコードジェネレータの仕事だ。
+理想を言えば、コードジェネレータは個々のターゲットに特化したカスタムコードになるべきだろう。
+しかしその一方で、各ターゲット向けのコードジェネレータが解こうとしている問題は、どれも似たようなものだ。
+たとえば、値をレジスタに割り当てる必要があるというのはどのターゲットでも同じことだ。
+レジスタファイルはターゲットごとに異なるだろうが、そのときに使うアルゴリズムは可能な限り共有しておくべきだろう。
 
-Similar to the approach in the optimizer, LLVM's code generator splits
-the code generation problem into individual passes---instruction
-selection, register allocation, scheduling, code layout optimization,
-and assembly emission---and provides many builtin passes that are run
-by default.  The target author is then given the opportunity to choose
-among the default passes, override the defaults and implement
-completely custom target-specific passes as required.  For example,
-the x86 back end uses a register-pressure-reducing scheduler since it
-has very few registers, but the PowerPC back end uses a latency
-optimizing scheduler since it has many of them.  The x86 back end uses
-a custom pass to handle the x87 floating point stack, and the ARM
-back end uses a custom pass to place constant pool islands inside
-functions where needed.  This flexibility allows target authors to
-produce great code without having to write an entire code generator
-from scratch for their target.
+%% Similar to the approach in the optimizer, LLVM's code generator splits
+%% the code generation problem into individual passes---instruction
+%% selection, register allocation, scheduling, code layout optimization,
+%% and assembly emission---and provides many builtin passes that are run
+%% by default.  The target author is then given the opportunity to choose
+%% among the default passes, override the defaults and implement
+%% completely custom target-specific passes as required.  For example,
+%% the x86 back end uses a register-pressure-reducing scheduler since it
+%% has very few registers, but the PowerPC back end uses a latency
+%% optimizing scheduler since it has many of them.  The x86 back end uses
+%% a custom pass to handle the x87 floating point stack, and the ARM
+%% back end uses a custom pass to place constant pool islands inside
+%% functions where needed.  This flexibility allows target authors to
+%% produce great code without having to write an entire code generator
+%% from scratch for their target.
+オプティマイザのときと同様に、LLVMのコードジェネレータも、
+コード生成に関する問題を個別のパス
+(命令の選択、レジスタの割り当て、スケジューリング、コード配置の最適化、
+アセンブリコードの発行など)に分割して、さまざまなパスをデフォルトで使えるよう組み込んでいる。
+各ターゲット用のコードジェネレータを作ろうとする人は
+デフォルトのパスの中から好きなものを使えるし、
+それをオーバーライドしてそのターゲット専用にカスタマイズしてしまってもいい。
+たとえばx86用のバックエンドはレジスタ数を節約するスケジューラを使っている。
+これはx86のレジスタ数が限られているからだが、一方PowerPC用のバックエンドでは
+レイテンシーを最適化したスケジューラを使っている。レジスタには余裕があるからだ。
+x86バックエンドではカスタムパスを使ってx87浮動小数点スタックを扱っており、
+ARMバックエンドでもカスタムパスを使って定数プールを関数内で必要に応じて配置する。
+この柔軟性のおかげで、バックエンドの作者はそのターゲット用のコードジェネレータを
+ゼロから書きあげる必要がなくなるというわけだ。
 
 %% \begin{aosasect2}{LLVM Target Description Files}
 \begin{aosasect2}{LLVMターゲット記述ファイル}
