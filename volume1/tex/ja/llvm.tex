@@ -973,26 +973,43 @@ ARMバックエンドでもカスタムパスを使って定数プールを関�
 %% \begin{aosasect2}{LLVM Target Description Files}
 \begin{aosasect2}{LLVMターゲット記述ファイル}
 
-The ``mix and match'' approach allows target authors to choose what
-makes sense for their architecture and permits a large amount of code
-reuse across different targets.  This brings up another challenge:
-each shared component needs to be able to reason about target specific
-properties in a generic way. For example, a shared register allocator
-needs to know the register file of each target and the constraints
-that exist between instructions and their register operands.  LLVM's
-solution to this is for each target to provide a target description in
-a declarative domain-specific language (a set of \code{.td} files)
-processed by the tblgen tool.  The (simplified) build process for the
-x86 target is shown in \aosafigref{fig.llvm.x86}.
+%% The ``mix and match'' approach allows target authors to choose what
+%% makes sense for their architecture and permits a large amount of code
+%% reuse across different targets.  This brings up another challenge:
+%% each shared component needs to be able to reason about target specific
+%% properties in a generic way. For example, a shared register allocator
+%% needs to know the register file of each target and the constraints
+%% that exist between instructions and their register operands.  LLVM's
+%% solution to this is for each target to provide a target description in
+%% a declarative domain-specific language (a set of \code{.td} files)
+%% processed by the tblgen tool.  The (simplified) build process for the
+%% x86 target is shown in \aosafigref{fig.llvm.x86}.
+この「いろんなものを組み合わせる」手法のおかげで、
+バックエンドの作者はそのアーキテクチャに合わせた選択ができるようになる。
+そして、ターゲットをまたがってコードを再利用できるようにもなる。
+しかし、その一方で問題も出てくる。
+共有コンポーネントは、何らかの汎用的な方法で
+ターゲット固有の特性を判断できないといけない。
+たとえば、レジスタアロケータを共有する場合は、
+ターゲットごとのレジスタファイルの場所や
+命令とレジスタオペランドとの間の制約などについて知っておく必要がある。
+LLVMは、この問題を解決するために、ターゲットごとの記述をドメイン特化言語
+(\code{.td}ファイルの集まり)で提供するようにした。この記述はtblgenで生成する。
+x86ターゲット用の(簡略化した)ビルド手順を\aosafigref{fig.llvm.x86}に示す。
 
 %% \aosafigure{../images/llvm/X86Target.eps}{Simplified x86 Target Definition}{fig.llvm.x86}
-\aosafigure{../images/llvm/X86Target.eps}{単純化したx86ターゲット定義}{fig.llvm.x86}
+\aosafigure{../images/llvm/X86Target.eps}{簡略化したx86ターゲット定義}{fig.llvm.x86}
 
-The different subsystems supported by the \code{.td} files allow
-target authors to build up the different pieces of their target. For
-example, the x86 back end defines a register class that holds all of
-its 32-bit registers named ``GR32'' (in the \code{.td} files, target
-specific definitions are all caps) like this:
+%% The different subsystems supported by the \code{.td} files allow
+%% target authors to build up the different pieces of their target. For
+%% example, the x86 back end defines a register class that holds all of
+%% its 32-bit registers named ``GR32'' (in the \code{.td} files, target
+%% specific definitions are all caps) like this:
+\code{.td}ファイルがサポートするさまざまなサブシステムを使えば、
+バックエンドの作者は各ターゲット用にいろんなピースを作れるようになる。
+たとえばx86バックエンドで定義しているレジスタクラスは、
+``GR32''(\code{.td}ファイル内では、ターゲット固有の定義は大文字になる)
+という名前で32ビットレジスタをすべて保持している。
 
 \begin{verbatim}
 def GR32 : RegisterClass<[i32], 32,
@@ -1000,13 +1017,19 @@ def GR32 : RegisterClass<[i32], 32,
    R8D, R9D, R10D, R11D, R14D, R15D, R12D, R13D]> { ... }
 \end{verbatim}
 
-\noindent This definition says that registers in this class can hold 32-bit
-integer values (``i32''), prefer to be 32-bit aligned, have the
-specified 16 registers (which are defined elsewhere in the \code{.td}
-files) and have some more information to specify preferred allocation
-order and other things.  Given this definition, specific instructions
-can refer to this, using it as an operand.  For example, the
-``complement a 32-bit register'' instruction is defined as:
+%% \noindent This definition says that registers in this class can hold 32-bit
+%% integer values (``i32''), prefer to be 32-bit aligned, have the
+%% specified 16 registers (which are defined elsewhere in the \code{.td}
+%% files) and have some more information to specify preferred allocation
+%% order and other things.  Given this definition, specific instructions
+%% can refer to this, using it as an operand.  For example, the
+%% ``complement a 32-bit register'' instruction is defined as:
+\noindent
+ここで定義しているのは、このクラスに属するレジスタに32ビット整数値(``i32'')を保持できること、
+32ビット単位で整列されること、16種類のレジスタがある(その定義は\code{.td}ファイル中のどこかにある)
+こと、そして代入の順序などのその他の情報だ。
+これを定義しておけば、各命令から参照でき、オペランドとして使えるようになる。
+たとえば、「32ビットレジスタの補集合をとる」という命令の定義はこのようになる。
 
 \begin{verbatim}
 let Constraints = "$src = $dst" in
@@ -1016,50 +1039,89 @@ def NOT32r : I<0xF7, MRM2r,
                [(set GR32:$dst, (not GR32:$src))]>;
 \end{verbatim}
 
-\noindent This definition says that NOT32r is an instruction (it uses the
-\code{I} tblgen class), specifies encoding information (\code{0xF7,
-  MRM2r}), specifies that it defines an ``output'' 32-bit register
-\code{\$dst} and has a 32-bit register ``input'' named \code{\$src}
-(the \code{GR32} register class defined above defines which registers
-are valid for the operand), specifies the assembly syntax for the
-instruction (using the \code{\{\}} syntax to handle both AT\&T and
-Intel syntax), specifies the effect of the instruction and provides
-the pattern that it should match on the last line.  The ``let''
-constraint on the first line tells the register allocator that the
-input and output register must be allocated to the same physical
-register.
+%% \noindent This definition says that NOT32r is an instruction (it uses the
+%% \code{I} tblgen class), specifies encoding information (\code{0xF7,
+%%   MRM2r}), specifies that it defines an ``output'' 32-bit register
+%% \code{\$dst} and has a 32-bit register ``input'' named \code{\$src}
+%% (the \code{GR32} register class defined above defines which registers
+%% are valid for the operand), specifies the assembly syntax for the
+%% instruction (using the \code{\{\}} syntax to handle both AT\&T and
+%% Intel syntax), specifies the effect of the instruction and provides
+%% the pattern that it should match on the last line.  The ``let''
+%% constraint on the first line tells the register allocator that the
+%% input and output register must be allocated to the same physical
+%% register.
+\noindent
+この定義では、まずNOT32rが命令であるということを示し(tblgenクラス\code{I}を使っている)、
+続けて符号化方式の情報(\code{0xF7,   MRM2r})を指定し、
+さらに出力用の32ビットレジスタ\code{\$dst}と入力用の32ビットレジスタ\code{\$src}
+(先ほどの定義のレジスタクラス\code{GR32}
+で、このオペランドに使えるレジスタがわかる)
+を指定する。さらに、その命令のアセンブリ構文
+(\code{\{\}}を使ってAT\&TとIntelの両方を扱う)とその命令の効果を指定し、
+マッチするパターンを最後の行で指定する。
+最初の行の``let''制約は、
+入出力用のレジスタをそれぞれ同じ物理レジスタ上に確保する必要があることを
+レジスタアロケータに指定する。
 
-This definition is a very dense description of the instruction, and
-the common LLVM code can do a lot with information derived from it (by
-the \code{tblgen} tool).  This one definition is enough for
-instruction selection to form this instruction by pattern matching on
-the input IR code for the compiler.  It also tells the register allocator how
-to process it, is enough to encode and decode the instruction to
-machine code bytes, and is enough to parse and print the instruction
-in a textual form.  These capabilities allow the x86 target to support
-generating a stand-alone x86 assembler (which is a drop-in replacement
-for the ``gas'' GNU assembler) and disassemblers from the target
-description as well as handle encoding the instruction for the JIT.
+%% This definition is a very dense description of the instruction, and
+%% the common LLVM code can do a lot with information derived from it (by
+%% the \code{tblgen} tool).  This one definition is enough for
+%% instruction selection to form this instruction by pattern matching on
+%% the input IR code for the compiler.  It also tells the register allocator how
+%% to process it, is enough to encode and decode the instruction to
+%% machine code bytes, and is enough to parse and print the instruction
+%% in a textual form.  These capabilities allow the x86 target to support
+%% generating a stand-alone x86 assembler (which is a drop-in replacement
+%% for the ``gas'' GNU assembler) and disassemblers from the target
+%% description as well as handle encoding the instruction for the JIT.
+この定義には命令に関する説明がぎっしり詰まっており、
+LLVMのコードは(\code{tblgen}を使って)ここから多くの情報を引き出せる。
+命令の選択をするにはこの定義だけで十分で、
+入力のIR形式のコードに対するパターンマッチングでこの命令を作る。
+また、レジスタアロケータにもその処理方法を伝えられるし、
+命令からバイトコードへの符号化や復号もできる。
+命令をテキスト形式で表示するにもこの定義だけで十分だ。
+これらを使えば、x86用のバックエンドで
+(``gas'' GNUアセンブラの一時的な代替として)
+スタンドアロンのx86アセンブラ形式を生成させたり
+ターゲット記述からのディスアセンブラをサポートしたりもできる。
+またJIT用に命令を符号化することもできる。
 
-In addition to providing useful functionality, having multiple pieces
-of information generated from the same ``truth'' is good for other
-reasons.  This approach makes it almost infeasible for the assembler
-and disassembler to disagree with each other in either assembly syntax
-or in the binary encoding.  It also makes the target description
-easily testable: instruction encodings can be unit tested without
-having to involve the entire code generator.
+%% In addition to providing useful functionality, having multiple pieces
+%% of information generated from the same ``truth'' is good for other
+%% reasons.  This approach makes it almost infeasible for the assembler
+%% and disassembler to disagree with each other in either assembly syntax
+%% or in the binary encoding.  It also makes the target description
+%% easily testable: instruction encodings can be unit tested without
+%% having to involve the entire code generator.
+便利な機能を提供できることだけに限らず、
+複数の情報をたったひとつの「正解」から生成できるということも利点のひとつだ。
+この方式にしておけば、アセンブラとディスアセンブラが構文や
+バイナリ符号化方式などで食い違うことがまずなくなる。
+また、ターゲット記述のテストもしやすい。
+命令の符号化を単体テストするときに、コードジェネレータ全体を巻き込まなくても済むようになる。
 
-While we aim to get as much target information as possible into the
-\code{.td} files in a nice declarative form, we still don't have
-everything. Instead, we require target authors to write some C++ code
-for various support routines and to implement any target specific
-passes they might need (like \code{X86FloatingPoint.cpp}, which
-handles the x87 floating point stack).  As LLVM continues to grow new
-targets, it becomes more and more important to increase the amount of
-the target that can be expressed in the \code{.td} file, and we
-continue to increase the expressiveness of the \code{.td} files to
-handle this.  A great benefit is that it gets easier and easier write
-targets in LLVM as time goes on.
+%% While we aim to get as much target information as possible into the
+%% \code{.td} files in a nice declarative form, we still don't have
+%% everything. Instead, we require target authors to write some C++ code
+%% for various support routines and to implement any target specific
+%% passes they might need (like \code{X86FloatingPoint.cpp}, which
+%% handles the x87 floating point stack).  As LLVM continues to grow new
+%% targets, it becomes more and more important to increase the amount of
+%% the target that can be expressed in the \code{.td} file, and we
+%% continue to increase the expressiveness of the \code{.td} files to
+%% handle this.  A great benefit is that it gets easier and easier write
+%% targets in LLVM as time goes on.
+ターゲットに関する情報は可能な限り\code{.td}ファイルに取り込んで、
+宣言型の書式でまとめられるようにしてきた。しかし、すべてを取り込めたわけではない。
+そのかわりに、バックエンドの作者にちょっとしたC++のコードを書いてもらうようにしている。
+各種サポートルーチンや、そのターゲットにだけ必要になるようなパス
+(x87浮動小数点スタックを扱う\code{X86FloatingPoint.cpp}など)
+の実装は、そちらで扱う。LLVMが新たなターゲットに対応して成長するにつれて、
+\code{.td}ファイルで表現しきれるターゲットの量を増やすことがより重要になる。
+そのために、私たちは\code{.td}ファイルの表現力を向上させ続ける。
+表現力が上がれば上がるほど、LLVM用のターゲットがより書きやすくなるだろう。
 
 \end{aosasect2}
 
