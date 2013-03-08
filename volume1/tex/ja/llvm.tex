@@ -1130,59 +1130,99 @@ LLVMのコードは(\code{tblgen}を使って)ここから多くの情報を引�
 %% \begin{aosasect1}{Interesting Capabilities Provided by a Modular Design}
 \begin{aosasect1}{モジュラー設計がもたらす興味深い可能性}
 
-Besides being a generally elegant design, modularity provides clients
-of the LLVM libraries with several interesting capabilities. These
-capabilities stem from the fact that LLVM provides functionality, but
-lets the client decide most of the \emph{policies} on how to use it.
+%% Besides being a generally elegant design, modularity provides clients
+%% of the LLVM libraries with several interesting capabilities. These
+%% capabilities stem from the fact that LLVM provides functionality, but
+%% lets the client decide most of the \emph{policies} on how to use it.
+全体的に洗練されているという点以外にも、
+モジュラー設計の利点はある。LLVMのライブラリを使うクライアントに、
+いくつかの興味深い可能性をもたらしてくれるのだ。
+そもそもはLLVM自体の機能によるものだが、
+クライアント側で、それをどう使うかという\emph{ポリシー}
+を決められるというのが大きい。
 
 %% \begin{aosasect2}{Choosing When and Where Each Phase Runs}
-\begin{aosasect2}{各フェーズがいつどこで走るかを選ぶ}
+\begin{aosasect2}{各フェーズを動かすタイミングを選ぶ}
 
-As mentioned earlier, LLVM IR can be efficiently (de)serialized
-to/from a binary format known as LLVM bitcode.  Since LLVM IR is
-self-contained, and serialization is a lossless process, we can do
-part of compilation, save our progress to disk, then continue work at
-some point in the future.  This feature provides a number of
-interesting capabilities including support for link-time and
-install-time optimization, both of which delay code generation from
-``compile time''.
+%% As mentioned earlier, LLVM IR can be efficiently (de)serialized
+%% to/from a binary format known as LLVM bitcode.  Since LLVM IR is
+%% self-contained, and serialization is a lossless process, we can do
+%% part of compilation, save our progress to disk, then continue work at
+%% some point in the future.  This feature provides a number of
+%% interesting capabilities including support for link-time and
+%% install-time optimization, both of which delay code generation from
+%% ``compile time''.
+先述のとおり、
+LLVM IRはバイナリ形式(LLVMビットコード)との間でのフォーマット変換ができる。
+LLVM IR自体が自己完結しているうえにフォーマット変換がロスレスな処理であることから、
+コンパイル処理の一部だけを行ってその状況をディスクに保存し、
+また違うときにその続きを実行するなどということもできる。
+この昨日を使えば、リンク時の最適化やインストール時の最適化なども実現できる。
+どちらも、「コンパイル時」のコード生成を遅らせるものだ。
 
-Link-Time Optimization (LTO) addresses the problem where the compiler
-traditionally only sees one translation unit (e.g., a \code{.c} file
-with all its headers) at a time and therefore cannot do optimizations
-(like inlining) across file boundaries.  LLVM compilers like Clang
-support this with the \code{-flto} or \code{-O4} command line option.
-This option instructs the compiler to emit LLVM bitcode to the
-\code{.o}file instead of writing out a native object file, and delays
-code generation to link time, shown in \aosafigref{fig.llvm.lto}.
+%% Link-Time Optimization (LTO) addresses the problem where the compiler
+%% traditionally only sees one translation unit (e.g., a \code{.c} file
+%% with all its headers) at a time and therefore cannot do optimizations
+%% (like inlining) across file boundaries.  LLVM compilers like Clang
+%% support this with the \code{-flto} or \code{-O4} command line option.
+%% This option instructs the compiler to emit LLVM bitcode to the
+%% \code{.o}file instead of writing out a native object file, and delays
+%% code generation to link time, shown in \aosafigref{fig.llvm.lto}.
+リンク時の最適化(Link-Time Optimization: LTO)は、
+コンパイラが伝統的にもつ問題に対応するものだ。
+その問題とは、一度に一つの変換ユニット(e.g., a \code{.c} file with all its headers)
+しか見ないために、ファイルをまたがる最適化(インライン化など)ができないというものだ。
+LLVMのコンパイラ(Clangなど)は、これに対応したコマンドラインオプション\code{-flto}あるいは\code{-O4}を用意している。
+このオプションは、ネイティブなオブジェクトファイルではなく\code{.o}ファイルにLLVMビットコードを書き出すよう指示する。
+そして、コードの生成はリンク時まで先延ばしにする。その様子を\aosafigref{fig.llvm.lto}に示す。
 
 %% \aosafigure{../images/llvm/LTO.eps}{Link-Time Optimization}{fig.llvm.lto}
 \aosafigure{../images/llvm/LTO.eps}{リンク時の最適化}{fig.llvm.lto}
 
-Details differ depending on which operating system you're on, but the
-important bit is that the linker detects that it has LLVM bitcode in
-the \code{.o} files instead of native object files.  When it sees
-this, it reads all the bitcode files into memory, links them together,
-then runs the LLVM optimizer over the aggregate.  Since the optimizer
-can now see across a much larger portion of the code, it can inline,
-propagate constants, do more aggressive dead code elimination, and
-more across file boundaries.  While many modern compilers support LTO,
-most of them (e.g., GCC, Open64, the Intel compiler, etc.) do so by
-having an expensive and slow serialization process.  In LLVM, LTO
-falls out naturally from the design of the system, and works across
-different source languages (unlike many other compilers) because the
-IR is truly source language neutral.
+%% Details differ depending on which operating system you're on, but the
+%% important bit is that the linker detects that it has LLVM bitcode in
+%% the \code{.o} files instead of native object files.  When it sees
+%% this, it reads all the bitcode files into memory, links them together,
+%% then runs the LLVM optimizer over the aggregate.  Since the optimizer
+%% can now see across a much larger portion of the code, it can inline,
+%% propagate constants, do more aggressive dead code elimination, and
+%% more across file boundaries.  While many modern compilers support LTO,
+%% most of them (e.g., GCC, Open64, the Intel compiler, etc.) do so by
+%% having an expensive and slow serialization process.  In LLVM, LTO
+%% falls out naturally from the design of the system, and works across
+%% different source languages (unlike many other compilers) because the
+%% IR is truly source language neutral.
+OSによって詳細は異なるが、重要なのは、
+LLVMビットコードがネイティブオブジェクトファイルではなく\code{.o}ファイルにあるというのを
+リンカが気づくということだ。リンカがそれを発見したら、すべてのビットコードをメモリに読み込む。
+そしてそれをリンクし、とりまとめた結果に対してLLVMオプティマイザを実行する。
+オプティマイザはかなり大きなコード片を扱えるようになり、
+インライン化や定数の伝搬、より積極的なデッドコードの破棄などの最適化を
+ファイルをまたがって行えるようになる。最近のコンパイラの多くはLTOをサポートしているが、
+そのほとんど(GCCやOpen64、Intel compilerなど)は、
+コストのかかる低速なシリアライズ処理を使って実現している。
+LLVMの場合は、システムの設計からごく自然にLTOが実現でき、
+異なるソース言語の組み合わせでも利用できる(他のコンパイラでは無理なことだ)。
+これもまた、IRが本当の意味でソース言語に中立だからこそ実現できたことだ。
 
-Install-time optimization is the idea of delaying code generation even
-later than link time, all the way to install time, as shown in
-\aosafigref{fig.llvm.ito}.  Install time is a very interesting time
-(in cases when software is shipped in a box, downloaded, uploaded to a
-mobile device, etc.), because this is when you find out the specifics
-of the device you're targeting.  In the x86 family for example, there
-are broad variety of chips and characteristics.  By delaying
-instruction choice, scheduling, and other aspects of code generation,
-you can pick the best answers for the specific hardware an application
-ends up running on.
+%% Install-time optimization is the idea of delaying code generation even
+%% later than link time, all the way to install time, as shown in
+%% \aosafigref{fig.llvm.ito}.  Install time is a very interesting time
+%% (in cases when software is shipped in a box, downloaded, uploaded to a
+%% mobile device, etc.), because this is when you find out the specifics
+%% of the device you're targeting.  In the x86 family for example, there
+%% are broad variety of chips and characteristics.  By delaying
+%% instruction choice, scheduling, and other aspects of code generation,
+%% you can pick the best answers for the specific hardware an application
+%% ends up running on.
+インストール時の最適化とは、コードの生成をリンク時よりもさらに先延ばしにして、インストールのときに行うというものだ。
+その様子を\aosafigref{fig.llvm.ito}に示す。
+インストール時というのは
+(危機に組み込んだり、ダウンロードしたり、モバイルデバイスにアップロードしたりなど)いろいろ興味深いタイミングだ。
+というのも、導入しようとしているデバイスの詳細が判明するのがまさにことときだからである。
+x86ファミリーを例に取ると、いろんなチップが存在するしそれぞれ特性は違う。
+命令の選択やスケジューリングなどのコード生成がらみの処理を先送りすることで、
+最終的にアプリケーションを実行する環境のハードウェアにより特化した選択ができるようになる。
 
 %% \aosafigure{../images/llvm/InstallTime.eps}{Install-Time Optimization}{fig.llvm.ito}
 \aosafigure{../images/llvm/InstallTime.eps}{インストール時の最適化}{fig.llvm.ito}
