@@ -1324,50 +1324,81 @@ LLVM IRをテキスト形式で読み込んで特定のパスに送り、その�
 \end{aosasect2}
 
 %% \begin{aosasect2}{Automatic Test Case Reduction with BugPoint}
-\begin{aosasect2}{BugPointによる、自動的なテストケースの削減}
+\begin{aosasect2}{BugPointによる、自動的なテストケースの単純化}
 
-When a bug is found in a compiler or other client of the LLVM
-libraries, the first step to fixing it is to get a test case that
-reproduces the problem.  Once you have a test case, it is best to
-minimize it to the smallest example that reproduces the problem, and
-also narrow it down to the part of LLVM where the problem happens,
-such as the optimization pass at fault.  While you eventually learn
-how to do this, the process is tedious, manual, and particularly
-painful for cases where the compiler generates incorrect code but does
-not crash.
+%% When a bug is found in a compiler or other client of the LLVM
+%% libraries, the first step to fixing it is to get a test case that
+%% reproduces the problem.  Once you have a test case, it is best to
+%% minimize it to the smallest example that reproduces the problem, and
+%% also narrow it down to the part of LLVM where the problem happens,
+%% such as the optimization pass at fault.  While you eventually learn
+%% how to do this, the process is tedious, manual, and particularly
+%% painful for cases where the compiler generates incorrect code but does
+%% not crash.
+コンパイラ、あるいはLLVMのライブラリを使う他のクライアントに何らかのバグが見つかったとして、
+それを修正するためにまず最初にすることは、問題を再現するためのテストケースを書くことだ。
+テストケースさえ書けてしまえば、問題を再現する必要最小限のサンプルが得られたことになる。
+そして、問題の発生源をLLVMの特定のパーツ、たとえば特定の最適化パスなどに絞り込めることにもなる。
+読者もいずれはその方法を身につけることになるだろうが、
+その手順はつまらない手作業になる。
+特に、コンパイラが生成するコードが何かおかしいけれどもクラッシュに至るほどではない、という場合の作業が難しい。
 
-The LLVM BugPoint
-tool\footnote{\url{http://llvm.org/docs/Bugpoint.html}} uses the IR
-serialization and modular design of LLVM to automate this process.
-For example, given an input \code{.ll} or \code{.bc} file along with a
-list of optimization passes that causes an optimizer crash, BugPoint
-reduces the input to a small test case and determines which optimizer
-is at fault.  It then outputs the reduced test case and the \code{opt}
-command used to reproduce the failure.  It finds this by using
-techniques similar to ``delta debugging'' to reduce the input and the
-optimizer pass list.  Because it knows the structure of LLVM IR,
-BugPoint does not waste time generating invalid IR to input to the
-optimizer, unlike the standard ``delta'' command line tool.
+%% The LLVM BugPoint
+%% tool\footnote{\url{http://llvm.org/docs/Bugpoint.html}} uses the IR
+%% serialization and modular design of LLVM to automate this process.
+%% For example, given an input \code{.ll} or \code{.bc} file along with a
+%% list of optimization passes that causes an optimizer crash, BugPoint
+%% reduces the input to a small test case and determines which optimizer
+%% is at fault.  It then outputs the reduced test case and the \code{opt}
+%% command used to reproduce the failure.  It finds this by using
+%% techniques similar to ``delta debugging'' to reduce the input and the
+%% optimizer pass list.  Because it knows the structure of LLVM IR,
+%% BugPoint does not waste time generating invalid IR to input to the
+%% optimizer, unlike the standard ``delta'' command line tool.
+LLVMのBugPoint\footnote{\url{http://llvm.org/docs/Bugpoint.html}}
+というツールは、IRのシリアライズ機能とLLVMのモジュラー構成を活用してこの手順を自動化する。
+たとえば、入力として\code{.ll}ファイルか\code{.bc}ファイルを与え、
+さらにオプティマイザのクラッシュを引き起こす最適化パスのリストを渡すと、
+BugPointが入力を単純化して小さなテストケースを作り、
+どのパスが問題なのかを特定する。それから単純化したテストケースを出力し、
+\code{opt}コマンドを使って障害を再現する。このツールが問題の原因を特定するときに使うのが
+``Delta Debugging''と似たテクニックで、これを使って入力と最適化パスのリストを減らしていく。
+BugPointはLLVM IRの構造を知っているので、
+オプティマイザが理解できないような無効なIRを生成したりはしない。
+標準のコマンドラインツール``delta''では、時にそんなことで時間を無駄にすることがある。
 
-In the more complex case of a miscompilation, you can specify the
-input, code generator information, the command line to pass to the
-executable, and a reference output. BugPoint will first determine if
-the problem is due to an optimizer or a code generator, and will then
-repeatedly partition the test case into two pieces: one that is sent
-into the ``known good'' component and one that is sent into the
-``known buggy'' component.  By iteratively moving more and more code
-out of the partition that is sent into the known buggy code generator,
-it reduces the test case.
+%% In the more complex case of a miscompilation, you can specify the
+%% input, code generator information, the command line to pass to the
+%% executable, and a reference output. BugPoint will first determine if
+%% the problem is due to an optimizer or a code generator, and will then
+%% repeatedly partition the test case into two pieces: one that is sent
+%% into the ``known good'' component and one that is sent into the
+%% ``known buggy'' component.  By iteratively moving more and more code
+%% out of the partition that is sent into the known buggy code generator,
+%% it reduces the test case.
+もう少し複雑なコンパイルミスの場合は、
+入力とコードジェネレータの情報、そして実行形式に渡すコマンドラインや参考出力も指定できる。
+BugPointは、まずその問題がオプティマイザによるものなのかコードジェネレータによるものなのかを判断する。
+それからテストケースを繰り返し二分割して、
+一方を「正常に動く」コンポーネント、もう一方を「バグがある」コンポーネントとして振り分ける。
+分割を繰り返していくことで「バグのある」コンポーネントに送られる部分が減っていき、テストケースの単純化につなげる。
 
-BugPoint is a very simple tool and has saved countless hours of test
-case reduction throughout the life of LLVM\@.  No other open source
-compiler has a similarly powerful tool, because it relies on a
-well-defined intermediate representation.  That said, BugPoint isn't
-perfect, and would benefit from a rewrite.  It dates back to 2002, and
-is typically only improved when someone has a really tricky bug to
-track down that the existing tool doesn't handle well. It has grown
-over time, accreting new features (such as JIT debugging) without a
-consistent design or owner.
+%% BugPoint is a very simple tool and has saved countless hours of test
+%% case reduction throughout the life of LLVM\@.  No other open source
+%% compiler has a similarly powerful tool, because it relies on a
+%% well-defined intermediate representation.  That said, BugPoint isn't
+%% perfect, and would benefit from a rewrite.  It dates back to 2002, and
+%% is typically only improved when someone has a really tricky bug to
+%% track down that the existing tool doesn't handle well. It has grown
+%% over time, accreting new features (such as JIT debugging) without a
+%% consistent design or owner.
+BugPointは非常にシンプルなツールで、LLVMのテストケースを作る時間を数え切れないほど節約してくれた。
+オープンソースのコンパイラの中でこれほど強力なツールを持ち合わせているものは、他にないだろう。
+うまく作られたLLVMの中間表現があってこそ実現できたツールだからである。
+とはいうものの、BugPointは決してパーフェクトなツールではなく、書き直せばもっといいものになるだろう。
+2002年に戻って振り返ってみても、このツールに手を入れる機会は限られていた。
+誰かが奇妙なバグに遭遇して既存のツールではうまく処理できなかったときに、このツールに手を入れるというものだ。
+そんな具合い徐々に成長し、一貫した設計や作者もなしに新たな機能(JITデバッグなど)が追加されてきた。
 
 \end{aosasect2}
 
