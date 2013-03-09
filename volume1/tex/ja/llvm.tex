@@ -1233,29 +1233,50 @@ x86ファミリーを例に取ると、いろんなチップが存在するし�
 %% \begin{aosasect2}{Unit Testing the Optimizer}
 \begin{aosasect2}{オプティマイザのユニットテスト}
 
-Compilers are very complicated, and quality is important, therefore
-testing is critical.  For example, after fixing a bug that caused a
-crash in an optimizer, a regression test should be added to make sure
-it doesn't happen again.  The traditional approach to testing this is
-to write a \code{.c} file (for example) that is run through the
-compiler, and to have a test harness that verifies that the compiler
-doesn't crash.  This is the approach used by the GCC test suite, for
-example.
+%% Compilers are very complicated, and quality is important, therefore
+%% testing is critical.  For example, after fixing a bug that caused a
+%% crash in an optimizer, a regression test should be added to make sure
+%% it doesn't happen again.  The traditional approach to testing this is
+%% to write a \code{.c} file (for example) that is run through the
+%% compiler, and to have a test harness that verifies that the compiler
+%% doesn't crash.  This is the approach used by the GCC test suite, for
+%% example.
+コンパイラは非常に込み入ったものであり、高い品質が要求される。
+そのため、テストが重要になる。
+たとえば、オプティマイザでクラッシュを引き起こすようなバグを修正したとしたら、
+同じバグが再発しないようにリグレッションテストも追加しないといけない。
+リグレッションテストを書く昔ながらの手法は、
+コンパイラを通す(たとえば)\code{.c}ファイルを書いて、
+コンパイラがクラッシュしないことを確かめるテストハーネスを用意するというものだ。
+この手法は、たとえばGCCのテストスイートでも使われている。
 
-The problem with this approach is that the compiler consists of many
-different subsystems and even many different passes in the optimizer,
-all of which have the opportunity to change what the input code looks
-like by the time it gets to the previously buggy code in question.  If
-something changes in the front end or an earlier optimizer, a test
-case can easily fail to test what it is supposed to be testing.
+%% The problem with this approach is that the compiler consists of many
+%% different subsystems and even many different passes in the optimizer,
+%% all of which have the opportunity to change what the input code looks
+%% like by the time it gets to the previously buggy code in question.  If
+%% something changes in the front end or an earlier optimizer, a test
+%% case can easily fail to test what it is supposed to be testing.
+この手法の問題は、
+コンパイラがさまざまなサブシステムで構成されていて、
+オプティマイザにもさまざまなパスがあるということだ。
+そのすべてが、バグのあった箇所への入力となるコードに対して何かの変更を加える可能性がある。
+フロントエンドやオプティマイザの初期段階で何かを変更すると、
+これまでのテストケースが動かなくなりやすい。
 
-By using the textual form of LLVM IR with the modular optimizer, the
-LLVM test suite has highly focused regression tests that can load LLVM
-IR from disk, run it through exactly one optimization pass, and verify
-the expected behavior.  Beyond crashing, a more complicated behavioral
-test wants to verify that an optimization is actually performed.  Here
-is a simple test case that checks to see that the constant propagation
-pass is working with add instructions:
+%% By using the textual form of LLVM IR with the modular optimizer, the
+%% LLVM test suite has highly focused regression tests that can load LLVM
+%% IR from disk, run it through exactly one optimization pass, and verify
+%% the expected behavior.  Beyond crashing, a more complicated behavioral
+%% test wants to verify that an optimization is actually performed.  Here
+%% is a simple test case that checks to see that the constant propagation
+%% pass is working with add instructions:
+LLVM IRのテキスト形式とモジュール式のオプティマイザを使うことで、
+LLVMのテストスイートはリグレッションテストに注力できるようになる。
+LLVM IRをディスクから読み込んで、特定の最適化パスを実行し、期待される挙動を検証できるのだ。
+クラッシュするかしないかというレベルではなく、もっと入り組んだ振る舞いをテストしたいこともある。
+最適化が実際に行われているのかというテストなどだ。
+ここで、シンプルなテストケースの例を示す。この例は、定数の伝搬の最適化が
+add命令に対して働いているかどうかのテストだ。
 
 \begin{verbatim}
 ; RUN: opt < %s -constprop -S | FileCheck %s
@@ -1267,24 +1288,38 @@ define i32 @test() {
 }
 \end{verbatim}
 
-\noindent The \code{RUN} line specifies the command to execute: in this case,
-the \code{opt} and \code{FileCheck} command line tools.  The
-\code{opt} program is a simple wrapper around the LLVM pass manager,
-which links in all the standard passes (and can dynamically load
-plugins containing other passes) and exposes them through to the
-command line.  The \code{FileCheck} tool verifies that its standard
-input matches a series of \code{CHECK} directives.  In this case, this
-simple test is verifying that the \code{constprop} pass is folding the
-\code{add} of 4 and 5 into 9.
+%% \noindent The \code{RUN} line specifies the command to execute: in this case,
+%% the \code{opt} and \code{FileCheck} command line tools.  The
+%% \code{opt} program is a simple wrapper around the LLVM pass manager,
+%% which links in all the standard passes (and can dynamically load
+%% plugins containing other passes) and exposes them through to the
+%% command line.  The \code{FileCheck} tool verifies that its standard
+%% input matches a series of \code{CHECK} directives.  In this case, this
+%% simple test is verifying that the \code{constprop} pass is folding the
+%% \code{add} of 4 and 5 into 9.
+\noindent
+\code{RUN}の行では、実行するコマンドを指定する。この例の場合は、
+コマンドラインツール\code{opt}と\code{FileCheck}だ。
+\code{opt}はLLVMパスマネージャーのシンプルなラッパーで、すべての標準パスをリンクして
+(そして、その他のパスを含むプラグインも動的に読み込めて)、それをコマンドラインに公開する。
+\code{FileCheck}は、標準入力に与えられた内容が一連の\code{CHECK}ディレクティブにマッチするかどうかを確かめる。
+今回の場合は、\code{constprop}パスが4と5の\code{add}を9にまとめるかどうかを調べている。
 
-While this might seem like a really trivial example, this is very
-difficult to test by writing .c files: front ends often do constant
-folding as they parse, so it is very difficult and fragile to write
-code that makes its way downstream to a constant folding optimization
-pass.  Because we can load LLVM IR as text and send it through the
-specific optimization pass we're interested in, then dump out the
-result as another text file, it is really straightforward to test
-exactly what we want, both for regression and feature tests.
+%% While this might seem like a really trivial example, this is very
+%% difficult to test by writing .c files: front ends often do constant
+%% folding as they parse, so it is very difficult and fragile to write
+%% code that makes its way downstream to a constant folding optimization
+%% pass.  Because we can load LLVM IR as text and send it through the
+%% specific optimization pass we're interested in, then dump out the
+%% result as another text file, it is really straightforward to test
+%% exactly what we want, both for regression and feature tests.
+何てこともないごく当たり前の例に見えるかもしれないが、
+同じことを.cファイルを書いてテストしようとすると非常に難しい。
+フロントエンドが定数のたたみ込みをパース時に済ませてしまうことが多いので、
+わざわざそれを先延ばしにして、オプティマイザのパスで処理させるコードを書くのはとても難しいし不安定になる。
+LLVMの場合は、
+LLVM IRをテキスト形式で読み込んで特定のパスに送り、その結果を別のテキストファイルに書き出すだけだ。
+リグレッションテストについても機能テストについても、極めて直感的に実現できる。
 
 \end{aosasect2}
 
