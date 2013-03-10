@@ -124,31 +124,46 @@ Eclipseには長い歴史があるので、まずは初期のEclipseについて
 %% \begin{aosasect1}{Early Eclipse}
 \begin{aosasect1}{初期のEclipse}
 
-At the beginning of the 21st century, there were many tools for
-software developers, but few of them worked together. Eclipse sought
-to provide an open source platform for the creation of interoperable
-tools for application developers. This would allow
-developers to focus on writing new tools, instead of
-writing code to deal with infrastructure issues like interacting
-with the filesystem, providing software updates, and connecting to
-source code repositories. Eclipse is perhaps most famous for the Java
-Development Tools (JDT). The intent was that these exemplary Java
-development tools would serve as an example for people interested in
-providing tooling for other languages.
+%% At the beginning of the 21st century, there were many tools for
+%% software developers, but few of them worked together. Eclipse sought
+%% to provide an open source platform for the creation of interoperable
+%% tools for application developers. This would allow
+%% developers to focus on writing new tools, instead of
+%% writing code to deal with infrastructure issues like interacting
+%% with the filesystem, providing software updates, and connecting to
+%% source code repositories. Eclipse is perhaps most famous for the Java
+%% Development Tools (JDT). The intent was that these exemplary Java
+%% development tools would serve as an example for people interested in
+%% providing tooling for other languages.
+21世紀が始まったころ、世の中にはソフトウェア開発用のツールは山ほど存在したが、
+組み合わせて使えるものなどほとんどなかった。
+そんな中でEclipseは、アプリケーション開発者に相互運用性をもたらすオープンソースプラットフォームを提供しようとした。
+そうすれば、開発者は新たなツールを書くことだけに専念できるようになる。
+ファイルシステムとのやりとりやソフトウェアのアップグレード機能、
+そしてソースコードリポジトリとの接続などといったインフラがらみの問題は気にせずに済むのだ。
+Eclipseで一番よく知られているのは、おそらくJava Development Tools (JDT)だろう。
+JDTの狙いは、お手本となるJava開発ツール群を作ることだった。
+他の言語用のツールを作ろうとする人たちが、これを参考にできるようにする意図があった。
 
-Before we delve into the architecture of Eclipse, let's look at what
-the Eclipse SDK looks like to a developer.  Upon starting Eclipse and
-selecting the workbench, you'll be presented with the Java
-perspective. A perspective organizes the views and editors that are
-specific to the tooling that is currently in use.
+%% Before we delve into the architecture of Eclipse, let's look at what
+%% the Eclipse SDK looks like to a developer.  Upon starting Eclipse and
+%% selecting the workbench, you'll be presented with the Java
+%% perspective. A perspective organizes the views and editors that are
+%% specific to the tooling that is currently in use.
+Eclipseのアーキテクチャに深入りする前に、まずは開発者にとってのEclipse SDKがどのようなものかを見ていこう。
+Eclipseを立ち上げてワークベンチを選ぶと、Javaパースペクティブが表示される。
+パースペクティブとは、現在使用中のツール専用にビューやエディターの配置を管理する仕組みだ。
 
 %% \aosafigure{../images/eclipse/javaperspective.eps}{Java Perspective}{fig.ecl.jpersp}
 \aosafigure{../images/eclipse/javaperspective.eps}{Javaパースペクティブ}{fig.ecl.jpersp}
 
-Early versions of the Eclipse SDK architecture had three major
-elements, which corresponded to three major sub-projects: the
-Platform, the JDT (Java Development Tools) and the PDE (Plug-in
-Development Environment).
+%% Early versions of the Eclipse SDK architecture had three major
+%% elements, which corresponded to three major sub-projects: the
+%% Platform, the JDT (Java Development Tools) and the PDE (Plug-in
+%% Development Environment).
+初期バージョンのEclipse SDKのアーキテクチャには三つの主要な要素があり、
+それぞれが三つの主要なサブプロジェクトに対応していた。
+プラットフォーム、JDT (Java Development Tools)、そしてPDE (Plug-in Development Environment)だ。
 
 %% \begin{aosasect2}{Platform}
 \begin{aosasect2}{プラットフォーム}
