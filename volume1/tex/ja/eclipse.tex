@@ -1,71 +1,125 @@
 \begin{aosachapter}{Eclipse}{s:eclipse}{Kim Moir}
 %% Based on EN-Revision r1485
 
-Implementing software modularity is a notoriously difficult task.
-Interoperability with a large code base written by a diverse community
-is also difficult to manage. At Eclipse, we have managed to succeed on
-both counts. In June 2010, the Eclipse Foundation made available its
-Helios coordinated release, with over 39 projects and 490 committers
-from over 40 companies working together to build upon the
-functionality of the base platform. What was the original
-architectural vision for Eclipse?  How did it evolve? How does the
-architecture of an application serve to encourage community engagement
-and growth? Let's go back to the beginning.
+%% Implementing software modularity is a notoriously difficult task.
+%% Interoperability with a large code base written by a diverse community
+%% is also difficult to manage. At Eclipse, we have managed to succeed on
+%% both counts. In June 2010, the Eclipse Foundation made available its
+%% Helios coordinated release, with over 39 projects and 490 committers
+%% from over 40 companies working together to build upon the
+%% functionality of the base platform. What was the original
+%% architectural vision for Eclipse?  How did it evolve? How does the
+%% architecture of an application serve to encourage community engagement
+%% and growth? Let's go back to the beginning.
+モジュール形式でソフトウェアを設計することは、周知の通り、とても難しいことだ。
+さまざまなコミュニティが書いた巨大なコードベース間での相互運用性、
+これもまた非常に管理しづらいものである。
+Eclipseは、これら両方をなんとかうまく成し遂げた。
+2010年6月、Eclipse FoundationはHeliosリリースを公開した。
+39のプロジェクト、そして40以上の企業に属する490人のコミッター達が協力し、
+その基盤となるプラットフォームの機能を作り上げた。
+Eclipseが誕生した当初は、どんなアーキテクチャを思い描いていたのだろう？
+そして、それがどのように進化したのだろう？
+あるアプリケーションのアーキテクチャが、コミュニティの成長を促すということがあるのだろうか？
+そもそものはじまりを振り返ってみよう。
 
-On November 7, 2001, an open source project called Eclipse 1.0 was
-released. At the time, Eclipse was described as ``an integrated
-development environment (IDE) for anything and nothing in
-particular.''  This description was purposely generic because the
-architectural vision was not just another set of tools, but a
-framework; a framework that was modular and scalable. Eclipse provided
-a component-based platform that could serve as the foundation for
-building tools for developers. This extensible architecture encouraged
-the community to build upon a core platform and extend it beyond the
-limits of the original vision. Eclipse started as a platform and the
-Eclipse SDK was the proof-of-concept product.  The Eclipse SDK allowed
-the developers to self-host and use the Eclipse SDK itself to build
-newer versions of Eclipse.
+%% On November 7, 2001, an open source project called Eclipse 1.0 was
+%% released. At the time, Eclipse was described as ``an integrated
+%% development environment (IDE) for anything and nothing in
+%% particular.''  This description was purposely generic because the
+%% architectural vision was not just another set of tools, but a
+%% framework; a framework that was modular and scalable. Eclipse provided
+%% a component-based platform that could serve as the foundation for
+%% building tools for developers. This extensible architecture encouraged
+%% the community to build upon a core platform and extend it beyond the
+%% limits of the original vision. Eclipse started as a platform and the
+%% Eclipse SDK was the proof-of-concept product.  The Eclipse SDK allowed
+%% the developers to self-host and use the Eclipse SDK itself to build
+%% newer versions of Eclipse.
+2001年11月7日、あるオープンソースプロジェクトのバージョン1.0がリリースされた。
+その名はEclipse。当時、Eclipseは
+「特定の何か専用ではなく、何にでも使える統合開発環境」と自称していた。
+このように一般的な説明にしたのには意図があった。
+アーキテクチャ上の狙いとして、単なるツール群ではなくフレームワークを作ることを考えていたのだ。
+モジュール形式で、スケーラブルなフレームワークだ。
+Eclipseはコンポーネントベースのプラットフォームを提供し、
+開発者用のツールを作る基盤としてそれを使うこともできた。
+拡張可能なアーキテクチャのおかげで、
+コアプラットフォームをベースにして当初の狙いを越えて拡張するコミュニティを生み出した。
+Eclipseはプラットフォームとして誕生したもので、
+Eclipse SDKはその概念を実証するプロダクトだった。
+Eclipse SDKはそれ単体でも使えるし、Eclipse SDKを使ってEclipseの新たなバージョンを作ることもできた。
 
-The stereotypical image of an open source developer is that of an
-altruistic person toiling late into night fixing bugs and implementing
-fantastic new features to address their own personal interests. In
-contrast, if you look back at the early history of the Eclipse
-project, some of the initial code that was donated was based on
-VisualAge for Java, developed by IBM\@. The first committers who worked
-on this open source project were employees of an IBM subsidiary
-called Object Technology International (OTI). These committers were
-paid to work full time on the open source project, to answer questions
-on newsgroups, address bugs, and implement new features. A consortium
-of interested software vendors was formed to expand this open tooling
-effort. The initial members of the Eclipse consortium were Borland,
-IBM, Merant, QNX Software Systems, Rational Software, RedHat, SuSE,
-and TogetherSoft.
+%% The stereotypical image of an open source developer is that of an
+%% altruistic person toiling late into night fixing bugs and implementing
+%% fantastic new features to address their own personal interests. In
+%% contrast, if you look back at the early history of the Eclipse
+%% project, some of the initial code that was donated was based on
+%% VisualAge for Java, developed by IBM\@. The first committers who worked
+%% on this open source project were employees of an IBM subsidiary
+%% called Object Technology International (OTI). These committers were
+%% paid to work full time on the open source project, to answer questions
+%% on newsgroups, address bugs, and implement new features. A consortium
+%% of interested software vendors was formed to expand this open tooling
+%% effort. The initial members of the Eclipse consortium were Borland,
+%% IBM, Merant, QNX Software Systems, Rational Software, RedHat, SuSE,
+%% and TogetherSoft.
+オープンソースの開発者と聞いて真っ先に思い浮かべるありがちなイメージは、
+「他の人の役に立てたらいいな」と思いながら毎晩遅くまでバグ対応やイケてる新機能の追加をしているような人たち。
+誰に言われるでもなく、個人的な興味を満たすためだけに作業に取り組むような人たちだ。
+でも、Eclipseプロジェクトを振り返ってみると、そんな人たちばかりではなかった。
+最初期に寄贈されたコードの一部には、IBMが開発するVisualAge for Javaをベースにしたものもあったのだ。
+Eclipseプロジェクトの最初のコミッターとなったのは、IBMの子会社であるObject Technology International (OTI)
+の社員たちだった。彼らは同社の業務としてフルタイムでEclipseプロジェクトに取り組み、
+ニュースグループでの質問に答えたりバグ修正をしたり、新機能を実装したりしていた。
+その後、それに関心を示したいくつかのソフトウェアベンダーとの間で提携し、プロジェクトは拡大していった。
+Eclipseコンソーシアムに参加した最初のメンバーは、
+Borland、IBM、Merant、QNX Software Systems、Rational Software、RedHat、SuSE、そしてTogetherSoftだった。
 
-By investing in this effort, these companies would have the expertise
-to ship commercial products based on Eclipse. This is similar to
-investments that corporations make in contributing to the Linux kernel
-because it is in their self-interest to have employees improving the
-open source software that underlies their commercial offerings. In
-early 2004, the Eclipse Foundation was formed to manage and expand the
-growing Eclipse community.  This not-for-profit foundation was funded
-by corporate membership dues and is governed by a board of
-directors. Today, the diversity of the Eclipse community has expanded
-to include over 170 member companies and almost 1000 committers.
+%% By investing in this effort, these companies would have the expertise
+%% to ship commercial products based on Eclipse. This is similar to
+%% investments that corporations make in contributing to the Linux kernel
+%% because it is in their self-interest to have employees improving the
+%% open source software that underlies their commercial offerings. In
+%% early 2004, the Eclipse Foundation was formed to manage and expand the
+%% growing Eclipse community.  This not-for-profit foundation was funded
+%% by corporate membership dues and is governed by a board of
+%% directors. Today, the diversity of the Eclipse community has expanded
+%% to include over 170 member companies and almost 1000 committers.
+このプロジェクトに出資することで、参加各社はさまざまなノウハウを得て、
+Eclipseをベースにした商用製品を出荷することもできるようになった。
+参加各社の判断で社員にオープンソースソフトウェアの改良をさせて、
+それをベースにした自社製品に役立てるという意味で、これはLinuxカーネルへの出資に似ている。
+2004年初頭にEclipse Foundationが設立され、日々拡大するEclipseコミュニティの運営と拡大を担当することになった。
+この非営利組織は法人会員の会費で運営され、理事会が統治していた。
+現在ではEclipseコミュニティの多様性はさらに広がり、
+170社以上の企業と1000人近くのコミッターを抱えるようになっている。
 
-Originally, people knew ``Eclipse'' as the SDK only but today it is
-much more.  In July 2010, there were 250 diverse projects under
-development at eclipse.org. There's tooling to support developing with
-C/C++, PHP, web services, model driven development, build tooling and
-many more. Each of these projects is included in a top-level project
-(TLP) which is managed by a project management committee (PMC)
-consisting of senior members of the project nominated for the
-responsibility of setting technical direction and release goals. In
-the interests of brevity, the scope of this chapter will be limited to
-the evolution of the architecture of the Eclipse SDK within 
-Eclipse\footnote{\url{http://www.eclipse.org}} and Runtime 
-Equinox\footnote{\url{http://www.eclipse.org/equinox}} projects. Since Eclipse has
-long history, I'll be focusing on early Eclipse, as well as the 3.0,
-3.4 and 4.0 releases.
+%% Originally, people knew ``Eclipse'' as the SDK only but today it is
+%% much more.  In July 2010, there were 250 diverse projects under
+%% development at eclipse.org. There's tooling to support developing with
+%% C/C++, PHP, web services, model driven development, build tooling and
+%% many more. Each of these projects is included in a top-level project
+%% (TLP) which is managed by a project management committee (PMC)
+%% consisting of senior members of the project nominated for the
+%% responsibility of setting technical direction and release goals. In
+%% the interests of brevity, the scope of this chapter will be limited to
+%% the evolution of the architecture of the Eclipse SDK within 
+%% Eclipse\footnote{\url{http://www.eclipse.org}} and Runtime 
+%% Equinox\footnote{\url{http://www.eclipse.org/equinox}} projects. Since Eclipse has
+%% long history, I'll be focusing on early Eclipse, as well as the 3.0,
+%% 3.4 and 4.0 releases.
+出だしたころは``Eclipse''と言えばSDKのことだったのだが、今ではもっと広い意味で知られるようになってきた。
+2010年7月の時点で、eclipse.orgの配下で開発されているプロジェクトは250にも及ぶ。
+C/C++やPHPそしてWebサービスの開発を支援するツールもあれば、
+モデル駆動開発ツールやビルドツールなどもある。これらの各プロジェクトは、何らかのトップレベルプロジェクト(TLP)
+に属し、プロジェクト管理委員会(PMC)が管理している。
+PMCはプロジェクトの上級メンバーで構成されており、技術的な方向性やリリース目標などを定めるために選出される。
+簡潔にまとめるために、本章で取り上げる範囲は
+Eclipse\footnote{\url{http://www.eclipse.org}}の中のEclipse SDKと、ランタイムのEquinox\footnote{\url{http://www.eclipse.org/equinox}}
+プロジェクトのアーキテクチャに限定する。
+Eclipseには長い歴史があるので、まずは初期のEclipseについて説明してから
+3.0、3.4、そして4.0についても取り上げる。
 
 %% \begin{aosasect1}{Early Eclipse}
 \begin{aosasect1}{初期のEclipse}
