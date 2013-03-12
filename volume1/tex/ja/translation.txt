@@ -9,7 +9,7 @@ bash.tex            TAKAGI Masahiro <matakagi@gmail.com>      100
 bdb.tex             TAKAGI Masahiro <matakagi@gmail.com>      100
 cmake.tex           TAKAGI Masahiro <matakagi@gmail.com>      100
 colophon.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
-eclipse.tex         TAKAGI Masahiro <matakagi@gmail.com>        5
+eclipse.tex         TAKAGI Masahiro <matakagi@gmail.com>       35
 frontmatter.tex     TAKAGI Masahiro <matakagi@gmail.com>      100
 graphite.tex        TAKAGI Masahiro <matakagi@gmail.com>      100
 hdfs.tex            TAKAGI Masahiro <matakagi@gmail.com>      100

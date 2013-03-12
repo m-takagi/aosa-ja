@@ -168,23 +168,40 @@ Eclipseを立ち上げてワークベンチを選ぶと、Javaパースペクテ
 %% \begin{aosasect2}{Platform}
 \begin{aosasect2}{プラットフォーム}
 
-The Eclipse platform is written using Java and a Java VM is required
-to run it. It is built from small units of functionality called
-plugins.  Plugins are the basis of the Eclipse component model. A
-plugin is essentially a JAR file with a manifest which describes
-itself, its dependencies, and how it can be utilized, or
-extended. This manifest information was initially stored in
-a \code{plug-in.xml} file which resides in the root of the plugin
-directory.  The Java development tools provided plugins for
-developing in Java. The Plug-in Development Environment (PDE) provides
-tooling for developing plugins to extend Eclipse.  Eclipse plugins
-are written in Java but could also contain non-code contributions such
-as HTML files for online documentation. Each plugin has its own class
-loader.  Plugins can express dependencies on other plugins by the
-use of \code{requires} statements in the \code{plugin.xml}. Looking at the
-\code{plugin.xml} for the \code{org.eclipse.ui} plugin you can see its name
-and version specified, as well as the dependencies it needs to import
-from other plugins.
+%% The Eclipse platform is written using Java and a Java VM is required
+%% to run it. It is built from small units of functionality called
+%% plugins.  Plugins are the basis of the Eclipse component model. A
+%% plugin is essentially a JAR file with a manifest which describes
+%% itself, its dependencies, and how it can be utilized, or
+%% extended. This manifest information was initially stored in
+%% a \code{plug-in.xml} file which resides in the root of the plugin
+%% directory.  The Java development tools provided plugins for
+%% developing in Java. The Plug-in Development Environment (PDE) provides
+%% tooling for developing plugins to extend Eclipse.  Eclipse plugins
+%% are written in Java but could also contain non-code contributions such
+%% as HTML files for online documentation. Each plugin has its own class
+%% loader.  Plugins can express dependencies on other plugins by the
+%% use of \code{requires} statements in the \code{plugin.xml}. Looking at the
+%% \code{plugin.xml} for the \code{org.eclipse.ui} plugin you can see its name
+%% and version specified, as well as the dependencies it needs to import
+%% from other plugins.
+EclipseプラットフォームはJavaで書かれていて、実行するにはJava VMが必要だ。
+プラグインと呼ばれる、機能ごとの小さな単位で構成されている。
+プラグインが、Eclipseのコンポーネントモデルの基盤となる。
+プラグインは基本的にJARファイルであり、
+その説明や依存関係、使いかた、そして拡張方法などがマニフェストに書かれている。
+このマニフェスト情報は、当初はプラグインのルートディレクトリ
+にある\code{plug-in.xml}というファイルに格納されていた。
+JDTは、Javaでの開発用のプラグインを提供する。
+Plug-in Development Environment (PDE)は、プラグインを
+開発してEclipseを拡張するためのツールを提供する。
+EclipseのプラグインはJavaで書かれているが、Javaのコードを書く以外にも貢献の余地はある。
+オンラインドキュメントのHTMLを書いたりなどといったものだ。
+プラグインごとに、自身のクラスローダーを持っている。
+あるプラグインと別のプラグインとの依存関係を表すには、\code{plugin.xml}
+の\code{requires}ステートメントを利用する。
+\code{org.eclipse.ui}プラグインの\code{plugin.xml}を見てみよう。
+プラグインの名前やバージョン、さらに、別のプラグインからインポートしないといけない依存関係も記されている。
 
 \begin{verbatim}
 <?xml version="1.0" encoding="UTF-8"?>
@@ -213,20 +230,31 @@ from other plugins.
 </plugin>
 \end{verbatim}
 
-In order to encourage people to build upon the Eclipse platform, there
-needs to be a mechanism to make a contribution to the platform, and
-for the platform to accept this contribution. This is achieved through
-the use of extensions and extension points, another element of the
-Eclipse component model. The export identifies the interfaces that you
-expect others to use when writing their extensions, which limits the
-classes that are available outside your plugin to the ones that are
-exported. It also provides additional limitations on the resources
-that are available outside the plugin, as opposed to making all
-public methods or classes available to consumers.  Exported plugins
-are considered public API\@. All others are considered private
-implementation details. To write a plugin that would contribute a
-menu item to the Eclipse toolbar, you can use the \code{actionSets}
-extension point in the \code{org.eclipse.ui} plugin.
+%% In order to encourage people to build upon the Eclipse platform, there
+%% needs to be a mechanism to make a contribution to the platform, and
+%% for the platform to accept this contribution. This is achieved through
+%% the use of extensions and extension points, another element of the
+%% Eclipse component model. The export identifies the interfaces that you
+%% expect others to use when writing their extensions, which limits the
+%% classes that are available outside your plugin to the ones that are
+%% exported. It also provides additional limitations on the resources
+%% that are available outside the plugin, as opposed to making all
+%% public methods or classes available to consumers.  Exported plugins
+%% are considered public API\@. All others are considered private
+%% implementation details. To write a plugin that would contribute a
+%% menu item to the Eclipse toolbar, you can use the \code{actionSets}
+%% extension point in the \code{org.eclipse.ui} plugin.
+Eclipseプラットフォーム上での開発にかかわる人を増やすには、
+プラットフォームに貢献できるような仕組みが必要だ。そして、その貢献を受け入れる体勢も必要になる。
+それを実現したのが拡張と拡張ポイントで、これもEclipseコンポーネントモデルの要素の一つだ。
+エクスポート機能で、他のプラグインが自身の拡張を書くときのインターフェイスを指定する。
+これが、プラグインの外部から使えるクラスを制限する。
+また、プラグインの外部から使えるリソースを制限する機能も提供する。
+すべてのpublicメソッドやクラスが使えるのとは対象的だ。
+エクスポートされたプラグインは、公開APIだとみなされる。
+それ以外はすべて、内部的な実装の詳細だ。
+たとえばEclipseのツールバーにメニュー項目を追加するようなプラグインを書きたければ、
+\code{org.eclipse.ui}プラグインの拡張ポイント\code{actionSets}を利用する。
 
 \scriptsize
 \begin{verbatim}
@@ -243,8 +271,10 @@ extension point in the \code{org.eclipse.ui} plugin.
 \end{verbatim}
 \normalsize
 
-Your plugin's extension to contribute a menu item to the
-\code{org.eclipse.ui.actionSet} extension point would look like:
+%% Your plugin's extension to contribute a menu item to the
+%% \code{org.eclipse.ui.actionSet} extension point would look like:
+拡張ポイント\code{org.eclipse.ui.actionSet}を拡張して
+メニュー項目を追加するコードは、このようになる。
 
 \begin{verbatim}
 <?xml version="1.0" encoding="UTF-8"?>
@@ -285,25 +315,38 @@ Your plugin's extension to contribute a menu item to the
 </plugin>
 \end{verbatim}
 
-When Eclipse is started, the runtime platform scans the manifests of
-the plugins in your install, and builds a plugin registry that is
-stored in memory.  Extension points and the corresponding extensions
-are mapped by name. The resulting plugin registry can be referenced
-from the API provided by the Eclipse platform.  The registry is cached to
-disk so that this information can be reloaded the next time Eclipse is
-restarted. All plugins are discovered upon startup to populate the
-registry but they are not activated (classes loaded) until the code is
-actually used. This approach is called lazy activation. The
-performance impact of adding additional bundles into your install is
-reduced by not actually loading the classes associated with the
-plugins until they are needed. For instance, the plugin that
-contributes to the org.eclipse.ui.actionSet extension point wouldn't
-be activated until the user selected the new menu item in the toolbar.
+%% When Eclipse is started, the runtime platform scans the manifests of
+%% the plugins in your install, and builds a plugin registry that is
+%% stored in memory.  Extension points and the corresponding extensions
+%% are mapped by name. The resulting plugin registry can be referenced
+%% from the API provided by the Eclipse platform.  The registry is cached to
+%% disk so that this information can be reloaded the next time Eclipse is
+%% restarted. All plugins are discovered upon startup to populate the
+%% registry but they are not activated (classes loaded) until the code is
+%% actually used. This approach is called lazy activation. The
+%% performance impact of adding additional bundles into your install is
+%% reduced by not actually loading the classes associated with the
+%% plugins until they are needed. For instance, the plugin that
+%% contributes to the org.eclipse.ui.actionSet extension point wouldn't
+%% be activated until the user selected the new menu item in the toolbar.
+Eclipseを立ち上げるときに、ランタイムプラットフォームはインストールされたプラグインのマニフェストを走査し、
+プラグインレジストリを構築してメモリに展開する。
+拡張ポイントとそれに対応する拡張は、名前でマッピングされる。
+できあがったプラグインレジストリは、Eclipseプラットフォームが提供するAPIで参照できるようになる。
+レジストリはディスクにキャッシュされ、Eclipseを再起動したときにもその情報を読み込める。
+すべてのプラグインは、起動時にレジストリに登録される。しかし、アクティブになる(クラスがロードされる)
+のは、実際にそのコードが使われるときになってからである。
+この手法を、遅延アクティベーションと呼ぶ。
+これで、新しいバンドルを追加したときのパフォーマンスへの影響が抑えられるようになる。
+プラグインに関連づけられたクラスは、実際にそれを使うときまでロードされないからだ。
+たとえばorg.eclipse.ui.actionSet拡張ポイントを拡張するプラグインは、
+ユーザーがツールバーのメニュー項目を選択するまでロードされない。
 
 %% \aosafigure[300pt]{../images/eclipse/examplemenu.eps}{Example Menu}{fig.ecl.menu}
 \aosafigure[300pt]{../images/eclipse/examplemenu.eps}{Exampleメニュー}{fig.ecl.menu}
 
-The code that generates this menu item looks like this:
+%% The code that generates this menu item looks like this:
+このメニュー項目を生成するコードは、次のようになる。
 
 \begin{verbatim}
 package com.example.helloworld.actions;
@@ -339,122 +382,213 @@ public class ExampleAction implements IWorkbenchWindowActionDelegate {
 }
 \end{verbatim}
 
-Once the user selects the new item in the toolbar, the extension
-registry is queried by the plugin implementing the extension point.
-The plugin supplying the extension instantiates the contribution, and
-loads the plugin. Once the plugin is activated, the \code{ExampleAction}
-constructor in our example is run, and then initializes a \code{Workbench}
-action delegate. Since the selection in the workbench has changed and
-the delegate has been created, the action can change. The message
-dialog opens with the message ``Hello, Eclipse architecture world''.
+%% Once the user selects the new item in the toolbar, the extension
+%% registry is queried by the plugin implementing the extension point.
+%% The plugin supplying the extension instantiates the contribution, and
+%% loads the plugin. Once the plugin is activated, the \code{ExampleAction}
+%% constructor in our example is run, and then initializes a \code{Workbench}
+%% action delegate. Since the selection in the workbench has changed and
+%% the delegate has been created, the action can change. The message
+%% dialog opens with the message ``Hello, Eclipse architecture world''.
+ユーザーがツールバーの新しいメニュー項目を選択すると、
+拡張リポジトリを問い合わせてその拡張ポイントを実装するプラグインを探す。
+拡張を提供するプラグインがそのインスタンスを作成し、プラグインをロードする。
+プラグインがアクティブになると、\code{ExampleAction}のコンストラクタが走る。
+そして\code{Workbench}アクションデリゲートを初期化する。
+ワークベンチ内での選択が変わってデリゲートが作られたら、アクションを変更できるようになる。
+ここでは、メッセージダイアログを出して``Hello, Eclipse architecture world''
+というメッセージを表示する。
 
-This extensible architecture was one of the keys to the successful
-growth of the Eclipse ecosystem. Companies or individuals could
-develop new plugins, and either release them as open source or sell
-them commercially.
+%% This extensible architecture was one of the keys to the successful
+%% growth of the Eclipse ecosystem. Companies or individuals could
+%% develop new plugins, and either release them as open source or sell
+%% them commercially.
+このように拡張可能なアーキテクチャこそが、Eclipseを取り巻く環境が大きく成長した一つの要因だ。
+企業でも個人でもそれぞれ新しいプラグインを作れるし、
+作ったプラグインを商品として売ってもかまわない。
 
-One of the most important concepts about Eclipse is that
-\emph{everything is a plugin}. Whether the plugin is included in the
-Eclipse platform, or you write it yourself, plugins are all first
-class components of the assembled
-application. \aosafigref{fig.ecl.plat} shows clusters of related
-functionality contributed by plugins in early versions of Eclipse.
+%% One of the most important concepts about Eclipse is that
+%% \emph{everything is a plugin}. Whether the plugin is included in the
+%% Eclipse platform, or you write it yourself, plugins are all first
+%% class components of the assembled
+%% application. \aosafigref{fig.ecl.plat} shows clusters of related
+%% functionality contributed by plugins in early versions of Eclipse.
+Eclipseで最も重要な概念は、\emph{すべてはプラグインである}ということだ。
+Eclipseプラットフォームに含まれるプラグインもあれば自作のプラグインもある。
+いずれにせよ、プラグインはすべて、アプリケーションでのファーストクラスのコンポーネントとなる。
+\aosafigref{fig.ecl.plat}は、初期のEclipseでさまざまなプラグインが提供する機能の関連を示したものだ。
 
 %% \aosafigure[250pt]{../images/eclipse/platform.eps}{Early Eclipse Architecture}{fig.ecl.plat}
 \aosafigure[250pt]{../images/eclipse/platform.eps}{初期のEclipseのアーキテクチャ}{fig.ecl.plat}
 
-The workbench is the most familiar UI element to users of the Eclipse
-platform, as it provides the structures that organize how Eclipse
-appears to the user on the desktop. The workbench consists of
-perspectives, views, and editors.  Editors are associated with file
-types so the correct editor is launched when a file is opened. An
-example of a view is the ``problems'' view that indicates errors or
-warnings in your Java code. Together, editors and views form a
-perspective which presents the tooling to the user in an organized
-fashion.
+%% The workbench is the most familiar UI element to users of the Eclipse
+%% platform, as it provides the structures that organize how Eclipse
+%% appears to the user on the desktop. The workbench consists of
+%% perspectives, views, and editors.  Editors are associated with file
+%% types so the correct editor is launched when a file is opened. An
+%% example of a view is the ``problems'' view that indicates errors or
+%% warnings in your Java code. Together, editors and views form a
+%% perspective which presents the tooling to the user in an organized
+%% fashion.
+ワークベンチはEclipseプラットフォームのユーザーにとって最も身近なUI要素で、
+Eclipseがユーザーのデスクトップ上でどのように表示されるのかを管理する。
+ワークベンチを構成するのは、パースペクティブとビューそしてエディタだ。
+エディタはファイルタイプと関連づけられており、何かのファイルを開いたときに適切なエディタが起動するようになっている。
+ビューの一例としては「問題」ビューがある。これは、Javaのコードのエラーや警告を表示するものだ。
+これらのエディタとビューがパースペクティブを形成し、整頓された形式で各種ツールを表示する。
 
-The Eclipse workbench is built on the Standard Widget Toolkit (SWT)
-and JFace, and SWT deserves a bit of exploration.  Widget toolkits are
-generally classified as either native or emulated.  A native widget
-toolkit uses operating system calls to build user interface components
-such as lists and push buttons.  Interaction with components is
-handled by the operating system. An emulated widget toolkit implements
-components outside of the operating system, handling mouse and
-keyboard, drawing, focus and other widget functionality itself, rather
-than deferring to the operating system.  Both designs have different
-strengths and weaknesses.
+%% The Eclipse workbench is built on the Standard Widget Toolkit (SWT)
+%% and JFace, and SWT deserves a bit of exploration.  Widget toolkits are
+%% generally classified as either native or emulated.  A native widget
+%% toolkit uses operating system calls to build user interface components
+%% such as lists and push buttons.  Interaction with components is
+%% handled by the operating system. An emulated widget toolkit implements
+%% components outside of the operating system, handling mouse and
+%% keyboard, drawing, focus and other widget functionality itself, rather
+%% than deferring to the operating system.  Both designs have different
+%% strengths and weaknesses.
+EclipseワークベンチはStandard Widget Toolkit (SWT)とJFaceで作られている。
+SWTは、さらに詳しく見る価値があるだろう。ウィジェットツールキットには、
+大きく分けてネイティブ型とエミュレート型の二種類がある。
+ネイティブ型のウィジェットツールキットは、OSの機能を直接呼んで、
+リストやボタンなどのユーザーインターフェイスコンポーネントを作る。
+そして、コンポーネントを使ったやりとりはOSが処理する。
+エミュレート型のウィジェットツールキットは、OSから離れてコンポーネントを実装する。
+マウスやキーボードの処理、描画、フォーカスなどの機能も、
+OS任せではなく自前で実装する。どちらの方式にも、それぞれ利点と欠点がある。
 
-Native widget toolkits are ``pixel perfect.'' Their widgets look and
-feel like their counterparts in other applications on the
-desktop. Operating system vendors constantly change the look and feel
-of their widgets and add new features. Native widget toolkits get
-these updates for free.  Unfortunately, native toolkits are difficult
-to implement because their underlying operating system widget
-implementations are vastly different, leading to inconsistencies and
-programs that are not portable.
+%% Native widget toolkits are ``pixel perfect.'' Their widgets look and
+%% feel like their counterparts in other applications on the
+%% desktop. Operating system vendors constantly change the look and feel
+%% of their widgets and add new features. Native widget toolkits get
+%% these updates for free.  Unfortunately, native toolkits are difficult
+%% to implement because their underlying operating system widget
+%% implementations are vastly different, leading to inconsistencies and
+%% programs that are not portable.
+ネイティブウィジェットツールキットは「ピクセル単位で完璧」だ。
+ウィジェットの見た目は、他のデスクトップアプリと同じようになる。
+OSのベンダーは頻繁にウィジェットの見た目を変えるし、機能も追加する。
+ネイティブウィジェットツールキットなら、何もしなくてもその更新が適用される。
+残念ながら、ネイティブツールキットの実装は難しい。
+ベースになるOSレベルの実装はOSによって大きく異なるからだ。
+一貫性に欠けるし、作ったプログラムは移植性に欠けるものになる。
 
-Emulated widget toolkits either provide their own look and feel, or
-try to draw and behave like the operating system. Their great strength
-over native toolkits is flexibility (although modern native widget
-toolkits such as Windows Presentation Framework (WPF) are equally as
-flexible). Because the code to implement a widget is part of the
-toolkit rather than embedded in the operating system, a widget can be
-made to draw and behave in any manner. Programs that use emulated
-widget toolkits are highly portable.  Early emulated widget toolkits
-had a bad reputation. They were often slow and did a poor job of
-emulating the operating system, making them look out of place on the
-desktop.  In particular, Smalltalk-80 programs at the time were easy
-to recognize due to their use of emulated widgets. Users were aware
-that they were running a ``Smalltalk program'' and this hurt
-acceptance of applications written in Smalltalk.
+%% Emulated widget toolkits either provide their own look and feel, or
+%% try to draw and behave like the operating system. Their great strength
+%% over native toolkits is flexibility (although modern native widget
+%% toolkits such as Windows Presentation Framework (WPF) are equally as
+%% flexible). Because the code to implement a widget is part of the
+%% toolkit rather than embedded in the operating system, a widget can be
+%% made to draw and behave in any manner. Programs that use emulated
+%% widget toolkits are highly portable.  Early emulated widget toolkits
+%% had a bad reputation. They were often slow and did a poor job of
+%% emulating the operating system, making them look out of place on the
+%% desktop.  In particular, Smalltalk-80 programs at the time were easy
+%% to recognize due to their use of emulated widgets. Users were aware
+%% that they were running a ``Smalltalk program'' and this hurt
+%% acceptance of applications written in Smalltalk.
+エミュレート型ウイジェットツールキットは、
+見た目を自前で提供することもあればOSのウィジェットに似せることもある。
+ネイティブツールキットと比べたときの大きな利点は、その柔軟性だ
+(ただ、最近のネイティブツールキットはかなりの柔軟性を持っている。たとえば
+Windows Presentation Framework (WPF)などがそうだ)。
+ウィジェットを実装するコードもツールキット自身で実装しており、OS組み込みのコードではないので、
+ウィジェットの描画や振る舞いを好きなようにできる。
+エミュレート型ウィジェットツールキットを使ったプログラムは、移植性が高まる。
+ただ、初期のエミュレート型ウィジェットツールキットは不評だった。
+速度が遅いしOSのエミュレートも貧弱だし、
+デスクトップ上では場違いな感じだった。
+特に、当時のSmalltalk-80で書いたプログラムは、Smalltalk-80で書いたことが一目瞭然だった。
+エミュレート型ウィジェットを使っていたからだ。ユーザーは、それを見れば
+「ああ、Smalltalkのプログラムだな」とわかるし、
+そのせいでSmalltalkのアプリケーションがなかなか受け入れられなかった。
 
-Unlike other computer languages such as C and C++, the first versions
-of Java came with a native widget toolkit library called the Abstract
-Window Toolkit (AWT). AWT was considered to be limited, buggy and
-inconsistent and was widely decried. At Sun and elsewhere, in part
-because of experience with AWT, a native widget toolkit that was
-portable and performant was considered to be unworkable. The solution
-was Swing, a full-featured emulated widget toolkit.
+%% Unlike other computer languages such as C and C++, the first versions
+%% of Java came with a native widget toolkit library called the Abstract
+%% Window Toolkit (AWT). AWT was considered to be limited, buggy and
+%% inconsistent and was widely decried. At Sun and elsewhere, in part
+%% because of experience with AWT, a native widget toolkit that was
+%% portable and performant was considered to be unworkable. The solution
+%% was Swing, a full-featured emulated widget toolkit.
+CやC++のような他の言語とは異なり、Javaの初期バージョンにはネイティブウイジェットツールキットが付属していた。
+Abstract Window Toolkit (AWT)だ。AWTは機能に制限があってバグが多く、
+一貫性もないと、さんざんな言われようだった。
+Sunも他社も、AWTでの苦い経験があったので、
+可搬性があって高速に動くネイティブウィジェットツールキットは実現不可能だと思うようになった。
+そこで登場したのがSwing。これは完全な機能を持つエミュレート型ウィジェットツールキットだ。
 
-Around 1999, OTI was using Java to implement a product called
-VisualAge Micro Edition. The first version of VisualAge Micro Edition
-used Swing and OTI's experience with Swing was not positive. Early
-versions of Swing were buggy, had timing and memory issues and the
-hardware at the time was not powerful enough to give acceptable
-performance. OTI had successfully built a native widget toolkit for
-Smalltalk-80 and other Smalltalk implementations to gain acceptance of
-Smalltalk.  This experience was used to build the first version of
-SWT\@. VisualAge Micro Edition and SWT were a success and SWT was the
-natural choice when work began on Eclipse.  The use of SWT over Swing
-in Eclipse split the Java community. Some saw conspiracies, but
-Eclipse was a success and the use of SWT differentiated it from other
-Java programs.  Eclipse was performant, pixel perfect and the general
-sentiment was, ``I can't believe it's a Java program.''
+%% Around 1999, OTI was using Java to implement a product called
+%% VisualAge Micro Edition. The first version of VisualAge Micro Edition
+%% used Swing and OTI's experience with Swing was not positive. Early
+%% versions of Swing were buggy, had timing and memory issues and the
+%% hardware at the time was not powerful enough to give acceptable
+%% performance. OTI had successfully built a native widget toolkit for
+%% Smalltalk-80 and other Smalltalk implementations to gain acceptance of
+%% Smalltalk.  This experience was used to build the first version of
+%% SWT\@. VisualAge Micro Edition and SWT were a success and SWT was the
+%% natural choice when work began on Eclipse.  The use of SWT over Swing
+%% in Eclipse split the Java community. Some saw conspiracies, but
+%% Eclipse was a success and the use of SWT differentiated it from other
+%% Java programs.  Eclipse was performant, pixel perfect and the general
+%% sentiment was, ``I can't believe it's a Java program.''
+1999年頃に、OTIがJavaを使ってVisualAge Micro Editionという製品を作った。
+VisualAge Micro Editionの最初のバージョンはSwingを使っていたが、
+OTIはSwingに満足していなかった。
+初期のSwingはバグが多かったし、タイミングやメモリの問題もあった。
+また、当時のハードウェアでは満足なパフォーマンスを得られなかった。
+OTIは、Smalltalk-80やその他のSmalltalk実装用のネイティブウィジェットツールキットの実装に成功し、
+Smalltalkが受け入れられるようになる道を開いた。
+この経験をいかして、SWTの最初のバージョンが作られた。
+VisualAge Micro EditionとSWTは成功を収め、Eclipseの開発が始まったときもごく自然な流れでSWTを使うことになった。
+SwingではなくSWTを使うとしたEclipseの判断については、Javaコミュニティで賛否両論が出た。
+中には陰謀論を語る人もいたが、Eclipseは成功した。SWTを使ったことで、他のJavaプログラムとの差別化ができたのだ。
+Eclipseは高パフォーマンスを誇り、ピクセル単位で完全であり、簡単に言えば
+「これがJavaのプログラムだとは信じられない」ようなものだった。
 
-Early Eclipse SDKs ran on Linux and Windows. In 2010, there is support
-for over a dozen platforms. A developer can write an application for
-one platform, and deploy it to multiple platforms. Developing a new
-widget toolkit for Java was a contentious issue within the Java
-community at the time, but the Eclipse committers felt that it was
-worth the effort to provide the best native experience on the
-desktop. This assertion applies today, and there are millions of lines
-of code that depend on SWT.
+%% Early Eclipse SDKs ran on Linux and Windows. In 2010, there is support
+%% for over a dozen platforms. A developer can write an application for
+%% one platform, and deploy it to multiple platforms. Developing a new
+%% widget toolkit for Java was a contentious issue within the Java
+%% community at the time, but the Eclipse committers felt that it was
+%% worth the effort to provide the best native experience on the
+%% desktop. This assertion applies today, and there are millions of lines
+%% of code that depend on SWT.
+初期のEclipse SDKは、LinuxとWindowsにだけ対応していた。
+2010年になって、10をこえる数多くのプラットフォームをサポートするようになった。
+どれか一つのプラットフォームでアプリケーションを書けば、それを複数のプラットフォームで公開できるのだ。
+Java用に新たなウィジェットツールキットを書くというのは、当時のJavaコミュニティでは議論を引き起こしがちな問題だった。
+しかしEclipseのコミッターは、それを踏まえた上で、最高のデスクトップ体験をもたらすためには
+新たなウィジェットツールキットを書く価値があると判断した。
+この主張は今でもあてはまり、何百万行ものコードがSWT上に実装されている。
 
-JFace is a layer on top of SWT that provides tools for common UI
-programming tasks, such as frameworks for preferences and
-wizards. Like SWT, it was designed to work with many windowing
-systems. However, it is pure Java code and doesn't contain any native
-platform code.
+%% JFace is a layer on top of SWT that provides tools for common UI
+%% programming tasks, such as frameworks for preferences and
+%% wizards. Like SWT, it was designed to work with many windowing
+%% systems. However, it is pure Java code and doesn't contain any native
+%% platform code.
+JFaceはSWTの上位に位置するレイヤーで、一般的なUIプログラミングのタスクを担当する。
+たとえば、設定画面やウィザードなどのフレームワークだ。
+SWTと同様、JFaceもさまざまなウィンドウシステムで動くように作られている。
+しかし、JFaceはピュアJavaで書かれており、ネイティブプラットフォームのコードは一切含まない。
 
-The platform also provided an integrated help system based upon small
-units of information called topics. A topic consists of a label and a
-reference to its location.  The location can be an HTML documentation
-file, or an XML document describing additional links.  Topics are
-grouped together in table of contents (TOCs).  Consider the topics as
-the leaves, and TOCs as the branches of organization. To add help
-content to your application, you can contribute to the
-\code{org.eclipse.help.toc} extension point, as the
-\code{org.eclipse.platform.doc.isv} \code{plugin.xml} does below.
+%% The platform also provided an integrated help system based upon small
+%% units of information called topics. A topic consists of a label and a
+%% reference to its location.  The location can be an HTML documentation
+%% file, or an XML document describing additional links.  Topics are
+%% grouped together in table of contents (TOCs).  Consider the topics as
+%% the leaves, and TOCs as the branches of organization. To add help
+%% content to your application, you can contribute to the
+%% \code{org.eclipse.help.toc} extension point, as the
+%% \code{org.eclipse.platform.doc.isv} \code{plugin.xml} does below.
+Eclipseプラットフォームでは、統合されたヘルプシステムも提供している。
+これは、トピックと呼ばれる小さな情報単位をベースにしたシステムだ。
+一つのトピックは、ラベルとその場所への参照で構成されている。
+場所として指定できるのは、HTMLドキュメントファイルあるいはリンクを記したXMLドキュメントだ。
+トピックをひとまとめにして、目次(Table of Contents: TOC)が作られる。
+トピックを葉だと考えると、TOCはその構造を表す枝と見なせる。
+ヘルプのコンテンツをアプリケーションに追加するには、拡張ポイント\code{org.eclipse.help.toc}
+を拡張する。ちょうど、次に示す\code{org.eclipse.platform.doc.isv}の\code{plugin.xml}
+のようになる。
 
 \begin{verbatim}
 <?xml version="1.0" encoding="UTF-8"?>
@@ -495,32 +629,54 @@ content to your application, you can contribute to the
    </extension>
 \end{verbatim}
 
-Apache Lucene is used to index and search the online help content. In
-early versions of Eclipse, online help was served as a Tomcat web
-application. Additionally, by providing help within Eclipse itself, you
-can also use the subset of help plugins to provide a standalone help
-server.\footnote{For example: \url{http://help.eclipse.org}.}
+%% Apache Lucene is used to index and search the online help content. In
+%% early versions of Eclipse, online help was served as a Tomcat web
+%% application. Additionally, by providing help within Eclipse itself, you
+%% can also use the subset of help plugins to provide a standalone help
+%% server.\footnote{For example: \url{http://help.eclipse.org}.}
+Apache Luceneを使って、オンラインヘルプのコンテンツのインデキシングや検索を行う。
+初期のEclipseでは、オンラインヘルプをTomcatでWebアプリケーションとして提供していた。
+さらに、Eclipse自身でヘルプを提供するために、ヘルププラグインのサブセットを使って
+スタンドアロンのヘルプサーバーを使うこともできる。
+\footnote{その一例が\url{http://help.eclipse.org}だ。}
 
-Eclipse also provides team support to interact with a source code
-repository, create patches and other common tasks.  The workspace
-provided collection of files and metadata that stored your work on the
-filesystem. There was also a debugger to trace problems in the
-Java code, as well as a framework for building language specific
-debuggers.
+%% Eclipse also provides team support to interact with a source code
+%% repository, create patches and other common tasks.  The workspace
+%% provided collection of files and metadata that stored your work on the
+%% filesystem. There was also a debugger to trace problems in the
+%% Java code, as well as a framework for building language specific
+%% debuggers.
+Eclipseには、チームでの開発をサポートする機能もある。
+ソースコードリポジトリとのやりとりやパッチの作成など、一般的なタスクを実現できる。
+ワークスペースはファイルとメタデータのコレクションを提供し、
+作業内容をファイルシステム上に保存できる。
+また、デバッガもあり、Javaコードの問題を追跡できるし、
+言語固有のデバッガを作るためのフレームワークもある。
 
-One of the goals of the Eclipse project was to encourage open source
-and commercial consumers of this technology to extend the platform to
-meet their needs, and one way to encourage this adoption is to provide a
-stable API\@. An API can be thought of as a technical contract
-specifying the behavior of your application. It also can be thought
-of as a social contract. On the Eclipse project, the mantra is, ``API
-is forever''. Thus careful consideration must be given when writing an
-API given that it is meant to be used indefinitely. A stable API is
-a contract between the client or API consumer and the provider. This
-contract ensures that the client can depend on the Eclipse platform to
-provide the API for the long term without the need for painful
-refactoring on the part of the client.  A good API is also flexible
-enough to allow the implementation to evolve.
+%% One of the goals of the Eclipse project was to encourage open source
+%% and commercial consumers of this technology to extend the platform to
+%% meet their needs, and one way to encourage this adoption is to provide a
+%% stable API\@. An API can be thought of as a technical contract
+%% specifying the behavior of your application. It also can be thought
+%% of as a social contract. On the Eclipse project, the mantra is, ``API
+%% is forever''. Thus careful consideration must be given when writing an
+%% API given that it is meant to be used indefinitely. A stable API is
+%% a contract between the client or API consumer and the provider. This
+%% contract ensures that the client can depend on the Eclipse platform to
+%% provide the API for the long term without the need for painful
+%% refactoring on the part of the client.  A good API is also flexible
+%% enough to allow the implementation to evolve.
+Eclipseプロジェクトのゴールの一つは、オープンソースの開発者らが
+必要に応じてプラットフォームを拡張できるようにすることだ。
+そのための方法の一つが、安定したAPIを提供することだった。
+APIとは一種の技術的な契約で、アプリケーションの振る舞いを定義するものでもある。
+あるいは、一種の社会契約であると捕らえてもいい。
+Eclipseプロジェクトの信念は「APIよ永遠なれ」だ。
+したがって、APIを書くときには細心の注意を払って検討する。一度定めたAPIは半永久的に使われることになるからだ。
+安定したAPIは、クライアントとAPI提供者との間の契約になる。
+この契約によって、クライアントはEclipseプラットフォームに依存してAPIを長期間提供できるようになる。
+クライアント側では、辛いリファクタリングの必要はなくなる。
+よいAPIというものは、実装を改良していける程度の柔軟性も持っている。
 
 \end{aosasect2}
 
