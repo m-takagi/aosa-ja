@@ -683,46 +683,85 @@ Eclipseプロジェクトの信念は「APIよ永遠なれ」だ。
 %% \begin{aosasect2}{Java Development Tools (JDT)}
 \begin{aosasect2}{Java Development Tools (JDT)}
 
-The JDT provides Java editors, wizards, refactoring support, debugger,
-compiler and an incremental builder.  The compiler is also used for
-content assist, navigation and other editing features. A Java SDK
-isn't shipped with Eclipse so it's up to the user to choose which SDK to
-install on their desktop. Why did the JDT team write a separate
-compiler to compile your Java code within Eclipse?  They had an
-initial compiler code contribution from VisualAge Micro Edition. They
-planned to build tooling on top of the compiler, so writing the
-compiler itself was a logical decision. This approach also allowed the
-JDT committers to provide extension points for extending the
-compiler. This would be difficult if the compiler was a command line
-application provided by a third party.
+%% The JDT provides Java editors, wizards, refactoring support, debugger,
+%% compiler and an incremental builder.  The compiler is also used for
+%% content assist, navigation and other editing features. A Java SDK
+%% isn't shipped with Eclipse so it's up to the user to choose which SDK to
+%% install on their desktop. Why did the JDT team write a separate
+%% compiler to compile your Java code within Eclipse?  They had an
+%% initial compiler code contribution from VisualAge Micro Edition. They
+%% planned to build tooling on top of the compiler, so writing the
+%% compiler itself was a logical decision. This approach also allowed the
+%% JDT committers to provide extension points for extending the
+%% compiler. This would be difficult if the compiler was a command line
+%% application provided by a third party.
+JDTが提供するのは、Java用のエディタやウィザード、リファクタリング機能、
+デバッガ、コンパイラ、そしてインクリメンタルビルダーだ。
+コンパイラは、コンテンツ・アシストやナビゲーションなどの編集機能にも用いられる。
+Java SDKはEclipseに同梱されていないので、
+どのSDKを使うかはユーザーしだいということになる。
+いったいなぜ、JDTチームはわざわざコンパイラを書いてEclipseの中で
+Javaコードをコンパイルできるようにしたのだろう？
+最初期のコンパイラのコードはVisualAge Micro Editionから寄贈されたものだった。
+ゆくゆくはこのコンパイラ上に各種ビルドツールを用意するつもりだったので、
+コンパイラを自前で書くのも極めて論理的な決断だった。
+この手法をとったおかげで、JDTではコンパイラを拡張するための
+拡張ポイントを用意できるようになった。
+もしサードパーティのコマンドラインアプリケーションをコンパイラとして使っていたら、
+とてもそんなことはできなかっただろう。
 
-Writing their own compiler provided a mechanism to provide support for
-an incremental builder within the IDE\@. An incremental builder provides
-better performance because it only recompiles files that have changed
-or their dependencies. How does the incremental builder work? When
-you create a Java project within Eclipse, you are creating resources
-in the workspace to store your files.  A builder within Eclipse takes
-the inputs within your workspace (\code{.java} files), and creates an
-output (\code{.class} files).  Through the build state, the builder
-knows about the types (classes or interfaces) in the workspace, and
-how they reference each other. The build state is provided to the
-builder by the compiler each time a source file is compiled. When an
-incremental build is invoked, the builder is supplied with a resource
-delta, which describes any new, modified or deleted files. Deleted
-source files have their corresponding class files deleted. New or
-modified types are added to a queue.  The files in the queue are
-compiled in sequence and compared with the old class file to determine
-if there are structural changes. Structural changes are modifications
-to the class that can impact another type that references it. For
-example, changing a method signature, or adding or removing a
-method. If there are structural changes, all the types that reference
-it are also added to the queue.  If the type has changed at all, the
-new class file is written to the build output folder.  The build state
-is updated with reference information for the compiled type. This
-process is repeated for all the types in the queue until empty. If
-there are compilation errors, the Java editor will create problem
-markers. Over the years, the tooling that JDT provides has expanded
-tremendously in concert with new versions of the Java runtime itself.
+%% Writing their own compiler provided a mechanism to provide support for
+%% an incremental builder within the IDE\@. An incremental builder provides
+%% better performance because it only recompiles files that have changed
+%% or their dependencies. How does the incremental builder work? When
+%% you create a Java project within Eclipse, you are creating resources
+%% in the workspace to store your files.  A builder within Eclipse takes
+%% the inputs within your workspace (\code{.java} files), and creates an
+%% output (\code{.class} files).  Through the build state, the builder
+%% knows about the types (classes or interfaces) in the workspace, and
+%% how they reference each other. The build state is provided to the
+%% builder by the compiler each time a source file is compiled. When an
+%% incremental build is invoked, the builder is supplied with a resource
+%% delta, which describes any new, modified or deleted files. Deleted
+%% source files have their corresponding class files deleted. New or
+%% modified types are added to a queue.  The files in the queue are
+%% compiled in sequence and compared with the old class file to determine
+%% if there are structural changes. Structural changes are modifications
+%% to the class that can impact another type that references it. For
+%% example, changing a method signature, or adding or removing a
+%% method. If there are structural changes, all the types that reference
+%% it are also added to the queue.  If the type has changed at all, the
+%% new class file is written to the build output folder.  The build state
+%% is updated with reference information for the compiled type. This
+%% process is repeated for all the types in the queue until empty. If
+%% there are compilation errors, the Java editor will create problem
+%% markers. Over the years, the tooling that JDT provides has expanded
+%% tremendously in concert with new versions of the Java runtime itself.
+自前のコンパイラを書いたことで、IDE内でのインクリメンタル・ビルドに対応できるようになった。
+インクリメンタル・ビルダーが高いパフォーマンスを誇るのは、
+変更されたファイルおよびそれに依存するファイルだけを再コンパイルしているからだ。
+インクリメンタル・ビルダーはどのように動いているのだろう？
+EclipseでJavaのプロジェクトを作るときは、
+ワークスペースの中にリソースを作ってそこにファイルを格納することになる。
+Eclipseのビルダーは、ワークスペース内の\code{.java}ファイルを
+入力として受け取り、出力(\code{.class}ファイル)を作る。
+ビルドステートを使って、そのファイルのワークスペース内での形式
+(クラスかインターフェイスか)を知り、お互いどのように参照しあっているのかも知る。
+ビルドステートは、ソースファイルをコンパイルするたびにコンパイラがビルダーに渡す。
+インクリメンタル・ビルドを実行すると、ビルダーにはリソースの差分が渡される。
+この差分には、新しいファイルや変更されたファイル、削除されたファイルについての説明がある。
+ソースファイルが削除された場合は、それに対応するクラスファイルも削除される。
+新しいファイルや変更されたファイルは、コンパイルキューに追加される。
+キューの中のファイルが順番にコンパイルされ、前のクラスファイルと比較して、
+構造的な変更があったかどうかを調べる。
+構造的な変更とは、それを参照する別のクラスやインターフェイスに栄養を及ぼす変更のことだ。
+たとえばメソッドのシグネチャの変更や、メソッドの追加・削除がそれにあたる。
+構造的な変更があった場合は、それを参照するすべてのクラスやインターフェイスもキューに追加される。
+それらも変更があった場合は、コンパイル後のクラスファイルを出力フォルダに書き出す。
+そして、コンパイルされたものの参照情報を元にしてビルドステートを更新する。
+この流れを、キューが空になるまで繰り返す。
+コンパイルエラーが発生すると、Javaエディタは問題マーカーを作る。
+長年にわたって、JDTが提供するツールはJavaランタイムのバージョンが新しくなるたびに大きく拡大してきた。
 
 \end{aosasect2}
 
