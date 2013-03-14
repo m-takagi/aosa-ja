@@ -757,7 +757,7 @@ Eclipseのビルダーは、ワークスペース内の\code{.java}ファイル�
 構造的な変更とは、それを参照する別のクラスやインターフェイスに栄養を及ぼす変更のことだ。
 たとえばメソッドのシグネチャの変更や、メソッドの追加・削除がそれにあたる。
 構造的な変更があった場合は、それを参照するすべてのクラスやインターフェイスもキューに追加される。
-それらも変更があった場合は、コンパイル後のクラスファイルを出力フォルダに書き出す。
+ それらも変更があった場合は、コンパイル後のクラスファイルを出力フォルダに書き出す。
 そして、コンパイルされたものの参照情報を元にしてビルドステートを更新する。
 この流れを、キューが空になるまで繰り返す。
 コンパイルエラーが発生すると、Javaエディタは問題マーカーを作る。
@@ -768,14 +768,21 @@ Eclipseのビルダーは、ワークスペース内の\code{.java}ファイル�
 %% \begin{aosasect2}{Plug-in Development Environment (PDE) }
 \begin{aosasect2}{プラグイン開発環境(PDE) }
 
-The Plug-in Development Environment (PDE) provided the tooling to
-develop, build, deploy and test plugins and other artifacts that are
-used to extend the functionality of Eclipse. Since Eclipse plugins
-were a new type of artifact in the Java world there wasn't a build
-system that could transform the source into plugins.  Thus the PDE
-team wrote a component called PDE Build which examined the
-dependencies of the plugins and generated Ant scripts to construct
-the build artifacts.
+%% The Plug-in Development Environment (PDE) provided the tooling to
+%% develop, build, deploy and test plugins and other artifacts that are
+%% used to extend the functionality of Eclipse. Since Eclipse plugins
+%% were a new type of artifact in the Java world there wasn't a build
+%% system that could transform the source into plugins.  Thus the PDE
+%% team wrote a component called PDE Build which examined the
+%% dependencies of the plugins and generated Ant scripts to construct
+%% the build artifacts.
+プラグイン開発環境(Plug-in Development Environment: PDE)
+は、プラグインの開発やビルド、デプロイ、テストに使うツール群などを提供する。
+これらを使って、Eclipseの機能を拡張できる。
+EclipseプラグインはJavaの世界にないタイプの生成物だったので、
+ソースからプラグインに直接変換するビルドシステムがなかった。
+そこでPDEチームはPDE Buildというコンポーネントを作った。
+これは、プラグインの依存関係を調べてビルド用のAntスクリプトを生成するものだ。
 
 \end{aosasect2}
 
