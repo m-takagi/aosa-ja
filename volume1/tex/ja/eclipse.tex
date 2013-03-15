@@ -794,84 +794,158 @@ EclipseプラグインはJavaの世界にないタイプの生成物だったの
 %% \begin{aosasect2}{Runtime}
 \begin{aosasect2}{ランタイム}
 
-Eclipse 3.0 was probably one of the most important Eclipse releases
-due to the number of significant changes that occurred during this
-release cycle.  In the pre-3.0 Eclipse architecture, the Eclipse component
-model consisted of plugins that could interact with each other in two
-ways.  First, they could express their dependencies by the use of
-the \code{requires} statement in their \code{plugin.xml}.  If plugin
-A requires plugin B, plugin A can see all the Java classes and
-resources from B, respecting Java class visibility conventions.  Each
-plugin had a version, and they could also specify the versions of
-their dependencies.  Secondly, the component model provided
-\emph{extensions} and \emph{extension points}.  Historically, Eclipse
-committers wrote their own runtime for the Eclipse SDK to manage
-classloading, plugin dependencies and extensions and extension
-points. 
+%% Eclipse 3.0 was probably one of the most important Eclipse releases
+%% due to the number of significant changes that occurred during this
+%% release cycle.  In the pre-3.0 Eclipse architecture, the Eclipse component
+%% model consisted of plugins that could interact with each other in two
+%% ways.  First, they could express their dependencies by the use of
+%% the \code{requires} statement in their \code{plugin.xml}.  If plugin
+%% A requires plugin B, plugin A can see all the Java classes and
+%% resources from B, respecting Java class visibility conventions.  Each
+%% plugin had a version, and they could also specify the versions of
+%% their dependencies.  Secondly, the component model provided
+%% \emph{extensions} and \emph{extension points}.  Historically, Eclipse
+%% committers wrote their own runtime for the Eclipse SDK to manage
+%% classloading, plugin dependencies and extensions and extension
+%% points. 
+Eclipse 3.0は、これまでのEclipseのリリースの中でも最も重要なものの一つだろう。
+ひとつ前のリリースから、大きな変更が数多く加えられた。
+3.0より前のEclipseのアーキテクチャでは、Eclipseのコンポーネントモデルは
+プラグインで構成されていて、各プラグインが双方向にやりとりできるようになっていた。
+まず、プラグイン自身が依存関係を表す手段として、
+\code{plugin.xml}の中で\code{requires}ステートメントが使えた。
+プラグインAがプラグインBをrequireすると、
+プラグインBが持つすべてのJavaクラスやリソースを
+(アクセス修飾子に応じて)プラグインAから読めるようになる。
+各プラグインにはバージョンがあり、依存関係をバージョン付きで指定することもできた。
+次に、3.0より前のコンポーネントモデルには\emph{拡張}と\emph{拡張ポイント}
+の仕組みがあった。
+歴史的に、Eclipseのコミッターはそれぞれ自前のランタイムをEclipse SDK
+用に書いて、クラスのロードや依存関係そして拡張や拡張ポイントを管理していた。
 
-The Equinox project was created as a new incubator project at Eclipse.
-The goal of the Equinox project was to replace the Eclipse component
-model with one that already existed, as well as provide
-support for dynamic plugins. The solutions under consideration
-included JMX, Jakarta Avalon and OSGi. JMX was not a fully developed component
-model so it was not deemed appropriate. Jakarta Avalon wasn't chosen
-because it seemed to be losing momentum as a project. In addition to
-the technical requirements, it was also important to consider the
-community that supported these technologies.  Would they be willing to
-incorporate Eclipse-specific changes? Was it actively developed and
-gaining new adopters?  The Equinox team felt that the community around
-their final choice of technology was just as important as the
-technical considerations.
+%% The Equinox project was created as a new incubator project at Eclipse.
+%% The goal of the Equinox project was to replace the Eclipse component
+%% model with one that already existed, as well as provide
+%% support for dynamic plugins. The solutions under consideration
+%% included JMX, Jakarta Avalon and OSGi. JMX was not a fully developed component
+%% model so it was not deemed appropriate. Jakarta Avalon wasn't chosen
+%% because it seemed to be losing momentum as a project. In addition to
+%% the technical requirements, it was also important to consider the
+%% community that supported these technologies.  Would they be willing to
+%% incorporate Eclipse-specific changes? Was it actively developed and
+%% gaining new adopters?  The Equinox team felt that the community around
+%% their final choice of technology was just as important as the
+%% technical considerations.
+Equinoxプロジェクトは、Eclipseのインキュベータープロジェクトとして誕生した。
+Equinoxプロジェクトの目標は、Eclipseのコンポーネントモデルを既存の別のモデルに置き換えて、
+動的プラグインにも対応できるようにすることだった。
+当時検討されていたソリューションは、JMXやJakarta AvalonそしてOSGiなどだ。
+JMXはその当時まだ発達途上のコンポーネントモデルだったので、候補から外れた。
+Jakarta Avalonの採用も見送った。プロジェクトが停滞しており、今後の発展が見込めなかったからだ。
+技術的な要件だけでなく、その技術をとりまくコミュニティも大事な判断材料だったのだ。
+Eclipseに特有の変更も組み込んでもらえるだろうか？
+活発に開発されていて、新たなメンバーを呼びこめているだろうか？
+Equinoxチームは、コミュニティが最終的にどんな選択をしたかということを
+技術的要件と同様に重視していた。
 
-After researching and evaluating the available alternatives, the
-committers selected OSGi. Why OSGi?  It had a semantic versioning
-scheme for managing dependencies. It provided a framework for
-modularity that the JDK itself lacked. Packages that were available to
-other bundles must be explicitly exported, and all others were hidden.
-OSGi provided its own classloader so the Equinox team didn't have to
-continue to maintain their own. By standardizing on a component model
-that had wider adoption outside the Eclipse ecosystem, they felt they
-could appeal to a broader community and further drive the adoption of
-Eclipse.
+%% After researching and evaluating the available alternatives, the
+%% committers selected OSGi. Why OSGi?  It had a semantic versioning
+%% scheme for managing dependencies. It provided a framework for
+%% modularity that the JDK itself lacked. Packages that were available to
+%% other bundles must be explicitly exported, and all others were hidden.
+%% OSGi provided its own classloader so the Equinox team didn't have to
+%% continue to maintain their own. By standardizing on a component model
+%% that had wider adoption outside the Eclipse ecosystem, they felt they
+%% could appeal to a broader community and further drive the adoption of
+%% Eclipse.
+その当時に使えそうだった各種コンポーネントモデルを調査して評価した結果、
+コミッターたちが選んだのがOSGiだ。なぜOSGiだったのだろうか？
+まず、OSGiにはセマンティックなバージョン管理方式があって、それで依存関係を管理できた。
+また、モジュール方式に対応したフレームワークも用意されていた。
+これはJDK自体には欠けている機能だった。
+パッケージを他のバンドルからも使えるようにするには明示的にエクスポートする必要があり、
+エクスポートしていないものは見えなくなる。
+OSGiは自前のクラスローダーを提供していたので、
+Equinoxチームはこれまでの自作のローダーを維持し続ける必要がなくなった。
+Eclipseの世界以外でも幅広く使われているコンポーネントモデルで標準化したことで、
+より多くの人たちにアピールできるようになり、Eclipseを採用しやすくなった。
 
-The Equinox team felt comfortable that since OSGi already had an
-existing and vibrant community, they could work with that community to
-help include the functionality that Eclipse required in a component
-model.  For instance, at the time, OSGi only supported listing
-requirements at a package level, not a plugin level as Eclipse
-required. In addition, OSGi did not yet include the concept of
-fragments, which were Eclipse's preferred mechanism for supplying
-platform or environment specific code to an existing plugin. For
-example, fragments provide code for working with Linux and Windows
-filesystems as well as fragments which contribute language
-translations. Once the decision was made to proceed with OSGi as the
-new runtime, the committers needed an open source framework
-implementation. They evaluated Oscar, the precursor to Apache Felix,
-and the Service Management Framework (SMF) developed by IBM\@. At the
-time, Oscar was a research project with limited deployment.  SMF was
-ultimately chosen since it was already used in shipping products and
-thus was deemed enterprise-ready. The Equinox implementation serves as
-the reference implementation of the OSGi specification.
+%% The Equinox team felt comfortable that since OSGi already had an
+%% existing and vibrant community, they could work with that community to
+%% help include the functionality that Eclipse required in a component
+%% model.  For instance, at the time, OSGi only supported listing
+%% requirements at a package level, not a plugin level as Eclipse
+%% required. In addition, OSGi did not yet include the concept of
+%% fragments, which were Eclipse's preferred mechanism for supplying
+%% platform or environment specific code to an existing plugin. For
+%% example, fragments provide code for working with Linux and Windows
+%% filesystems as well as fragments which contribute language
+%% translations. Once the decision was made to proceed with OSGi as the
+%% new runtime, the committers needed an open source framework
+%% implementation. They evaluated Oscar, the precursor to Apache Felix,
+%% and the Service Management Framework (SMF) developed by IBM\@. At the
+%% time, Oscar was a research project with limited deployment.  SMF was
+%% ultimately chosen since it was already used in shipping products and
+%% thus was deemed enterprise-ready. The Equinox implementation serves as
+%% the reference implementation of the OSGi specification.
+Equinoxチームはこの選択に満足していた。
+既にOSGiには活発なコミュニティが存在したし、そのコミュニティと協力して、
+Eclipseで必要とする機能をコンポーネントモデルに組み込むこともできたからだ。
+たとえば、その当時のOSGiはパッケージレベルでしか要件をまとめられなかったが、
+Eclipseではプラグインレベルで扱えるようにする必要があった。
+さらに、OSGiにはまだフラグメントの概念が組み込まれていなかった。
+Eclipseではこの概念を使って、プラットフォームや環境に依存するコードを
+既存のプラグインに組み込んでいた。
+たとえば、LinuxのファイルシステムでもWindowsのファイルシステムでも使えるようなコードを書いたり、
+各国語への翻訳を扱ったりするときに、フラグメントを使っていたのだ。
+新しいランタイムとしてOSGiを使うと決めたときに、
+コミッターたちがまず必要としたのは、オープンソースでのこのフレームワークの実装だった。
+評価の対象になったのは、Oscar(後のApache Felix)や
+IBMのService Management Framework (SMF)だった。
+当時のOscarは研究プロジェクトで、公開範囲が限定されていた。
+最終的に採用したのはSMFだ。
+すでに他の製品での実績があることから、実用に耐えるであろうと判断した。
+Equinoxの実装は、OSGiの仕様のリファレンス実装とされている。
 
-A compatibility layer was also provided so that existing plugins
-would still work in a 3.0 install. Asking developers to rewrite their
-plugins to accommodate changes in the underlying infrastructure of
-Eclipse 3.0 would have stalled the momentum on Eclipse as a tooling
-platform. The expectation from Eclipse consumers was that the platform
-should just continue to work.
+%% A compatibility layer was also provided so that existing plugins
+%% would still work in a 3.0 install. Asking developers to rewrite their
+%% plugins to accommodate changes in the underlying infrastructure of
+%% Eclipse 3.0 would have stalled the momentum on Eclipse as a tooling
+%% platform. The expectation from Eclipse consumers was that the platform
+%% should just continue to work.
+互換性を確保するためのレイヤーも用意しているので、
+既存のプラグインも3.0の環境で動かせる。
+プラグインの開発者たちに
+「Eclipse 3.0の新しい基盤に対応するためには修正が必要です」
+などと言ってしまえば、ツール開発用のプラットフォームとしてのEclipseの勢いをそいでしまう。
+Eclipse上でツールを作っている人たちが期待するのは、
+単にプラットフォームがきちんと動き続けることだろう。
 
-With the switch to OSGi, Eclipse plugins became known as bundles. A
-plugin and a bundle are the same thing: They both provide a modular
-subset of functionality that describes itself with metadata in a
-manifest.  Previously, dependencies, exported packages and the
-extensions and extension points were described in \code{plugin.xml}.
-With the move to OSGi bundles, the extensions and extension points
-continued to be described in \code{plugin.xml} since they are Eclipse
-concepts. The remaining information was described in
-the \code{META-INF/MANIFEST.MF}, OSGi's version of the bundle
-manifest. To support this change, PDE provided a new manifest editor
-within Eclipse.  Each bundle has a name and version. The manifest for
-\code{the org.eclipse.ui} bundle looks like this:
+%% With the switch to OSGi, Eclipse plugins became known as bundles. A
+%% plugin and a bundle are the same thing: They both provide a modular
+%% subset of functionality that describes itself with metadata in a
+%% manifest.  Previously, dependencies, exported packages and the
+%% extensions and extension points were described in \code{plugin.xml}.
+%% With the move to OSGi bundles, the extensions and extension points
+%% continued to be described in \code{plugin.xml} since they are Eclipse
+%% concepts. The remaining information was described in
+%% the \code{META-INF/MANIFEST.MF}, OSGi's version of the bundle
+%% manifest. To support this change, PDE provided a new manifest editor
+%% within Eclipse.  Each bundle has a name and version. The manifest for
+%% \code{the org.eclipse.ui} bundle looks like this:
+OSGiへの切り替えに伴って、Eclipseのプラグインは「バンドル」と呼ばれるようになった。
+プラグインとバンドルはどちらも同じものだ。
+どちらも何らかの機能のサブセットを提供するモジュールで、
+自身についての説明はマニフェストの中のメタデータに保持する。
+以前のバージョンでは、依存関係やエクスポートするパッケージ、
+そして拡張と拡張ポイントは\code{plugin.xml}
+に書かれていた。OSGiバンドルでも、拡張や拡張ポイントは
+\code{plugin.xml}に記述する。というのも、これらはEclipse固有の概念だからである。
+残りの情報は\code{META-INF/MANIFEST.MF}に記述する。
+これは、OSGiにおけるバンドルのマニフェストを書くファイルだ。
+この変更に対応するため、PDEはEclipseに新たなマニフェストエディタを用意した。
+各バンドルには名前とバージョンがある。
+たとえば、\code{the org.eclipse.ui}バンドルのマニフェストは次のようになる。
 
 \begin{verbatim}
 Manifest-Version: 1.0
@@ -893,90 +967,155 @@ Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: CDC-1.0/Foundation-1.0, J2SE-1.3
 \end{verbatim}
 
-As of Eclipse 3.1, the manifest can also specify a bundle required
-execution environment (BREE). Execution environments specify the
-minimum Java environment required for the bundle to run. The Java
-compiler does not understand bundles and OSGi manifests. PDE provides
-tooling for developing OSGi bundles. Thus, PDE parses the bundle's
-manifest, and generates the classpath for that bundle. If you
-specified an execution environment of J2SE-1.4 in your manifest, and
-then wrote some code that included generics, you would be advised of
-compile errors in your code. This ensures that your code adheres to
-the contract you have specified in the manifest.
+%% As of Eclipse 3.1, the manifest can also specify a bundle required
+%% execution environment (BREE). Execution environments specify the
+%% minimum Java environment required for the bundle to run. The Java
+%% compiler does not understand bundles and OSGi manifests. PDE provides
+%% tooling for developing OSGi bundles. Thus, PDE parses the bundle's
+%% manifest, and generates the classpath for that bundle. If you
+%% specified an execution environment of J2SE-1.4 in your manifest, and
+%% then wrote some code that included generics, you would be advised of
+%% compile errors in your code. This ensures that your code adheres to
+%% the contract you have specified in the manifest.
+Eclipse 3.1からは、マニフェストでバンドルの必須実行環境(BREE)を指定できるようになった。
+ここで指定するのは、そのバンドルを実行するために必要な最低限のJava環境だ。
+JavaコンパイラはバンドルやOSGiのマニフェストを理解しない。
+OSGiバンドルの開発用のツールはPDEが提供する。
+つまり、PDEがバンドルのマニフェストを読み取って、そのバンドル用のclasspathを生成する。
+たとえば、マニフェストで実行環境としてJ2SE-1.4を指定すると、
+ジェネリクスを使ったコードを書いたときにコンパイルエラーが表示されることになる。
+これで、自分の書いたコードがマニフェストの環境に従っていることを確認できる。
 
-OSGi provides a modularity framework for Java. The OSGi framework
-manages collections of self-describing bundles and manages their
-classloading. Each bundle has its own classloader. The classpath
-available to a bundle is constructed by examining the dependencies of
-the manifest and generating a classpath available to the bundle. OSGi
-applications are collections of bundles. In order to fully embrace
-modularity, you must be able to express your dependencies in a
-reliable format for consumers. Thus the manifest describes exported
-packages that are available to clients of this bundle which
-corresponds to the public API that was available for consumption.  The
-bundle that is consuming that API must have a corresponding import of
-the package they are consuming. The manifest also allows you to
-express version ranges for your dependencies.  Looking at
-the \code{Require-Bundle} heading in the above manifest, you will note
-that the \code{org.eclipse.core.runtime} bundle that
-\code{org.eclipse.ui} depends on must be at least 3.2.0 and less than
-4.0.0.
+%% OSGi provides a modularity framework for Java. The OSGi framework
+%% manages collections of self-describing bundles and manages their
+%% classloading. Each bundle has its own classloader. The classpath
+%% available to a bundle is constructed by examining the dependencies of
+%% the manifest and generating a classpath available to the bundle. OSGi
+%% applications are collections of bundles. In order to fully embrace
+%% modularity, you must be able to express your dependencies in a
+%% reliable format for consumers. Thus the manifest describes exported
+%% packages that are available to clients of this bundle which
+%% corresponds to the public API that was available for consumption.  The
+%% bundle that is consuming that API must have a corresponding import of
+%% the package they are consuming. The manifest also allows you to
+%% express version ranges for your dependencies.  Looking at
+%% the \code{Require-Bundle} heading in the above manifest, you will note
+%% that the \code{org.eclipse.core.runtime} bundle that
+%% \code{org.eclipse.ui} depends on must be at least 3.2.0 and less than
+%% 4.0.0.
+OSGiは、Javaでモジュール方式を扱うためのフレームワークだ。
+OSGiフレームワークは、自己記述型のバンドルの集合を管理し、
+そのクラスローディングも扱う。個々のバンドルが自分用のクラスローダーを持っており、
+あるバンドル用のclasspathを組み立てるために、
+マニフェストに書かれている依存関係を調べる。
+OSGiアプリケーションは、バンドルの集合となる。
+そのモジュール性をフルに活用するには、
+自作のバンドルの依存関係を、信頼できるフォーマットでユーザーに示せることが必要だ。
+そのため、マニフェストでは、そのバンドルが公開するパッケージを記述する。
+バンドルを使う側から見たときに、これらのパッケージが利用可能だということになる。
+このパッケージが、公開APIに対応する。
+APIを利用するバンドル側は、対応するパッケージをインポートしておく必要がある。
+マニフェストで依存関係を記述するときには、バージョンの範囲も指定できる。
+先ほどのマニフェストの\code{Require-Bundle}を見ればわかるとおり、
+\code{org.eclipse.ui}が依存する\code{org.eclipse.core.runtime}
+バンドルのバージョンは3.2.0以上4.0.0未満であることが指定されている。
 
 %% \aosafigure[200pt]{../images/eclipse/bundlelifecycle.eps}{OSGi Bundle Lifecycle}{fig.ecl.blc}
 \aosafigure[200pt]{../images/eclipse/bundlelifecycle.eps}{OSGiバンドルのライフサイクル}{fig.ecl.blc}
 
-OSGi is a dynamic framework which supports the installation, starting,
-stopping, or uninstallation of bundles. As mentioned before, lazy
-activation was a core advantage to Eclipse because plugin classes were
-not loaded until they were needed. The OSGi bundle lifecycle also
-enables this approach.  When you start an OSGi application, the
-bundles are in the installed state. If its dependencies are met, the
-bundle changes to the resolved state.  Once resolved, the classes
-within that bundle can be loaded and run.  The starting state means
-that the bundle is being activated according to its activation
-policy. Once activated, the bundle is in the active state, it can
-acquire required resources and interact with other bundles. A bundle
-is in the stopping state when it is executing its activator stop method
-to clean up any resources that were opened when it was active.
-Finally, a bundle may be uninstalled, which means that it's not
-available for use.
+%% OSGi is a dynamic framework which supports the installation, starting,
+%% stopping, or uninstallation of bundles. As mentioned before, lazy
+%% activation was a core advantage to Eclipse because plugin classes were
+%% not loaded until they were needed. The OSGi bundle lifecycle also
+%% enables this approach.  When you start an OSGi application, the
+%% bundles are in the installed state. If its dependencies are met, the
+%% bundle changes to the resolved state.  Once resolved, the classes
+%% within that bundle can be loaded and run.  The starting state means
+%% that the bundle is being activated according to its activation
+%% policy. Once activated, the bundle is in the active state, it can
+%% acquire required resources and interact with other bundles. A bundle
+%% is in the stopping state when it is executing its activator stop method
+%% to clean up any resources that were opened when it was active.
+%% Finally, a bundle may be uninstalled, which means that it's not
+%% available for use.
+OSGiは動的なフレームワークで、
+バンドルのインストールや開始・停止、そしてアンインストールにも対応している。
+先述のとおり、遅延アクティベーションはEclipseの大きな強みのひとつだ。
+プラグインのクラスは、実際に必要になるまでロードされないようになっていた。
+OSGiバンドルも、この方式を使える。
+OSGiアプリケーションを立ち上げると、バンドルは「installed」の状態になる。
+依存関係がすべて満たされると、状態が「resolved」に変わる。
+この状態になれば、バンドル内のクラスをロードして実行できるようになる。
+「starting」は、アクティベーションポリシーにしたがってそのバンドルがアクティベートされた状態を意味する。
+いったんアクティベートすれば、バンドルは「active」な状態になる。
+この状態になれば、必要なリソースの確保や他のバンドルとのやりとりができるようになる。
+アクティベーターのstopメソッドを実行すると、アクティブなときに開いたリソースの後始末をしてから
+「stopping」状態に移行する。最終的にバンドルが「uninstalled」の状態になると、
+使えなくなる。
 
-As the API evolves, there needs to be a way to signal changes to your
-consumers. One approach is to use semantic versioning of your bundles
-and version ranges in your manifests to specify the version ranges for
-your dependencies.  OSGi uses a four-part versioning naming scheme as
-shown in \aosafigref{fig.ecl.ver}.
+%% As the API evolves, there needs to be a way to signal changes to your
+%% consumers. One approach is to use semantic versioning of your bundles
+%% and version ranges in your manifests to specify the version ranges for
+%% your dependencies.  OSGi uses a four-part versioning naming scheme as
+%% shown in \aosafigref{fig.ecl.ver}.
+APIは進化し続けるので、利用者側にAPIの変更を通知する仕組みも必要だ。
+一つの方法として考えられるのが、バンドルのバージョン名のつけかたを決めて、
+マニフェストでバージョンの範囲を指定できるようにするというものだ。
+OSGiでは、\aosafigref{fig.ecl.ver}に示すように四つの部分に分かれたバージョン体系を採用している。
 
 %% \aosafigure[200pt]{../images/eclipse/versioning.eps}{Versioning Naming Scheme}{fig.ecl.ver}
 \aosafigure[200pt]{../images/eclipse/versioning.eps}{バージョン名のつけかた}{fig.ecl.ver}
 
-With the OSGi version numbering scheme, each bundle has a unique
-identifier consisting of a name and a four part version number. An id
-and version together denote a unique set of bytes to the
-consumer. By Eclipse convention, if you're making changes to a bundle,
-each segment of the version signifies to the consumer the type of
-change being made. Thus, if you want to indicate that you intend to
-break API, you increment the first (major) segment.  If you have just
-added API, you increment the second (minor) segment. If you fix a
-small bug that doesn't impact API, the third (service) segment is
-incremented. Finally, the fourth or qualifier segment is incremented
-to indicate a build id source control repository tag.
+%% With the OSGi version numbering scheme, each bundle has a unique
+%% identifier consisting of a name and a four part version number. An id
+%% and version together denote a unique set of bytes to the
+%% consumer. By Eclipse convention, if you're making changes to a bundle,
+%% each segment of the version signifies to the consumer the type of
+%% change being made. Thus, if you want to indicate that you intend to
+%% break API, you increment the first (major) segment.  If you have just
+%% added API, you increment the second (minor) segment. If you fix a
+%% small bug that doesn't impact API, the third (service) segment is
+%% incremented. Finally, the fourth or qualifier segment is incremented
+%% to indicate a build id source control repository tag.
+OSGiのバージョン命名指針に従うと、個々のバンドルは、
+その名前と四つのバージョン番号からなる一意な識別子を持つことになる。
+idとversionを指定すれば、あるバイト群を利用者側が特定できるようになる。
+Eclipseの慣習では、バンドルに何か変更を加えたときには
+その変更の種類によってが—ジョンのどの部分を変えるかが決まる。
+もしAPIの互換生を崩してしまうような場合は、最初の部分(major)を変更する。
+新しいAPIを追加するだけのようなときは、二番目の部分(minor)を変更する。
+APIには影響しないようなバグ修正の場合は、三番目の部分(service)を変更する。
+四番目の部分は、ソース管理リポジトリのタグにあわせて変更し、そのビルドのIDを表す。
 
-In addition to expressing the fixed dependencies between bundles,
-there is also a mechanism within OSGi called services which provides
-further decoupling between bundles. Services are objects with a set of
-properties that are registered with the OSGi service registry. Unlike
-extensions, which are registered in the extension registry when Eclipse
-scans bundles during startup, services are registered
-dynamically. A bundle that is consuming a service needs to import the
-package defining the service contract, and the framework determines
-the service implementation from the service registry.
+%% In addition to expressing the fixed dependencies between bundles,
+%% there is also a mechanism within OSGi called services which provides
+%% further decoupling between bundles. Services are objects with a set of
+%% properties that are registered with the OSGi service registry. Unlike
+%% extensions, which are registered in the extension registry when Eclipse
+%% scans bundles during startup, services are registered
+%% dynamically. A bundle that is consuming a service needs to import the
+%% package defining the service contract, and the framework determines
+%% the service implementation from the service registry.
+バンドル間の固定した依存関係を表す仕組み以外にも、
+OSGiにはサービスという仕組みが用意されている。
+これを使えば、バンドル間をより疎結合にできる。
+サービスとはいくつかのプロパティを持つオブジェクトで、OSGiサービスレジストリに登録されている。
+拡張についてはEclipseの起動時にスキャンしたバンドルが拡張レジストリに登録されるが、
+サービスの場合は動的に登録される。
+サービスを利用するバンドルは、そのサービスの規約を定義したパッケージをインポートする必要がある。
+フレームワークが、そのサービスの実装をサービスレジストリから取得する。
 
-Like a main method in a Java class file, there is a specific
-application defined to start Eclipse. Eclipse applications are defined
-using extensions. For instance, the application to start the Eclipse
-IDE itself is \code{org.eclipse.ui.ide.workbench} which is defined in the
-\code{org.eclipse.ui.ide.application} bundle.
+%% Like a main method in a Java class file, there is a specific
+%% application defined to start Eclipse. Eclipse applications are defined
+%% using extensions. For instance, the application to start the Eclipse
+%% IDE itself is \code{org.eclipse.ui.ide.workbench} which is defined in the
+%% \code{org.eclipse.ui.ide.application} bundle.
+Javaのクラスファイルにはmainメソッドがあるように、
+Eclipseにも起動用のアプリケーションが定義されている。
+Eclipseのアプリケーションは、拡張を使って定義する。
+たとえばEclipse IDE自身を起動するアプリケーションは
+\code{org.eclipse.ui.ide.workbench}で、これは\code{org.eclipse.ui.ide.application}
+バンドルの中で定義されている。
 
 \begin{verbatim}
 <plugin>
@@ -992,8 +1131,11 @@ IDE itself is \code{org.eclipse.ui.ide.workbench} which is defined in the
 </plugin>
 \end{verbatim}
 
-There are many applications provided by Eclipse such as those to run
-standalone help servers, Ant tasks, and JUnit tests.
+%% There are many applications provided by Eclipse such as those to run
+%% standalone help servers, Ant tasks, and JUnit tests.
+Eclipseはさまざまなアプリケーションを提供している。
+スタンドアロンのヘルプサーバーを起動するアプリケーションもあれば、
+AntのタスクやJUnitのテストを実行するアプリケーションもある。
 
 \end{aosasect2}
 
