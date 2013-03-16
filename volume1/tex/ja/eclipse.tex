@@ -789,7 +789,7 @@ EclipseプラグインはJavaの世界にないタイプの生成物だったの
 \end{aosasect1}
 
 %% \begin{aosasect1}{Eclipse 3.0: Runtime, RCP and Robots}
-\begin{aosasect1}{Eclipse 3.0: ランタイム、RCPそしてロボット}
+\begin{aosasect1}{Eclipse 3.0: ランタイム、RCPそしてロボットたち}
 
 %% \begin{aosasect2}{Runtime}
 \begin{aosasect2}{ランタイム}
@@ -1142,40 +1142,65 @@ AntのタスクやJUnitのテストを実行するアプリケーションもあ
 %% \begin{aosasect2}{Rich Client Platform (RCP)}
 \begin{aosasect2}{リッチクライアント・プラットフォーム(RCP)}
 
-One of the most interesting things about working in an open source
-community is that people use the software in totally unexpected ways.
-The original intent of Eclipse was to provide a platform and tooling
-to create and extend IDEs.  However, in the time leading up to the 3.0
-release, bug reports revealed that the community was taking a subset
-of the platform bundles and using them to build Rich Client Platform
-(RCP) applications, which many people would recognize as Java applications.  Since Eclipse was initially constructed with an
-IDE-centric focus, there had to be some refactoring of the bundles to
-allow this use case to be more easily adopted by the user
-community. RCP applications didn't require all the functionality in
-the IDE, so several bundles were split into smaller ones that could be
-consumed by the community for building RCP applications.  
+%% One of the most interesting things about working in an open source
+%% community is that people use the software in totally unexpected ways.
+%% The original intent of Eclipse was to provide a platform and tooling
+%% to create and extend IDEs.  However, in the time leading up to the 3.0
+%% release, bug reports revealed that the community was taking a subset
+%% of the platform bundles and using them to build Rich Client Platform
+%% (RCP) applications, which many people would recognize as Java applications.  Since Eclipse was initially constructed with an
+%% IDE-centric focus, there had to be some refactoring of the bundles to
+%% allow this use case to be more easily adopted by the user
+%% community. RCP applications didn't require all the functionality in
+%% the IDE, so several bundles were split into smaller ones that could be
+%% consumed by the community for building RCP applications.  
+オープンソースコミュニティで活動していて興味深いのは、
+自分たちがまったく予想しない使いかたでそのソフトウェアを使う人たちがいることだ。
+Eclipseのそもそもの狙いは、IDEを作ったり拡張したりするための基盤とツールを提供することだった。
+しかし、3.0のリリースが近づいてきたころのバグレポートで明らかになったのだが、
+プラットフォームバンドルのサブセットを使ってリッチクライアント・プラットフォーム
+(RCP)アプリケーションを作ろうという動きが出始めた。
+多くの人は、これをJavaアプリケーションとして認識していた。
+EclipseはIDEに注力した作りになっていたので、
+バンドルの構造に少し手を入れて、そんな使い方にも対応できるようにした。
+ユーザーコミュニティに、より取り入れてもらいやすくするためだ。
+RCPアプリケーションはIDEの全機能を必要とするわけではない。
+そこで、いくつかのバンドルはさらに細かく分割して、
+RCPアプリケーションの構築にも使えるようにした。
 
-Examples of RCP applications in the wild include the use of RCP to monitor the
-Mars Rover robots developed by NASA at the Jet Propulsion Laboratory,
-Bioclipse for data visualization of bioinformatics and Dutch Railway
-for monitoring train performance.  The common thread that ran through
-many of these applications was that these teams decided that they
-could take the utility provided by the RCP platform and concentrate on
-building their specialized tools on top of it. They could save
-development time and money by focusing on building their tools on a
-platform with a stable API that guaranteed that their technology
-choice would have long term support.
+%% Examples of RCP applications in the wild include the use of RCP to monitor the
+%% Mars Rover robots developed by NASA at the Jet Propulsion Laboratory,
+%% Bioclipse for data visualization of bioinformatics and Dutch Railway
+%% for monitoring train performance.  The common thread that ran through
+%% many of these applications was that these teams decided that they
+%% could take the utility provided by the RCP platform and concentrate on
+%% building their specialized tools on top of it. They could save
+%% development time and money by focusing on building their tools on a
+%% platform with a stable API that guaranteed that their technology
+%% choice would have long term support.
+RCPアプリケーションの実例としては、NASAのジェット推進研究所が開発したマーズ・ローバー・ロボットの監視に
+RCPを使っている例がある。さらに、バイオインフォマティックスのデータを可視化するBioclipseや
+オランダの鉄道が列車の運行監視に使っている例もある。
+これらのアプリケーションに共通するのは、RCPが提供する機能を活用して
+自分たちは本来作りたいところに集中しようとチームが決断したことだ。
+彼らはその決断のおかげで時間と資金を節約でき、自分たちのツールを作ることに注力できた。
+基盤となるプラットフォームのAPIは安定していて、長期間にわたるサポートが保証されている。
 
 %% \aosafigure[300pt]{../images/eclipse/rcp.eps}{Eclipse 3.0 Architecture}{fig.ecl.rcp}
 \aosafigure[300pt]{../images/eclipse/rcp.eps}{Eclipse 3.0のアーキテクチャ}{fig.ecl.rcp}
 
-Looking at the 3.0 architecture in \aosafigref{fig.ecl.rcp}, you will
-note that the Eclipse Runtime still exists to provide the application
-model and extension registry.  Managing the dependencies between
-components, the plugin model is now managed by OSGi. In addition
-to continuing to be able to extend Eclipse for their own IDEs,
-consumers can also build upon the RCP application framework for more
-generic applications.
+%% Looking at the 3.0 architecture in \aosafigref{fig.ecl.rcp}, you will
+%% note that the Eclipse Runtime still exists to provide the application
+%% model and extension registry.  Managing the dependencies between
+%% components, the plugin model is now managed by OSGi. In addition
+%% to continuing to be able to extend Eclipse for their own IDEs,
+%% consumers can also build upon the RCP application framework for more
+%% generic applications.
+\aosafigref{fig.ecl.rcp}に示す3.0のアーキテクチャを見ると、
+Eclipse Runtimeがまだ残っていてアプリケーションモデルと拡張レジストリを提供していることに気づくだろう。
+コンポーネント間の依存関係を管理するために、プラグインモデルはOSGiの管理下に置かれるようになった。
+これまでどおりにEclipseを拡張して自分用のIDEを作ることもできるし、
+RCPアプリケーションフレームワークを使ってより汎用的なアプリケーションを作ることもできる。
 
 \end{aosasect2}
 
