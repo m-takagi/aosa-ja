@@ -1209,39 +1209,66 @@ RCPアプリケーションフレームワークを使ってより汎用的な�
 %% \begin{aosasect1}{Eclipse 3.4}
 \begin{aosasect1}{Eclipse 3.4}
 
-The ability to easily update an application to a new version and add
-new content is taken for granted. In Firefox it happens seamlessly.
-For Eclipse it hasn't been so easy. Update Manager was the original
-mechanism that was used to add new content to the Eclipse install or
-update to a new version.
+%% The ability to easily update an application to a new version and add
+%% new content is taken for granted. In Firefox it happens seamlessly.
+%% For Eclipse it hasn't been so easy. Update Manager was the original
+%% mechanism that was used to add new content to the Eclipse install or
+%% update to a new version.
+アプリケーションを新しいバージョンに簡単に更新できて、新たな機能が使えるようになるというのは、
+あって当然の仕組みだと考えられている。たとえばFirefoxなら、これはシームレスに行われる。
+Eclipseの場合はそんなに簡単にはいかなかった。
+更新マネージャーが導入されたことで、
+Eclipseに新たな機能を追加したり新しいバージョンに更新したりができるようになった。
 
-To understand what changes during an update or install operation,
-it's necessary to understand what Eclipse means by ``features''.
-A feature is a PDE artifact that defines a set
-of bundles that are packaged together in a format that can be built or
-installed. Features can also include other features. (See
-\aosafigref{fig.ecl.feat}.)
+%% To understand what changes during an update or install operation,
+%% it's necessary to understand what Eclipse means by ``features''.
+%% A feature is a PDE artifact that defines a set
+%% of bundles that are packaged together in a format that can be built or
+%% installed. Features can also include other features. (See
+%% \aosafigref{fig.ecl.feat}.)
+アップデートやインストールの際に何が変わるのかを知るには、
+Eclipseの「フィーチャー」について理解する必要がある。
+フィーチャーとはPDEの生成物の一つで、複数のバンドルのセットを定義する。
+これらがひとまとまりになって、ビルドしたりインストールしたりできる形式になっている。
+フィーチャーの中に、別のフィーチャーを含めることもできる
+(\aosafigref{fig.ecl.feat}を参照)。
 
 %% \aosafigure[250pt]{../images/eclipse/eclipse33features.eps}{Eclipse 3.3 SDK Feature Hierarchy}{fig.ecl.feat}
-\aosafigure[250pt]{../images/eclipse/eclipse33features.eps}{Eclipse 3.3 SDKの機能階層}{fig.ecl.feat}
+\aosafigure[250pt]{../images/eclipse/eclipse33features.eps}{Eclipse 3.3 SDKのフィーチャーの階層}{fig.ecl.feat}
 
-If you wished to update your Eclipse install to a new build that only
-incorporated one new bundle, the entire feature had to be updated
-since this was the coarse grained mechanism that was used by update
-manager.  Updating a feature to fix a single bundle is inefficient.
+%% If you wished to update your Eclipse install to a new build that only
+%% incorporated one new bundle, the entire feature had to be updated
+%% since this was the coarse grained mechanism that was used by update
+%% manager.  Updating a feature to fix a single bundle is inefficient.
+インストールされているEclipseのうちの一つのバンドルが新しくなったので更新しようとした場合は、
+フィーチャー全体をアップデートする必要がある。フィーチャーはあまりきめ細かくない仕組みで、
+更新マネージャーが利用しているものだからである。
+たった一つのバンドルのためだけにフィーチャーを更新するのは非効率的だ。
 
-There are PDE wizards to create features, and build them in your
-workspace.  The \code{feature.xml} file defines the bundles included
-in the feature, and some simple properties of the bundles. A feature,
-like a bundle, has a name and a version. Features can include other
-features, and specify version ranges for the features they
-include. The bundles that are included in a feature are listed, along
-with specific properties. For instance, you can see that the
-\code{org.eclipse.launcher.gtk.linux.x86\_64} fragment specifies the operating
-system (\code{os}), windowing system (\code{ws}) and architecture
-(\code{arch}) where it should be used. Thus upgrading to a new
-release, this fragment would only be installed on this platform. These
-platform filters are included in the OSGi manifest of this bundle.
+%% There are PDE wizards to create features, and build them in your
+%% workspace.  The \code{feature.xml} file defines the bundles included
+%% in the feature, and some simple properties of the bundles. A feature,
+%% like a bundle, has a name and a version. Features can include other
+%% features, and specify version ranges for the features they
+%% include. The bundles that are included in a feature are listed, along
+%% with specific properties. For instance, you can see that the
+%% \code{org.eclipse.launcher.gtk.linux.x86\_64} fragment specifies the operating
+%% system (\code{os}), windowing system (\code{ws}) and architecture
+%% (\code{arch}) where it should be used. Thus upgrading to a new
+%% release, this fragment would only be installed on this platform. These
+%% platform filters are included in the OSGi manifest of this bundle.
+PDEのウィザードを使って、フィーチャーの作成やワークスペース内でのビルドができる。
+\code{feature.xml}というファイルに、そのフィーチャーに含めるバンドルや
+バンドルのプロパティを定義する。フィーチャーには、バンドルと同様に名前やバージョンがある。
+フィーチャーの中に別のフィーチャーを含めることもできるし、
+含めるフィーチャーのバージョンを範囲で指定することもできる。
+フィーチャーに含めるバンドルは、そのプロパティも含めてリストで管理する。
+たとえば\code{org.eclipse.launcher.gtk.linux.x86\_64}
+フラグメントでは、OS(\code{os})やウインドウシステム(\code{ws})、
+そしてアーキテクチャ(\code{arch})などを指定していることがわかるだろう。
+この場合、新しいリリースに更新するときには、
+このフラグメントは指定したプラットフォームにだけインストールされる。
+これらのプラットフォームに関するフィルタは、このバンドルのOSGiマニフェストに記述する。
 
 \begin{verbatim}
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1283,10 +1310,13 @@ platform filters are included in the OSGi manifest of this bundle.
          fragment="true"/>
 \end{verbatim}
 
-An Eclipse application consists of more than just features and
-bundles.  There are platform specific executables to start Eclipse
-itself, license files, and platform specific libraries, as shown in
-this list of files included in the Eclipse application.
+%% An Eclipse application consists of more than just features and
+%% bundles.  There are platform specific executables to start Eclipse
+%% itself, license files, and platform specific libraries, as shown in
+%% this list of files included in the Eclipse application.
+Eclipseアプリケーションは、単にフィーチャーやバンドルの寄せ集めだけでできているわけではない。
+Eclipse自身を立ち上げるためのプラットフォーム固有の実行ファイルもあればライセンスファイルもあるし、
+プラットフォーム固有のライブラリもある。これらについてもEclipseアプリケーションのファイル一覧に含まれる。
 
 \begin{verbatim}
 com.ibm.icu
@@ -1310,19 +1340,32 @@ org.eclipse.equinox.launcher.gtk.linux.x86_64
 
 % \aosafigureTop[200pt]{../images/eclipse/rcpfeature33.eps}{Files Included in Eclipse Application}{fig.ecl.inst}
 
-These files couldn't be updated via
-update manager, because again, it only dealt with features.
-Since many of these files were updated every major release, this meant
-that users had to download a new zip each time there was a new release
-instead of updating their existing install. This wasn't acceptable to
-the Eclipse community. PDE provided support for product files, which
-specified all the files needed to build an Eclipse RCP
-application. However, update manager didn't have a mechanism to
-provision these files into your install which was very frustrating for
-users and product developers alike. In March 2008, p2 was released
-into the SDK as the new provisioning solution.  In the interest of
-backward compatibility, Update Manager was still available for use,
-but p2 was enabled by default.
+%% These files couldn't be updated via
+%% update manager, because again, it only dealt with features.
+%% Since many of these files were updated every major release, this meant
+%% that users had to download a new zip each time there was a new release
+%% instead of updating their existing install. This wasn't acceptable to
+%% the Eclipse community. PDE provided support for product files, which
+%% specified all the files needed to build an Eclipse RCP
+%% application. However, update manager didn't have a mechanism to
+%% provision these files into your install which was very frustrating for
+%% users and product developers alike. In March 2008, p2 was released
+%% into the SDK as the new provisioning solution.  In the interest of
+%% backward compatibility, Update Manager was still available for use,
+%% but p2 was enabled by default.
+これらのファイルは更新マネージャーでのアップデートができない。
+更新マネージャーはフィーチャ−だけを扱うものだからだ。
+これらのファイルの多くはメジャーリリースのたびに更新される。つまり、
+新しいリリースがあるたびにzipを毎回ダウンロードしないといけないということだ。
+今インストールされているものを単純にアップデートするだけでは済まない。
+Eclipseのコミュニティでは、そんなことは到底受け入れられない。
+PDEは、プロダクトのファイルもサポートしていた。
+Eclipse RCPアプリケーションのビルドに必要なすべてのファイルを指定するものだ。
+しかし、更新マネージャーにはこれらのファイルをインストール環境に展開する仕組みがない。
+これは、ユーザーだけでなくプロダクトの開発者にとってももどかしいことだった。
+2008年3月に、p2が公開されてSDKに組み込まれた。これは、プロビジョニング用の新たな仕組みだ。
+過去との互換性を考慮して、更新マネージャーもまだ使えるようになっている。
+しかし、デフォルトではp2が有効になるように変わった。
 
 %% \begin{aosasect2}{p2 Concepts}
 \begin{aosasect2}{p2の概念}
