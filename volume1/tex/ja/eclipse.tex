@@ -1370,83 +1370,144 @@ Eclipse RCPアプリケーションのビルドに必要なすべてのファイ
 %% \begin{aosasect2}{p2 Concepts}
 \begin{aosasect2}{p2の概念}
 
-Equinox p2 is all about installation units (IU). An IU is a
-description of the name and id of the artifact you are
-installing. This metadata also describes the capabilities of the
-artifact (what is provided) and its requirements (its
-dependencies). Metadata can also express applicability filters if an
-artifact is only applicable to a certain environment. For instance,
-the org.eclipse.swt.gtk.linux.x86 fragment is only applicable if
-you're installing on a Linux gtk x86 machine. Fundamentally, metadata
-is an expression of the information in the bundle's
-manifest. Artifacts are simply the binary bits being installed. A
-separation of concerns is achieved by separating the metadata and the
-artifacts that they describe. A p2 repository consists of both
-metadata and artifact repositories.
+%% Equinox p2 is all about installation units (IU). An IU is a
+%% description of the name and id of the artifact you are
+%% installing. This metadata also describes the capabilities of the
+%% artifact (what is provided) and its requirements (its
+%% dependencies). Metadata can also express applicability filters if an
+%% artifact is only applicable to a certain environment. For instance,
+%% the org.eclipse.swt.gtk.linux.x86 fragment is only applicable if
+%% you're installing on a Linux gtk x86 machine. Fundamentally, metadata
+%% is an expression of the information in the bundle's
+%% manifest. Artifacts are simply the binary bits being installed. A
+%% separation of concerns is achieved by separating the metadata and the
+%% artifacts that they describe. A p2 repository consists of both
+%% metadata and artifact repositories.
+Equinox p2は、要するに情報ユニット(IU)だ。
+IUとは、インストール仕様としている生成物の名前とIDに関する記述である。
+このメタデータには、生成物の機能(何ができるのか)とその要件(何に依存するのか)
+も書かれている。もし特定の環境でしか使えないのなら、それを表すフィルタも記述できる。
+たとえば、org.eclipse.swt.gtk.linux.x86フラグメントが使えるのは
+Linux gtk x86マシンにインストールしたときだけだ。
+本来、メタデータとはバンドルのマニフェストの情報を表したものである。
+生成物は、インストールされる単なるバイナリになる。
+関心の分離を実現するために、インストールされる内容とそのメタデータを完全に分離した。
+p2のリポジトリには、メタデータのリポジトリと生成物のリポジトリの両方が含まれる。
 
 %% \aosafigure{../images/eclipse/p2.eps}{P2 Concepts}{fig.ecl.p2}
 \aosafigure{../images/eclipse/p2.eps}{P2の概念}{fig.ecl.p2}
 
-A profile is a list of IUs in your install. For instance, your Eclipse
-SDK has a profile that describes your current install. From within
-Eclipse, you can request an update to a newer version of the build
-which will create a new profile with a different set of IUs. A profile
-also provides a list of properties associated with the installation,
-such as the operating system, windowing system, and architecture
-parameters. Profiles also store the installation directory and the
-location. Profiles are held by a profile registry, which can store
-multiple profiles. The director is responsible for invoking
-provisioning operations. It works with the planner and the engine. The
-planner examines the existing profile, and determines the operations
-that must occur to transform the install into its new state. The
-engine is responsible for carrying out the actual provisioning
-operations and installing the new artifacts on disk.  Touchpoints are
-part of the engine that work with the runtime implementation of the
-system being installed. For instance, for the Eclipse SDK, there is an
-Eclipse touchpoint which knows how to install bundles. For a Linux
-system where Eclipse is installed from RPM binaries, the engine would
-deal with an RPM touchpoint. Also, p2 can perform installs in-process
-or outside in a separate process, such as a build.
+%% A profile is a list of IUs in your install. For instance, your Eclipse
+%% SDK has a profile that describes your current install. From within
+%% Eclipse, you can request an update to a newer version of the build
+%% which will create a new profile with a different set of IUs. A profile
+%% also provides a list of properties associated with the installation,
+%% such as the operating system, windowing system, and architecture
+%% parameters. Profiles also store the installation directory and the
+%% location. Profiles are held by a profile registry, which can store
+%% multiple profiles. The director is responsible for invoking
+%% provisioning operations. It works with the planner and the engine. The
+%% planner examines the existing profile, and determines the operations
+%% that must occur to transform the install into its new state. The
+%% engine is responsible for carrying out the actual provisioning
+%% operations and installing the new artifacts on disk.  Touchpoints are
+%% part of the engine that work with the runtime implementation of the
+%% system being installed. For instance, for the Eclipse SDK, there is an
+%% Eclipse touchpoint which knows how to install bundles. For a Linux
+%% system where Eclipse is installed from RPM binaries, the engine would
+%% deal with an RPM touchpoint. Also, p2 can perform installs in-process
+%% or outside in a separate process, such as a build.
+プロファイルは、インストールされたIUの一覧だ。
+たとえば、Eclipse SDKは現在インストールされている内容を記したプロファイルを持っている。
+Eclipseの内部から、新しいバージョンへの更新をリクエストすることができる。
+そのときは、別のIUセットからなる新しいプロファイルを作る。
+プロファイルでは、そのインストール環境に関連するプロパティの一覧も提供する。
+たとえばOSやウィンドウシステム、そしてアーキテクチャなどのパラメータだ。
+また、インストール先のディレクトリや場所もプロファイルに格納する。
+プロファイルはプラファイル用のレジストリで管理され、ここには複数のプロファイルを格納できる。
+プロビジョニングを実行するのはディレクターの役割だ。
+ディレクターは、プランナーやエンジンとともに動作する。
+プランナーは既存のプロファイルを調べ、インストールされた環境を新しい状態に移行するために必要な操作を決める。
+エンジンは、実際のプロビジョニングを担当し、新しい生成物をディスクにインストールする。
+エンジンの一部として含まれているのがタッチポイントで、
+これは、インストールされたシステムのランタイム実装とともに動作する。
+たとえばEclipse SDKにはEclipseタッチポイントがあり、これがバンドルのインストール方法を知っている。
+LinuxシステムでEclipseをRPMからインストールする場合、
+エンジンはRPMタッチポイントを使うことになる。
+また、p2はインストールをインプロセスで行うこともできるし、
+ビルドなどのように別プロセスで行うこともできる。
 
-There were many benefits to the new p2 provisioning system. Eclipse
-install artifacts could be updated from release to release. Since
-previous profiles were stored on disk, there was also a way to revert
-to a previous Eclipse install. Additionally, given a profile and a
-repository, you could recreate the Eclipse install of a user that was
-reporting a bug to try to reproduce the problem on your own desktop.
-Provisioning with p2 provided a way to update and install more than
-just the Eclipse SDK, it was a platform that applied to RCP and OSGi
-use cases as well.  The Equinox team also worked with the members of
-another Eclipse project, the Eclipse Communication Framework (ECF) to
-provide reliable transport for consuming artifacts and metadata in p2
-repositories.
+%% There were many benefits to the new p2 provisioning system. Eclipse
+%% install artifacts could be updated from release to release. Since
+%% previous profiles were stored on disk, there was also a way to revert
+%% to a previous Eclipse install. Additionally, given a profile and a
+%% repository, you could recreate the Eclipse install of a user that was
+%% reporting a bug to try to reproduce the problem on your own desktop.
+%% Provisioning with p2 provided a way to update and install more than
+%% just the Eclipse SDK, it was a platform that applied to RCP and OSGi
+%% use cases as well.  The Equinox team also worked with the members of
+%% another Eclipse project, the Eclipse Communication Framework (ECF) to
+%% provide reliable transport for consuming artifacts and metadata in p2
+%% repositories.
+新しいプロビジョニングシステムであるp2には、いろんなメリットがあった。
+Eclipseがインストールする生成物は、リリースのたびに更新される。
+前回のプロファイルがディスク上に残っているので、
+Eclipseを以前の状態に戻すこともできる。
+さらに、プロファイルとリポジトリがあれば、バグ報告をしてきたユーザーと
+同じインストール環境を再現できる。これで、バグ報告の内容を再現しやすくなる。
+p2によるプロビジョニングは、単にEcipse SDKの更新やインストールにだけ使えるというものではない。
+RCPやOSGiでも同様に使える。
+Equinoxチームは、Eclipse Communication Framework (ECF)という別のEclipseプロジェクトのメンバーと
+協力し、p2リポジトリの生成物やメタデータを扱える方法を提供した。
 
-There were many spirited discussions within the Eclipse community when p2
-was released into the SDK\@. Since update manager was a less than
-optimal solution for provisioning your Eclipse install, Eclipse
-consumers had the habit of unzipping bundles into their install and
-restarting Eclipse. This approach resolves your bundles on a best
-effort basis. It also meant that any conflicts in your install were
-being resolved at runtime, not install time.  Constraints should be
-resolved at install time, not run time. However, users were often
-oblivious to these issues and assumed since the bundles existed on
-disk, they were working.  Previously, the update sites that Eclipse
-provided were a simple directory consisting of JARred bundles and
-features.  A simple \code{site.xml} file provided the names of the
-features that were available to be consumed in the site.  With the
-advent of p2, the metadata that was provided in the p2 repositories
-was much more complex. To create metadata, the build process needed to
-be tweaked to either generate metadata at build time or run a
-generator task over the existing bundles. Initially, there was a lack
-of documentation available describing how to make these changes.  As
-well, as is always the case, exposing new technology to a wider
-audience exposed unexpected bugs that had to be addressed. However, by
-writing more documentation and working long hours to address these
-bugs, the Equinox team was able to address these concerns and now p2
-is the underlying provision engine behind many commercial
-offerings. As well, the Eclipse Foundation ships its coordinated
-release every year using a p2 aggregate repository of all the
-contributing projects.
+%% There were many spirited discussions within the Eclipse community when p2
+%% was released into the SDK\@. Since update manager was a less than
+%% optimal solution for provisioning your Eclipse install, Eclipse
+%% consumers had the habit of unzipping bundles into their install and
+%% restarting Eclipse. This approach resolves your bundles on a best
+%% effort basis. It also meant that any conflicts in your install were
+%% being resolved at runtime, not install time.  Constraints should be
+%% resolved at install time, not run time. However, users were often
+%% oblivious to these issues and assumed since the bundles existed on
+%% disk, they were working.  Previously, the update sites that Eclipse
+%% provided were a simple directory consisting of JARred bundles and
+%% features.  A simple \code{site.xml} file provided the names of the
+%% features that were available to be consumed in the site.  With the
+%% advent of p2, the metadata that was provided in the p2 repositories
+%% was much more complex. To create metadata, the build process needed to
+%% be tweaked to either generate metadata at build time or run a
+%% generator task over the existing bundles. Initially, there was a lack
+%% of documentation available describing how to make these changes.  As
+%% well, as is always the case, exposing new technology to a wider
+%% audience exposed unexpected bugs that had to be addressed. However, by
+%% writing more documentation and working long hours to address these
+%% bugs, the Equinox team was able to address these concerns and now p2
+%% is the underlying provision engine behind many commercial
+%% offerings. As well, the Eclipse Foundation ships its coordinated
+%% release every year using a p2 aggregate repository of all the
+%% contributing projects.
+p2をSDKに組み込むにあたっては、Eclipseコミュニティ内でも活発な議論があった。
+更新マネージャーはEclipse自身のインストール環境をプロビジョニングするための必要最小限のソリューションでしかなかったので、
+ユーザーは、バンドルを導入するときにはzipファイルを展開してから再起動するという手順になれていた。
+この手法は、ベストエフォート型の仕組みでバンドルを解決するものだ。
+また、何らかのコンフリクトが発生したとしても、それを解決するのは実行時になる。インストール時ではない。
+制約があるのなら、実行時ではなくてインストール時に解決しておくべきだ。
+しかし、ユーザーは、こんな問題があることに気づかないことが多い。
+バンドルがディスク上にあるのだから、動いてしかるべきだと思い込んでしまうのだ。
+以前のバージョンでは、Eclipseの提供する更新サイトは、
+単にJAR化したバンドルやフィーチャーを並べたディレクトリ構造があるだけだった。
+シンプルな\code{site.xml}ファイルを用意して、そのサイトで提供するフィーチャーの名前を並べておけばよかった。
+p2の時代になって、p2リポジトリが提供するメタデータはもっと複雑なものになった。
+メタデータを作る方法は、ビルドプロセスに手を入れてビルド時にメタデータを生成させるか、
+既存のバンドルに対してジェネレータタスクを実行するかのいずれかになる。
+当初は、こういった変更の方法を説明したドキュメントが欠けていた。
+さらに、いつものことではあるが、新しいテクノロジーを一般公開すると、
+予期せぬバグが見つかって対応が必要になることもあった。
+しかし、ドキュメントをきちんと書いたりそれらのバグに対応したりしているうちに、
+Equinoxチームはいろんな心配ごとを解決できるようになった。
+今やp2は、多くの商用製品のプロビジョニングエンジンとして使われている。
+Eclipse Foundationも、組織でとりまとめたリリースを毎年リリースしているが、
+このリリースにもp2集約リポジトリを使っている。これは、すべての寄贈プロジェクトをとりまとめたものだ。
 
 \end{aosasect2}
 
