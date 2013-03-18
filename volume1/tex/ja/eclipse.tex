@@ -1516,31 +1516,54 @@ Eclipse Foundationも、組織でとりまとめたリリースを毎年リリ�
 %% \begin{aosasect1}{Eclipse 4.0}
 \begin{aosasect1}{Eclipse 4.0}
 
-Architecture must continually be examined to evaluate if it is still
-appropriate. Is it able to incorporate new technology? Does it
-encourage growth of the community?  Is it easy to attract new
-contributors?  In late 2007, the Eclipse project committers decided
-that the answers to these questions were no and they embarked on
-designing a new vision for Eclipse. At the same time, they realized
-that there were thousands of Eclipse applications that depended on the
-existing API\@.  An incubator technology project was created in late
-2008 with three specific goals: simplify the Eclipse programming
-model, attract new committers and enable the platform to take
-advantage of new web-based technologies while providing an open
-architecture.
+%% Architecture must continually be examined to evaluate if it is still
+%% appropriate. Is it able to incorporate new technology? Does it
+%% encourage growth of the community?  Is it easy to attract new
+%% contributors?  In late 2007, the Eclipse project committers decided
+%% that the answers to these questions were no and they embarked on
+%% designing a new vision for Eclipse. At the same time, they realized
+%% that there were thousands of Eclipse applications that depended on the
+%% existing API\@.  An incubator technology project was created in late
+%% 2008 with three specific goals: simplify the Eclipse programming
+%% model, attract new committers and enable the platform to take
+%% advantage of new web-based technologies while providing an open
+%% architecture.
+アーキテクチャは常に、それで適切かどうかを評価し続けないといけない。
+新しいテクノロジーを取り込むことができるか?
+コミュニティの成長を促せるか?
+新しい参加者にとって魅力的なものだろうか?
+2007年後半、Eclipseプロジェクトのコミッターたちは、
+現状ではこれらの問いへの答えが「ノー」であると判断した。
+そして、Eclipseのビジョンを刷新すべく動き出した。
+そうは言っても、既存のAPIに依存するEclipseプリケーションが大量にあることもわかっていた。
+2008年の後半になって、技術評価用のプロジェクトが立ち上がった。その目標は次の三つだ。
+Eclipseのプログラミングモデルを単純化すること、
+新たなコミッターを獲得しやすいよう魅力的にすること、
+そして、ウェブベースのテクノロジーの利点をいかしたプラットフォームを
+オープンなアーキテクチャとして提供すること。
 
 %% \aosafigure{../images/eclipse/e4.eps}{Eclipse 4.0 SDK Early Adopter Release}{fig.ecl.e4}
 \aosafigure{../images/eclipse/e4.eps}{Eclipse 4.0 SDK Early Adopter Release}{fig.ecl.e4}
 
-Eclipse 4.0 was first released in July 2010 for early adopters to
-provide feedback. It consisted of a combination of SDK bundles that
-were part of the 3.6 release, and new bundles that graduated from the
-technology project.  Like 3.0, there was a compatibility layer so that
-existing bundles could work with the new release. As always, there was
-the caveat that consumers needed to be using the public API in order
-to be assured of that compatibility.  There was no such guarantee if
-your bundle used internal code. The 4.0 release provided the Eclipse 4
-Application Platform which provided the following features.
+%% Eclipse 4.0 was first released in July 2010 for early adopters to
+%% provide feedback. It consisted of a combination of SDK bundles that
+%% were part of the 3.6 release, and new bundles that graduated from the
+%% technology project.  Like 3.0, there was a compatibility layer so that
+%% existing bundles could work with the new release. As always, there was
+%% the caveat that consumers needed to be using the public API in order
+%% to be assured of that compatibility.  There was no such guarantee if
+%% your bundle used internal code. The 4.0 release provided the Eclipse 4
+%% Application Platform which provided the following features.
+2010年7月に、Eclipse 4.0の最初のリリースが公開された。
+このリリースの狙いは、アーリーアダプターからのフィードバックを得ることだった。
+3.6系のリリースに含まれていたSDKバンドルと新しいバンドル群を組み合わせたもので、
+新しいバンドルは技術評価プロジェクトの成果物だった。
+3.0と同様に互換性のためのレイヤーも組み込まれており、既存のバンドルは新しいリリースでも使える。
+いつものことではあるが、この互換性の恩恵を受けるには、
+公開APIだけを使ってバンドルを書いておく必要がある。
+公開API以外の内部コードを使っているバンドルについては、互換性は保証されなかった。
+4.0のリリースではEclipse 4アプリケーションプラットフォームも含まれており、
+次のような機能を提供していた。
 
 %% \begin{aosasect2}{Model Workbench}
 \begin{aosasect2}{モデルワークベンチ}
