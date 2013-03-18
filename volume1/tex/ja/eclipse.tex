@@ -1568,15 +1568,22 @@ Eclipseのプログラミングモデルを単純化すること、
 %% \begin{aosasect2}{Model Workbench}
 \begin{aosasect2}{モデルワークベンチ}
 
-In 4.0, a model workbench is generated using the Eclipse Modeling
-Framework (EMFgc). There is a separation of concerns between the model
-and the rendering of the view, since the renderer talks to the model
-and then generates the SWT code. The default is to use the SWT
-renderers, but other solutions are possible.  If you create an example
-4.x application, an XMI file will be created for the default workbench
-model. The model can be modified and the workbench will be instantly
-updated to reflect the changes in the model. \aosafigref{fig.ecl.mwb}
-is an example of a model generated for an example 4.x application.
+%% In 4.0, a model workbench is generated using the Eclipse Modeling
+%% Framework (EMFgc). There is a separation of concerns between the model
+%% and the rendering of the view, since the renderer talks to the model
+%% and then generates the SWT code. The default is to use the SWT
+%% renderers, but other solutions are possible.  If you create an example
+%% 4.x application, an XMI file will be created for the default workbench
+%% model. The model can be modified and the workbench will be instantly
+%% updated to reflect the changes in the model. \aosafigref{fig.ecl.mwb}
+%% is an example of a model generated for an example 4.x application.
+4.0では、Eclipse Modeling Framework (EMFgc)を使ってモデルワークベンチを生成する。
+これは、ビューのレンダリングとモデルの間で関心の分離を実現するものだ。
+レンダラーはモデルとやりとりし、そしてSWTのコードを生成する。
+デフォルトではSWTレンダラーを使うが、他の方法も使える。
+4.xのアプリケーションを作ると、デフォルトのワークベンチ用にXMIファイルが作られる。
+モデルを変更するとワークベンチもすぐに更新され、モデルの変更が反映される。
+\aosafigref{fig.ecl.mwb}は、サンプルの4.xアプリケーション用に生成したモデルの例だ。
 
 %% \aosafigure[350pt]{../images/eclipse/modelledworkbench.pdf}{Model Generated for Example 4.x Application}{fig.ecl.mwb}
 \aosafigure[350pt]{../images/eclipse/modelledworkbench.eps}{サンプルの4.xアプリケーション用に生成されたモデル}{fig.ecl.mwb}
@@ -1586,12 +1593,17 @@ is an example of a model generated for an example 4.x application.
 %% \begin{aosasect2}{Cascading Style Sheets Styling}
 \begin{aosasect2}{スタイルシートによる整形}
 
-Eclipse was released in 2001, before the era of rich Internet
-applications that could be skinned via CSS to provide a different look
-and feel. Eclipse 4.0 provides the ability to use stylesheets to
-easily change the look and feel of the Eclipse application. The
-default CSS stylesheets can be found in the \code{css} folder of the
-\code{org.eclipse.platform} bundle.
+%% Eclipse was released in 2001, before the era of rich Internet
+%% applications that could be skinned via CSS to provide a different look
+%% and feel. Eclipse 4.0 provides thbe ability to use stylesheets to
+%% easily change the look and feel of the Eclipse application. The
+%% default CSS stylesheets can be found in the \code{css} folder of the
+%% \code{org.eclipse.platform} bundle.
+Eclipseが最初にリリースされたのは2001年で、
+当時はまだ、CSSで見た目を切り替えられるようなリッチインターネットアプリケーションの時代ではなかった。
+Eclipse 4.0からはスタイルシートを使えるようになり、
+Eclipseアプリケーションの見た目を簡単に変更できるようになった。
+デフォルトのスタイルシートは、\code{org.eclipse.platform}バンドルの\code{css}フォルダに入っている。
 
 \end{aosasect2}
 
