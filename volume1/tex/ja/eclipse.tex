@@ -1610,67 +1610,118 @@ Eclipseアプリケーションの見た目を簡単に変更できるように�
 %% \begin{aosasect2}{Dependency Injection}
 \begin{aosasect2}{依存性の注入}
 
-Both the Eclipse extensions registry and OSGi services are examples of service
-programming models. By convention, a service programming model contains service
-producers and consumers. The broker is responsible for managing the
-relationship between producers and consumers.
+%% Both the Eclipse extensions registry and OSGi services are examples of service
+%% programming models. By convention, a service programming model contains service
+%% producers and consumers. The broker is responsible for managing the
+%% relationship between producers and consumers.
+Eclipseの拡張リポジトリやOSGiサービスは、サービスプログラミングモデルの一例だ。
+慣例により、サービスプログラミングモデルには、サービスの提供者（プロデューサー）と
+利用者（コンシューマー）が存在する。
+プロデューサーとコンシューマーの間の関係を取り持つのが、ブローカーの役割だ。
 
 %% \aosafigure[200pt]{../images/eclipse/producerconsumer.eps}{Relationship Between Producers and Consumers}{fig.ecl.prc}
 \aosafigure[200pt]{../images/eclipse/producerconsumer.eps}{プロデューサーとコンシューマーの関係}{fig.ecl.prc}
 
 \pagebreak
 
-Traditionally, in Eclipse 3.4.x applications, the consumer needed
-to know the location of the implementation, and to
-understand inheritance within the framework to
-consume services. The consumer code was therefore less reusable
-because people couldn't override which implementation the consumer
-receives. For example, if you wanted to update the message on the
-status line in Eclipse 3.x, the code would look like:
+%% Traditionally, in Eclipse 3.4.x applications, the consumer needed
+%% to know the location of the implementation, and to
+%% understand inheritance within the framework to
+%% consume services. The consumer code was therefore less reusable
+%% because people couldn't override which implementation the consumer
+%% receives. For example, if you wanted to update the message on the
+%% status line in Eclipse 3.x, the code would look like:
+伝統的に、Eclipse 3.4.xのアプリケーションでは、
+コンシューマー側がサービスの場所を知っている必要があった。
+また、サービスを利用するには、そのサービスのフレームワーク内での継承関係も知っている必要があった。
+そのため、コンシューマーのコードはあまり使い回しが利かなくなる。
+というのも、そのコンシューマーが利用するサービスを上書きできないからだ。
+たとえば、Eclipse 3.xでステータス行のメッセージを更新したいときには、
+こんなコードを書いていた。
 
 \begin{verbatim}
 getViewSite().getActionBars().getStatusLineManager().setMessage(msg);
 \end{verbatim}
 
-Eclipse 3.6 is built from components, but many of these components are
-too tightly coupled. To assemble applications of more loosely coupled
-components, Eclipse 4.0 uses dependency injection to provide services
-to clients. Dependency injection in Eclipse 4.x is through the use of
-a custom framework that uses the the concept of a context that serves
-as a generic mechanism to locate services for consumers.  The context
-exists between the application and the framework. Contexts are
-hierarchical. If a context has a request that cannot be satisfied,
-it will delegate the request to the parent context. The Eclipse
-context, called \code{IEclipseContext}, stores the available services and
-provides OSGi services lookup.  Basically, the context is similar to a
-Java map in that it provides a mapping of a name or class to an
-object.  The context handles model elements and services.  Every
-element of the model, will have a context. Services are published in
-4.x by means of the OSGi service mechanism.
+%% Eclipse 3.6 is built from components, but many of these components are
+%% too tightly coupled. To assemble applications of more loosely coupled
+%% components, Eclipse 4.0 uses dependency injection to provide services
+%% to clients. Dependency injection in Eclipse 4.x is through the use of
+%% a custom framework that uses the the concept of a context that serves
+%% as a generic mechanism to locate services for consumers.  The context
+%% exists between the application and the framework. Contexts are
+%% hierarchical. If a context has a request that cannot be satisfied,
+%% it will delegate the request to the parent context. The Eclipse
+%% context, called \code{IEclipseContext}, stores the available services and
+%% provides OSGi services lookup.  Basically, the context is similar to a
+%% Java map in that it provides a mapping of a name or class to an
+%% object.  The context handles model elements and services.  Every
+%% element of the model, will have a context. Services are published in
+%% 4.x by means of the OSGi service mechanism.
+Eclipse 3.6はコンポーネントベースで作られてはいるものの、
+そのコンポーネントの大半は密結合になっていた。
+より疎結合なコンポーネント群によるアプリケーションを作るために、
+Eclipse 4.0では依存性の注入を使ってクライアントにサービスを提供することにした。
+Eclipse 4.xにおける依存性の注入は、カスタムフレームワークを使って実現する。
+このフレームワークは、コンテキストという概念を使って
+コンシューマーにサービスの場所を知らせる仕組みを提供する。
+コンテキストは、アプリケーションとフレームワークの間に位置づけられる。
+また、コンテキストは階層構造になっている。
+あるコンテキストが自分には対応できないリクエストを受け取ると、
+そのリクエストを親コンテキストに委譲する。
+\code{IEclipseContext}という名前のEclipseコンテキストには、
+利用できるサービスの情報が格納される。そして、OSGiサービスルックアップ機能を提供する。
+基本的に、コンテキストはJavaのマップのようなものだ。
+名前あるいはクラスとオブジェクトの間のマッピングを行う。
+コンテキストは、モデルの要素やサービスを処理する。
+モデルのすべての要素は、コンテキストを持っている。
+4.0でサービスを公開するには、OSGiのサービス機能を利用する。
 
 %% \aosafigure[200pt]{../images/eclipse/context.eps}{Service Broker Context}{fig.ecl.con}
 \aosafigure[200pt]{../images/eclipse/context.eps}{サービスブローカーコンテキスト}{fig.ecl.con}
 
-Producers add services and objects to the context which stores them.
-Services are injected into consumer objects by the context. The
-consumer declares what it wants, and the context determines how to
-satisfy this request. This approach has made consuming dynamic service
-easier. In Eclipse 3.x, a consumer had to attach listeners to be
-notified when services were available or unavailable. With Eclipse
-4.x, once a context has been injected into a consumer object, any
-change is automatically delivered to that object again. In other
-words, dependency injection occurs again. The consumer indicates that
-it will use the context by the use of Java 5 annotations which adhere
-to the JSR~330 standard, such as \code{@inject}, as well as some
-custom Eclipse annotations. Constructor, method, and field injection
-are supported.  The 4.x runtime scans the objects for these
-annotations. The action that is performed depends on the annotation
-that's found.
+%% Producers add services and objects to the context which stores them.
+%% Services are injected into consumer objects by the context. The
+%% consumer declares what it wants, and the context determines how to
+%% satisfy this request. This approach has made consuming dynamic service
+%% easier. In Eclipse 3.x, a consumer had to attach listeners to be
+%% notified when services were available or unavailable. With Eclipse
+%% 4.x, once a context has been injected into a consumer object, any
+%% change is automatically delivered to that object again. In other
+%% words, dependency injection occurs again. The consumer indicates that
+%% it will use the context by the use of Java 5 annotations which adhere
+%% to the JSR~330 standard, such as \code{@inject}, as well as some
+%% custom Eclipse annotations. Constructor, method, and field injection
+%% are supported.  The 4.x runtime scans the objects for these
+%% annotations. The action that is performed depends on the annotation
+%% that's found.
+プロデューサーは、サービスやオブジェクトをコンテキストに追加して、そこに格納させる。
+サービスをコンシューマーオブジェクトに注入するのが、コンテキストの役割だ。
+コンシューマーは自分が何を欲しいのかを宣言し、
+コンテキストがそのリクエストを満たす方法を判断する。
+この手法のおかげで、動的なサービスを使うのがより簡単になった。
+Eclipse 3.xでは、コンシューマーにリスナーをアタッチして、
+サービスが使えるようになったときや使えなくなったときに通知を受ける必要があった。
+Eclipse 4.xでは、いったんコンテキストをコンシューマーオブジェクトに注入してしまえば、
+あらゆる変更が自動的にオブジェクトに配送される。
+言いかえれば、変更があれば再び依存性の注入を行うということだ。
+コンシューマーは、自分がコンテキストを使うことを示すために
+Java 5のアノテーション機能を利用する。
+JSR~330の標準にしたがった\code{@inject}のようなアノテーションのほかに、
+Eclipse独自のカスタムアノテーションも利用する。
+コンストラクターインジェクション、メソッドインジェクション、
+そしてフィールドインジェクションに対応している。
+4.xのランタイムは、これらのアノテーションに沿ってオブジェクトをスキャンする。
+実際に見つかったアノテーションによって、実行されるアクションが決まる。
 
-This separation of concerns between context and application allows for
-better reuse of components, and absolves the consumer from
-understanding the implementation.  In 4.x, the code to update the
-status line would look like this:
+%% This separation of concerns between context and application allows for
+%% better reuse of components, and absolves the consumer from
+%% understanding the implementation.  In 4.x, the code to update the
+%% status line would look like this:
+このようにしてコンテキストとアプリケーションの間で関心を分離したおかげで、
+コンポーネントの再利用がしやすくなった。
+もはや、コンシューマーがサービスの実装を知っている必要はなくなった。
+4.xでは、ステータス行を更新するコードはこんなふうになる。
 
 \begin{verbatim}
 @Inject
