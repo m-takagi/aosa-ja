@@ -1735,16 +1735,22 @@ statusLine.setMessage(msg);
 %% \begin{aosasect2}{Application Services}
 \begin{aosasect2}{アプリケーションサービス}
 
-One of the main goals in Eclipse 4.0 was to simplify the API for
-consumers so that it was easy to implement common services. The list
-of simple services came to be known as ``the twenty things'' and are
-known as the Eclipse Application services. The goal is to offer
-standalone APIs that clients can use without having to have a deep
-understanding of all the APIs available. They are structured as
-individual services so that they can also be used in other languages
-other than Java, such as Javascript.  For example, there is an API to
-access the application model, to read and modify preferences and
-report errors and warnings.
+%% One of the main goals in Eclipse 4.0 was to simplify the API for
+%% consumers so that it was easy to implement common services. The list
+%% of simple services came to be known as ``the twenty things'' and are
+%% known as the Eclipse Application services. The goal is to offer
+%% standalone APIs that clients can use without having to have a deep
+%% understanding of all the APIs available. They are structured as
+%% individual services so that they can also be used in other languages
+%% other than Java, such as Javascript.  For example, there is an API to
+%% access the application model, to read and modify preferences and
+%% report errors and warnings.
+Eclipse 4.0の目標の一つは、利用者向けのAPIをシンプルにして、
+共通サービスを実装しやすくすることだった。シンプルなサービスの一覧は
+``the twenty things''と呼ばれ、Eclipseアプリケーションサービスとして知られるようになった。
+その狙いは、スタンドアローンのAPIを提供して、あらゆるAPIを熟知していなくてもクライアントから利用できるようにすることだ。
+個別のサービス群として作られており、Java以外の言語、たとえばJavaScriptなどからでも使える。
+たとえばアプリケーションモデルにアクセスするAPIがあり、設定情報を読み書きしたり、エラーや警告を表示したりできる。
 
 \end{aosasect2}
 
