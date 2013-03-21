@@ -1759,39 +1759,65 @@ Eclipse 4.0の目標の一つは、利用者向けのAPIをシンプルにして
 %% \begin{aosasect1}{Conclusion}
 \begin{aosasect1}{結論}
 
-The component-based architecture of Eclipse has evolved to incorporate
-new technology while maintaining backward compatibility.  This has
-been costly, but the reward is the growth of the Eclipse community
-because of the trust established that consumers can continue to ship
-products based on a stable API.
+%% The component-based architecture of Eclipse has evolved to incorporate
+%% new technology while maintaining backward compatibility.  This has
+%% been costly, but the reward is the growth of the Eclipse community
+%% because of the trust established that consumers can continue to ship
+%% products based on a stable API.
+Eclipseのコンポーネントベースのアーキテクチャは、
+新しいテクノロジーを取り込みながらも後方互換性を重視して成長してきた。
+これは容易なことではなかったが、その苦労のおかげでEclipseのコミュニティも成長した。
+Eclipseベースの製品を作っている人たちに対して、APIが安定しているという安心感を与えることができたからだ。
 
-Eclipse has so many consumers with diverse use cases and our expansive
-API became difficult for new consumers to adopt and understand. In
-retrospect, we should have kept our API simpler. If 80\% of consumers
-only use 20\% of the API, there is a need for simplification which was
-one of the reasons that the Eclipse 4.x stream was created.
+%% Eclipse has so many consumers with diverse use cases and our expansive
+%% API became difficult for new consumers to adopt and understand. In
+%% retrospect, we should have kept our API simpler. If 80\% of consumers
+%% only use 20\% of the API, there is a need for simplification which was
+%% one of the reasons that the Eclipse 4.x stream was created.
+Eclipseの利用者層はさまざまで、いろんな使い方で利用されている。
+APIが増えていくにつれて、新しく入ってきた利用者がAPIを把握して使えるようになるまでの敷居が高くなった。
+今思えば、APIはもっとシンプルにしておくべきだったのだろう。
+利用者の8割が、APIの2割しか使っていないのだとしたら、APIをもっと単純化する必要がある。
+Eclipse 4.xでストリームが導入された理由の一つもそれだ。
 
-The wisdom of crowds does reveal interesting use cases, such as
-disaggregating the IDE into bundles that could be used to construct
-RCP applications.  Conversely, crowds often generate a lot of noise
-with requests for edge case scenarios that take a significant amount
-of time to implement.
+%% The wisdom of crowds does reveal interesting use cases, such as
+%% disaggregating the IDE into bundles that could be used to construct
+%% RCP applications.  Conversely, crowds often generate a lot of noise
+%% with requests for edge case scenarios that take a significant amount
+%% of time to implement.
+群衆の叡智のおかげで、想像もしていなかった利用法も出てくるようになった。
+IDEをいくつかのバンドルに切り分けて、それらを使ったRCPアプリケーションを作るなどといったものだ。
+逆に、ユーザーからの要求がちょっとしたノイズに感じられるようなこともよくあった。
+めったに発生しないようなエッジケースに関する要求で、
+それを実装するにはかなりの時間がかかるといったものだ。
 
-In the early days of the Eclipse project, committers had the luxury of
-dedicating significant amounts of time to documentation, examples and
-answering community questions. Over time, this responsibility has
-shifted to the Eclipse community as a whole.  We could have been
-better at providing documentation and use cases to help out the
-community, but this has been difficult given the large number of items
-planned for every release.  Contrary to the expectation that software
-release dates slip, at Eclipse we consistently deliver our releases on
-time which allows our consumers to trust that they will be able to do
-the same.
+%% In the early days of the Eclipse project, committers had the luxury of
+%% dedicating significant amounts of time to documentation, examples and
+%% answering community questions. Over time, this responsibility has
+%% shifted to the Eclipse community as a whole.  We could have been
+%% better at providing documentation and use cases to help out the
+%% community, but this has been difficult given the large number of items
+%% planned for every release.  Contrary to the expectation that software
+%% release dates slip, at Eclipse we consistently deliver our releases on
+%% time which allows our consumers to trust that they will be able to do
+%% the same.
+初期のEclipseプロジェクトでは、コミッターは時間をぜいたくに使うことができた。
+ドキュメントを書いたりサンプルプログラムを書いたり、
+あるいはコミュニティの質問に答えたりといったことをする時間を存分に確保できていたのだ。
+時を経て、そういった作業の負荷がEclipseコミュニティ全体にのしかかってきた。
+ドキュメントや実際の利用例などを用意してコミュニティを支援したいという気持ちはあったものの、
+リリースのたびに大量の機能追加などが発生する状態では、それも不可能だった。
+どうせリリース日は遅れるだろうという想定に反して、
+Eclipseは常にリリーススケジュールを守れていた。
+そのため、利用者側も、Eclipseはいつも予定通りにリリースされるものだと信用してくれるようになった。
 
-By adopting new technology, and reinventing how Eclipse looks and
-works, we continue the conversation with our consumers and keep
-them engaged in the community. If you're interested in becoming
-involved with Eclipse, please visit http://www.eclipse.org.
+%% By adopting new technology, and reinventing how Eclipse looks and
+%% works, we continue the conversation with our consumers and keep
+%% them engaged in the community. If you're interested in becoming
+%% involved with Eclipse, please visit http://www.eclipse.org.
+新しいテクノロジーを取り込んだり、Eclipseの見た目や動きを改良したりするためにも、
+利用者との対話をこれからも大切にしたい。また、いろんな人がコミュニティに参加してくれることを期待する。
+これを読んでEclipseに興味を持った人は、ぜひhttp://www.eclipse.orgに来てほしい。
 \end{aosasect1}
 
 \end{aosachapter}
