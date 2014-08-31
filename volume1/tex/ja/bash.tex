@@ -138,7 +138,7 @@ bashには、基本的に三種類のトークンがある。予約語(reserved 
 %% numbers as subscripts, while associative arrays use arbitrary strings.
 %% Array elements are strings, which can be treated as integers if
 %% desired.  Array elements may not be other arrays.
-変数には最低限の型をつけることができる。単純な文字列値の変数に加えて、静数値と配列が使える。整数型の変数は数値として扱われる。文字列を代入するとそれを計算式とみなして展開し、計算結果を変数の値として代入する。配列は、インデックス型と連想型のどちらかになる。インデックス型の配列は数値を添字として使い、連想配列は任意の文字列を添字として使う。配列の要素は文字列であり、望むなら静数値として扱うこともできる。配列の要素に別の配列が入ることはない。
+変数には最低限の型をつけることができる。単純な文字列値の変数に加えて、整数値と配列が使える。整数型の変数は数値として扱われる。文字列を代入するとそれを計算式とみなして展開し、計算結果を変数の値として代入する。配列は、インデックス型と連想型のどちらかになる。インデックス型の配列は数値を添字として使い、連想配列は任意の文字列を添字として使う。配列の要素は文字列であり、望むなら整数値として扱うこともできる。配列の要素に別の配列が入ることはない。
 
 %% Bash uses hash tables to store and retrieve shell variables, and
 %% linked lists of these hash tables to implement variable scoping.
@@ -562,7 +562,7 @@ for for in for; do for=for; done; echo $for
 %% Similar problems are posed by programmable word completion, which allows
 %% arbitrary commands to be executed while parsing another command,
 %% and solved by saving and restoring parser state around invocations.
-同様の問題が、プログラマブルな単語補完でも発生する。これは、あるコマンドのパース中に別の任意のコマンドを実行できるようにするものだ。この問題を解決するために、起動の館にパーサの状態を保存して後で復元している。
+同様の問題が、プログラマブルな単語補完でも発生する。これは、あるコマンドのパース中に別の任意のコマンドを実行できるようにするものだ。この問題を解決するために、起動の間にパーサの状態を保存して後で復元している。
 
 %% Quoting is also a source of incompatibility and debate.  Twenty years
 %% after the publication of the first Posix shell standard, members of
