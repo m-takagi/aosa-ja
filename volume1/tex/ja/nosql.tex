@@ -724,7 +724,7 @@ RiakやCassandraそしてVoldemortでは、より細やかにレプリケーシ�
 %% have to replicate data and spread requests across multiple machines to
 %% distribute load.  This approach is called \emph{scale out}, and is
 %% measured by the \emph{horizontal scalability} of your system.
-エラー処理について語る前に、もっと楽観的な状況を考えてみよう。やった!大成功!という場面だ。あなたが構築したシステムがうまく動き出すと、データストアはそのコンポーネントのひとつとなり、それなりの負荷にさらされることになる。お手軽だがあまり美しくない解決策は、既存の機器を\emph{スケールアップ}することだ。RAMとディスクをさらに調達して、ひとつのマシンでさばける量を増やせばよい。あなたのシステムがさらに成功を収めると、ハードウェアをよいものにして高価なメモリをどんどん投入することにも限界が出てくる。ここまでくると、データをレプリケートして複数マシンで負荷分散をさせるしか方法がなくなる。これは\emph{スケールアウト}とよばれる手法で、システムの\emph{水平スケーラビリティ}の指標となる。
+エラー処理について語った後は、もっと楽観的な状況を考えてみよう。やった!大成功!という場面だ。あなたが構築したシステムがうまく動き出すと、データストアはそのコンポーネントのひとつとなり、それなりの負荷にさらされることになる。お手軽だがあまり美しくない解決策は、既存の機器を\emph{スケールアップ}することだ。RAMとディスクをさらに調達して、ひとつのマシンでさばける量を増やせばよい。あなたのシステムがさらに成功を収めると、ハードウェアをよいものにして高価なメモリをどんどん投入することにも限界が出てくる。ここまでくると、データをレプリケートして複数マシンで負荷分散をさせるしか方法がなくなる。これは\emph{スケールアウト}とよばれる手法で、システムの\emph{水平スケーラビリティ}の指標となる。
 
 %% The ideal horizontal scalability goal is \emph{linear scalability}, in
 %% which doubling the number of machines in your storage system doubles
