@@ -249,7 +249,7 @@ CentOSやDebianの管理者にとっては一大事だ。
 %% called ``Phil'', so that the ``Fumanchu'' version comes after the
 %% ``Phil'' one?
 既存のPythonパッケージングシステムを使うパッケージャーを困らせる方法をひとつ教えよう。
-``MathUtils''という名前のライブラリの、バージョン``Fumanchu''リリースするんだ。
+``MathUtils''という名前のライブラリの、バージョン``Fumanchu''をリリースするんだ。
 どこかの賢い数学者がライブラリを書いたときに、
 「バージョン番号のかわりに、うちの飼い猫の名前を順番につけていこう。イケてるよね？」
 とでも思ったんでしょうなあ。
@@ -325,7 +325,7 @@ CentOSやDebianの管理者にとっては一大事だ。
 しかし、これらのツールはすべて\code{Distutils}をベースにしたものであり、
 その問題点も引き継いでいる。\code{Distutils}自体を改善しようという動きもあったが、
 他のツールがあまりにもそのコードに依存しすぎていたので、
-内部のコードをほんの少し変更するだけでもPythonpパッケージの世界を破滅させてしまう恐れがあった。
+内部のコードをほんの少し変更するだけでもPythonパッケージの世界を破滅させてしまう恐れがあった。
 
 %% We therefore decided to freeze \code{Distutils} and start the
 %% development of \code{Distutils2} from the same code base, without
@@ -1830,7 +1830,7 @@ PyPIの中央サーバーの\code{stats}ディレクトリに置かれている�
 %% directly, or use the copy that came with the PyPI client
 %% software. Mirrors should still download the key so that they can
 %% detect a key rollover.
-中央インデックスはURL \code{/serverkey}でDSA鍵を提供していつ。
+中央インデックスはURL \code{/serverkey}でDSA鍵を提供している。
 これはPEMフォーマットで、\code{openssl dsa -pubout}
 \footnote{RFC 3280 SubjectPublicKeyInfo, with the algorithm 1.3.14.3.2.12.}
 で生成したものだ。このURLは決してミラーしてはいけない。クライアントは、
