@@ -555,7 +555,7 @@ King James Sendmail (略してKJS。ポール・ヴィクシーが作ったも�
 %% configuration file allowed the administrator to just declare what
 %% features, mailers, and so on were required, and m4 laid out the final
 %% configuration file.
-Sendmail 8には新たな設定パッケージも導入された。これはm4(1)マクロプロセッサを利用したものだ。sendmail 5の設定パッケージよりもさらに宣言的に記述できるよう心がけ、大部分は手続き型で書けるようになっている。sendmail 5の場合は、管理者が設定ファイルをすべて手で書き換える必要があった。単にm4からのショートカットとして``include''を使うだけであってもだ。sendmail 8の設定ファイルの場合、管理者が宣言できるのは、必要な機能やメーラーなどだけで、最終的な設定ファイルはm4が作成する。
+Sendmail 8には新たな設定パッケージも導入された。これはm4(1)マクロプロセッサを利用したものだ。大部分が手続きに書かれていたsendmail 5の設定パッケージよりもさらに宣言的に記述できるよう心がけた。sendmail 5の場合は、管理者が設定ファイルをすべて手で書き換える必要があった。簡略化の手段としてはm4の``include''機能を使うしかなかった。sendmail 8の設定ファイルの場合、管理者はどの機能やメーラーが必要かを宣言するだけでよく、最終的な設定ファイルはm4が作成する。
 
 %% Much of \aosasecref{sec.sendmail.evo} discusses the enhancements in
 %% sendmail 8.
@@ -1267,7 +1267,7 @@ sendmailの稼働環境が複雑になるにつれ、また同時に16ビット�
 %% \code{/etc/hosts} files.  Service switches had not been invented,
 %% directory services were nonexistent, and configuration was small and
 %% hand-maintained.
-sendmailが書かれたころは、メールシステムといえば大抵はOSの他の部分から隔離されているものだった。統合を要するサービスはごく一部で、たとえば\code{/etc/passwd}や\code{/etc/hosts}といったファイルくらいだった。サービスを斬り合える機能はまだ発明されていなかったし、ディレクトリサービスも存在しなかった。そして設定ファイルはまだ小さく、手で書けるレベルだった。
+sendmailが書かれたころは、メールシステムといえば大抵はOSの他の部分から隔離されているものだった。統合を要するサービスはごく一部で、たとえば\code{/etc/passwd}や\code{/etc/hosts}といったファイルくらいだった。サービスを切り替える機能はまだ発明されていなかったし、ディレクトリサービスも存在しなかった。そして設定ファイルはまだ小さく、手で書けるレベルだった。
 
 %% That quickly changed. One of the first additions was DNS\@. Although the
 %% system host lookup abstraction (\code{gethostbyname}) worked for
@@ -1375,7 +1375,7 @@ sendmailの開発が始まったころの世界は、現在の常識からする
 %% etc.), and some were eminently predictable. Some were just that in the
 %% process of writing sendmail I learned a lot about e-mail, about TCP/IP,
 %% and about programming itself---everyone grows as they code.
-後からなら何とでも言える。というわけで、今だったら違うやりかたにしただろうということもたくさんある。当時としては予測不能だったこと(spamのせいでメールに対する視点がどれほど変わるかや、最新のツール軍がどんなものになるかなど)もあれば、どう見ても予測できたはずだろうということもある。また、sendmailを書いている間に私自身さまざまなことを学んだ。電子メールのことやTCP/IPのこと、そしてプログラミング自体のことなど。誰もがコードとともに成長するということだ。
+後からなら何とでも言える。というわけで、今だったら違うやりかたにしただろうということもたくさんある。当時としては予測不能だったこと(spamのせいでメールに対する視点がどれほど変わるかや、最新のツール群がどんなものになるかなど)もあれば、どう見ても予測できたはずだろうということもある。また、sendmailを書いている間に私自身さまざまなことを学んだ。電子メールのことやTCP/IPのこと、そしてプログラミング自体のことなど。誰もがコードとともに成長するということだ。
 
 %% But there are also many things I would do the same, some in
 %% contradiction to the standard wisdom.
